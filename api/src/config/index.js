@@ -1,0 +1,52 @@
+import dotenv from 'dotenv'
+
+// Load environment variables
+const envFile = process.env.NODE_ENV === 'production'
+  ? '.env.production'
+  : '.env.development'
+
+dotenv.config({ path: envFile })
+
+const config = {
+  // Environment
+  env: process.env.NODE_ENV || 'development',
+  isDev: process.env.NODE_ENV !== 'production',
+
+  // Server
+  port: parseInt(process.env.PORT) || 4000,
+
+  // Database
+  mongodb: {
+    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/booking-engine'
+  },
+
+  // JWT
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    accessExpire: process.env.JWT_ACCESS_EXPIRE || '15m',
+    refreshExpire: process.env.JWT_REFRESH_EXPIRE || '7d'
+  },
+
+  // CORS
+  cors: {
+    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000']
+  },
+
+  // AWS
+  aws: {
+    ses: {
+      region: process.env.AWS_SES_REGION || 'eu-west-1',
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      fromEmail: process.env.AWS_SES_FROM_EMAIL || 'noreply@example.com',
+      fromName: process.env.AWS_SES_FROM_NAME || 'Booking Engine'
+    }
+  }
+}
+
+// Validation
+if (!config.jwt.secret) {
+  throw new Error('JWT_SECRET is required in environment variables')
+}
+
+export default config

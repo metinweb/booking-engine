@@ -1,0 +1,84 @@
+import express from 'express'
+import * as planningService from './planning.service.js'
+import { protect, requireAdmin } from '../../middleware/auth.js'
+import { partnerContext } from '../../middlewares/partnerContext.js'
+import { roomTypeUpload } from '../../helpers/roomTypeUpload.js'
+
+const router = express.Router()
+
+// All routes require authentication and admin role
+router.use(protect)
+router.use(requireAdmin)
+router.use(partnerContext)
+
+// ==================== MEAL PLANS (Standard - Partner-wide) ====================
+router.get('/meal-plans/standard', planningService.getStandardMealPlans)
+router.post('/meal-plans/init-standard', planningService.initStandardMealPlans)
+
+// ==================== ROOM TYPES ====================
+router.get('/hotels/:hotelId/room-types', planningService.getRoomTypes)
+router.get('/hotels/:hotelId/room-types/:id', planningService.getRoomType)
+router.post('/hotels/:hotelId/room-types', planningService.createRoomType)
+router.put('/hotels/:hotelId/room-types/:id', planningService.updateRoomType)
+router.delete('/hotels/:hotelId/room-types/:id', planningService.deleteRoomType)
+router.patch('/hotels/:hotelId/room-types/:id/status', planningService.updateRoomTypeStatus)
+router.patch('/hotels/:hotelId/room-types/reorder', planningService.reorderRoomTypes)
+
+// Room Type Image Management
+router.post('/hotels/:hotelId/room-types/:roomTypeId/images', roomTypeUpload.single('image'), planningService.uploadRoomTypeImage)
+router.delete('/hotels/:hotelId/room-types/:roomTypeId/images/:imageId', planningService.deleteRoomTypeImage)
+router.patch('/hotels/:hotelId/room-types/:roomTypeId/images/reorder', planningService.reorderRoomTypeImages)
+router.patch('/hotels/:hotelId/room-types/:roomTypeId/images/:imageId/main', planningService.setRoomTypeMainImage)
+
+// ==================== MEAL PLANS (Hotel-specific) ====================
+router.get('/hotels/:hotelId/meal-plans', planningService.getMealPlans)
+router.post('/hotels/:hotelId/meal-plans', planningService.createMealPlan)
+router.post('/hotels/:hotelId/meal-plans/add-standard', planningService.addStandardMealPlansToHotel)
+router.put('/hotels/:hotelId/meal-plans/:id', planningService.updateMealPlan)
+router.delete('/hotels/:hotelId/meal-plans/:id', planningService.deleteMealPlan)
+
+// ==================== MARKETS ====================
+router.get('/hotels/:hotelId/markets', planningService.getMarkets)
+router.get('/hotels/:hotelId/markets/assigned-countries', planningService.getAssignedCountries)
+router.get('/hotels/:hotelId/markets/:id', planningService.getMarket)
+router.post('/hotels/:hotelId/markets', planningService.createMarket)
+router.put('/hotels/:hotelId/markets/:id', planningService.updateMarket)
+router.delete('/hotels/:hotelId/markets/:id', planningService.deleteMarket)
+router.patch('/hotels/:hotelId/markets/:id/default', planningService.setDefaultMarket)
+
+// ==================== SEASONS ====================
+router.get('/hotels/:hotelId/seasons', planningService.getSeasons)
+router.get('/hotels/:hotelId/seasons/:id', planningService.getSeason)
+router.post('/hotels/:hotelId/seasons', planningService.createSeason)
+router.put('/hotels/:hotelId/seasons/:id', planningService.updateSeason)
+router.delete('/hotels/:hotelId/seasons/:id', planningService.deleteSeason)
+
+// ==================== RATES ====================
+router.get('/hotels/:hotelId/rates', planningService.getRates)
+router.get('/hotels/:hotelId/rates/calendar', planningService.getRatesCalendar)
+router.get('/hotels/:hotelId/rates/price-list', planningService.getRatesPriceList)
+router.get('/hotels/:hotelId/rates/:id', planningService.getRate)
+router.post('/hotels/:hotelId/rates', planningService.createRate)
+router.put('/hotels/:hotelId/rates/:id', planningService.updateRate)
+router.patch('/hotels/:hotelId/rates/:id/quick', planningService.quickUpdateSingleRate)
+router.delete('/hotels/:hotelId/rates/:id', planningService.deleteRate)
+router.post('/hotels/:hotelId/rates/bulk', planningService.bulkCreateRates)
+router.put('/hotels/:hotelId/rates/bulk', planningService.bulkUpdateRates)
+router.patch('/hotels/:hotelId/rates/quick-update', planningService.quickUpdateRates)
+router.patch('/hotels/:hotelId/rates/stop-sale', planningService.toggleStopSale)
+router.patch('/hotels/:hotelId/rates/allotment', planningService.updateAllotment)
+router.patch('/hotels/:hotelId/rates/by-dates', planningService.bulkUpdateByDates)
+
+// ==================== CAMPAIGNS ====================
+router.get('/hotels/:hotelId/campaigns', planningService.getCampaigns)
+router.get('/hotels/:hotelId/campaigns/:id', planningService.getCampaign)
+router.post('/hotels/:hotelId/campaigns', planningService.createCampaign)
+router.put('/hotels/:hotelId/campaigns/:id', planningService.updateCampaign)
+router.delete('/hotels/:hotelId/campaigns/:id', planningService.deleteCampaign)
+router.patch('/hotels/:hotelId/campaigns/:id/status', planningService.updateCampaignStatus)
+
+// ==================== AI PRICING ASSISTANT ====================
+router.post('/hotels/:hotelId/ai/parse-command', planningService.parseAIPricingCommand)
+router.post('/hotels/:hotelId/ai/execute-command', planningService.executeAIPricingCommand)
+
+export default router

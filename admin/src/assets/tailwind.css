@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Dark mode base styles */
+  .dark body {
+    @apply bg-slate-900 text-slate-200;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+}
+
+@layer components {
+  /* Scrollbar Styling */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-slate-800 rounded-lg;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-slate-600 rounded-lg;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-slate-500;
+  }
+
+  /* Custom button styles */
+  .btn-primary {
+    @apply px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-sm font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors duration-200;
+  }
+
+  .btn-success {
+    @apply px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200;
+  }
+
+  .btn-warning {
+    @apply px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600 transition-colors duration-200;
+  }
+
+  .btn-danger {
+    @apply px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors duration-200;
+  }
+
+  /* Icon button styles */
+  .btn-icon {
+    @apply p-2 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors duration-200;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400;
+  }
+
+  .badge-warning {
+    @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400;
+  }
+
+  .badge-info {
+    @apply bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400;
+  }
+
+  /* Alert styles */
+  .alert {
+    @apply p-4 rounded-lg border flex items-start;
+  }
+
+  .alert-error {
+    @apply bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-400 border-red-200 dark:border-red-800;
+  }
+
+  .alert-success {
+    @apply bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-400 border-green-200 dark:border-green-800;
+  }
+
+  .alert-warning {
+    @apply bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800;
+  }
+
+  .alert-info {
+    @apply bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-400 border-blue-200 dark:border-blue-800;
+  }
+
+  /* Form styles */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors duration-200;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  @screen md {
+    .form-input {
+      @apply text-sm;
+      font-size: 14px;
+    }
+  }
+
+  .form-input:disabled {
+    @apply bg-gray-100 dark:bg-slate-800 cursor-not-allowed opacity-60;
+  }
+
+  /* Error state for form inputs */
+  .form-input.has-error {
+    @apply border-red-500 dark:border-red-500 ring-1 ring-red-500;
+  }
+
+  .form-input.has-error:focus {
+    @apply border-red-500 ring-2 ring-red-500;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1;
+  }
+
+  /* Table styles */
+  .table-header {
+    @apply bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700;
+  }
+
+  .table-cell {
+    @apply px-6 py-4 text-sm text-gray-900 dark:text-white;
+  }
+
+  .table-row {
+    @apply border-b border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50;
+  }
+}

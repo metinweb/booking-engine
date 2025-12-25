@@ -1,0 +1,254 @@
+<template>
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('planning.campaigns.title') }}</h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.campaigns.description') }}</p>
+      </div>
+      <button @click="showCampaignForm = true" class="btn-primary flex items-center gap-2">
+        <span class="material-icons text-sm">add</span>
+        {{ $t('planning.campaigns.add') }}
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="loading" class="flex justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    </div>
+
+    <!-- Campaigns List -->
+    <div v-else-if="campaigns.length > 0" class="grid gap-4">
+      <div
+        v-for="campaign in campaigns"
+        :key="campaign._id"
+        class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 rounded-lg flex items-center justify-center"
+              :class="getCampaignTypeColor(campaign.type)"
+            >
+              <span class="material-icons text-white">{{ getCampaignTypeIcon(campaign.type) }}</span>
+            </div>
+            <div>
+              <div class="font-medium text-gray-800 dark:text-white flex items-center gap-2">
+                {{ getCampaignName(campaign) }}
+                <span
+                  class="px-2 py-0.5 text-xs rounded"
+                  :class="{
+                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': campaign.status === 'active',
+                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400': campaign.status === 'draft',
+                    'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400': campaign.status === 'inactive'
+                  }"
+                >
+                  {{ $t(`common.status.${campaign.status}`) }}
+                </span>
+              </div>
+              <div class="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-3">
+                <span class="font-mono">{{ campaign.code }}</span>
+                <span>{{ $t(`planning.campaigns.types.${campaign.type}`) }}</span>
+                <span class="font-bold text-green-600 dark:text-green-400">
+                  {{ formatDiscount(campaign.discount) }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button @click="editCampaign(campaign)" class="p-2 text-gray-500 hover:text-indigo-600">
+              <span class="material-icons">edit</span>
+            </button>
+            <button @click="confirmDelete(campaign)" class="p-2 text-gray-500 hover:text-red-600">
+              <span class="material-icons">delete</span>
+            </button>
+          </div>
+        </div>
+        <!-- Date Info -->
+        <div class="mt-3 text-xs text-gray-500 dark:text-slate-400 flex gap-4">
+          <span>
+            <span class="font-medium">{{ $t('planning.campaigns.bookingWindow') }}:</span>
+            {{ formatDate(campaign.bookingWindow?.startDate) }} - {{ formatDate(campaign.bookingWindow?.endDate) }}
+          </span>
+          <span>
+            <span class="font-medium">{{ $t('planning.campaigns.stayWindow') }}:</span>
+            {{ formatDate(campaign.stayWindow?.startDate) }} - {{ formatDate(campaign.stayWindow?.endDate) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else class="text-center py-12 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+      <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">campaign</span>
+      <p class="mt-3 text-gray-500 dark:text-slate-400">{{ $t('planning.campaigns.empty') }}</p>
+    </div>
+
+    <!-- Campaign Form Modal -->
+    <Modal
+      v-model="showCampaignForm"
+      :title="editingCampaign ? $t('planning.campaigns.edit') : $t('planning.campaigns.add')"
+      size="xl"
+    >
+      <CampaignForm
+        :hotel="hotel"
+        :campaign="editingCampaign"
+        :room-types="roomTypes"
+        :meal-plans="mealPlans"
+        :markets="markets"
+        @saved="handleCampaignSaved"
+        @cancel="showCampaignForm = false"
+      />
+    </Modal>
+
+    <!-- Delete Confirmation -->
+    <Modal v-model="showDeleteModal" :title="$t('common.delete')" size="sm">
+      <p class="text-gray-600 dark:text-slate-400">{{ $t('common.confirm') }}?</p>
+      <template #footer>
+        <button @click="showDeleteModal = false" class="btn-secondary">{{ $t('common.no') }}</button>
+        <button @click="executeDelete" class="btn-danger" :disabled="deleting">
+          {{ deleting ? $t('common.loading') : $t('common.yes') }}
+        </button>
+      </template>
+    </Modal>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useToast } from 'vue-toastification'
+import Modal from '@/components/common/Modal.vue'
+import CampaignForm from './CampaignForm.vue'
+import planningService from '@/services/planningService'
+
+const props = defineProps({
+  hotel: { type: Object, required: true }
+})
+
+const { t, locale } = useI18n()
+const toast = useToast()
+
+const campaigns = ref([])
+const roomTypes = ref([])
+const mealPlans = ref([])
+const markets = ref([])
+const loading = ref(false)
+const showCampaignForm = ref(false)
+const editingCampaign = ref(null)
+const showDeleteModal = ref(false)
+const deleteTarget = ref(null)
+const deleting = ref(false)
+
+const getCampaignName = (campaign) => {
+  return campaign.name?.[locale.value] || campaign.name?.tr || campaign.name?.en || campaign.code
+}
+
+const getCampaignTypeIcon = (type) => {
+  const icons = {
+    early_bird: 'schedule',
+    last_minute: 'flash_on',
+    long_stay: 'hotel',
+    promotional: 'local_offer',
+    seasonal: 'wb_sunny',
+    honeymoon: 'favorite',
+    family: 'family_restroom',
+    weekend: 'weekend',
+    midweek: 'work'
+  }
+  return icons[type] || 'campaign'
+}
+
+const getCampaignTypeColor = (type) => {
+  const colors = {
+    early_bird: 'bg-blue-500',
+    last_minute: 'bg-red-500',
+    long_stay: 'bg-green-500',
+    promotional: 'bg-purple-500',
+    seasonal: 'bg-orange-500',
+    honeymoon: 'bg-pink-500',
+    family: 'bg-teal-500'
+  }
+  return colors[type] || 'bg-gray-500'
+}
+
+const formatDiscount = (discount) => {
+  if (!discount) return ''
+  if (discount.type === 'percentage') return `-${discount.value}%`
+  if (discount.type === 'fixed') return `-${discount.value}`
+  if (discount.type === 'free_nights') return `${discount.freeNights?.stayNights}=${discount.freeNights?.freeNights} Free`
+  return ''
+}
+
+const formatDate = (date) => {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString()
+}
+
+const fetchCampaigns = async () => {
+  loading.value = true
+  try {
+    const response = await planningService.getCampaigns(props.hotel._id)
+    if (response.success) {
+      campaigns.value = response.data
+    }
+  } catch (error) {
+    toast.error(t('common.fetchError'))
+  } finally {
+    loading.value = false
+  }
+}
+
+const fetchRelatedData = async () => {
+  try {
+    const [roomTypesRes, mealPlansRes, marketsRes] = await Promise.all([
+      planningService.getRoomTypes(props.hotel._id),
+      planningService.getMealPlans(props.hotel._id),
+      planningService.getMarkets(props.hotel._id)
+    ])
+
+    if (roomTypesRes.success) roomTypes.value = roomTypesRes.data
+    if (mealPlansRes.success) mealPlans.value = mealPlansRes.data
+    if (marketsRes.success) markets.value = marketsRes.data
+  } catch (error) {
+    console.error('Error fetching related data:', error)
+  }
+}
+
+const editCampaign = (campaign) => {
+  editingCampaign.value = campaign
+  showCampaignForm.value = true
+}
+
+const handleCampaignSaved = () => {
+  showCampaignForm.value = false
+  editingCampaign.value = null
+  fetchCampaigns()
+}
+
+const confirmDelete = (campaign) => {
+  deleteTarget.value = campaign
+  showDeleteModal.value = true
+}
+
+const executeDelete = async () => {
+  deleting.value = true
+  try {
+    await planningService.deleteCampaign(props.hotel._id, deleteTarget.value._id)
+    toast.success(t('planning.campaigns.deleted'))
+    showDeleteModal.value = false
+    fetchCampaigns()
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('common.deleteFailed'))
+  } finally {
+    deleting.value = false
+  }
+}
+
+watch(() => props.hotel?._id, (newId) => {
+  if (newId) {
+    fetchCampaigns()
+    fetchRelatedData()
+  }
+}, { immediate: true })
+</script>
