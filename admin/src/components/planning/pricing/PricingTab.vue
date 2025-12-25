@@ -298,24 +298,24 @@
                   <!-- Min Stay Column -->
                   <td class="px-2 py-2 text-center border-r border-gray-100 dark:border-slate-700">
                     <span
-                      v-if="getFirstPeriodRate(period)?.minStay"
+                      v-if="getFirstPeriodRate(period)?.minStay !== undefined"
                       class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium"
                       :class="getFirstPeriodRate(period).minStay > 1 ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-slate-600 text-gray-500 dark:text-slate-400'"
                     >
-                      {{ getFirstPeriodRate(period).minStay }}
+                      {{ getFirstPeriodRate(period).minStay || 1 }}
                     </span>
-                    <span v-else class="text-gray-300 dark:text-slate-600">-</span>
+                    <span v-else class="text-gray-300 dark:text-slate-600">1</span>
                   </td>
 
                   <!-- Release Days Column -->
                   <td class="px-2 py-2 text-center">
                     <span
-                      v-if="getFirstPeriodRate(period)?.releaseDays"
+                      v-if="getFirstPeriodRate(period)?.releaseDays !== undefined && getFirstPeriodRate(period).releaseDays > 0"
                       class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
                     >
                       {{ getFirstPeriodRate(period).releaseDays }}
                     </span>
-                    <span v-else class="text-gray-300 dark:text-slate-600">0</span>
+                    <span v-else class="text-gray-300 dark:text-slate-600">-</span>
                   </td>
                 </tr>
               </tbody>
@@ -518,12 +518,16 @@ const filteredRates = computed(() => {
   return result
 })
 
-// Price List Computed - Get all meal plans from price list data
+// Price List Computed - Get meal plans that have periods with prices
 const priceListMealPlans = computed(() => {
   const mpMap = {}
   priceListData.value.forEach(item => {
-    if (item.mealPlan) {
-      mpMap[item.mealPlan._id] = item.mealPlan
+    // Only include meal plans that have at least one period with a price
+    if (item.mealPlan && item.periods && item.periods.length > 0) {
+      const hasPrice = item.periods.some(p => p.pricePerNight > 0)
+      if (hasPrice) {
+        mpMap[item.mealPlan._id] = item.mealPlan
+      }
     }
   })
   return Object.values(mpMap)
