@@ -20,6 +20,8 @@
         @input="$emit('inline-change', $event.target.value)"
         @keydown.enter="$emit('inline-save')"
         @keydown.tab="$emit('inline-next', $event)"
+        @keydown.up.prevent="$emit('inline-up')"
+        @keydown.down.prevent="$emit('inline-down')"
         class="inline-price-input w-full h-7 sm:h-8 text-center text-[10px] sm:text-xs font-semibold border rounded px-0.5 bg-white dark:bg-slate-800 transition-colors"
         :class="[
           inlineEditValue > 0
@@ -183,7 +185,7 @@ const props = defineProps({
   allowEditCalculated: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['click', 'dblclick', 'inline-change', 'inline-save', 'inline-next'])
+const emit = defineEmits(['click', 'dblclick', 'inline-change', 'inline-save', 'inline-next', 'inline-up', 'inline-down'])
 
 const inlineInput = ref(null)
 const cellRef = ref(null)

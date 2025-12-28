@@ -279,6 +279,7 @@
                 }"
               >
                 <RateCell
+                  :ref="el => setCellRef(el, roomType._id, mealPlan._id, day.date)"
                   :rate="getRateForCell(roomType._id, mealPlan._id, day.date)"
                   :date="day.date"
                   :room-type-id="roomType._id"
@@ -294,6 +295,8 @@
                   @click="handleCellClick($event, roomType._id, mealPlan._id, day.date)"
                   @dblclick="handleCellDblClick(roomType._id, mealPlan._id, day.date)"
                   @inline-change="handleInlineChange(roomType._id, mealPlan._id, day.date, $event)"
+                  @inline-up="navigateCell(roomType._id, mealPlan._id, day.date, 'up')"
+                  @inline-down="navigateCell(roomType._id, mealPlan._id, day.date, 'down')"
                 />
               </td>
             </tr>
@@ -571,6 +574,65 @@ const isBaseCellFn = (roomTypeId, mealPlanId) => {
 const isCalculatedCell = (roomTypeId, mealPlanId) => {
   if (!hasBaseRoom.value || !inlineRelativePricing.value) return false
   return !isBaseCellFn(roomTypeId, mealPlanId)
+}
+
+// Cell refs for keyboard navigation
+const cellRefs = reactive({})
+
+const setCellRef = (el, roomTypeId, mealPlanId, date) => {
+  const key = `${roomTypeId}-${mealPlanId}-${date}`
+  if (el) {
+    cellRefs[key] = el
+  } else {
+    delete cellRefs[key]
+  }
+}
+
+// Navigate between cells with arrow keys
+const navigateCell = (currentRoomId, currentMealPlanId, currentDate, direction) => {
+  // Get current indices
+  const roomIndex = props.roomTypes.findIndex(r => r._id === currentRoomId)
+  const mealIndex = props.mealPlans.findIndex(m => m._id === currentMealPlanId)
+
+  if (roomIndex === -1 || mealIndex === -1) return
+
+  let newRoomIndex = roomIndex
+  let newMealIndex = mealIndex
+
+  if (direction === 'up') {
+    // Move to previous meal plan, or previous room's last meal plan
+    if (mealIndex > 0) {
+      newMealIndex = mealIndex - 1
+    } else if (roomIndex > 0) {
+      newRoomIndex = roomIndex - 1
+      newMealIndex = props.mealPlans.length - 1
+    } else {
+      return // Already at top
+    }
+  } else if (direction === 'down') {
+    // Move to next meal plan, or next room's first meal plan
+    if (mealIndex < props.mealPlans.length - 1) {
+      newMealIndex = mealIndex + 1
+    } else if (roomIndex < props.roomTypes.length - 1) {
+      newRoomIndex = roomIndex + 1
+      newMealIndex = 0
+    } else {
+      return // Already at bottom
+    }
+  }
+
+  const newRoomId = props.roomTypes[newRoomIndex]._id
+  const newMealPlanId = props.mealPlans[newMealIndex]._id
+  const key = `${newRoomId}-${newMealPlanId}-${currentDate}`
+
+  // Focus the input in the target cell
+  const targetCell = cellRefs[key]
+  if (targetCell?.$el) {
+    const input = targetCell.$el.querySelector('input')
+    if (input) {
+      nextTick(() => input.focus())
+    }
+  }
 }
 
 // Inline edit state
