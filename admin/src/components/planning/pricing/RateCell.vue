@@ -20,10 +20,15 @@
         @input="$emit('inline-change', $event.target.value)"
         @keydown.enter="$emit('inline-save')"
         @keydown.tab="$emit('inline-next', $event)"
-        class="w-full h-8 sm:h-10 text-center text-xs sm:text-sm font-bold border-2 rounded px-1 bg-white dark:bg-slate-800 transition-colors"
-        :class="inlineEditValue > 0
-          ? 'border-green-400 dark:border-green-600 text-green-700 dark:text-green-400'
-          : 'border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-400'"
+        class="inline-price-input w-full h-7 sm:h-8 text-center text-[10px] sm:text-xs font-semibold border rounded px-0.5 bg-white dark:bg-slate-800 transition-colors"
+        :class="[
+          inlineEditValue > 0
+            ? 'border-green-300 dark:border-green-700 text-green-700 dark:text-green-400'
+            : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400',
+          isBaseCell ? 'ring-1 ring-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : '',
+          isCalculated && !allowEditCalculated ? 'bg-gray-100 dark:bg-slate-700 cursor-not-allowed' : ''
+        ]"
+        :readonly="isCalculated && !allowEditCalculated"
         placeholder="0"
       />
     </div>
@@ -172,7 +177,10 @@ const props = defineProps({
   isSelected: { type: Boolean, default: false },
   isPast: { type: Boolean, default: false },
   inlineEditMode: { type: Boolean, default: false },
-  inlineEditValue: { type: [Number, String], default: '' }
+  inlineEditValue: { type: [Number, String], default: '' },
+  isBaseCell: { type: Boolean, default: false },
+  isCalculated: { type: Boolean, default: false },
+  allowEditCalculated: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['click', 'dblclick', 'inline-change', 'inline-save', 'inline-next'])
@@ -305,6 +313,16 @@ const childPricesForDisplay = computed(() => {
 <style scoped>
 .rate-cell {
   min-width: 50px;
+}
+
+/* Hide number input spin buttons */
+.inline-price-input::-webkit-outer-spin-button,
+.inline-price-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.inline-price-input[type=number] {
+  -moz-appearance: textfield;
 }
 
 /* Popover fade transition */

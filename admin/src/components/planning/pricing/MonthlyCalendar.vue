@@ -109,9 +109,34 @@
 
     <!-- Inline Edit Mode Banner -->
     <div v-if="inlineEditMode" class="mb-3 p-2 sm:p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-      <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs sm:text-sm">
-        <span class="material-icons text-lg">edit_note</span>
-        <span>{{ $t('planning.pricing.inlineEditHint') }}</span>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs sm:text-sm">
+          <span class="material-icons text-lg">edit_note</span>
+          <span>{{ $t('planning.pricing.inlineEditHint') }}</span>
+        </div>
+        <!-- Relative Pricing Toggle -->
+        <div v-if="hasBaseRoom" class="flex items-center gap-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              v-model="inlineRelativePricing"
+              class="w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+            />
+            <span class="text-xs text-amber-700 dark:text-amber-300">
+              {{ $t('planning.pricing.useRelativePricing') }}
+            </span>
+          </label>
+          <label v-if="inlineRelativePricing" class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              v-model="inlineAllowEditCalculated"
+              class="w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+            />
+            <span class="text-xs text-amber-700 dark:text-amber-300">
+              {{ $t('planning.pricing.allowEditCalculated') }}
+            </span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -263,9 +288,12 @@
                   :is-past="day.isPast"
                   :inline-edit-mode="inlineEditMode"
                   :inline-edit-value="getInlineEditPrice(roomType._id, mealPlan._id, day.date)"
+                  :is-base-cell="isBaseCellFn(roomType._id, mealPlan._id)"
+                  :is-calculated="isCalculatedCell(roomType._id, mealPlan._id)"
+                  :allow-edit-calculated="inlineAllowEditCalculated"
                   @click="handleCellClick($event, roomType._id, mealPlan._id, day.date)"
                   @dblclick="handleCellDblClick(roomType._id, mealPlan._id, day.date)"
-                  @inline-change="setInlineEditPrice(roomType._id, mealPlan._id, day.date, $event)"
+                  @inline-change="handleInlineChange(roomType._id, mealPlan._id, day.date, $event)"
                 />
               </td>
             </tr>
@@ -525,6 +553,25 @@ const copiedWeek = ref(null)
 // Inline edit mode
 const inlineEditMode = ref(false)
 const inlineEditPrices = reactive({}) // { `${roomTypeId}-${mealPlanId}-${date}`: price }
+const inlineRelativePricing = ref(true) // Use relative pricing in inline edit mode
+const inlineAllowEditCalculated = ref(false) // Allow editing calculated cells
+
+// Base room/meal plan for relative pricing
+const baseRoom = computed(() => props.roomTypes.find(rt => rt.isBaseRoom))
+const baseMealPlan = computed(() => props.mealPlans.find(mp => mp.isBaseMealPlan) || props.mealPlans[0])
+const hasBaseRoom = computed(() => !!baseRoom.value)
+
+// Check if a cell is the base cell
+const isBaseCellFn = (roomTypeId, mealPlanId) => {
+  if (!hasBaseRoom.value || !inlineRelativePricing.value) return false
+  return baseRoom.value._id === roomTypeId && baseMealPlan.value?._id === mealPlanId
+}
+
+// Check if a cell is calculated (not base, when relative pricing is active)
+const isCalculatedCell = (roomTypeId, mealPlanId) => {
+  if (!hasBaseRoom.value || !inlineRelativePricing.value) return false
+  return !isBaseCellFn(roomTypeId, mealPlanId)
+}
 
 // Inline edit state
 const editingCell = ref(null)
@@ -889,6 +936,36 @@ const getInlineEditPrice = (roomTypeId, mealPlanId, date) => {
 const setInlineEditPrice = (roomTypeId, mealPlanId, date, value) => {
   const key = `${roomTypeId}-${mealPlanId}-${date}`
   inlineEditPrices[key] = value
+}
+
+// Handle inline change with relative pricing calculation
+const handleInlineChange = (roomTypeId, mealPlanId, date, value) => {
+  setInlineEditPrice(roomTypeId, mealPlanId, date, value)
+
+  // If this is the base cell and relative pricing is enabled, calculate others
+  if (inlineRelativePricing.value && hasBaseRoom.value && isBaseCellFn(roomTypeId, mealPlanId)) {
+    const basePrice = parseFloat(value) || 0
+    if (basePrice <= 0) return
+
+    // Calculate for all other room/meal plan combinations for this date
+    props.roomTypes.forEach(room => {
+      props.mealPlans.forEach(meal => {
+        // Skip base cell
+        if (isBaseCellFn(room._id, meal._id)) return
+
+        const roomAdj = room.priceAdjustment || 0
+        const mealAdj = meal.priceAdjustment || 0
+
+        // Apply adjustments: first room, then meal plan
+        const afterRoom = basePrice * (1 + roomAdj / 100)
+        const afterMeal = afterRoom * (1 + mealAdj / 100)
+        const calculatedPrice = Math.round(afterMeal * 100) / 100
+
+        const key = `${room._id}-${meal._id}-${date}`
+        inlineEditPrices[key] = calculatedPrice
+      })
+    })
+  }
 }
 
 const saveInlineEditPrices = async () => {

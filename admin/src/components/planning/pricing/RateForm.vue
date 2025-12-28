@@ -215,13 +215,13 @@
                 {{ $t('planning.pricing.baseRoomPricingInfo') }}
               </p>
               <!-- Show which room is base -->
-              <div class="mt-2 flex items-center gap-2">
+              <div class="mt-2 flex items-center gap-2 flex-wrap">
                 <span class="text-xs text-yellow-600 dark:text-yellow-400">{{ $t('planning.pricing.baseRoom') }}:</span>
                 <span class="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-800 rounded text-sm font-bold text-yellow-800 dark:text-yellow-200">
                   {{ baseRoom?.code }}
                 </span>
-                <span v-if="hasExplicitBaseMealPlan" class="text-xs text-yellow-600 dark:text-yellow-400 ml-2">{{ $t('planning.pricing.baseMealPlan') }}:</span>
-                <span v-if="hasExplicitBaseMealPlan" class="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-800 rounded text-sm font-bold text-yellow-800 dark:text-yellow-200">
+                <span v-if="baseMealPlan" class="text-xs text-yellow-600 dark:text-yellow-400 ml-2">{{ $t('planning.pricing.baseMealPlan') }}:</span>
+                <span v-if="baseMealPlan" class="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-800 rounded text-sm font-bold text-yellow-800 dark:text-yellow-200">
                   {{ baseMealPlan?.code }}
                 </span>
               </div>
@@ -230,6 +230,17 @@
                 <span class="material-icons text-sm">info</span>
                 {{ $t('planning.pricing.viewingCalculatedRoom', { room: currentRoomType?.code }) }}
               </div>
+              <!-- Allow edit calculated checkbox -->
+              <label class="mt-3 flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="allowEditCalculated"
+                  class="w-4 h-4 rounded border-yellow-400 text-yellow-600 focus:ring-yellow-500"
+                />
+                <span class="text-sm text-yellow-700 dark:text-yellow-400">
+                  {{ $t('planning.pricing.allowEditCalculated') }}
+                </span>
+              </label>
             </div>
           </div>
         </div>
@@ -304,21 +315,29 @@
                         step="1"
                         class="w-24 text-center text-lg font-bold border-2 rounded-lg px-2 py-1.5 transition-colors"
                         :class="[
-                          isBaseCell(selectedRoomTab, mp._id) ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 ring-2 ring-yellow-300' :
-                          hasExplicitBaseRoom && !isCurrentRoomBase ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500' :
+                          isBaseCell(selectedRoomTab, mp._id) ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 ring-2 ring-yellow-400 shadow-lg' :
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500' :
                           roomPrices[selectedRoomTab][mp._id]?.pricePerNight > 0 ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20' :
                           'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
                         ]"
-                        :readonly="hasExplicitBaseRoom && !isCurrentRoomBase"
+                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
                         placeholder="0"
                       />
-                      <!-- Lock icon for calculated cells (non-base rooms) -->
+                      <!-- Star icon for base cell -->
                       <span
-                        v-if="hasExplicitBaseRoom && !isCurrentRoomBase"
+                        v-if="isBaseCell(selectedRoomTab, mp._id)"
+                        class="absolute -top-2 -left-2 text-yellow-500"
+                        :title="$t('planning.pricing.baseCell')"
+                      >
+                        <span class="material-icons text-lg">star</span>
+                      </span>
+                      <!-- Lock icon for calculated cells -->
+                      <span
+                        v-else-if="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
                         class="absolute -top-1 -right-1 text-amber-500"
                         :title="$t('planning.pricing.autoCalculated')"
                       >
-                        <span class="material-icons text-sm">calculate</span>
+                        <span class="material-icons text-sm">lock</span>
                       </span>
                     </div>
                   </td>
@@ -345,10 +364,10 @@
                         type="number"
                         min="0"
                         class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="hasExplicitBaseRoom && !isCurrentRoomBase
+                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
                           ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
                           : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="hasExplicitBaseRoom && !isCurrentRoomBase"
+                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
                         placeholder="0"
                       />
                     </div>
@@ -396,10 +415,10 @@
                         type="number"
                         min="0"
                         class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="hasExplicitBaseRoom && !isCurrentRoomBase
+                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
                           ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
                           : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="hasExplicitBaseRoom && !isCurrentRoomBase"
+                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
                         placeholder="0"
                       />
                     </div>
@@ -442,10 +461,10 @@
                         type="number"
                         min="0"
                         class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="hasExplicitBaseRoom && !isCurrentRoomBase
+                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
                           ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
                           : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="hasExplicitBaseRoom && !isCurrentRoomBase"
+                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
                         placeholder="0"
                       />
                     </div>
@@ -473,10 +492,10 @@
                         type="number"
                         min="0"
                         class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="hasExplicitBaseRoom && !isCurrentRoomBase
+                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
                           ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
                           : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="hasExplicitBaseRoom && !isCurrentRoomBase"
+                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
                         placeholder="0"
                       />
                     </div>
@@ -901,6 +920,14 @@ const isCurrentRoomBase = computed(() => {
   return baseRoom.value?._id === selectedRoomTab.value
 })
 
+// Check if a cell is calculated (not the base cell, when relative pricing is active)
+const isCalculatedCell = (roomId, mealPlanId) => {
+  if (!hasExplicitBaseRoom.value) return false
+  // If it's the base cell, it's not calculated
+  if (isBaseCell(roomId, mealPlanId)) return false
+  return true
+}
+
 // Calculate relative prices when base room prices change
 const calculateRelativePrices = () => {
   // Only calculate if base room is explicitly set
@@ -908,18 +935,27 @@ const calculateRelativePrices = () => {
   if (!baseRoom.value) return
 
   const baseRoomId = baseRoom.value._id
+  const baseMealPlanId = baseMealPlan.value?._id
 
-  // For each meal plan, get the base room's price and calculate for other rooms
-  props.mealPlans.forEach(meal => {
-    const basePriceData = roomPrices[baseRoomId]?.[meal._id]
-    if (!basePriceData?.pricePerNight || basePriceData.pricePerNight <= 0) return
+  // Get the base cell price (base room + base meal plan)
+  const baseCellData = roomPrices[baseRoomId]?.[baseMealPlanId]
+  if (!baseCellData?.pricePerNight || baseCellData.pricePerNight <= 0) return
 
-    const basePrice = basePriceData.pricePerNight
+  const baseCellPrice = baseCellData.pricePerNight
 
-    // Calculate for all other rooms (not the base room)
-    props.roomTypes.forEach(room => {
-      // Skip the base room
-      if (room._id === baseRoomId) return
+  // Helper function to calculate price with adjustments
+  const applyAdjustments = (price, roomAdj, mealAdj) => {
+    // First apply room adjustment, then meal plan adjustment
+    const afterRoom = price * (1 + (roomAdj || 0) / 100)
+    const afterMeal = afterRoom * (1 + (mealAdj || 0) / 100)
+    return Math.round(afterMeal * 100) / 100
+  }
+
+  // Calculate for all combinations
+  props.roomTypes.forEach(room => {
+    props.mealPlans.forEach(meal => {
+      // Skip the base cell (base room + base meal plan)
+      if (room._id === baseRoomId && meal._id === baseMealPlanId) return
 
       // Ensure the structure exists
       if (!roomPrices[room._id]) roomPrices[room._id] = {}
@@ -934,33 +970,35 @@ const calculateRelativePrices = () => {
         }
       }
 
-      // Calculate relative price using room adjustment only (meal plan is same)
+      // Get adjustments
       const roomAdj = room.priceAdjustment || 0
-      const calculatedPrice = Math.round(basePrice * (1 + roomAdj / 100) * 100) / 100
-      roomPrices[room._id][meal._id].pricePerNight = calculatedPrice
+      const mealAdj = meal.priceAdjustment || 0
+
+      // Calculate relative price
+      roomPrices[room._id][meal._id].pricePerNight = applyAdjustments(baseCellPrice, roomAdj, mealAdj)
 
       // Also calculate extra adult if base has it
-      if (basePriceData.extraAdult > 0) {
-        roomPrices[room._id][meal._id].extraAdult = Math.round(basePriceData.extraAdult * (1 + roomAdj / 100) * 100) / 100
+      if (baseCellData.extraAdult > 0) {
+        roomPrices[room._id][meal._id].extraAdult = applyAdjustments(baseCellData.extraAdult, roomAdj, mealAdj)
       }
 
       // Calculate child prices
-      if (basePriceData.childOrderPricing?.length > 0) {
-        basePriceData.childOrderPricing.forEach((childPrice, idx) => {
+      if (baseCellData.childOrderPricing?.length > 0) {
+        baseCellData.childOrderPricing.forEach((childPrice, idx) => {
           if (childPrice > 0 && roomPrices[room._id][meal._id].childOrderPricing) {
-            roomPrices[room._id][meal._id].childOrderPricing[idx] = Math.round(childPrice * (1 + roomAdj / 100) * 100) / 100
+            roomPrices[room._id][meal._id].childOrderPricing[idx] = applyAdjustments(childPrice, roomAdj, mealAdj)
           }
         })
       }
 
       // Calculate infant price
-      if (basePriceData.extraInfant > 0) {
-        roomPrices[room._id][meal._id].extraInfant = Math.round(basePriceData.extraInfant * (1 + roomAdj / 100) * 100) / 100
+      if (baseCellData.extraInfant > 0) {
+        roomPrices[room._id][meal._id].extraInfant = applyAdjustments(baseCellData.extraInfant, roomAdj, mealAdj)
       }
 
       // Calculate single supplement
-      if (basePriceData.singleSupplement > 0) {
-        roomPrices[room._id][meal._id].singleSupplement = Math.round(basePriceData.singleSupplement * (1 + roomAdj / 100) * 100) / 100
+      if (baseCellData.singleSupplement > 0) {
+        roomPrices[room._id][meal._id].singleSupplement = applyAdjustments(baseCellData.singleSupplement, roomAdj, mealAdj)
       }
     })
   })
@@ -1171,15 +1209,16 @@ watch([() => props.roomTypes, () => props.mealPlans], () => {
   initializeRoomData()
 }, { immediate: true, deep: true })
 
-// Watch base room prices and trigger relative calculation
+// Watch base cell (base room + base meal plan) prices and trigger relative calculation
 watch(
   () => {
-    if (!baseRoom.value) return null
-    // Watch all prices for the base room
-    return JSON.stringify(roomPrices[baseRoom.value._id])
+    if (!baseRoom.value || !baseMealPlan.value) return null
+    // Watch the base cell specifically
+    const baseCell = roomPrices[baseRoom.value._id]?.[baseMealPlan.value._id]
+    return JSON.stringify(baseCell)
   },
   () => {
-    // Trigger calculation whenever any base room price changes
+    // Trigger calculation whenever base cell price changes
     calculateRelativePrices()
   },
   { deep: true }
