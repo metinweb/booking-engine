@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
+import auditPlugin from '../../plugins/auditPlugin.js'
 
 const userSchema = new mongoose.Schema({
   // Hangi account'a ait
@@ -161,5 +162,11 @@ userSchema.statics.findActive = function() {
 userSchema.statics.findOnline = function() {
   return this.find({ isOnline: true })
 }
+
+// Audit plugin for tracking changes
+userSchema.plugin(auditPlugin, {
+  module: 'user',
+  nameField: 'email'
+})
 
 export default mongoose.model('User', userSchema)

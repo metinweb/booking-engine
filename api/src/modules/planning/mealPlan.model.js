@@ -62,12 +62,26 @@ const mealPlanSchema = new mongoose.Schema({
 	// Status
 	status: {
 		type: String,
-		enum: ['active', 'inactive'],
+		enum: ['active', 'inactive', 'deleted'],
 		default: 'active'
 	},
 
 	// Display order
-	displayOrder: { type: Number, default: 0 }
+	displayOrder: { type: Number, default: 0 },
+
+	// Base meal plan pricing
+	isBaseMealPlan: {
+		type: Boolean,
+		default: false
+	},
+
+	// Price adjustment relative to base meal plan (%)
+	priceAdjustment: {
+		type: Number,
+		default: 0,
+		min: -50,
+		max: 200
+	}
 
 }, {
 	timestamps: true,
@@ -80,6 +94,20 @@ mealPlanSchema.index({ partner: 1, hotel: 1 })
 mealPlanSchema.index({ partner: 1, hotel: 1, code: 1 }, { unique: true })
 mealPlanSchema.index({ partner: 1, isStandard: 1 })
 mealPlanSchema.index({ displayOrder: 1 })
+
+// Base meal plan logic
+mealPlanSchema.pre('save', async function(next) {
+	// If this meal plan is set as base, clear isBaseMealPlan from others in the same hotel
+	if (this.isBaseMealPlan && this.isModified('isBaseMealPlan')) {
+		await this.constructor.updateMany(
+			{ hotel: this.hotel, partner: this.partner, _id: { $ne: this._id } },
+			{ isBaseMealPlan: false }
+		)
+		// Base meal plan always has 0 adjustment
+		this.priceAdjustment = 0
+	}
+	next()
+})
 
 // Statics
 mealPlanSchema.statics.findStandardByPartner = function(partnerId) {

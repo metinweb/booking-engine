@@ -11,35 +11,6 @@
 
     <!-- Main Content (when hotel is selected) -->
     <div v-else class="bg-white dark:bg-slate-800 rounded-lg shadow">
-      <!-- Selected Hotel Info Bar -->
-      <div class="px-6 py-3 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-900/30 flex items-center gap-3">
-        <div v-if="selectedHotel.logo || getMainImage(selectedHotel)" class="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-          <img
-            :src="getImageUrl(selectedHotel.logo || getMainImage(selectedHotel))"
-            :alt="selectedHotel.name"
-            class="w-full h-full object-cover"
-          />
-        </div>
-        <div class="flex-1">
-          <div class="font-medium text-gray-800 dark:text-white flex items-center gap-2">
-            {{ selectedHotel.name }}
-            <span class="flex items-center text-yellow-500">
-              <span v-for="n in selectedHotel.stars" :key="n" class="material-icons text-sm">star</span>
-            </span>
-          </div>
-          <div class="text-sm text-gray-500 dark:text-slate-400">
-            {{ selectedHotel.address?.city }}, {{ selectedHotel.address?.country }}
-          </div>
-        </div>
-        <router-link
-          :to="`/hotels/${selectedHotel._id}`"
-          class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 text-sm flex items-center gap-1"
-        >
-          <span class="material-icons text-sm">open_in_new</span>
-          {{ $t('planning.viewHotel') }}
-        </router-link>
-      </div>
-
       <!-- Tabs -->
       <div class="border-b border-gray-200 dark:border-slate-700">
         <nav class="flex -mb-px">
@@ -101,10 +72,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useHotelStore } from '@/stores/hotel'
+import { useUIStore } from '@/stores/ui'
 import RoomsTab from '@/components/planning/rooms/RoomsTab.vue'
 import MarketsTab from '@/components/planning/markets/MarketsTab.vue'
 import CampaignsTab from '@/components/planning/campaigns/CampaignsTab.vue'
@@ -114,9 +86,24 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const hotelStore = useHotelStore()
+const uiStore = useUIStore()
 
 // Get selected hotel from store
 const selectedHotel = computed(() => hotelStore.selectedHotel)
+
+// Update page title suffix when hotel changes
+watch(selectedHotel, (hotel) => {
+  if (hotel) {
+    uiStore.setPageTitleSuffix(hotel.name)
+  } else {
+    uiStore.clearPageTitle()
+  }
+}, { immediate: true })
+
+// Clear title suffix when leaving page
+onUnmounted(() => {
+  uiStore.clearPageTitle()
+})
 
 // Valid tab IDs
 const validTabs = ['rooms', 'markets', 'campaigns', 'pricing']
@@ -168,19 +155,6 @@ const tabs = computed(() => [
     icon: 'payments'
   }
 ])
-
-const getImageUrl = (url) => {
-  if (!url) return ''
-  if (url.startsWith('http')) return url
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
-  const baseUrl = apiBaseUrl.replace('/api', '')
-  return `${baseUrl}${url}`
-}
-
-const getMainImage = (hotel) => {
-  const mainImage = hotel.images?.find(img => img.isMain)
-  return mainImage?.url || hotel.images?.[0]?.url || null
-}
 
 const handleRefresh = () => {
   // Can be used to trigger data refresh across tabs

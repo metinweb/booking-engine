@@ -21,6 +21,9 @@ const PlanningView = () => import('../views/PlanningView.vue')
 const RoomTypeDetailView = () => import('../views/RoomTypeDetailView.vue')
 const MarketDetailView = () => import('../views/MarketDetailView.vue')
 const RegionManagementView = () => import('../views/admin/RegionManagementView.vue')
+const HotelBaseListView = () => import('../views/admin/HotelBaseListView.vue')
+const HotelBaseDetailView = () => import('../views/admin/HotelBaseDetailView.vue')
+const AuditLogsView = () => import('../views/admin/AuditLogsView.vue')
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
@@ -51,6 +54,46 @@ const router = createRouter({
 					name: 'region-management',
 					component: RegionManagementView,
 					meta: {requiresPlatformAdmin: true}
+				},
+				{
+					path: 'admin/hotel-base',
+					name: 'hotel-base',
+					component: HotelBaseListView,
+					meta: {
+						requiresPlatformAdmin: true,
+						titleKey: 'hotels.hotelBase.title',
+						descriptionKey: 'hotels.hotelBase.description'
+					}
+				},
+				{
+					path: 'admin/hotel-base/new',
+					name: 'hotel-base-new',
+					component: HotelBaseDetailView,
+					meta: {
+						requiresPlatformAdmin: true,
+						titleKey: 'hotels.hotelBase.newHotel',
+						descriptionKey: 'hotels.hotelBase.newHotelDesc'
+					}
+				},
+				{
+					path: 'admin/hotel-base/:id',
+					name: 'hotel-base-detail',
+					component: HotelBaseDetailView,
+					meta: {
+						requiresPlatformAdmin: true,
+						titleKey: 'hotels.hotelBase.editHotel',
+						descriptionKey: 'hotels.hotelBase.editHotelDesc'
+					}
+				},
+				{
+					path: 'admin/audit-logs',
+					name: 'audit-logs',
+					component: AuditLogsView,
+					meta: {
+						requiresPlatformAdmin: true,
+						titleKey: 'audit.title',
+						descriptionKey: 'audit.description'
+					}
 				},
 				{
 					path: 'agencies',

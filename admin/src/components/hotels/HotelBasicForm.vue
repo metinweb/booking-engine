@@ -1,5 +1,14 @@
 <template>
   <div class="space-y-8">
+    <!-- Readonly Notice (for linked hotels) -->
+    <div v-if="readonly" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+      <span class="material-icons text-blue-500 dark:text-blue-400 mt-0.5">info</span>
+      <div>
+        <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ $t('hotels.linkedHotel.notice') }}</h4>
+        <p class="text-sm text-blue-600 dark:text-blue-300 mt-1">{{ $t('hotels.linkedHotel.description') }}</p>
+      </div>
+    </div>
+
     <!-- Basic Information -->
     <div>
       <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('hotels.basic.title') }}</h3>
@@ -14,8 +23,9 @@
           name="name"
           :label="$t('hotels.basic.hotelName')"
           :placeholder="$t('hotels.basic.hotelName')"
-          :required="true"
-          :rules="[{ required: true, message: $t('validation.required') }]"
+          :required="!readonly"
+          :disabled="readonly"
+          :rules="readonly ? [] : [{ required: true, message: $t('validation.required') }]"
           @validation-change="({ field, error }) => handleFieldValidation(field || 'name', error)"
         />
 
@@ -26,6 +36,7 @@
           :placeholder="$t('hotels.basic.tagsPlaceholder')"
           :help="$t('hotels.basic.tagsHelp')"
           :allow-create="true"
+          :disabled="readonly"
         />
       </div>
 
@@ -38,21 +49,23 @@
           type="textarea"
           :rows="4"
           :placeholder="$t('hotels.basic.description')"
+          :disabled="readonly"
         />
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <!-- Slug with Generate Button -->
         <div>
-          <label class="form-label">{{ $t('hotels.basic.slug') }} *</label>
+          <label class="form-label">{{ $t('hotels.basic.slug') }} <span v-if="!readonly">*</span></label>
           <div class="flex gap-2">
             <FormField
               ref="slugFieldRef"
               v-model="form.slug"
               name="slug"
               icon="link"
-              :required="true"
-              :rules="[
+              :required="!readonly"
+              :disabled="readonly"
+              :rules="readonly ? [] : [
                 { required: true, message: $t('validation.required') },
                 { pattern: /^[a-z0-9-]+$/, message: $t('validation.slugPattern') }
               ]"
@@ -62,6 +75,7 @@
               class="flex-1 mb-0"
             />
             <button
+              v-if="!readonly"
               type="button"
               @click="generateSlugFromName"
               class="px-3 py-2 h-[42px] bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
@@ -77,14 +91,15 @@
           <StarSelector
             v-model="form.stars"
             :label="$t('hotels.stars')"
-            :required="true"
+            :required="!readonly"
+            :disabled="readonly"
           />
         </div>
 
         <!-- Type -->
         <div>
-          <label class="form-label">{{ $t('hotels.type') }} *</label>
-          <select v-model="form.type" class="form-input" required>
+          <label class="form-label">{{ $t('hotels.type') }} <span v-if="!readonly">*</span></label>
+          <select v-model="form.type" class="form-input" :required="!readonly" :disabled="readonly">
             <option v-for="type in hotelTypes" :key="type" :value="type">
               {{ $t(`hotels.types.${type}`) }}
             </option>
@@ -94,15 +109,15 @@
         <!-- Category -->
         <div>
           <label class="form-label">{{ $t('hotels.basic.category') }}</label>
-          <select v-model="form.category" class="form-input">
+          <select v-model="form.category" class="form-input" :disabled="readonly">
             <option v-for="cat in categories" :key="cat" :value="cat">
               {{ $t(`hotels.categories.${cat}`) }}
             </option>
           </select>
         </div>
 
-        <!-- Status -->
-        <div>
+        <!-- Status (not readonly - partner can change this) -->
+        <div v-if="!readonly">
           <label class="form-label">{{ $t('common.status.label') }}</label>
           <select v-model="form.status" class="form-input">
             <option value="draft">{{ $t('hotels.statuses.draft') }}</option>
@@ -111,8 +126,8 @@
           </select>
         </div>
 
-        <!-- Featured -->
-        <div class="flex items-center">
+        <!-- Featured (not readonly - partner can change this) -->
+        <div v-if="!readonly" class="flex items-center">
           <label class="flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -125,8 +140,8 @@
       </div>
     </div>
 
-    <!-- Visibility Settings -->
-    <div class="pt-6 border-t border-gray-200 dark:border-slate-700">
+    <!-- Visibility Settings (Partner settings only - not for base hotels) -->
+    <div v-if="!readonly && !isBaseHotel" class="pt-6 border-t border-gray-200 dark:border-slate-700">
       <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('hotels.basic.visibility') }}</h3>
       <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.basic.visibility') }}</p>
 
@@ -171,6 +186,7 @@
             type="number"
             min="0"
             class="form-input"
+            :disabled="readonly"
           />
         </div>
 
@@ -182,15 +198,17 @@
             type="number"
             min="1"
             class="form-input"
+            :disabled="readonly"
           />
         </div>
 
         <!-- Has Elevator -->
         <div class="flex items-center pt-6">
-          <label class="flex items-center cursor-pointer">
+          <label class="flex items-center" :class="{ 'cursor-pointer': !readonly }">
             <input
               type="checkbox"
               v-model="form.roomConfig.hasElevator"
+              :disabled="readonly"
               class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
             />
             <span class="ml-2 text-sm text-gray-700 dark:text-slate-300">{{ $t('hotels.basic.hasElevator') }}</span>
@@ -199,12 +217,27 @@
       </div>
     </div>
 
-    <!-- Logo Upload -->
+    <!-- Logo Section -->
     <div class="pt-6 border-t border-gray-200 dark:border-slate-700">
       <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('hotels.basic.logo') }}</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.basic.logoHelp') }}</p>
+      <p v-if="!readonly" class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.basic.logoHelp') }}</p>
 
-      <div class="flex items-start gap-6">
+      <!-- Readonly mode: Just show logo preview -->
+      <div v-if="readonly">
+        <div v-if="form.logo" class="w-32 h-32">
+          <img
+            :src="getLogoUrl(form.logo)"
+            alt="Hotel Logo"
+            class="w-32 h-32 object-contain bg-gray-100 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600"
+          />
+        </div>
+        <div v-else class="w-32 h-32 bg-gray-100 dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 flex items-center justify-center">
+          <span class="material-icons text-4xl text-gray-400 dark:text-slate-500">image</span>
+        </div>
+      </div>
+
+      <!-- Edit mode: Full upload functionality -->
+      <div v-else class="flex items-start gap-6">
         <!-- Logo Preview -->
         <div class="flex-shrink-0">
           <div
@@ -300,6 +333,14 @@ const props = defineProps({
     default: false
   },
   isNew: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
+    type: Boolean,
+    default: false
+  },
+  isBaseHotel: {
     type: Boolean,
     default: false
   }

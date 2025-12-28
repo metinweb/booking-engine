@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import auditPlugin from '../../plugins/auditPlugin.js'
 
 const partnerSchema = new mongoose.Schema({
   // Durum
@@ -237,6 +238,12 @@ partnerSchema.post('save', async function(doc) {
       }
     }
   }
+})
+
+// Audit plugin for tracking changes
+partnerSchema.plugin(auditPlugin, {
+  module: 'partner',
+  nameField: 'companyName'
 })
 
 export default mongoose.model('Partner', partnerSchema)

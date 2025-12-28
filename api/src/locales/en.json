@@ -111,5 +111,14 @@
   "AI_COMMAND_EXECUTED": "AI command executed successfully",
   "COMMAND_REQUIRED": "Command is required",
   "VALID_COMMAND_REQUIRED": "A valid command is required",
-  "UNKNOWN_ACTION": "Unknown action"
+  "UNKNOWN_ACTION": "Unknown action",
+
+  "ROOM_TEMPLATE_CREATED": "Room template created successfully",
+  "ROOM_TEMPLATE_UPDATED": "Room template updated successfully",
+  "ROOM_TEMPLATE_DELETED": "Room template deleted successfully",
+  "ROOM_TEMPLATE_NOT_FOUND": "Room template not found",
+  "ROOM_TEMPLATE_CODE_REQUIRED": "Room template code is required",
+  "ROOM_TEMPLATE_CODE_EXISTS": "A room template with this code already exists",
+  "BASE_HOTEL_NOT_FOUND": "Base hotel not found",
+  "HOTEL_NOT_LINKED": "This hotel is not linked to a base hotel"
 }

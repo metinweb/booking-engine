@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-8">
-    <!-- Top Save Button -->
-    <div class="flex justify-end">
+    <!-- Top Save Button (hidden in readonly mode) -->
+    <div v-if="!readonly" class="flex justify-end">
       <button type="submit" class="btn-primary" :disabled="saving">
         <span v-if="saving" class="flex items-center">
           <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@
           {{ form.length }} {{ $t('common.selected') }}
         </span>
         <button
-          v-if="form.length > 0"
+          v-if="form.length > 0 && !readonly"
           type="button"
           @click="form = []"
           class="text-sm text-red-600 dark:text-red-400 hover:underline"
@@ -45,13 +45,17 @@
             <label
               v-for="amenity in generalAmenities"
               :key="amenity.id"
-              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-              :class="{ 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30': form.includes(amenity.id) }"
+              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg transition-colors"
+              :class="[
+                form.includes(amenity.id) ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30' : '',
+                readonly ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700'
+              ]"
             >
               <input
                 type="checkbox"
                 :value="amenity.id"
                 v-model="form"
+                :disabled="readonly"
                 class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
               />
               <span class="material-icons ml-2 text-gray-500 dark:text-slate-400 text-lg">{{ amenity.icon }}</span>
@@ -70,13 +74,17 @@
             <label
               v-for="amenity in facilityAmenities"
               :key="amenity.id"
-              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-              :class="{ 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30': form.includes(amenity.id) }"
+              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg transition-colors"
+              :class="[
+                form.includes(amenity.id) ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30' : '',
+                readonly ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700'
+              ]"
             >
               <input
                 type="checkbox"
                 :value="amenity.id"
                 v-model="form"
+                :disabled="readonly"
                 class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
               />
               <span class="material-icons ml-2 text-gray-500 dark:text-slate-400 text-lg">{{ amenity.icon }}</span>
@@ -95,13 +103,17 @@
             <label
               v-for="amenity in diningAmenities"
               :key="amenity.id"
-              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-              :class="{ 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30': form.includes(amenity.id) }"
+              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg transition-colors"
+              :class="[
+                form.includes(amenity.id) ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30' : '',
+                readonly ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700'
+              ]"
             >
               <input
                 type="checkbox"
                 :value="amenity.id"
                 v-model="form"
+                :disabled="readonly"
                 class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
               />
               <span class="material-icons ml-2 text-gray-500 dark:text-slate-400 text-lg">{{ amenity.icon }}</span>
@@ -120,13 +132,17 @@
             <label
               v-for="amenity in serviceAmenities"
               :key="amenity.id"
-              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-              :class="{ 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30': form.includes(amenity.id) }"
+              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg transition-colors"
+              :class="[
+                form.includes(amenity.id) ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30' : '',
+                readonly ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700'
+              ]"
             >
               <input
                 type="checkbox"
                 :value="amenity.id"
                 v-model="form"
+                :disabled="readonly"
                 class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
               />
               <span class="material-icons ml-2 text-gray-500 dark:text-slate-400 text-lg">{{ amenity.icon }}</span>
@@ -145,13 +161,17 @@
             <label
               v-for="amenity in businessAmenities"
               :key="amenity.id"
-              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-              :class="{ 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30': form.includes(amenity.id) }"
+              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg transition-colors"
+              :class="[
+                form.includes(amenity.id) ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30' : '',
+                readonly ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700'
+              ]"
             >
               <input
                 type="checkbox"
                 :value="amenity.id"
                 v-model="form"
+                :disabled="readonly"
                 class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
               />
               <span class="material-icons ml-2 text-gray-500 dark:text-slate-400 text-lg">{{ amenity.icon }}</span>
@@ -170,13 +190,17 @@
             <label
               v-for="amenity in familyAmenities"
               :key="amenity.id"
-              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-              :class="{ 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30': form.includes(amenity.id) }"
+              class="flex items-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg transition-colors"
+              :class="[
+                form.includes(amenity.id) ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/30' : '',
+                readonly ? 'cursor-default' : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700'
+              ]"
             >
               <input
                 type="checkbox"
                 :value="amenity.id"
                 v-model="form"
+                :disabled="readonly"
                 class="w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
               />
               <span class="material-icons ml-2 text-gray-500 dark:text-slate-400 text-lg">{{ amenity.icon }}</span>
@@ -288,6 +312,10 @@ const props = defineProps({
     required: true
   },
   saving: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }

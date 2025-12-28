@@ -1,43 +1,98 @@
 <template>
   <div>
+    <!-- Source Selection Modal (for new hotels) -->
+    <HotelSourceSelector
+      :show="showSourceSelector"
+      @close="handleSourceSelectorClose"
+      @select="handleSourceSelect"
+    />
+
+    <!-- Base Hotel Selection Modal -->
+    <HotelBaseSelector
+      :show="showBaseSelector"
+      @close="showBaseSelector = false"
+      @linked="handleBaseLinked"
+    />
+
     <!-- Header with back button and save button -->
     <div class="mb-6 flex items-center justify-between">
       <router-link to="/hotels" class="inline-flex items-center text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400">
         <span class="material-icons mr-1">arrow_back</span>
         {{ $t('common.back') }}
       </router-link>
-      <button @click="handleSave" class="btn-primary" :disabled="saving">
-        <span v-if="saving" class="flex items-center">
-          <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          {{ $t('common.loading') }}
-        </span>
-        <span v-else>{{ $t('common.save') }}</span>
-      </button>
+
+      <div class="flex items-center gap-3">
+        <!-- Unlink button for linked hotels -->
+        <button
+          v-if="isLinkedHotel && !isNew"
+          type="button"
+          @click="handleUnlink"
+          :disabled="unlinking"
+          class="px-4 py-2 border border-orange-500 text-orange-600 dark:text-orange-400 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors flex items-center gap-2"
+        >
+          <span v-if="unlinking" class="animate-spin material-icons text-lg">refresh</span>
+          <span class="material-icons text-lg" v-else>link_off</span>
+          {{ $t('hotels.hotelBase.unlinkFromBase') }}
+        </button>
+
+        <!-- Save button (hide for linked hotels on data tab) -->
+        <button
+          v-if="!isLinkedHotel || mainActiveTab === 'settings'"
+          @click="handleSave"
+          class="btn-primary"
+          :disabled="saving"
+        >
+          <span v-if="saving" class="flex items-center">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ $t('common.loading') }}
+          </span>
+          <span v-else>{{ $t('common.save') }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Linked Hotel Info Banner (only show when on settings tab) -->
+    <div
+      v-if="isLinkedHotel && !loading && mainActiveTab === 'settings'"
+      class="mb-4 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg"
+    >
+      <div class="flex items-start gap-3">
+        <span class="material-icons text-purple-600 dark:text-purple-400 mt-0.5">link</span>
+        <div>
+          <h4 class="font-medium text-purple-800 dark:text-purple-300">{{ $t('hotels.linkedHotel.notice') }}</h4>
+          <p class="text-sm text-purple-600 dark:text-purple-400 mt-1">
+            {{ $t('hotels.linkedHotel.settingsEditable') }}
+          </p>
+        </div>
+      </div>
     </div>
 
     <div class="bg-white dark:bg-slate-800 rounded-lg shadow">
 
-      <!-- Tabs with Error Badges -->
-      <FormTabs
-        v-model="activeTab"
-        :tabs="tabsWithDisabled"
-        :errors="allErrors"
-        :tab-fields="tabFields"
-        @tab-change="handleTabChange"
-      />
-
-      <!-- Validation Error Banner -->
-      <div
-        v-if="hasErrors"
-        class="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2"
-      >
-        <span class="material-icons text-red-500">error</span>
-        <span class="text-sm text-red-700 dark:text-red-400">
-          {{ $t('validation.fixErrors') }}
-        </span>
+      <!-- Main Tabs (Hotel Data / Settings) -->
+      <div class="border-b border-gray-200 dark:border-slate-700">
+        <div class="flex">
+          <button
+            v-for="tab in mainTabs"
+            :key="tab.id"
+            type="button"
+            @click="mainActiveTab = tab.id"
+            :class="[
+              'px-6 py-4 text-sm font-medium transition-colors border-b-2 -mb-px',
+              mainActiveTab === tab.id
+                ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
+            ]"
+          >
+            <span class="flex items-center gap-2">
+              <span class="material-icons text-lg">{{ tab.icon }}</span>
+              {{ tab.label }}
+            </span>
+          </button>
+        </div>
       </div>
 
       <!-- Loading State -->
@@ -46,98 +101,123 @@
         <p class="mt-4 text-gray-600 dark:text-slate-400">{{ $t('common.loading') }}</p>
       </div>
 
-      <!-- Tab Content -->
-      <form v-else @submit.prevent="handleSave" class="p-6">
-        <!-- Basic Info Tab -->
-        <div v-show="activeTab === 'basic'">
-          <HotelBasicForm
-            ref="basicFormRef"
-            :hotel="hotel"
-            :saving="saving"
-            :is-new="isNew"
-            :external-errors="tabErrors.basic"
-            @validation-change="(errors) => updateTabErrors('basic', errors)"
-          />
+      <div v-else>
+        <!-- HOTEL DATA TAB -->
+        <div v-show="mainActiveTab === 'data'">
+          <!-- For linked hotels: Show display-only component -->
+          <div v-if="isLinkedHotel" class="p-6">
+            <HotelDataDisplay :hotel="hotel" />
+          </div>
+
+          <!-- For partner/own hotels: Show editable forms -->
+          <template v-else>
+            <!-- Sub Tabs with Error Badges -->
+            <FormTabs
+              v-model="activeTab"
+              :tabs="tabsWithDisabled"
+              :errors="allErrors"
+              :tab-fields="tabFields"
+              @tab-change="handleTabChange"
+            />
+
+            <!-- Validation Error Banner -->
+            <div
+              v-if="hasErrors"
+              class="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2"
+            >
+              <span class="material-icons text-red-500">error</span>
+              <span class="text-sm text-red-700 dark:text-red-400">
+                {{ $t('validation.fixErrors') }}
+              </span>
+            </div>
+
+            <!-- Tab Content -->
+            <form @submit.prevent="handleSave" class="p-6">
+              <!-- Basic Info Tab -->
+              <div v-show="activeTab === 'basic'">
+                <HotelBasicForm
+                  ref="basicFormRef"
+                  :hotel="hotel"
+                  :saving="saving"
+                  :is-new="isNew"
+                  :external-errors="tabErrors.basic"
+                  @validation-change="(errors) => updateTabErrors('basic', errors)"
+                />
+              </div>
+
+              <!-- Contact Tab -->
+              <div v-show="activeTab === 'contact'">
+                <HotelContactForm
+                  ref="contactFormRef"
+                  :hotel="hotel"
+                  :saving="saving"
+                  :external-errors="tabErrors.contact"
+                  @validation-change="(errors) => updateTabErrors('contact', errors)"
+                />
+              </div>
+
+              <!-- Address Tab -->
+              <div v-show="activeTab === 'address'">
+                <HotelAddressForm
+                  ref="addressFormRef"
+                  :hotel="hotel"
+                  :saving="saving"
+                  :external-errors="tabErrors.address"
+                  @validation-change="(errors) => updateTabErrors('address', errors)"
+                />
+              </div>
+
+              <!-- Profile Tab -->
+              <div v-show="activeTab === 'profile'">
+                <HotelProfile
+                  ref="profileFormRef"
+                  :hotel="hotel"
+                  :saving="saving"
+                />
+              </div>
+
+              <!-- Gallery Tab -->
+              <div v-show="activeTab === 'gallery'">
+                <HotelGallery
+                  :hotel="hotel"
+                  @image-uploaded="handleImageUploaded"
+                  @image-deleted="handleImageDeleted"
+                  @images-reordered="handleImagesReordered"
+                  @main-image-set="handleMainImageSet"
+                />
+              </div>
+
+              <!-- Amenities Tab -->
+              <div v-show="activeTab === 'amenities'">
+                <HotelAmenities
+                  ref="amenitiesFormRef"
+                  :hotel="hotel"
+                  :saving="saving"
+                />
+              </div>
+
+              <!-- Policies Tab -->
+              <div v-show="activeTab === 'policies'">
+                <HotelPolicies
+                  ref="policiesFormRef"
+                  :hotel="hotel"
+                  :saving="saving"
+                />
+              </div>
+            </form>
+          </template>
         </div>
 
-        <!-- Contact Tab -->
-        <div v-show="activeTab === 'contact'">
-          <HotelContactForm
-            ref="contactFormRef"
+        <!-- SETTINGS TAB -->
+        <div v-show="mainActiveTab === 'settings'" class="p-6">
+          <HotelSettingsForm
+            ref="settingsFormRef"
             :hotel="hotel"
             :saving="saving"
-            :external-errors="tabErrors.contact"
-            @validation-change="(errors) => updateTabErrors('contact', errors)"
+            :is-linked="isLinkedHotel"
           />
         </div>
-
-        <!-- Address Tab -->
-        <div v-show="activeTab === 'address'">
-          <HotelAddressForm
-            ref="addressFormRef"
-            :hotel="hotel"
-            :saving="saving"
-            :external-errors="tabErrors.address"
-            @validation-change="(errors) => updateTabErrors('address', errors)"
-          />
-        </div>
-
-        <!-- Profile Tab -->
-        <div v-show="activeTab === 'profile'">
-          <HotelProfile
-            ref="profileFormRef"
-            :hotel="hotel"
-            :saving="saving"
-          />
-        </div>
-
-        <!-- Gallery Tab -->
-        <div v-show="activeTab === 'gallery'">
-          <HotelGallery
-            :hotel="hotel"
-            @image-uploaded="handleImageUploaded"
-            @image-deleted="handleImageDeleted"
-            @images-reordered="handleImagesReordered"
-            @main-image-set="handleMainImageSet"
-          />
-        </div>
-
-        <!-- Amenities Tab -->
-        <div v-show="activeTab === 'amenities'">
-          <HotelAmenities
-            ref="amenitiesFormRef"
-            :hotel="hotel"
-            :saving="saving"
-          />
-        </div>
-
-        <!-- Policies Tab -->
-        <div v-show="activeTab === 'policies'">
-          <HotelPolicies
-            ref="policiesFormRef"
-            :hotel="hotel"
-            :saving="saving"
-          />
-        </div>
-
-        <!-- Pricing Tab -->
-        <div v-show="activeTab === 'pricing'">
-          <HotelPricingForm
-            ref="pricingFormRef"
-            :hotel="hotel"
-            :saving="saving"
-          />
-        </div>
-
-        <!-- SEO Tab -->
-        <div v-show="activeTab === 'seo'">
-          <HotelSeoForm
-            ref="seoFormRef"
-            :hotel="hotel"
-            :saving="saving"
-          />
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 </template>
@@ -155,9 +235,11 @@ import HotelAddressForm from '@/components/hotels/HotelAddressForm.vue'
 import HotelGallery from '@/components/hotels/HotelGallery.vue'
 import HotelAmenities from '@/components/hotels/HotelAmenities.vue'
 import HotelPolicies from '@/components/hotels/HotelPolicies.vue'
-import HotelSeoForm from '@/components/hotels/HotelSeoForm.vue'
 import HotelProfile from '@/components/hotels/HotelProfile.vue'
-import HotelPricingForm from '@/components/hotels/HotelPricingForm.vue'
+import HotelSettingsForm from '@/components/hotels/HotelSettingsForm.vue'
+import HotelSourceSelector from '@/components/hotels/HotelSourceSelector.vue'
+import HotelBaseSelector from '@/components/hotels/HotelBaseSelector.vue'
+import HotelDataDisplay from '@/components/hotels/HotelDataDisplay.vue'
 import { useUIStore } from '@/stores/ui'
 
 const route = useRoute()
@@ -178,6 +260,8 @@ const createMultiLangObject = () => {
 
 function getEmptyHotel() {
   return {
+    hotelType: 'partner',
+    hotelBase: null,
     name: '',
     description: createMultiLangObject(),
     slug: '',
@@ -218,6 +302,7 @@ function getEmptyHotel() {
     images: [],
     amenities: [],
     policies: {
+      useBaseDefaults: true,
       checkIn: '14:00',
       checkOut: '12:00',
       maxBabyAge: 2,
@@ -262,14 +347,21 @@ function getEmptyHotel() {
       taxRate: 10
     },
     status: 'draft',
-    featured: false
+    featured: false,
+    displayOrder: 0
   }
 }
 
 const hotel = ref(getEmptyHotel())
 const loading = ref(false)
 const saving = ref(false)
+const unlinking = ref(false)
+const mainActiveTab = ref('data')
 const activeTab = ref('basic')
+
+// Source/Base selector states
+const showSourceSelector = ref(false)
+const showBaseSelector = ref(false)
 
 // Form refs
 const basicFormRef = ref(null)
@@ -277,9 +369,8 @@ const contactFormRef = ref(null)
 const addressFormRef = ref(null)
 const amenitiesFormRef = ref(null)
 const policiesFormRef = ref(null)
-const seoFormRef = ref(null)
 const profileFormRef = ref(null)
-const pricingFormRef = ref(null)
+const settingsFormRef = ref(null)
 
 // Tab errors tracking
 const tabErrors = reactive({
@@ -289,9 +380,7 @@ const tabErrors = reactive({
   profile: {},
   gallery: {},
   amenities: {},
-  policies: {},
-  pricing: {},
-  seo: {}
+  policies: {}
 })
 
 // Map of fields to tabs for error badge display
@@ -302,9 +391,7 @@ const tabFields = {
   profile: [],
   gallery: [],
   amenities: [],
-  policies: [],
-  pricing: [],
-  seo: []
+  policies: []
 }
 
 // Combine all errors for FormTabs
@@ -335,6 +422,11 @@ const clearAllTabErrors = () => {
 
 // Validate all forms and return first tab with errors
 const validateAllForms = () => {
+  // Skip validation for linked hotels on data tab
+  if (isLinkedHotel.value) {
+    return { isValid: true, firstErrorTab: null }
+  }
+
   const validationResults = {
     basic: basicFormRef.value?.validateAll?.() ?? true,
     contact: contactFormRef.value?.validateAll?.() ?? true,
@@ -352,14 +444,24 @@ const validateAllForms = () => {
 
 // Collect all form data
 const collectFormData = () => {
+  // For linked hotels, only collect settings data
+  if (isLinkedHotel.value) {
+    const settingsData = settingsFormRef.value?.getFormData?.() || {}
+    const policiesData = policiesFormRef.value?.getFormData?.() || {}
+
+    return {
+      ...settingsData,
+      policies: policiesData.policies
+    }
+  }
+
   const basicData = basicFormRef.value?.getFormData?.() || {}
   const contactData = contactFormRef.value?.getFormData?.() || {}
   const addressData = addressFormRef.value?.getFormData?.() || {}
   const amenitiesData = amenitiesFormRef.value?.getFormData?.() || {}
   const policiesData = policiesFormRef.value?.getFormData?.() || {}
-  const seoData = seoFormRef.value?.getFormData?.() || {}
   const profileData = profileFormRef.value?.getFormData?.() || {}
-  const pricingData = pricingFormRef.value?.getFormData?.() || {}
+  const settingsData = settingsFormRef.value?.getFormData?.() || {}
 
   // Merge all form data
   return {
@@ -368,14 +470,29 @@ const collectFormData = () => {
     ...addressData,
     ...amenitiesData,
     ...policiesData,
-    ...seoData,
     ...profileData,
-    ...pricingData
+    ...settingsData
   }
 }
 
 const isNew = computed(() => route.params.id === undefined || route.name === 'hotel-new')
+const isLinkedHotel = computed(() => hotel.value.hotelType === 'linked')
 
+// Main tabs (Data / Settings)
+const mainTabs = computed(() => {
+  const tabs = [
+    { id: 'data', label: t('hotels.tabs.hotelData'), icon: 'hotel' }
+  ]
+
+  // Only show settings tab for partner and linked hotels (not base)
+  if (hotel.value.hotelType !== 'base') {
+    tabs.push({ id: 'settings', label: t('hotels.tabs.settings'), icon: 'settings' })
+  }
+
+  return tabs
+})
+
+// Sub-tabs for hotel data
 const tabs = computed(() => [
   { id: 'basic', label: t('hotels.tabs.basic'), icon: 'info', requiresSave: false },
   { id: 'contact', label: t('hotels.tabs.contact'), icon: 'contacts', requiresSave: false },
@@ -383,9 +500,7 @@ const tabs = computed(() => [
   { id: 'profile', label: t('hotels.tabs.profile'), icon: 'description', requiresSave: false },
   { id: 'gallery', label: t('hotels.tabs.gallery'), icon: 'photo_library', requiresSave: true },
   { id: 'amenities', label: t('hotels.tabs.amenities'), icon: 'wifi', requiresSave: false },
-  { id: 'policies', label: t('hotels.tabs.policies'), icon: 'policy', requiresSave: false },
-  { id: 'pricing', label: t('hotels.tabs.pricing'), icon: 'sell', requiresSave: false },
-  { id: 'seo', label: t('hotels.tabs.seo'), icon: 'search', requiresSave: false }
+  { id: 'policies', label: t('hotels.tabs.policies'), icon: 'policy', requiresSave: false }
 ])
 
 // Add disabled flag for new hotels
@@ -406,6 +521,60 @@ const handleTabChange = (tab) => {
   }
 }
 
+// Source selector handlers
+const handleSourceSelectorClose = () => {
+  showSourceSelector.value = false
+  // If user cancels source selection for new hotel, go back to list
+  if (isNew.value && !hotel.value.hotelType) {
+    router.push('/hotels')
+  }
+}
+
+const handleSourceSelect = (source) => {
+  showSourceSelector.value = false
+
+  if (source === 'base') {
+    // Show base hotel selector
+    showBaseSelector.value = true
+  } else {
+    // Create own hotel - already set as 'partner' type
+    hotel.value.hotelType = 'partner'
+  }
+}
+
+const handleBaseLinked = (linkedHotel) => {
+  showBaseSelector.value = false
+  toast.success(t('hotels.hotelBase.linkSuccess'))
+  // Navigate to the newly created linked hotel
+  router.push(`/hotels/${linkedHotel._id}`)
+}
+
+// Unlink from base
+const handleUnlink = async () => {
+  if (!confirm(t('hotels.hotelBase.unlinkConfirm'))) {
+    return
+  }
+
+  unlinking.value = true
+  try {
+    const response = await hotelService.unlinkFromBase(hotel.value._id)
+    if (response.success) {
+      toast.success(t('hotels.hotelBase.unlinkSuccess'))
+      // Refresh hotel data
+      await fetchHotel()
+    }
+  } catch (error) {
+    toast.error(t('common.operationFailed'))
+  } finally {
+    unlinking.value = false
+  }
+}
+
+// Toggle policies override for linked hotels
+const handlePoliciesOverrideToggle = (useDefaults) => {
+  hotel.value.policies.useBaseDefaults = useDefaults
+}
+
 const fetchHotel = async () => {
   if (isNew.value) return
 
@@ -419,6 +588,8 @@ const fetchHotel = async () => {
       hotel.value = {
         ...emptyHotel,
         ...data,
+        hotelType: data.hotelType || 'partner',
+        hotelBase: data.hotelBase || null,
         name: data.name || '',
         description: { ...emptyHotel.description, ...data.description },
         visibility: { ...emptyHotel.visibility, ...data.visibility },
@@ -435,6 +606,7 @@ const fetchHotel = async () => {
         policies: {
           ...emptyHotel.policies,
           ...data.policies,
+          useBaseDefaults: data.policies?.useBaseDefaults ?? true,
           childPolicy: { ...emptyHotel.policies.childPolicy, ...data.policies?.childPolicy },
           petPolicy: { ...emptyHotel.policies.petPolicy, ...data.policies?.petPolicy },
           additionalInfo: { ...emptyHotel.policies.additionalInfo, ...data.policies?.additionalInfo },
@@ -521,11 +693,12 @@ const fetchHotel = async () => {
 }
 
 const handleSave = async () => {
-  // Validate ALL forms first
+  // Validate ALL forms first (skip for linked hotels on data fields)
   const { isValid, firstErrorTab } = validateAllForms()
 
   if (!isValid) {
     // Switch to first tab with errors
+    mainActiveTab.value = 'data'
     if (firstErrorTab && activeTab.value !== firstErrorTab) {
       activeTab.value = firstErrorTab
     }
@@ -591,20 +764,22 @@ watch(() => route.params.id, (newId) => {
   clearAllTabErrors()
 
   if (newId) {
+    // Existing hotel - fetch data
+    showSourceSelector.value = false
+    showBaseSelector.value = false
     fetchHotel()
   } else {
+    // New hotel - show source selector
     hotel.value = getEmptyHotel()
     activeTab.value = 'basic'
+    mainActiveTab.value = 'data'
+    showSourceSelector.value = true
+    uiStore.setPageTitleSuffix(t('hotels.newHotel'))
   }
 }, { immediate: true })
 
 onMounted(() => {
-  if (!isNew.value) {
-    fetchHotel()
-  } else {
-    // Set title for new hotel
-    uiStore.setPageTitleSuffix(t('hotels.newHotel'))
-  }
+  // Initial setup is handled by the watch with immediate: true
 })
 
 onUnmounted(() => {

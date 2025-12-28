@@ -111,5 +111,14 @@
   "AI_COMMAND_EXECUTED": "AI komutu başarıyla uygulandı",
   "COMMAND_REQUIRED": "Komut gereklidir",
   "VALID_COMMAND_REQUIRED": "Geçerli bir komut gereklidir",
-  "UNKNOWN_ACTION": "Bilinmeyen işlem"
+  "UNKNOWN_ACTION": "Bilinmeyen işlem",
+
+  "ROOM_TEMPLATE_CREATED": "Oda şablonu başarıyla oluşturuldu",
+  "ROOM_TEMPLATE_UPDATED": "Oda şablonu başarıyla güncellendi",
+  "ROOM_TEMPLATE_DELETED": "Oda şablonu başarıyla silindi",
+  "ROOM_TEMPLATE_NOT_FOUND": "Oda şablonu bulunamadı",
+  "ROOM_TEMPLATE_CODE_REQUIRED": "Oda şablonu kodu gereklidir",
+  "ROOM_TEMPLATE_CODE_EXISTS": "Bu kodla bir oda şablonu zaten mevcut",
+  "BASE_HOTEL_NOT_FOUND": "HotelBase oteli bulunamadı",
+  "HOTEL_NOT_LINKED": "Bu otel bir HotelBase'e bağlı değil"
 }

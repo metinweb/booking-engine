@@ -1,8 +1,10 @@
+import { createServer } from 'http'
 import app from './app.js'
 import config from './config/index.js'
 import logger from './core/logger.js'
 import { connectDB } from './core/mongoose.js'
 import bootstrap from './core/bootstrap.js'
+import { initSocket } from './core/socket.js'
 
 // Connect to database
 await connectDB()
@@ -10,10 +12,17 @@ await connectDB()
 // Run bootstrap (initial setup)
 await bootstrap()
 
+// Create HTTP server (for Socket.IO compatibility)
+const httpServer = createServer(app)
+
+// Initialize Socket.IO
+initSocket(httpServer)
+
 // Start server
-const server = app.listen(config.port, () => {
+const server = httpServer.listen(config.port, () => {
   logger.info(`🚀 Server running in ${config.env} mode`)
   logger.info(`📡 Listening on port ${config.port}`)
+  logger.info(`🔌 Socket.IO enabled`)
   logger.info(`🌍 CORS enabled for: ${config.cors.origin.join(', ')}`)
 })
 

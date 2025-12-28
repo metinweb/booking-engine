@@ -5,8 +5,9 @@
       <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.gallery.description') }}</p>
     </div>
 
-    <!-- Upload Area -->
+    <!-- Upload Area (hidden in readonly mode) -->
     <div
+      v-if="!readonly"
       class="border-2 border-dashed rounded-lg p-8 text-center transition-colors"
       :class="isDragging
         ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
@@ -56,7 +57,7 @@
     <div v-if="images.length > 0">
       <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.gallery.reorderHelp') }}</p>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
         <div
           v-for="(image, index) in images"
           :key="image._id"
@@ -76,8 +77,8 @@
             {{ $t('hotels.gallery.isMain') }}
           </div>
 
-          <!-- Image Actions Overlay -->
-          <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <!-- Image Actions Overlay (hidden in readonly mode) -->
+          <div v-if="!readonly" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <button
               v-if="!image.isMain"
               @click="setMainImage(image._id)"
@@ -143,6 +144,10 @@ const props = defineProps({
   hotel: {
     type: Object,
     required: true
+  },
+  readonly: {
+    type: Boolean,
+    default: false
   }
 })
 

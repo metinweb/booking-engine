@@ -23,6 +23,9 @@ router.put('/hotels/:hotelId/room-types/:id', planningService.updateRoomType)
 router.delete('/hotels/:hotelId/room-types/:id', planningService.deleteRoomType)
 router.patch('/hotels/:hotelId/room-types/:id/status', planningService.updateRoomTypeStatus)
 router.patch('/hotels/:hotelId/room-types/reorder', planningService.reorderRoomTypes)
+router.post('/hotels/:hotelId/room-types/import-from-base', planningService.importRoomTypesFromBase)
+router.post('/hotels/:hotelId/room-types/:id/set-base', planningService.setBaseRoom)
+router.patch('/hotels/:hotelId/room-types/:id/adjustment', planningService.updateRoomTypePriceAdjustment)
 
 // Room Type Image Management
 router.post('/hotels/:hotelId/room-types/:roomTypeId/images', roomTypeUpload.single('image'), planningService.uploadRoomTypeImage)
@@ -36,6 +39,8 @@ router.post('/hotels/:hotelId/meal-plans', planningService.createMealPlan)
 router.post('/hotels/:hotelId/meal-plans/add-standard', planningService.addStandardMealPlansToHotel)
 router.put('/hotels/:hotelId/meal-plans/:id', planningService.updateMealPlan)
 router.delete('/hotels/:hotelId/meal-plans/:id', planningService.deleteMealPlan)
+router.post('/hotels/:hotelId/meal-plans/:id/set-base', planningService.setBaseMealPlan)
+router.patch('/hotels/:hotelId/meal-plans/:id/adjustment', planningService.updateMealPlanPriceAdjustment)
 
 // ==================== MARKETS ====================
 router.get('/hotels/:hotelId/markets', planningService.getMarkets)

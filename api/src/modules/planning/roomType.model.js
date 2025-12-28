@@ -91,7 +91,7 @@ const roomTypeSchema = new mongoose.Schema({
 			// Mini Bar & Kitchen
 			'minibar', 'refrigerator', 'kettle', 'coffeeMachine', 'kitchenette',
 			// Bathroom
-			'privateBathroom', 'sharedBathroom', 'bathtub', 'shower', 'hairdryer', 'toiletries',
+			'privateBathroom', 'sharedBathroom', 'bathtub', 'shower', 'hairdryer', 'toiletries', 'bathrobes', 'slippers',
 			// View
 			'seaView', 'poolView', 'gardenView', 'cityView', 'mountainView', 'landmarkView',
 			// Outdoor
@@ -110,12 +110,26 @@ const roomTypeSchema = new mongoose.Schema({
 	// Status
 	status: {
 		type: String,
-		enum: ['draft', 'active', 'inactive'],
+		enum: ['draft', 'active', 'inactive', 'deleted'],
 		default: 'draft'
 	},
 
 	// Display order
-	displayOrder: { type: Number, default: 0 }
+	displayOrder: { type: Number, default: 0 },
+
+	// Base room pricing
+	isBaseRoom: {
+		type: Boolean,
+		default: false
+	},
+
+	// Price adjustment relative to base room (%)
+	priceAdjustment: {
+		type: Number,
+		default: 0,
+		min: -100,
+		max: 500
+	}
 
 }, {
 	timestamps: true,
@@ -130,7 +144,7 @@ roomTypeSchema.index({ partner: 1, hotel: 1, status: 1 })
 roomTypeSchema.index({ displayOrder: 1 })
 
 // Validate total max guests
-roomTypeSchema.pre('save', function(next) {
+roomTypeSchema.pre('save', async function(next) {
 	// Ensure totalMaxGuests >= baseOccupancy
 	if (this.occupancy.totalMaxGuests < this.occupancy.baseOccupancy) {
 		this.occupancy.totalMaxGuests = this.occupancy.baseOccupancy
@@ -156,6 +170,16 @@ roomTypeSchema.pre('save', function(next) {
 		})
 	} else if (mainImages.length === 0 && this.images.length > 0) {
 		this.images[0].isMain = true
+	}
+
+	// Base room logic: if this room is set as base, clear isBaseRoom from others
+	if (this.isBaseRoom && this.isModified('isBaseRoom')) {
+		await this.constructor.updateMany(
+			{ hotel: this.hotel, _id: { $ne: this._id } },
+			{ isBaseRoom: false }
+		)
+		// Base room always has 0 adjustment
+		this.priceAdjustment = 0
 	}
 
 	next()

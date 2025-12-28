@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import config from './config/index.js'
 import { i18nMiddleware } from './helpers/i18n.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
+import { auditMiddleware } from './middleware/auditMiddleware.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -39,6 +40,9 @@ app.use(express.urlencoded({ extended: true }))
 // i18n
 app.use(i18nMiddleware)
 
+// Audit middleware (for tracking HTTP requests)
+app.use(auditMiddleware)
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({
@@ -68,6 +72,7 @@ import hotelRoutes from './modules/hotel/hotel.routes.js'
 import planningRoutes from './modules/planning/planning.routes.js'
 import tagRoutes from './modules/tag/tag.routes.js'
 import locationRoutes from './modules/location/location.routes.js'
+import auditRoutes from './modules/audit/audit.routes.js'
 
 app.use('/api/auth', authRoutes)
 app.use('/api/partners', partnerRoutes)
@@ -79,6 +84,7 @@ app.use('/api/hotels', hotelRoutes)
 app.use('/api/planning', planningRoutes)
 app.use('/api/tags', tagRoutes)
 app.use('/api/locations', locationRoutes)
+app.use('/api/audit-logs', auditRoutes)
 
 // 404 handler
 app.use(notFoundHandler)

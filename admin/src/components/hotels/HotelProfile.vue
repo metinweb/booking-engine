@@ -14,6 +14,7 @@
       v-model:content="form.overview.content"
       :languages="languages"
       :default-open="true"
+      :readonly="readonly"
     >
       <template #fields>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -28,6 +29,7 @@
               :max="currentYear"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
               :placeholder="$t('hotels.profile.establishedYearPlaceholder')"
+              :disabled="readonly"
             />
           </div>
           <div>
@@ -41,6 +43,7 @@
               :max="currentYear"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
               :placeholder="$t('hotels.profile.renovationYearPlaceholder')"
+              :disabled="readonly"
             />
           </div>
           <div>
@@ -52,6 +55,7 @@
               type="text"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
               :placeholder="$t('hotels.profile.chainBrandPlaceholder')"
+              :disabled="readonly"
             />
           </div>
           <div>
@@ -63,6 +67,7 @@
               type="text"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
               :placeholder="$t('hotels.profile.officialRatingPlaceholder')"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -77,6 +82,7 @@
       v-model:selected-features="form.facilities.features"
       v-model:content="form.facilities.content"
       :languages="languages"
+      :readonly="readonly"
     />
 
     <!-- Dining Section -->
@@ -87,6 +93,7 @@
       v-model:selected-features="form.dining.features"
       v-model:content="form.dining.content"
       :languages="languages"
+      :readonly="readonly"
     />
 
     <!-- Sports & Entertainment Section -->
@@ -97,6 +104,7 @@
       v-model:selected-features="form.sportsEntertainment.features"
       v-model:content="form.sportsEntertainment.content"
       :languages="languages"
+      :readonly="readonly"
     />
 
     <!-- Spa & Wellness Section -->
@@ -107,6 +115,7 @@
       v-model:selected-features="form.spaWellness.features"
       v-model:content="form.spaWellness.content"
       :languages="languages"
+      :readonly="readonly"
     >
       <template #fields>
         <div class="grid grid-cols-2 gap-4">
@@ -121,6 +130,7 @@
                 min="0"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
                 placeholder="0"
+                :disabled="readonly"
               />
               <span class="text-gray-500 dark:text-slate-400">m2</span>
             </div>
@@ -137,6 +147,7 @@
       v-model:selected-features="form.familyKids.features"
       v-model:content="form.familyKids.content"
       :languages="languages"
+      :readonly="readonly"
     >
       <template #fields>
         <div class="grid grid-cols-2 gap-4">
@@ -152,6 +163,7 @@
                 max="18"
                 class="w-20 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
                 placeholder="4"
+                :disabled="readonly"
               />
               <span class="text-gray-500 dark:text-slate-400">-</span>
               <input
@@ -161,6 +173,7 @@
                 max="18"
                 class="w-20 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
                 placeholder="12"
+                :disabled="readonly"
               />
               <span class="text-gray-500 dark:text-slate-400">{{ $t('hotels.profile.years') }}</span>
             </div>
@@ -177,6 +190,7 @@
       v-model:selected-features="form.beachPool.features"
       v-model:content="form.beachPool.content"
       :languages="languages"
+      :readonly="readonly"
     >
       <template #fields>
         <div class="space-y-4">
@@ -193,6 +207,7 @@
                     min="0"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
                     placeholder="0"
+                    :disabled="readonly"
                   />
                   <span class="text-gray-500 dark:text-slate-400 text-sm">m</span>
                 </div>
@@ -202,6 +217,7 @@
                 <select
                   v-model="form.beachPool.beachDetails.type"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
+                  :disabled="readonly"
                 >
                   <option value="">{{ $t('common.select') }}</option>
                   <option value="sandy">{{ $t('hotels.profile.beachTypes.sandy') }}</option>
@@ -219,6 +235,7 @@
                     min="0"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
                     placeholder="0"
+                    :disabled="readonly"
                   />
                   <span class="text-gray-500 dark:text-slate-400 text-sm">m</span>
                 </div>
@@ -237,6 +254,7 @@
       v-model:selected-features="form.honeymoon.features"
       v-model:content="form.honeymoon.content"
       :languages="languages"
+      :readonly="readonly"
     >
       <template #fields>
         <div class="flex items-center gap-2">
@@ -244,6 +262,7 @@
             type="checkbox"
             v-model="form.honeymoon.available"
             class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+            :disabled="readonly"
           />
           <label class="text-sm text-gray-700 dark:text-slate-300">
             {{ $t('hotels.profile.honeymoonAvailable') }}
@@ -260,6 +279,7 @@
       :selected-features="[]"
       v-model:content="form.importantInfo.content"
       :languages="languages"
+      :readonly="readonly"
     />
 
     <!-- Location Section -->
@@ -270,12 +290,14 @@
       :selected-features="[]"
       v-model:content="form.location.content"
       :languages="languages"
+      :readonly="readonly"
     >
       <template #fields>
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <h5 class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('hotels.profile.distances') }}</h5>
             <button
+              v-if="!readonly"
               type="button"
               @click="addDistance"
               class="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 flex items-center gap-1"
@@ -295,6 +317,7 @@
                 type="text"
                 class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
                 :placeholder="$t('hotels.profile.placeName')"
+                :disabled="readonly"
               />
               <input
                 v-model.number="distance.distance"
@@ -302,15 +325,18 @@
                 min="0"
                 class="w-24 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
                 placeholder="0"
+                :disabled="readonly"
               />
               <select
                 v-model="distance.unit"
                 class="w-20 px-2 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
+                :disabled="readonly"
               >
                 <option value="m">m</option>
                 <option value="km">km</option>
               </select>
               <button
+                v-if="!readonly"
                 type="button"
                 @click="removeDistance(index)"
                 class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
@@ -339,6 +365,10 @@ const props = defineProps({
     required: true
   },
   saving: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }

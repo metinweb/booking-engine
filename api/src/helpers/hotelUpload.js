@@ -83,3 +83,64 @@ export const deleteHotelFolder = (partnerId, hotelId) => {
 	}
 	return false
 }
+
+// ===== Base Hotel Room Template Image Upload =====
+
+// Configure storage for base hotel room template images
+const roomTemplateStorage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		const hotelId = req.params?.id
+		const roomCode = req.params?.code?.toUpperCase()
+
+		if (!hotelId || !roomCode) {
+			return cb(new Error('Hotel ID and Room Code are required'))
+		}
+
+		// Base hotel room template images go to: /uploads/hotels/base/{hotelId}/rooms/{roomCode}/
+		const roomDir = path.join(uploadsDir, 'hotels', 'base', hotelId.toString(), 'rooms', roomCode)
+
+		if (!fs.existsSync(roomDir)) {
+			fs.mkdirSync(roomDir, { recursive: true })
+		}
+		cb(null, roomDir)
+	},
+	filename: (req, file, cb) => {
+		const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+		const ext = path.extname(file.originalname)
+		cb(null, `room-${uniqueSuffix}${ext}`)
+	}
+})
+
+// Configure multer for room template images
+export const roomTemplateUpload = multer({
+	storage: roomTemplateStorage,
+	fileFilter: imageFilter,
+	limits: {
+		fileSize: 10 * 1024 * 1024 // 10MB limit
+	}
+})
+
+// Helper to get room template file URL
+export const getRoomTemplateFileUrl = (hotelId, roomCode, filename) => {
+	return `/uploads/hotels/base/${hotelId}/rooms/${roomCode.toUpperCase()}/${filename}`
+}
+
+// Helper to delete room template file
+export const deleteRoomTemplateFile = (hotelId, roomCode, filename) => {
+	const filePath = path.join(uploadsDir, 'hotels', 'base', hotelId.toString(), 'rooms', roomCode.toUpperCase(), filename)
+	if (fs.existsSync(filePath)) {
+		fs.unlinkSync(filePath)
+		return true
+	}
+	return false
+}
+
+// Helper to delete all room template files
+export const deleteRoomTemplateFolder = (hotelId, roomCode) => {
+	const roomDir = path.join(uploadsDir, 'hotels', 'base', hotelId.toString(), 'rooms', roomCode.toUpperCase())
+	if (fs.existsSync(roomDir)) {
+		fs.rmSync(roomDir, { recursive: true, force: true })
+		return true
+	}
+	return false
+}

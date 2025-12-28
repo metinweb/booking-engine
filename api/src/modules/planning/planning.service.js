@@ -6,11 +6,26 @@ import Rate from './rate.model.js'
 // RateOverride removed - now using daily Rate model directly
 import Campaign from './campaign.model.js'
 import Hotel from '../hotel/hotel.model.js'
+import AuditLog from '../audit/audit.model.js'
 import { NotFoundError, BadRequestError, ForbiddenError } from '../../core/errors.js'
 import { asyncHandler } from '../../helpers/asyncHandler.js'
 import logger from '../../core/logger.js'
 import { getRoomTypeFileUrl, deleteRoomTypeFile } from '../../helpers/roomTypeUpload.js'
 import { parsePricingCommand } from '../../services/geminiService.js'
+
+// Helper: Get actor from request for audit logging
+const getAuditActor = (req) => {
+	if (!req.user) return { role: 'system' }
+	return {
+		userId: req.user._id,
+		partnerId: req.user.accountType === 'partner' ? req.user.accountId : req.partnerId,
+		email: req.user.email,
+		name: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim(),
+		role: req.user.role,
+		ip: req.ip,
+		userAgent: req.get('User-Agent')
+	}
+}
 
 // Get partner ID from request
 const getPartnerId = (req) => {
@@ -44,9 +59,15 @@ export const getRoomTypes = asyncHandler(async (req, res) => {
 	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
 	await verifyHotelOwnership(hotelId, partnerId)
 
-	const { status } = req.query
+	const { status, includeDeleted } = req.query
 	const filter = { partner: partnerId, hotel: hotelId }
-	if (status) filter.status = status
+
+	if (status) {
+		filter.status = status
+	} else if (includeDeleted !== 'true') {
+		// By default, exclude deleted room types
+		filter.status = { $ne: 'deleted' }
+	}
 
 	const roomTypes = await RoomType.find(filter).sort('displayOrder')
 
@@ -178,6 +199,160 @@ export const reorderRoomTypes = asyncHandler(async (req, res) => {
 	res.json({
 		success: true,
 		message: req.t('ORDER_UPDATED')
+	})
+})
+
+// Set base room for relative pricing
+export const setBaseRoom = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId, id } = req.params
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Clear isBaseRoom from all room types in this hotel
+	await RoomType.updateMany(
+		{ hotel: hotelId, partner: partnerId },
+		{ isBaseRoom: false }
+	)
+
+	// Set selected room as base
+	const roomType = await RoomType.findOneAndUpdate(
+		{ _id: id, hotel: hotelId, partner: partnerId },
+		{ isBaseRoom: true, priceAdjustment: 0 },
+		{ new: true }
+	)
+
+	if (!roomType) throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
+
+	logger.info(`Base room set: ${roomType.code} for hotel ${hotelId}`)
+
+	res.json({
+		success: true,
+		message: req.t('BASE_ROOM_SET'),
+		data: roomType
+	})
+})
+
+// Update room type price adjustment
+export const updateRoomTypePriceAdjustment = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId, id } = req.params
+	const { adjustment } = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (adjustment === undefined) throw new BadRequestError('ADJUSTMENT_REQUIRED')
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	const roomType = await RoomType.findOneAndUpdate(
+		{ _id: id, hotel: hotelId, partner: partnerId },
+		{ priceAdjustment: adjustment },
+		{ new: true, runValidators: true }
+	)
+
+	if (!roomType) throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
+
+	res.json({
+		success: true,
+		message: req.t('PRICE_ADJUSTMENT_UPDATED'),
+		data: roomType
+	})
+})
+
+// Import room types from base hotel templates
+export const importRoomTypesFromBase = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { templateCodes } = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!Array.isArray(templateCodes) || templateCodes.length === 0) {
+		throw new BadRequestError('TEMPLATE_CODES_REQUIRED')
+	}
+
+	// Verify hotel ownership
+	const hotel = await verifyHotelOwnership(hotelId, partnerId)
+
+	// Check if hotel is linked to a base hotel
+	if (!hotel.hotelBase) {
+		throw new BadRequestError('HOTEL_NOT_LINKED_TO_BASE')
+	}
+
+	// Get base hotel with room templates
+	const baseHotel = await Hotel.findById(hotel.hotelBase).select('roomTemplates')
+	if (!baseHotel) {
+		throw new NotFoundError('BASE_HOTEL_NOT_FOUND')
+	}
+
+	if (!baseHotel.roomTemplates || baseHotel.roomTemplates.length === 0) {
+		throw new BadRequestError('NO_TEMPLATES_AVAILABLE')
+	}
+
+	// Get existing room types for this hotel to avoid duplicates
+	const existingRoomTypes = await RoomType.find({
+		hotel: hotelId,
+		partner: partnerId
+	}).select('code')
+	const existingCodes = existingRoomTypes.map(rt => rt.code)
+
+	// Filter templates to import
+	const templatesToImport = baseHotel.roomTemplates.filter(template =>
+		templateCodes.includes(template.code) && !existingCodes.includes(template.code)
+	)
+
+	if (templatesToImport.length === 0) {
+		return res.json({
+			success: true,
+			message: 'NO_NEW_TEMPLATES_TO_IMPORT',
+			data: { imported: 0 }
+		})
+	}
+
+	// Get current max display order
+	const maxOrderResult = await RoomType.findOne({
+		hotel: hotelId,
+		partner: partnerId
+	}).sort({ displayOrder: -1 }).select('displayOrder')
+	let nextOrder = (maxOrderResult?.displayOrder || 0) + 1
+
+	// Create room types from templates
+	const createdRoomTypes = []
+	for (const template of templatesToImport) {
+		const roomTypeData = {
+			hotel: hotelId,
+			partner: partnerId,
+			code: template.code,
+			name: template.name || {},
+			description: template.description || {},
+			occupancy: template.occupancy || { maxAdults: 2, maxChildren: 2, maxInfants: 1, totalMaxGuests: 4 },
+			amenities: template.amenities || [],
+			size: template.size || null,
+			bedConfiguration: template.bedConfiguration || [],
+			// Copy images if available (they will reference base hotel images for now)
+			images: (template.images || []).map(img => ({
+				url: img.url,
+				caption: img.caption || {},
+				order: img.order || 0,
+				isMain: img.isMain || false
+			})),
+			status: 'draft',
+			displayOrder: nextOrder++
+		}
+
+		const roomType = await RoomType.create(roomTypeData)
+		createdRoomTypes.push(roomType)
+	}
+
+	logger.info(`Imported ${createdRoomTypes.length} room types from base hotel ${hotel.hotelBase} to partner hotel ${hotelId}`)
+
+	res.json({
+		success: true,
+		message: req.t ? req.t('ROOM_TYPES_IMPORTED') : 'Room types imported successfully',
+		data: {
+			imported: createdRoomTypes.length,
+			roomTypes: createdRoomTypes
+		}
 	})
 })
 
@@ -359,12 +534,15 @@ export const getMealPlans = asyncHandler(async (req, res) => {
 	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
 	await verifyHotelOwnership(hotelId, partnerId)
 
-	// Only return hotel-specific meal plans (not standard partner-wide ones)
-	const mealPlans = await MealPlan.find({
-		partner: partnerId,
-		hotel: hotelId,
-		status: 'active'
-	}).sort('displayOrder')
+	const { includeDeleted } = req.query
+	const filter = { partner: partnerId, hotel: hotelId }
+
+	// By default, exclude deleted meal plans
+	if (includeDeleted !== 'true') {
+		filter.status = { $ne: 'deleted' }
+	}
+
+	const mealPlans = await MealPlan.find(filter).sort('displayOrder')
 
 	res.json({ success: true, data: mealPlans })
 })
@@ -447,6 +625,64 @@ export const deleteMealPlan = asyncHandler(async (req, res) => {
 		success: true,
 		message: req.t('MEAL_PLAN_DELETED'),
 		data: { deletedRates: rateCount }
+	})
+})
+
+// Set base meal plan for relative pricing
+export const setBaseMealPlan = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId, id } = req.params
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Clear isBaseMealPlan from all meal plans in this hotel
+	await MealPlan.updateMany(
+		{ hotel: hotelId, partner: partnerId },
+		{ isBaseMealPlan: false }
+	)
+
+	// Set selected meal plan as base
+	const mealPlan = await MealPlan.findOneAndUpdate(
+		{ _id: id, hotel: hotelId, partner: partnerId },
+		{ isBaseMealPlan: true, priceAdjustment: 0 },
+		{ new: true }
+	)
+
+	if (!mealPlan) throw new NotFoundError('MEAL_PLAN_NOT_FOUND')
+
+	logger.info(`Base meal plan set: ${mealPlan.code} for hotel ${hotelId}`)
+
+	res.json({
+		success: true,
+		message: req.t('BASE_MEAL_PLAN_SET'),
+		data: mealPlan
+	})
+})
+
+// Update meal plan price adjustment
+export const updateMealPlanPriceAdjustment = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId, id } = req.params
+	const { adjustment } = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (adjustment === undefined) throw new BadRequestError('ADJUSTMENT_REQUIRED')
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	const mealPlan = await MealPlan.findOneAndUpdate(
+		{ _id: id, hotel: hotelId, partner: partnerId },
+		{ priceAdjustment: adjustment },
+		{ new: true, runValidators: true }
+	)
+
+	if (!mealPlan) throw new NotFoundError('MEAL_PLAN_NOT_FOUND')
+
+	res.json({
+		success: true,
+		message: req.t('PRICE_ADJUSTMENT_UPDATED'),
+		data: mealPlan
 	})
 })
 
@@ -949,6 +1185,33 @@ export const createRate = asyncHandler(async (req, res) => {
 
 		logger.info(`${result.upsertedCount || 0} daily rates created for hotel ${hotelId}`)
 
+		// Audit log for bulk rate creation
+		await AuditLog.log({
+			actor: getAuditActor(req),
+			module: 'planning',
+			subModule: 'rate',
+			action: 'create',
+			target: {
+				collection: 'rates',
+				documentName: `${startDate} - ${endDate}`
+			},
+			changes: {
+				after: {
+					dateRange: { startDate, endDate },
+					roomType: rateData.roomType,
+					mealPlan: rateData.mealPlan,
+					market: rateData.market,
+					pricePerNight: rateData.pricePerNight
+				}
+			},
+			metadata: {
+				batchId: `rate-create-${Date.now()}`,
+				notes: `Bulk rate creation: ${result.upsertedCount || 0} created, ${result.modifiedCount || 0} modified`
+			},
+			request: { method: req.method, path: req.originalUrl },
+			status: 'success'
+		})
+
 		res.status(201).json({
 			success: true,
 			message: req.t('RATE_CREATED'),
@@ -1032,6 +1295,30 @@ export const bulkCreateRates = asyncHandler(async (req, res) => {
 	const created = await Rate.insertMany(ratesToCreate, { ordered: false })
 
 	logger.info(`Bulk created ${created.length} rates for hotel ${hotelId}`)
+
+	// Audit log for bulk rate creation
+	await AuditLog.log({
+		actor: getAuditActor(req),
+		module: 'planning',
+		subModule: 'rate',
+		action: 'create',
+		target: {
+			collection: 'rates',
+			documentName: `Bulk create: ${created.length} rates`
+		},
+		changes: {
+			after: {
+				count: created.length,
+				sample: rates.slice(0, 5) // Sample of first 5 rates
+			}
+		},
+		metadata: {
+			batchId: `rate-bulk-create-${Date.now()}`,
+			notes: `Bulk created ${created.length} rates`
+		},
+		request: { method: req.method, path: req.originalUrl },
+		status: 'success'
+	})
 
 	res.status(201).json({
 		success: true,
@@ -1225,6 +1512,31 @@ export const bulkUpdateByDates = asyncHandler(async (req, res) => {
 	const bulkResult = await Rate.bulkUpsert(ratesToUpsert)
 
 	logger.info(`Bulk update: ${bulkResult.upsertedCount} created, ${bulkResult.modifiedCount} updated`)
+
+	// Audit log for bulk rate update
+	await AuditLog.log({
+		actor: getAuditActor(req),
+		module: 'planning',
+		subModule: 'rate',
+		action: 'update',
+		target: {
+			collection: 'rates',
+			documentName: `${cells.length} cells updated`
+		},
+		changes: {
+			after: {
+				cells: cells.slice(0, 10), // Limit to first 10 for readability
+				updateFields: sanitizedUpdate,
+				marketId
+			}
+		},
+		metadata: {
+			batchId: `rate-bulk-${Date.now()}`,
+			notes: `Bulk update: ${bulkResult.upsertedCount || 0} created, ${bulkResult.modifiedCount || 0} modified`
+		},
+		request: { method: req.method, path: req.originalUrl },
+		status: 'success'
+	})
 
 	res.json({
 		success: true,
@@ -2000,6 +2312,32 @@ export const executeAIPricingCommand = asyncHandler(async (req, res) => {
 		totalAffected += affected
 		logger.info(`AI action executed for hotel ${hotelId}: ${action}, affected: ${affected}`)
 	}
+
+	// Audit log for AI pricing command
+	await AuditLog.log({
+		actor: getAuditActor(req),
+		module: 'planning',
+		subModule: 'rate',
+		action: 'update',
+		target: {
+			collection: 'rates',
+			documentName: `AI Command: ${parsedCommand.actions?.[0]?.action || parsedCommand.action || 'unknown'}`
+		},
+		changes: {
+			after: {
+				dateRange: dateRange,
+				actions: actions.map(a => ({ action: a.action, value: a.value, valueType: a.valueType })),
+				rateIds: rateIds?.slice(0, 10), // Limit for readability
+				totalAffected
+			}
+		},
+		metadata: {
+			batchId: `ai-pricing-${Date.now()}`,
+			notes: `AI pricing command: ${actions.length} actions, ${totalAffected} rates affected`
+		},
+		request: { method: req.method, path: req.originalUrl },
+		status: 'success'
+	})
 
 	res.json({
 		success: true,

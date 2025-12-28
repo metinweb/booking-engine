@@ -1,5 +1,14 @@
 <template>
   <div class="space-y-8">
+    <!-- Readonly Notice -->
+    <div v-if="readonly" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 flex items-start gap-3">
+      <span class="material-icons text-blue-500 dark:text-blue-400 mt-0.5">info</span>
+      <div>
+        <h4 class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ $t('hotels.linkedHotel.notice') }}</h4>
+        <p class="text-sm text-blue-600 dark:text-blue-300 mt-1">{{ $t('hotels.linkedHotel.description') }}</p>
+      </div>
+    </div>
+
     <!-- Facility Contacts -->
     <div>
       <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('hotels.contact.title') }}</h3>
@@ -15,9 +24,8 @@
           type="tel"
           icon="phone"
           placeholder="+90 XXX XXX XX XX"
-          :required="true"
-          :rules="[
-            { required: true, message: $t('validation.required') },
+          :disabled="readonly"
+          :rules="readonly ? [] : [
             { phone: true, message: $t('validation.phone') }
           ]"
           @validation-change="({ field, error }) => handleFieldValidation(field || 'contact.phone', error)"
@@ -31,6 +39,7 @@
           type="tel"
           icon="support_agent"
           placeholder="+90 XXX XXX XX XX"
+          :disabled="readonly"
         />
 
         <!-- Email -->
@@ -42,9 +51,8 @@
           type="email"
           icon="email"
           placeholder="info@hotel.com"
-          :required="true"
-          :rules="[
-            { required: true, message: $t('validation.required') },
+          :disabled="readonly"
+          :rules="readonly ? [] : [
             { email: true, message: $t('validation.email') }
           ]"
           @validation-change="({ field, error }) => handleFieldValidation(field || 'contact.email', error)"
@@ -62,6 +70,7 @@
               type="url"
               class="form-input pl-10"
               placeholder="https://www.hotel.com"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -78,6 +87,7 @@
               type="tel"
               class="form-input pl-10"
               placeholder="+90 XXX XXX XX XX"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -101,6 +111,7 @@
               v-model="form.authorizedPerson"
               type="text"
               class="form-input pl-10"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -116,6 +127,7 @@
               v-model="form.authorizedEmail"
               type="email"
               class="form-input pl-10"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -132,6 +144,7 @@
               type="tel"
               class="form-input pl-10"
               placeholder="+90 XXX XXX XX XX"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -157,6 +170,7 @@
             type="url"
             class="form-input"
             placeholder="https://facebook.com/hotel"
+            :disabled="readonly"
           />
         </div>
 
@@ -173,6 +187,7 @@
             type="url"
             class="form-input"
             placeholder="https://instagram.com/hotel"
+            :disabled="readonly"
           />
         </div>
 
@@ -189,6 +204,7 @@
             type="url"
             class="form-input"
             placeholder="https://x.com/hotel"
+            :disabled="readonly"
           />
         </div>
 
@@ -205,6 +221,7 @@
             type="url"
             class="form-input"
             placeholder="https://youtube.com/@hotel"
+            :disabled="readonly"
           />
         </div>
       </div>
@@ -225,6 +242,10 @@ const props = defineProps({
     required: true
   },
   saving: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }

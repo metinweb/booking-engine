@@ -74,6 +74,36 @@ const reorderRoomTypes = async (hotelId, ids) => {
 	}
 }
 
+const importRoomTypesFromBase = async (hotelId, templateCodes) => {
+	try {
+		const response = await apiClient.post(`${BASE_URL}/hotels/${hotelId}/room-types/import-from-base`, { templateCodes })
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Import room types from base failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
+const setBaseRoom = async (hotelId, roomTypeId) => {
+	try {
+		const response = await apiClient.post(`${BASE_URL}/hotels/${hotelId}/room-types/${roomTypeId}/set-base`)
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Set base room failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
+const updateRoomTypePriceAdjustment = async (hotelId, roomTypeId, adjustment) => {
+	try {
+		const response = await apiClient.patch(`${BASE_URL}/hotels/${hotelId}/room-types/${roomTypeId}/adjustment`, { adjustment })
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Update room type price adjustment failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
 // ==================== ROOM TYPE IMAGES ====================
 
 const uploadRoomTypeImage = async (hotelId, roomTypeId, file, caption = null) => {
@@ -147,9 +177,9 @@ const initStandardMealPlans = async () => {
 	}
 }
 
-const getMealPlans = async (hotelId) => {
+const getMealPlans = async (hotelId, params = {}) => {
 	try {
-		const response = await apiClient.get(`${BASE_URL}/hotels/${hotelId}/meal-plans`)
+		const response = await apiClient.get(`${BASE_URL}/hotels/${hotelId}/meal-plans`, { params })
 		return response.data
 	} catch (error) {
 		console.error('Planning Service: Get meal plans failed', error.response?.data || error.message)
@@ -194,6 +224,26 @@ const addStandardMealPlansToHotel = async (hotelId, codes) => {
 		return response.data
 	} catch (error) {
 		console.error('Planning Service: Add standard meal plans failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
+const setBaseMealPlan = async (hotelId, mealPlanId) => {
+	try {
+		const response = await apiClient.post(`${BASE_URL}/hotels/${hotelId}/meal-plans/${mealPlanId}/set-base`)
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Set base meal plan failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
+const updateMealPlanPriceAdjustment = async (hotelId, mealPlanId, adjustment) => {
+	try {
+		const response = await apiClient.patch(`${BASE_URL}/hotels/${hotelId}/meal-plans/${mealPlanId}/adjustment`, { adjustment })
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Update meal plan price adjustment failed', error.response?.data || error.message)
 		throw error
 	}
 }
@@ -627,6 +677,9 @@ export default {
 	deleteRoomType,
 	updateRoomTypeStatus,
 	reorderRoomTypes,
+	importRoomTypesFromBase,
+	setBaseRoom,
+	updateRoomTypePriceAdjustment,
 
 	// Room Type Images
 	uploadRoomTypeImage,
@@ -643,6 +696,8 @@ export default {
 	deleteMealPlan,
 	addStandardMealPlansToHotel,
 	getAvailableStandardMealPlans,
+	setBaseMealPlan,
+	updateMealPlanPriceAdjustment,
 
 	// Markets
 	getMarkets,

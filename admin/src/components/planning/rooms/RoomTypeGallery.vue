@@ -56,7 +56,7 @@
     <div v-if="images.length > 0">
       <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('planning.roomTypes.gallery.reorderHelp') }}</p>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
         <div
           v-for="(image, index) in images"
           :key="image._id"

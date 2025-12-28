@@ -110,12 +110,14 @@ import { computed } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
+import { usePartnerStore } from '@/stores/partner'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const uiStore = useUIStore()
+const partnerStore = usePartnerStore()
 const { t } = useI18n()
 
 // Emit
@@ -132,6 +134,8 @@ const currentModuleIcon = computed(() => {
     '/dashboard': 'dashboard',
     '/partners': 'business',
     '/admin/regions': 'map',
+    '/admin/hotel-base': 'domain',
+    '/admin/audit-logs': 'history',
     '/agencies': 'groups',
     '/site-management': 'language',
     '/hotels': 'hotel',
@@ -162,29 +166,26 @@ const mainSection = computed(() => {
     { name: 'dashboard', to: '/dashboard', icon: 'dashboard', label: t('nav.dashboard') }
   ]
 
-  // Only platform admin can see partners
-  if (authStore.isPlatformAdmin) {
+  // Determine effective view mode:
+  // - Platform admin with no partner selected -> Admin view
+  // - Platform admin with partner selected -> Partner view (as if logged in as that partner)
+  // - Partner user -> Partner view
+  const isAdminView = authStore.isPlatformAdmin && !partnerStore.hasSelectedPartner
+  const isPartnerView = authStore.accountType === 'partner' || (authStore.isPlatformAdmin && partnerStore.hasSelectedPartner)
+
+  // Admin-only menu items (visible only when in admin view)
+  if (isAdminView) {
     items.push({ name: 'partners', to: '/partners', icon: 'business', label: t('nav.partners') })
     items.push({ name: 'region-management', to: '/admin/regions', icon: 'map', label: t('nav.regionManagement') })
+    items.push({ name: 'hotel-base', to: '/admin/hotel-base', icon: 'domain', label: t('nav.hotelBase') })
+    items.push({ name: 'audit-logs', to: '/admin/audit-logs', icon: 'history', label: t('nav.auditLogs') })
   }
 
-  // Partners and platform admins can see agencies
-  if (authStore.isPlatformAdmin || authStore.accountType === 'partner') {
+  // Partner menu items (visible when in partner view)
+  if (isPartnerView) {
     items.push({ name: 'agencies', to: '/agencies', icon: 'groups', label: t('nav.agencies') })
-  }
-
-  // Partners and platform admins can see site management
-  if (authStore.isPlatformAdmin || authStore.accountType === 'partner') {
     items.push({ name: 'site-management', to: '/site-management/settings', icon: 'language', label: t('nav.siteManagement') })
-  }
-
-  // Partners and platform admins can see hotels
-  if (authStore.isPlatformAdmin || authStore.accountType === 'partner') {
     items.push({ name: 'hotels', to: '/hotels', icon: 'hotel', label: t('nav.hotels') })
-  }
-
-  // Partners and platform admins can see planning
-  if (authStore.isPlatformAdmin || authStore.accountType === 'partner') {
     items.push({ name: 'planning', to: '/planning', icon: 'event_note', label: t('nav.planning') })
   }
 

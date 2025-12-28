@@ -1,14 +1,18 @@
 <template>
   <div>
     <RouterView />
+    <!-- Development: Missing translation keys panel -->
+    <MissingKeysPanel v-if="isDev" />
   </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import MissingKeysPanel from '@/components/dev/MissingKeysPanel.vue'
 
 const authStore = useAuthStore()
+const isDev = import.meta.env.DEV
 
 onMounted(async () => {
   // Check if user is already authenticated on app load

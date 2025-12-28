@@ -9,6 +9,7 @@
         v-model:country-code="location.countryCode"
         v-model:city-id="location.cityId"
         v-model:region-ids="location.regionIds"
+        :disabled="readonly"
         @city-selected="handleCitySelected"
       />
     </div>
@@ -30,13 +31,14 @@
             type="text"
             class="form-input pl-10 pr-20"
             :placeholder="$t('hotels.address.searchLocation')"
+            :disabled="readonly"
             @keydown.enter.prevent="searchAddress"
           />
           <button
             type="button"
             @click="searchAddress"
             class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 transition-colors"
-            :disabled="searching"
+            :disabled="searching || readonly"
           >
             <span v-if="searching" class="material-icons text-sm animate-spin">sync</span>
             <span v-else>{{ $t('common.search') }}</span>
@@ -49,9 +51,9 @@
         <div class="h-96 relative" ref="mapContainer">
           <div id="hotel-map" class="w-full h-full z-0"></div>
 
-          <!-- Map overlay instructions -->
+          <!-- Map overlay instructions (hidden in readonly mode) -->
           <div
-            v-if="!form.coordinates.lat || !form.coordinates.lng"
+            v-if="!readonly && (!form.coordinates.lat || !form.coordinates.lng)"
             class="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none z-10"
           >
             <div class="bg-white dark:bg-slate-800 rounded-lg px-4 py-3 shadow-lg text-center">
@@ -68,8 +70,8 @@
             <button
               type="button"
               @click="getCurrentLocation"
-              class="flex items-center gap-1 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
-              :disabled="gettingLocation"
+              class="flex items-center gap-1 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="gettingLocation || readonly"
             >
               <span class="material-icons text-lg" :class="{ 'animate-pulse': gettingLocation }">my_location</span>
               {{ $t('hotels.address.currentLocation') }}
@@ -104,6 +106,7 @@
             type="text"
             class="form-input pl-10"
             :placeholder="$t('hotels.address.streetPlaceholder')"
+            :disabled="readonly"
           />
         </div>
       </div>
@@ -128,6 +131,7 @@
               step="any"
               class="form-input pl-10"
               placeholder="41.0082"
+              :disabled="readonly"
               @change="updateMarkerFromInput"
             />
           </div>
@@ -146,6 +150,7 @@
               step="any"
               class="form-input pl-10"
               placeholder="28.9784"
+              :disabled="readonly"
               @change="updateMarkerFromInput"
             />
           </div>
@@ -163,6 +168,7 @@
               type="text"
               class="form-input pl-10"
               :placeholder="$t('hotels.address.formattedAddress')"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -202,6 +208,10 @@ const props = defineProps({
     required: true
   },
   saving: {
+    type: Boolean,
+    default: false
+  },
+  readonly: {
     type: Boolean,
     default: false
   }
@@ -304,8 +314,9 @@ const initMap = () => {
     addMarker(form.value.coordinates.lat, form.value.coordinates.lng)
   }
 
-  // Click event to place marker
+  // Click event to place marker (disabled in readonly mode)
   map.on('click', (e) => {
+    if (props.readonly) return
     const { lat, lng } = e.latlng
     setLocation(lat, lng, true)
   })
@@ -318,11 +329,12 @@ const addMarker = (lat, lng) => {
   } else {
     marker = L.marker([lat, lng], {
       icon: createMarkerIcon(),
-      draggable: true
+      draggable: !props.readonly
     }).addTo(map)
 
-    // Marker drag event
+    // Marker drag event (disabled in readonly mode)
     marker.on('dragend', (e) => {
+      if (props.readonly) return
       const { lat, lng } = e.target.getLatLng()
       setLocation(lat, lng, true)
     })
@@ -389,7 +401,10 @@ const centerOnMarker = () => {
 
 // Watch for hotel changes and update form
 watch(() => props.hotel, (newHotel) => {
-  if (newHotel?.address) {
+  if (!newHotel) return
+
+  // Update address form
+  if (newHotel.address) {
     form.value = {
       street: newHotel.address.street || '',
       coordinates: {
@@ -399,15 +414,6 @@ watch(() => props.hotel, (newHotel) => {
       formattedAddress: newHotel.address.formattedAddress || ''
     }
 
-    // Update hierarchical location
-    if (newHotel.location) {
-      location.value = {
-        countryCode: newHotel.location.countryCode || '',
-        cityId: newHotel.location.city || '',
-        regionIds: newHotel.location.tourismRegions || []
-      }
-    }
-
     // Update map if it exists
     nextTick(() => {
       if (map && form.value.coordinates.lat && form.value.coordinates.lng) {
@@ -415,6 +421,15 @@ watch(() => props.hotel, (newHotel) => {
         map.setView([form.value.coordinates.lat, form.value.coordinates.lng], 16)
       }
     })
+  }
+
+  // Update hierarchical location (separate from address check)
+  if (newHotel.location) {
+    location.value = {
+      countryCode: newHotel.location.countryCode || '',
+      cityId: newHotel.location.city?._id || newHotel.location.city || '',
+      regionIds: (newHotel.location.tourismRegions || []).map(r => r?._id || r)
+    }
   }
 }, { immediate: true, deep: true })
 

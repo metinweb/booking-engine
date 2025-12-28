@@ -1,7 +1,43 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-6">
+    <!-- Override Toggle for Linked Hotels -->
+    <div
+      v-if="showOverrideToggle"
+      class="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="material-icons text-purple-600 dark:text-purple-400">tune</span>
+          <div>
+            <h4 class="font-medium text-purple-800 dark:text-purple-300">{{ $t('hotels.policies.overrideSettings') }}</h4>
+            <p class="text-sm text-purple-600 dark:text-purple-400">
+              {{ useBaseDefaults ? $t('hotels.policies.usingBaseDefaults') : $t('hotels.policies.usingCustomSettings') }}
+            </p>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            :checked="!useBaseDefaults"
+            @change="toggleOverride"
+            class="sr-only peer"
+          />
+          <div class="w-11 h-6 bg-gray-200 peer-focus:ring-2 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[3px] after:left-[3px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Readonly Notice -->
+    <div
+      v-if="readonly"
+      class="p-3 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-lg flex items-center gap-2"
+    >
+      <span class="material-icons text-gray-400">info</span>
+      <span class="text-sm text-gray-600 dark:text-slate-400">{{ $t('hotels.policies.readonlyNotice') }}</span>
+    </div>
+
     <!-- Top Save Button -->
-    <div class="flex justify-end">
+    <div class="flex justify-end" v-if="!readonly">
       <button type="submit" class="btn-primary" :disabled="saving">
         <span v-if="saving" class="flex items-center">
           <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -27,6 +63,7 @@
             v-model="form.checkIn"
             type="time"
             class="form-input pl-9 text-sm"
+            :disabled="readonly"
           />
         </div>
       </div>
@@ -42,6 +79,7 @@
             v-model="form.checkOut"
             type="time"
             class="form-input pl-9 text-sm"
+            :disabled="readonly"
           />
         </div>
       </div>
@@ -53,7 +91,7 @@
           <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             <span class="material-icons text-sm">child_friendly</span>
           </span>
-          <select v-model.number="form.maxBabyAge" class="form-input pl-9 text-sm">
+          <select v-model.number="form.maxBabyAge" class="form-input pl-9 text-sm" :disabled="readonly">
             <option v-for="n in 6" :key="n-1" :value="n-1">{{ n-1 }} {{ $t('hotels.policies.years') }}</option>
           </select>
         </div>
@@ -66,7 +104,7 @@
           <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
             <span class="material-icons text-sm">face</span>
           </span>
-          <select v-model.number="form.maxChildAge" class="form-input pl-9 text-sm">
+          <select v-model.number="form.maxChildAge" class="form-input pl-9 text-sm" :disabled="readonly">
             <option v-for="n in 18" :key="n" :value="n">{{ n }} {{ $t('hotels.policies.years') }}</option>
           </select>
         </div>
@@ -82,6 +120,7 @@
           <h3 class="font-semibold text-gray-800 dark:text-white">{{ $t('hotels.policies.cancellation') }}</h3>
         </div>
         <button
+          v-if="!readonly"
           type="button"
           @click="addRule"
           class="flex items-center gap-1 px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
@@ -110,9 +149,10 @@
             min="1"
             max="30"
             class="w-16 px-2 py-1 text-sm text-center border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700"
+            :disabled="readonly"
           />
-          <label class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" v-model="form.freeCancellation.enabled" class="sr-only peer" />
+          <label class="relative inline-flex items-center cursor-pointer" :class="{ 'opacity-50 pointer-events-none': readonly }">
+            <input type="checkbox" v-model="form.freeCancellation.enabled" class="sr-only peer" :disabled="readonly" />
             <div class="w-9 h-5 bg-gray-200 peer-focus:ring-2 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
           </label>
         </div>
@@ -149,6 +189,7 @@
               min="0"
               max="365"
               class="w-16 px-2 py-1.5 text-sm text-center border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700"
+              :disabled="readonly"
               @change="sortRulesDebounced"
             />
             <span class="text-sm text-gray-600 dark:text-slate-400">{{ $t('hotels.policies.daysPlus') }}</span>
@@ -165,6 +206,7 @@
               min="0"
               max="100"
               class="w-16 px-2 py-1.5 text-sm text-center border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700"
+              :disabled="readonly"
             />
             <span class="text-sm text-gray-600 dark:text-slate-400">% {{ $t('hotels.policies.refund') }}</span>
           </div>
@@ -185,6 +227,7 @@
 
           <!-- Delete -->
           <button
+            v-if="!readonly"
             type="button"
             @click="removeRule(index)"
             class="opacity-0 group-hover:opacity-100 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 p-1 rounded transition-all"
@@ -195,7 +238,7 @@
       </div>
 
       <!-- Quick Add Presets -->
-      <div class="px-4 py-3 bg-gray-50 dark:bg-slate-700/30 border-t border-gray-200 dark:border-slate-600">
+      <div v-if="!readonly" class="px-4 py-3 bg-gray-50 dark:bg-slate-700/30 border-t border-gray-200 dark:border-slate-600">
         <p class="text-xs text-gray-500 dark:text-slate-400 mb-2">{{ $t('hotels.policies.quickAdd') }}:</p>
         <div class="flex flex-wrap gap-2">
           <button
@@ -249,6 +292,7 @@
             :label="$t('hotels.policies.childPolicy')"
             type="textarea"
             :rows="2"
+            :readonly="readonly"
           />
         </div>
 
@@ -260,6 +304,7 @@
             :label="$t('hotels.policies.petPolicy')"
             type="textarea"
             :rows="2"
+            :readonly="readonly"
           />
         </div>
 
@@ -271,13 +316,14 @@
             :label="$t('hotels.policies.additionalInfo')"
             type="textarea"
             :rows="2"
+            :readonly="readonly"
           />
         </div>
       </div>
     </details>
 
     <!-- Submit Button -->
-    <div class="flex justify-end">
+    <div class="flex justify-end" v-if="!readonly">
       <button type="submit" class="btn-primary" :disabled="saving">
         <span v-if="saving" class="flex items-center">
           <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -307,10 +353,27 @@ const props = defineProps({
   saving: {
     type: Boolean,
     default: false
+  },
+  readonly: {
+    type: Boolean,
+    default: false
+  },
+  showOverrideToggle: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['save'])
+const emit = defineEmits(['save', 'toggle-override'])
+
+// Track useBaseDefaults state
+const useBaseDefaults = ref(true)
+
+// Toggle override setting
+const toggleOverride = () => {
+  useBaseDefaults.value = !useBaseDefaults.value
+  emit('toggle-override', useBaseDefaults.value)
+}
 
 // All supported languages (20 languages for B2B)
 const SUPPORTED_LANGUAGES = ['tr', 'en', 'ru', 'el', 'de', 'es', 'it', 'fr', 'ro', 'bg', 'pt', 'da', 'zh', 'ar', 'fa', 'he', 'sq', 'uk', 'pl', 'az']
@@ -357,6 +420,8 @@ watch(() => props.hotel, (newHotel) => {
         daysBeforeCheckIn: newHotel.policies.freeCancellation?.daysBeforeCheckIn || 1
       }
     }
+    // Sync useBaseDefaults
+    useBaseDefaults.value = newHotel.policies.useBaseDefaults ?? true
   }
 }, { immediate: true, deep: true })
 

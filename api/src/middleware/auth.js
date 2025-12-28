@@ -75,3 +75,11 @@ export const requireAccountType = (...accountTypes) => {
     next()
   }
 }
+
+// Require platform admin (SuperAdmin)
+export const requirePlatformAdmin = (req, res, next) => {
+  if (req.user.accountType !== 'platform') {
+    throw new UnauthorizedError('FORBIDDEN')
+  }
+  next()
+}

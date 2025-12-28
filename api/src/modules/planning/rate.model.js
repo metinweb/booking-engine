@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import auditPlugin from '../../plugins/auditPlugin.js'
 
 /**
  * Rate Model (Daily Rate)
@@ -440,5 +441,12 @@ rateSchema.statics.createForDateRange = async function(baseData, startDate, endD
 
 	return this.bulkUpsert(rates)
 }
+
+// Apply audit plugin
+rateSchema.plugin(auditPlugin, {
+	module: 'planning',
+	subModule: 'rate',
+	nameField: 'date'
+})
 
 export default mongoose.model('Rate', rateSchema)

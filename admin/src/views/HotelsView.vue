@@ -365,12 +365,21 @@
                       </div>
                     </div>
                     <div class="ml-4">
-                      <router-link
-                        :to="`/hotels/${hotel._id}`"
-                        class="text-sm font-medium text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400"
-                      >
-                        {{ getHotelName(hotel) }}
-                      </router-link>
+                      <div class="flex items-center gap-2">
+                        <router-link
+                          :to="`/hotels/${hotel._id}`"
+                          class="text-sm font-medium text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400"
+                        >
+                          {{ getHotelName(hotel) }}
+                        </router-link>
+                        <span
+                          v-if="hotel.hotelType === 'linked'"
+                          class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                        >
+                          <span class="material-icons text-xs mr-0.5">link</span>
+                          HotelBase
+                        </span>
+                      </div>
                       <div class="flex items-center gap-2 mt-1">
                         <span v-if="hotel.featured" class="inline-flex items-center text-xs text-orange-600">
                           <span class="material-icons text-sm mr-0.5">star</span>
@@ -491,12 +500,21 @@
             </div>
             <!-- Card Content -->
             <div class="p-4">
-              <router-link
-                :to="`/hotels/${hotel._id}`"
-                class="text-lg font-semibold text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 block truncate"
-              >
-                {{ getHotelName(hotel) }}
-              </router-link>
+              <div class="flex items-center gap-2">
+                <router-link
+                  :to="`/hotels/${hotel._id}`"
+                  class="text-lg font-semibold text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 truncate"
+                >
+                  {{ getHotelName(hotel) }}
+                </router-link>
+                <span
+                  v-if="hotel.hotelType === 'linked'"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 flex-shrink-0"
+                >
+                  <span class="material-icons text-xs mr-0.5">link</span>
+                  HotelBase
+                </span>
+              </div>
               <div class="flex items-center gap-2 mt-1">
                 <span class="material-icons text-sm text-gray-400">location_on</span>
                 <span class="text-sm text-gray-500 dark:text-slate-400 truncate">

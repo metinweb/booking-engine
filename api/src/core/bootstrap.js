@@ -2,11 +2,37 @@ import mongoose from 'mongoose'
 import Partner from '../modules/partner/partner.model.js'
 import Agency from '../modules/agency/agency.model.js'
 import User from '../modules/user/user.model.js'
+import Hotel from '../modules/hotel/hotel.model.js'
 import logger from './logger.js'
+
+/**
+ * Clean up stale/obsolete indexes from collections
+ */
+async function cleanupStaleIndexes() {
+  try {
+    const hotelCollection = mongoose.connection.collection('hotels')
+    const indexes = await hotelCollection.indexes()
+
+    // Find and drop stale seo.slug index
+    const staleIndex = indexes.find(idx => idx.name === 'partner_1_seo.slug_1')
+    if (staleIndex) {
+      await hotelCollection.dropIndex('partner_1_seo.slug_1')
+      logger.info('✓ Dropped stale index: partner_1_seo.slug_1')
+    }
+  } catch (error) {
+    // Ignore errors - collection might not exist yet
+    if (!error.message.includes('ns not found')) {
+      logger.warn(`Index cleanup warning: ${error.message}`)
+    }
+  }
+}
 
 export async function bootstrap() {
   try {
     logger.info('🔧 Running bootstrap...')
+
+    // Clean up stale indexes
+    await cleanupStaleIndexes()
 
     // Platform admin user kontrolü
     const platformAdmin = await User.findOne({

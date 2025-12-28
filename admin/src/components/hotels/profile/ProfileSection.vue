@@ -50,6 +50,7 @@
                   type="checkbox"
                   :checked="isFeatureSelected(feature.value)"
                   @change="toggleFeature(feature.value)"
+                  :disabled="readonly"
                   class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                 />
                 <span class="text-sm text-gray-700 dark:text-slate-300 truncate" :title="feature.label">
@@ -69,6 +70,7 @@
               :languages="languages"
               :label="editorLabel || $t('hotels.profile.description')"
               :show-translate="true"
+              :disabled="readonly"
             />
           </div>
         </div>
@@ -117,6 +119,10 @@ const props = defineProps({
   editorLabel: {
     type: String,
     default: ''
+  },
+  readonly: {
+    type: Boolean,
+    default: false
   }
 })
 

@@ -281,6 +281,9 @@ const getLanguageName = (code) => {
   return availableLanguages.find(l => l.code === code)?.name || code.toUpperCase()
 }
 
+// Generate unique ID for this editor instance to avoid duplicate extension warnings
+const editorId = `editor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
 // TipTap Editor
 const editor = useEditor({
   extensions: [
@@ -289,8 +292,8 @@ const editor = useEditor({
         levels: [2, 3]
       }
     }),
-    Underline,
-    Link.configure({
+    Underline.extend({ name: `underline-${editorId}` }),
+    Link.extend({ name: `link-${editorId}` }).configure({
       openOnClick: false,
       HTMLAttributes: {
         class: 'text-purple-600 hover:text-purple-800 underline'

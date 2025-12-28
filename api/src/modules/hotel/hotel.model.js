@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import auditPlugin from '../../plugins/auditPlugin.js'
 
 /**
  * Hotel Model
@@ -26,11 +27,33 @@ const cancellationRuleSchema = new mongoose.Schema({
 }, { _id: false })
 
 const hotelSchema = new mongoose.Schema({
-	// Partner (Multi-tenant)
+	// ===== OTEL TİPİ =====
+	// base: Platform otel havuzu (SuperAdmin yönetir, partner: null)
+	// partner: Partner'ın kendi oteli (tam kontrol)
+	// linked: HotelBase'e bağlı partner oteli (bazı alanlar readonly)
+	hotelType: {
+		type: String,
+		enum: {
+			values: ['base', 'partner', 'linked'],
+			message: 'INVALID_HOTEL_TYPE'
+		},
+		default: 'partner',
+		index: true
+	},
+
+	// Partner (Multi-tenant) - base için null, partner/linked için zorunlu
 	partner: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Partner',
-		required: [true, 'REQUIRED_PARTNER'],
+		index: true
+		// Not required - base hotels have no partner
+	},
+
+	// HotelBase referansı - sadece linked tipi için
+	hotelBase: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'Hotel',
+		default: null,
 		index: true
 	},
 
@@ -202,6 +225,9 @@ const hotelSchema = new mongoose.Schema({
 
 	// Policies
 	policies: {
+		// linked oteller için: true ise base otel politikalarını kullan
+		useBaseDefaults: { type: Boolean, default: true },
+
 		// Time settings
 		checkIn: { type: String, default: '14:00' },
 		checkOut: { type: String, default: '12:00' },
@@ -434,6 +460,75 @@ const hotelSchema = new mongoose.Schema({
 		}
 	},
 
+	// ===== ROOM TEMPLATES (Only for base hotels) =====
+	// Room templates are used by base hotels to define room information
+	// Partners can import these templates when creating RoomTypes
+	roomTemplates: [{
+		_id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+		code: {
+			type: String,
+			required: true,
+			uppercase: true,
+			trim: true,
+			maxlength: 10
+		},
+		name: multiLangString(),
+		description: multiLangString(),
+		images: [{
+			_id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+			url: { type: String, required: true },
+			caption: multiLangString(),
+			order: { type: Number, default: 0 },
+			isMain: { type: Boolean, default: false }
+		}],
+		amenities: [{
+			type: String,
+			enum: [
+				// Klima & Isıtma
+				'airConditioning', 'heating', 'fan', 'centralHeating',
+				// Eğlence
+				'tv', 'satelliteTV', 'cableTV', 'smartTV', 'radio',
+				// Bağlantı
+				'wifi', 'telephone', 'usbPorts', 'laptop',
+				// Minibar & Mutfak
+				'minibar', 'refrigerator', 'kettle', 'coffeeMachine',
+				'kitchen', 'kitchenette', 'microwave', 'toaster', 'dishwasher', 'oven', 'stove',
+				'diningArea', 'diningTable',
+				// Banyo
+				'privateBathroom', 'sharedBathroom', 'bathtub', 'shower',
+				'rainShower', 'jacuzzi', 'hairdryer', 'toiletries', 'bathrobes', 'slippers', 'bidet',
+				// Manzara
+				'seaView', 'poolView', 'gardenView', 'cityView', 'mountainView', 'landmarkView',
+				// Dış Mekan
+				'balcony', 'terrace', 'privatePool', 'privateGarden', 'patio',
+				// Konfor
+				'safe', 'desk', 'sofa', 'wardrobe', 'ironingEquipment', 'soundproofing',
+				'carpeted', 'parquet', 'livingRoom', 'separateLivingRoom',
+				// Servis
+				'roomService', 'dailyHousekeeping', 'laundryService', 'turndownService',
+				// Erişilebilirlik
+				'wheelchairAccessible', 'connectedRooms',
+				// Özel
+				'smokingAllowed', 'nonSmoking', 'petFriendly', 'hypoallergenic'
+			]
+		}],
+		size: { type: Number, min: 0 }, // m²
+		bedConfiguration: [{
+			type: {
+				type: String,
+				enum: ['single', 'double', 'queen', 'king', 'twin', 'sofa', 'bunk', 'extra']
+			},
+			count: { type: Number, min: 1, max: 10, default: 1 }
+		}],
+		occupancy: {
+			maxAdults: { type: Number, min: 1, max: 10, default: 2 },
+			maxChildren: { type: Number, min: 0, max: 6, default: 2 },
+			maxInfants: { type: Number, min: 0, max: 2, default: 1 },
+			totalMaxGuests: { type: Number, min: 1, max: 12, default: 4 }
+		},
+		order: { type: Number, default: 0 }
+	}],
+
 	// Display settings
 	featured: { type: Boolean, default: false },
 	displayOrder: { type: Number, default: 0 },
@@ -443,6 +538,16 @@ const hotelSchema = new mongoose.Schema({
 		totalBookings: { type: Number, default: 0 },
 		averageRating: { type: Number, default: 0 },
 		reviewCount: { type: Number, default: 0 }
+	},
+
+	// Audit fields
+	createdBy: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
+	},
+	updatedBy: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'User'
 	}
 
 }, {
@@ -455,6 +560,10 @@ const hotelSchema = new mongoose.Schema({
 hotelSchema.index({ partner: 1, status: 1 })
 hotelSchema.index({ partner: 1, 'address.city': 1 })
 hotelSchema.index({ partner: 1, slug: 1 }, { unique: true, sparse: true })
+// HotelBase indexes
+hotelSchema.index({ hotelType: 1, status: 1 })
+hotelSchema.index({ hotelType: 1, partner: 1 })
+hotelSchema.index({ hotelBase: 1, partner: 1 })
 hotelSchema.index({ tags: 1 })
 hotelSchema.index({ 'location.countryCode': 1 })
 hotelSchema.index({ 'location.city': 1 })
@@ -493,6 +602,64 @@ hotelSchema.methods.deactivate = async function() {
 hotelSchema.methods.getMainImage = function() {
 	const mainImage = this.images.find(img => img.isMain)
 	return mainImage || this.images[0] || null
+}
+
+// Resolve full hotel data for linked hotels (merge base data with partner settings)
+hotelSchema.methods.resolveData = async function() {
+	// For base or partner hotels, return as-is
+	if (this.hotelType !== 'linked' || !this.hotelBase) {
+		return this.toObject()
+	}
+
+	// For linked hotels, merge base data with partner settings
+	const Hotel = mongoose.model('Hotel')
+	const baseHotel = await Hotel.findById(this.hotelBase)
+		.populate('location.city', 'name countryCode')
+		.populate('location.district', 'name')
+		.populate('location.tourismRegions', 'name')
+		.populate('tags', 'name slug')
+
+	if (!baseHotel) {
+		// Base hotel not found, return as-is
+		return this.toObject()
+	}
+
+	const resolved = this.toObject()
+
+	// Override with base hotel data (readonly fields)
+	resolved.name = baseHotel.name
+	resolved.description = baseHotel.description
+	resolved.logo = baseHotel.logo
+	resolved.stars = baseHotel.stars
+	resolved.type = baseHotel.type
+	resolved.category = baseHotel.category
+	resolved.address = baseHotel.address
+	resolved.location = baseHotel.location
+	resolved.contact = baseHotel.contact
+	resolved.images = baseHotel.images
+	resolved.amenities = baseHotel.amenities
+	resolved.roomConfig = baseHotel.roomConfig
+	resolved.profile = baseHotel.profile
+	resolved.tags = baseHotel.tags
+	resolved.roomTemplates = baseHotel.roomTemplates
+
+	// Policies: use base defaults or partner overrides
+	// BUT child age settings are ALWAYS partner-controlled
+	if (this.policies.useBaseDefaults) {
+		resolved.policies = {
+			...baseHotel.policies,
+			useBaseDefaults: true, // Keep this flag
+			// Child ages are always from partner's own settings
+			maxBabyAge: this.policies.maxBabyAge,
+			maxChildAge: this.policies.maxChildAge
+		}
+	}
+
+	// Add metadata
+	resolved._baseHotel = baseHotel.toObject()
+	resolved._isLinked = true
+
+	return resolved
 }
 
 // Calculate cancellation refund based on rules
@@ -549,6 +716,53 @@ hotelSchema.statics.findB2B = function(partnerId) {
 	})
 }
 
+// ===== HotelBase Static Methods =====
+
+// Find all base hotels (platform hotel pool)
+hotelSchema.statics.findBaseHotels = function(options = {}) {
+	const query = { hotelType: 'base' }
+	if (options.status) query.status = options.status
+	return this.find(query).sort({ name: 1 })
+}
+
+// Find available base hotels for partner selection
+hotelSchema.statics.findAvailableBases = function(options = {}) {
+	const query = {
+		hotelType: 'base',
+		status: 'active'
+	}
+	if (options.city) query['location.city'] = options.city
+	if (options.stars) query.stars = options.stars
+	return this.find(query).sort({ stars: -1, name: 1 })
+}
+
+// Find linked hotels by base hotel ID
+hotelSchema.statics.findLinkedHotels = function(baseHotelId) {
+	return this.find({
+		hotelType: 'linked',
+		hotelBase: baseHotelId
+	}).populate('partner', 'companyName')
+}
+
+// Find partner's linked hotel for a specific base
+hotelSchema.statics.findPartnerLinkedHotel = function(partnerId, baseHotelId) {
+	return this.findOne({
+		partner: partnerId,
+		hotelBase: baseHotelId,
+		hotelType: 'linked'
+	})
+}
+
+// Check if partner already has this base hotel linked
+hotelSchema.statics.isBaseAlreadyLinked = async function(partnerId, baseHotelId) {
+	const existing = await this.findOne({
+		partner: partnerId,
+		hotelBase: baseHotelId,
+		hotelType: 'linked'
+	})
+	return !!existing
+}
+
 // Helper to generate slug from text
 const generateSlug = (text) => {
 	if (!text) return ''
@@ -573,8 +787,26 @@ const generateSlug = (text) => {
 		.trim()
 }
 
-// Pre-save middleware
-hotelSchema.pre('save', function(next) {
+// Pre-save middleware (async for database queries)
+hotelSchema.pre('save', async function() {
+	// ===== HotelType Validation =====
+	// base hotels should not have partner
+	if (this.hotelType === 'base' && this.partner) {
+		throw new Error('Base hotels cannot have a partner')
+	}
+	// partner and linked hotels must have partner
+	if ((this.hotelType === 'partner' || this.hotelType === 'linked') && !this.partner) {
+		throw new Error('Partner and linked hotels must have a partner')
+	}
+	// linked hotels must have hotelBase reference
+	if (this.hotelType === 'linked' && !this.hotelBase) {
+		throw new Error('Linked hotels must have a hotelBase reference')
+	}
+	// partner hotels should not have hotelBase
+	if (this.hotelType === 'partner' && this.hotelBase) {
+		throw new Error('Partner hotels cannot have a hotelBase reference')
+	}
+
 	// Clean up null coordinates to prevent any issues
 	if (this.address && this.address.coordinates) {
 		if (this.address.coordinates.lat === null || this.address.coordinates.lat === undefined ||
@@ -584,9 +816,25 @@ hotelSchema.pre('save', function(next) {
 		}
 	}
 
-	// Auto-generate slug from Turkish name if not set
-	if (!this.slug && this.name.tr) {
-		this.slug = generateSlug(this.name.tr)
+	// Auto-generate slug from name if not set
+	// name can be string (for all hotel types now) or object with .tr (legacy)
+	if (!this.slug && this.name) {
+		const nameText = typeof this.name === 'string' ? this.name : (this.name.tr || this.name)
+		this.slug = generateSlug(nameText)
+	}
+
+	// Ensure slug uniqueness - add random suffix if duplicate exists
+	if (this.slug && this.isNew) {
+		const existingHotel = await mongoose.model('Hotel').findOne({
+			partner: this.partner,
+			slug: this.slug,
+			_id: { $ne: this._id }
+		})
+		if (existingHotel) {
+			// Append random 4-char suffix
+			const suffix = Math.random().toString(36).substring(2, 6)
+			this.slug = `${this.slug}-${suffix}`
+		}
 	}
 
 	// Ensure only one main image
@@ -613,10 +861,78 @@ hotelSchema.pre('save', function(next) {
 		this.policies.cancellationRules.sort((a, b) => b.daysBeforeCheckIn - a.daysBeforeCheckIn)
 	}
 
-	next()
+	// Validate roomTemplates - only for base hotels
+	if (this.hotelType === 'base' && this.roomTemplates && this.roomTemplates.length > 0) {
+		// Check for duplicate codes
+		const codes = this.roomTemplates.map(rt => rt.code.toUpperCase())
+		const uniqueCodes = new Set(codes)
+		if (codes.length !== uniqueCodes.size) {
+			throw new Error('Room template codes must be unique within a hotel')
+		}
+
+		// Sort by order and ensure main image consistency
+		this.roomTemplates.sort((a, b) => a.order - b.order)
+
+		// Ensure each room template has one main image
+		this.roomTemplates.forEach(rt => {
+			if (rt.images && rt.images.length > 0) {
+				const mainImages = rt.images.filter(img => img.isMain)
+				if (mainImages.length > 1) {
+					let foundFirst = false
+					rt.images.forEach(img => {
+						if (img.isMain) {
+							if (foundFirst) img.isMain = false
+							else foundFirst = true
+						}
+					})
+				} else if (mainImages.length === 0) {
+					rt.images[0].isMain = true
+				}
+				// Sort images by order
+				rt.images.sort((a, b) => a.order - b.order)
+			}
+		})
+	}
 })
 
 // Export supported languages for use in other modules
 export const HOTEL_LANGUAGES = SUPPORTED_LANGUAGES
+
+// Export room amenities for use in other modules
+export const ROOM_AMENITIES = [
+	// Klima & Isıtma
+	'airConditioning', 'heating', 'fan', 'centralHeating',
+	// Eğlence
+	'tv', 'satelliteTV', 'cableTV', 'smartTV', 'radio',
+	// Bağlantı
+	'wifi', 'telephone', 'usbPorts', 'laptop',
+	// Minibar & Mutfak
+	'minibar', 'refrigerator', 'kettle', 'coffeeMachine',
+	'kitchenette', 'microwave', 'toaster',
+	// Banyo
+	'privateBathroom', 'sharedBathroom', 'bathtub', 'shower',
+	'rainShower', 'jacuzzi', 'hairdryer', 'toiletries', 'bathrobes', 'slippers',
+	// Manzara
+	'seaView', 'poolView', 'gardenView', 'cityView', 'mountainView', 'landmarkView',
+	// Dış Mekan
+	'balcony', 'terrace', 'privatePool', 'privateGarden',
+	// Konfor
+	'safe', 'desk', 'sofa', 'wardrobe', 'ironingEquipment', 'soundproofing',
+	// Servis
+	'roomService', 'dailyHousekeeping', 'laundryService', 'turndownService',
+	// Erişilebilirlik
+	'wheelchairAccessible', 'connectedRooms',
+	// Özel
+	'smokingAllowed', 'nonSmoking', 'petFriendly', 'hypoallergenic'
+]
+
+// Export bed types for use in other modules
+export const BED_TYPES = ['single', 'double', 'queen', 'king', 'twin', 'sofa', 'bunk', 'extra']
+
+// Audit plugin for tracking changes
+hotelSchema.plugin(auditPlugin, {
+	module: 'hotel',
+	nameField: 'name'
+})
 
 export default mongoose.model('Hotel', hotelSchema)

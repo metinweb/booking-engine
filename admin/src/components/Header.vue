@@ -104,6 +104,24 @@
                   </span>
                   <span class="text-xs text-gray-400">{{ uiStore.darkMode ? '☀️' : '🌙' }}</span>
                 </button>
+
+                <!-- Language Selector -->
+                <div class="px-4 py-2">
+                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">{{ $t('user.language') }}</label>
+                  <div class="flex gap-2">
+                    <button
+                      v-for="lang in languages"
+                      :key="lang.code"
+                      @click="changeLanguage(lang.code)"
+                      class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors"
+                      :class="currentLocale === lang.code
+                        ? 'bg-purple-600 text-white'
+                        : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'"
+                    >
+                      {{ lang.name }}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- Logout -->
@@ -138,7 +156,20 @@ import HotelSelector from '@/components/common/HotelSelector.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+// Language settings
+const languages = [
+  { code: 'en', name: 'English' },
+  { code: 'tr', name: 'Türkçe' }
+]
+
+const currentLocale = computed(() => locale.value)
+
+const changeLanguage = (lang) => {
+  locale.value = lang
+  localStorage.setItem('language', lang)
+}
 
 // Props
 defineProps({

@@ -19,7 +19,7 @@ app.use(i18n)
 window.__vueRouter = router
 app.use(Toast, {
   position: 'bottom-right',
-  timeout: 8000,
+  timeout: 5000,
   closeOnClick: false, // Toast'a tıklayınca bildirime gidilecek
   pauseOnFocusLoss: true,
   pauseOnHover: true,
@@ -31,8 +31,14 @@ app.use(Toast, {
   icon: true,
   rtl: false,
   newestOnTop: true,
-  maxToasts: 5,
-  // Aşağıdan yukarıya doğru stack
+  maxToasts: 1, // Sadece 1 toast göster
+  filterBeforeCreate: (toast, toasts) => {
+    // Aynı mesajlı toast'ları filtrele
+    if (toasts.filter(t => t.content === toast.content).length !== 0) {
+      return false
+    }
+    return toast
+  },
   toastClassName: 'cursor-pointer'
 })
 
