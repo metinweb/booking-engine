@@ -305,6 +305,8 @@
                   <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-slate-300 uppercase w-[60px]">
                     Rel
                   </th>
+                  <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-slate-300 uppercase w-[60px]">
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -392,6 +394,17 @@
                       {{ period.releaseDays }}
                     </span>
                     <span v-else class="text-gray-300 dark:text-slate-600">-</span>
+                  </td>
+
+                  <!-- Edit Button -->
+                  <td class="px-4 py-3 text-center">
+                    <button
+                      @click="openPeriodEdit(period)"
+                      class="p-1.5 text-gray-400 hover:text-purple-600 dark:text-slate-500 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                      :title="$t('common.edit')"
+                    >
+                      <span class="material-icons text-lg">edit</span>
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -483,6 +496,24 @@
       :meal-plans="filteredMealPlans"
       :markets="markets"
     />
+
+    <!-- Period Edit Modal -->
+    <Modal
+      v-model="showPeriodEditModal"
+      :title="$t('planning.pricing.editPeriod')"
+      size="lg"
+    >
+      <PeriodEditForm
+        v-if="editingPeriod"
+        :hotel-id="hotel._id"
+        :period="editingPeriod"
+        :room-types="filteredRoomTypes"
+        :meal-plans="filteredMealPlans"
+        :market="selectedMarket"
+        @saved="handlePeriodEditSaved"
+        @cancel="showPeriodEditModal = false"
+      />
+    </Modal>
   </div>
 </template>
 
@@ -497,6 +528,7 @@ import RateForm from './RateForm.vue'
 import BulkEditModal from './BulkEditModal.vue'
 import AIPricingAssistant from './AIPricingAssistant.vue'
 import PriceQueryModal from './PriceQueryModal.vue'
+import PeriodEditForm from './PeriodEditForm.vue'
 import planningService from '@/services/planningService'
 
 const props = defineProps({
@@ -537,6 +569,8 @@ const deleting = ref(false)
 const bulkEditCells = ref([])
 const showBulkEditModal = ref(false)
 const showPriceQueryModal = ref(false)
+const showPeriodEditModal = ref(false)
+const editingPeriod = ref(null)
 const calendarRef = ref(null)
 
 // Current calendar month - load from localStorage if available
@@ -1012,6 +1046,18 @@ const handleBulkEditSaved = () => {
   showBulkEditModal.value = false
   bulkEditCells.value = []
   fetchRates()
+}
+
+// Period Edit
+const openPeriodEdit = (period) => {
+  editingPeriod.value = period
+  showPeriodEditModal.value = true
+}
+
+const handlePeriodEditSaved = () => {
+  showPeriodEditModal.value = false
+  editingPeriod.value = null
+  fetchPriceList()
 }
 
 const handleAIExecuted = () => {
