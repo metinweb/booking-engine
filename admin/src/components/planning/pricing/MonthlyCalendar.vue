@@ -558,10 +558,15 @@ const inlineEditPrices = reactive({}) // { `${roomTypeId}-${mealPlanId}-${date}`
 const inlineRelativePricing = ref(true) // Use relative pricing in inline edit mode
 const inlineAllowEditCalculated = ref(false) // Allow editing calculated cells
 
-// Base room/meal plan for relative pricing
-const baseRoom = computed(() => props.roomTypes.find(rt => rt.isBaseRoom))
-const baseMealPlan = computed(() => props.mealPlans.find(mp => mp.isBaseMealPlan) || props.mealPlans[0])
-const hasBaseRoom = computed(() => !!baseRoom.value)
+// Base room/meal plan for relative pricing (only if explicitly set)
+const baseRoom = computed(() => props.roomTypes.find(rt => rt.isBaseRoom) || null)
+const baseMealPlan = computed(() => {
+  const found = props.mealPlans.find(mp => mp.isBaseMealPlan)
+  if (found) return found
+  // Fallback to first meal plan only if base room exists
+  return baseRoom.value ? props.mealPlans[0] : null
+})
+const hasBaseRoom = computed(() => props.roomTypes.some(rt => rt.isBaseRoom === true))
 
 // Check if a cell is the base cell
 const isBaseCellFn = (roomTypeId, mealPlanId) => {

@@ -5,16 +5,25 @@ import { computed } from 'vue'
  * Used in RateForm.vue for automatic price calculation based on base room/meal plan
  */
 export function useRelativePricing(roomTypes, mealPlans) {
-	// Find the base room (or fallback to first room)
+	// Find the base room (only if explicitly set)
 	const baseRoom = computed(() => {
 		if (!roomTypes.value?.length) return null
-		return roomTypes.value.find(r => r.isBaseRoom) || roomTypes.value[0]
+		return roomTypes.value.find(r => r.isBaseRoom) || null
 	})
 
-	// Find the base meal plan (or fallback to first meal plan)
+	// Find the base meal plan (only if explicitly set, or fallback to first if base room is set)
 	const baseMealPlan = computed(() => {
 		if (!mealPlans.value?.length) return null
-		return mealPlans.value.find(m => m.isBaseMealPlan) || mealPlans.value[0]
+		// Only use fallback if base room is explicitly set
+		const found = mealPlans.value.find(m => m.isBaseMealPlan)
+		if (found) return found
+		// Fallback to first meal plan only if base room exists
+		return baseRoom.value ? mealPlans.value[0] : null
+	})
+
+	// Check if base room is explicitly set
+	const hasExplicitBaseRoom = computed(() => {
+		return roomTypes.value?.some(r => r.isBaseRoom === true) || false
 	})
 
 	// Check if a specific room/meal combination is the base cell
@@ -119,6 +128,7 @@ export function useRelativePricing(roomTypes, mealPlans) {
 	return {
 		baseRoom,
 		baseMealPlan,
+		hasExplicitBaseRoom,
 		isBaseCell,
 		isBaseRoom,
 		isBaseMealPlan,
