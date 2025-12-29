@@ -653,6 +653,36 @@ const executeAIPricingCommand = async (hotelId, parsedCommand) => {
 	}
 }
 
+// ==================== CONTRACT IMPORT ====================
+
+const parseContract = async (hotelId, fileContent, mimeType, fileName) => {
+	try {
+		const response = await apiClient.post(`${BASE_URL}/hotels/${hotelId}/contract/parse`, {
+			fileContent,
+			mimeType,
+			fileName
+		})
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Parse contract failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
+const importContractPricing = async (hotelId, contractData, mappings, options = {}) => {
+	try {
+		const response = await apiClient.post(`${BASE_URL}/hotels/${hotelId}/contract/import`, {
+			contractData,
+			mappings,
+			options
+		})
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Import contract failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
 // ==================== HOTEL ====================
 
 const getHotel = async (hotelId) => {
@@ -661,6 +691,18 @@ const getHotel = async (hotelId) => {
 		return response.data
 	} catch (error) {
 		console.error('Planning Service: Get hotel failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
+// ==================== PLATFORM ADMIN ONLY ====================
+
+const deleteMarketPricingData = async (hotelId, marketId) => {
+	try {
+		const response = await apiClient.delete(`${BASE_URL}/hotels/${hotelId}/markets/${marketId}/pricing-data`)
+		return response.data
+	} catch (error) {
+		console.error('Planning Service: Delete market pricing data failed', error.response?.data || error.message)
 		throw error
 	}
 }
@@ -741,5 +783,12 @@ export default {
 
 	// AI Pricing Assistant
 	parseAIPricingCommand,
-	executeAIPricingCommand
+	executeAIPricingCommand,
+
+	// Contract Import
+	parseContract,
+	importContractPricing,
+
+	// Platform Admin Only
+	deleteMarketPricingData
 }

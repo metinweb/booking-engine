@@ -33,9 +33,9 @@ app.use(cors({
   credentials: true
 }))
 
-// Body parser
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+// Body parser (increased limit for base64 file uploads like contract PDFs)
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 
 // i18n
 app.use(i18nMiddleware)

@@ -177,204 +177,6 @@
       :show-translate="true"
     />
 
-    <!-- Occupancy Settings - Balanced -->
-    <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-4">
-      <h4 class="font-medium text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-        <span class="material-icons text-indigo-600">people</span>
-        {{ $t('planning.roomTypes.occupancySettings.title') }}
-      </h4>
-
-      <!-- Two Row Layout -->
-      <div class="space-y-4">
-        <!-- Row 1: Guest Types -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <!-- Max Adults -->
-          <div class="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center flex-shrink-0">
-              <span class="material-icons text-blue-600 dark:text-blue-400 text-lg">person</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <label class="text-xs text-gray-500 dark:text-slate-400 block">{{ $t('planning.roomTypes.occupancySettings.maxAdults') }}</label>
-              <div class="flex items-center gap-1 mt-1">
-                <button
-                  type="button"
-                  @click="adjustCapacity('maxAdults', -1)"
-                  :disabled="formData.occupancy.maxAdults <= 1"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.maxAdults <= 1
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800'"
-                >
-                  <span class="material-icons text-sm">remove</span>
-                </button>
-                <span class="w-6 text-center font-bold text-gray-800 dark:text-white">{{ formData.occupancy.maxAdults }}</span>
-                <button
-                  type="button"
-                  @click="adjustCapacity('maxAdults', 1)"
-                  :disabled="formData.occupancy.maxAdults >= maxAllowedAdults"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.maxAdults >= maxAllowedAdults
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800'"
-                >
-                  <span class="material-icons text-sm">add</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Max Children -->
-          <div class="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-            <div class="w-9 h-9 rounded-full bg-amber-100 dark:bg-amber-800/50 flex items-center justify-center flex-shrink-0">
-              <span class="material-icons text-amber-600 dark:text-amber-400 text-lg">child_care</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <label class="text-xs text-gray-500 dark:text-slate-400 block">{{ $t('planning.roomTypes.occupancySettings.maxChildren') }}</label>
-              <div class="flex items-center gap-1 mt-1">
-                <button
-                  type="button"
-                  @click="adjustCapacity('maxChildren', -1)"
-                  :disabled="formData.occupancy.maxChildren <= 0"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.maxChildren <= 0
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800'"
-                >
-                  <span class="material-icons text-sm">remove</span>
-                </button>
-                <span class="w-6 text-center font-bold text-gray-800 dark:text-white">{{ formData.occupancy.maxChildren }}</span>
-                <button
-                  type="button"
-                  @click="adjustCapacity('maxChildren', 1)"
-                  :disabled="formData.occupancy.maxChildren >= maxAllowedChildren"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.maxChildren >= maxAllowedChildren
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-800'"
-                >
-                  <span class="material-icons text-sm">add</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Max Infants -->
-          <div class="flex items-center gap-3 p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg">
-            <div class="w-9 h-9 rounded-full bg-pink-100 dark:bg-pink-800/50 flex items-center justify-center flex-shrink-0">
-              <span class="material-icons text-pink-600 dark:text-pink-400 text-lg">baby_changing_station</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <label class="text-xs text-gray-500 dark:text-slate-400 block">{{ $t('planning.roomTypes.occupancySettings.maxInfants') }}</label>
-              <div class="flex items-center gap-1 mt-1">
-                <button
-                  type="button"
-                  @click="adjustCapacity('maxInfants', -1)"
-                  :disabled="formData.occupancy.maxInfants <= 0"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.maxInfants <= 0
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-800'"
-                >
-                  <span class="material-icons text-sm">remove</span>
-                </button>
-                <span class="w-6 text-center font-bold text-gray-800 dark:text-white">{{ formData.occupancy.maxInfants }}</span>
-                <button
-                  type="button"
-                  @click="adjustCapacity('maxInfants', 1)"
-                  :disabled="formData.occupancy.maxInfants >= 3"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.maxInfants >= 3
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-800'"
-                >
-                  <span class="material-icons text-sm">add</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Total Capacity -->
-          <div class="flex items-center gap-3 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-            <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-800/50 flex items-center justify-center flex-shrink-0">
-              <span class="material-icons text-indigo-600 dark:text-indigo-400 text-lg">hotel</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <label class="text-xs text-gray-500 dark:text-slate-400 block">{{ $t('planning.roomTypes.occupancySettings.totalMax') }}</label>
-              <div class="flex items-center gap-1 mt-1">
-                <button
-                  type="button"
-                  @click="adjustCapacity('totalMaxGuests', -1)"
-                  :disabled="formData.occupancy.totalMaxGuests <= 1"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.totalMaxGuests <= 1
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-800'"
-                >
-                  <span class="material-icons text-sm">remove</span>
-                </button>
-                <span class="w-6 text-center font-bold text-gray-800 dark:text-white">{{ formData.occupancy.totalMaxGuests }}</span>
-                <button
-                  type="button"
-                  @click="adjustCapacity('totalMaxGuests', 1)"
-                  :disabled="formData.occupancy.totalMaxGuests >= 12"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.totalMaxGuests >= 12
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-800'"
-                >
-                  <span class="material-icons text-sm">add</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Row 2: Base Occupancy + Info -->
-        <div class="flex flex-col md:flex-row gap-3">
-          <!-- Base Occupancy -->
-          <div class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg md:w-auto">
-            <div class="w-9 h-9 rounded-full bg-green-100 dark:bg-green-800/50 flex items-center justify-center flex-shrink-0">
-              <span class="material-icons text-green-600 dark:text-green-400 text-lg">price_check</span>
-            </div>
-            <div>
-              <label class="text-xs text-gray-500 dark:text-slate-400 block">{{ $t('planning.roomTypes.occupancySettings.baseOccupancy') }}</label>
-              <div class="flex items-center gap-1 mt-1">
-                <button
-                  type="button"
-                  @click="adjustCapacity('baseOccupancy', -1)"
-                  :disabled="formData.occupancy.baseOccupancy <= 1"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.baseOccupancy <= 1
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-800'"
-                >
-                  <span class="material-icons text-sm">remove</span>
-                </button>
-                <span class="w-6 text-center font-bold text-gray-800 dark:text-white">{{ formData.occupancy.baseOccupancy }}</span>
-                <button
-                  type="button"
-                  @click="adjustCapacity('baseOccupancy', 1)"
-                  :disabled="formData.occupancy.baseOccupancy >= formData.occupancy.totalMaxGuests"
-                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.baseOccupancy >= formData.occupancy.totalMaxGuests
-                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                    : 'text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-800'"
-                >
-                  <span class="material-icons text-sm">add</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Info Box -->
-          <div class="flex-1 flex items-center gap-2 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg text-xs text-gray-500 dark:text-slate-400">
-            <span class="material-icons text-sm">info_outline</span>
-            <span>{{ $t('planning.roomTypes.occupancySettings.summaryAdult') }} · {{ $t('planning.roomTypes.occupancySettings.summaryInfant') }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Amenities -->
     <div class="border border-gray-200 dark:border-slate-700 rounded-lg p-4">
       <h4 class="font-medium text-gray-800 dark:text-white mb-4 flex items-center gap-2">
@@ -415,6 +217,7 @@ import { ROOM_CODE_DEFINITIONS, searchRoomCodes, getRoomCodeDefinition } from '@
 
 const props = defineProps({
   roomType: { type: Object, default: null },
+  hotel: { type: Object, default: null },
   saving: { type: Boolean, default: false },
   isNew: { type: Boolean, default: false }
 })
@@ -532,11 +335,6 @@ const selectCodeSuggestion = (suggestion) => {
     }
   })
 
-  // Auto-fill occupancy
-  if (suggestion.occupancy) {
-    formData.value.occupancy = { ...formData.value.occupancy, ...suggestion.occupancy }
-  }
-
   toast.success(t('planning.roomTypes.autoFillSuccess'))
 }
 
@@ -565,19 +363,12 @@ const nameFieldRef = ref(null)
 // Track field errors
 const fieldErrors = ref({})
 
-// Form data
+// Form data (only basic info - capacity/pricing moved to separate tab)
 const formData = ref({
   code: '',
   name: createMultiLangObject(),
   description: createMultiLangObject(),
   size: null,
-  occupancy: {
-    maxAdults: 2,
-    maxChildren: 2,
-    maxInfants: 1,
-    totalMaxGuests: 4,
-    baseOccupancy: 2
-  },
   amenities: [],
   status: 'draft'
 })
@@ -590,67 +381,6 @@ const handleFieldValidation = ({ field, error }) => {
     delete fieldErrors.value[field]
   }
   emit('validation-change', { ...fieldErrors.value })
-}
-
-// Computed constraints for capacity
-const maxAllowedAdults = computed(() => {
-  // Adults can't exceed total capacity
-  return formData.value.occupancy.totalMaxGuests
-})
-
-const maxAllowedChildren = computed(() => {
-  // Children need at least 1 adult, so max children = total - 1
-  return Math.max(0, formData.value.occupancy.totalMaxGuests - 1)
-})
-
-// Adjust capacity with constraints
-const adjustCapacity = (field, delta) => {
-  const occupancy = formData.value.occupancy
-  const newValue = occupancy[field] + delta
-
-  switch (field) {
-    case 'totalMaxGuests':
-      if (newValue >= 1 && newValue <= 12) {
-        occupancy.totalMaxGuests = newValue
-        // Auto-adjust other values if they exceed new total
-        if (occupancy.maxAdults > newValue) {
-          occupancy.maxAdults = newValue
-        }
-        if (occupancy.maxChildren > newValue - 1) {
-          occupancy.maxChildren = Math.max(0, newValue - 1)
-        }
-        if (occupancy.baseOccupancy > newValue) {
-          occupancy.baseOccupancy = newValue
-        }
-      }
-      break
-
-    case 'maxAdults':
-      if (newValue >= 1 && newValue <= occupancy.totalMaxGuests) {
-        occupancy.maxAdults = newValue
-      }
-      break
-
-    case 'maxChildren':
-      // Max children = totalMaxGuests - 1 (at least 1 adult required)
-      const maxChildrenAllowed = occupancy.totalMaxGuests - 1
-      if (newValue >= 0 && newValue <= maxChildrenAllowed) {
-        occupancy.maxChildren = newValue
-      }
-      break
-
-    case 'maxInfants':
-      if (newValue >= 0 && newValue <= 3) {
-        occupancy.maxInfants = newValue
-      }
-      break
-
-    case 'baseOccupancy':
-      if (newValue >= 1 && newValue <= occupancy.totalMaxGuests) {
-        occupancy.baseOccupancy = newValue
-      }
-      break
-  }
 }
 
 // Amenities list with icons
@@ -697,13 +427,6 @@ watch(() => props.roomType, (newVal) => {
       name: { ...createMultiLangObject(), ...newVal.name },
       description: { ...createMultiLangObject(), ...newVal.description },
       size: newVal.size || null,
-      occupancy: {
-        maxAdults: newVal.occupancy?.maxAdults || 2,
-        maxChildren: newVal.occupancy?.maxChildren || 2,
-        maxInfants: newVal.occupancy?.maxInfants || 1,
-        totalMaxGuests: newVal.occupancy?.totalMaxGuests || 4,
-        baseOccupancy: newVal.occupancy?.baseOccupancy || 2
-      },
       amenities: newVal.amenities || [],
       status: newVal.status || 'draft'
     }
@@ -750,14 +473,13 @@ const validateAll = () => {
   return { valid: isValid, errors }
 }
 
-// Expose form data getter for parent component
+// Expose form data getter for parent component (only basic info)
 const getFormData = () => {
   return {
     code: formData.value.code.toUpperCase(),
     name: formData.value.name,
     description: formData.value.description,
     size: formData.value.size,
-    occupancy: formData.value.occupancy,
     amenities: formData.value.amenities,
     status: formData.value.status
   }

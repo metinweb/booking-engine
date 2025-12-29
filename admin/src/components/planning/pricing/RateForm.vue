@@ -144,6 +144,32 @@
         </button>
       </div>
 
+      <!-- Pricing Type Info (read-only, from room type) -->
+      <div class="rounded-xl p-4 border" :class="currentRoomPricingType === 'per_person' ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800'">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="material-icons" :class="currentRoomPricingType === 'per_person' ? 'text-indigo-600' : 'text-green-600'">sell</span>
+            <div>
+              <div class="font-medium text-gray-800 dark:text-white">Fiyatlandırma Tipi</div>
+              <div class="text-xs text-gray-500 dark:text-slate-400">Oda tipi ayarlarından alınır</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 px-4 py-2 rounded-lg" :class="currentRoomPricingType === 'per_person' ? 'bg-indigo-500 text-white' : 'bg-green-500 text-white'">
+            <span class="material-icons text-sm">{{ currentRoomPricingType === 'per_person' ? 'groups' : 'hotel' }}</span>
+            <span class="font-medium">{{ currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}</span>
+          </div>
+        </div>
+        <!-- OBP Info -->
+        <div v-if="currentRoomPricingType === 'per_person'" class="mt-3 p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-sm text-indigo-700 dark:text-indigo-300">
+          <span class="material-icons text-sm align-middle mr-1">info</span>
+          OBP modunda her yetişkin sayısı için ayrı fiyat girilir. Ekstra yetişkin ve tek kişi indirimi kullanılmaz.
+        </div>
+        <div v-else class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-700 dark:text-green-300">
+          <span class="material-icons text-sm align-middle mr-1">info</span>
+          Ünite bazlı modda oda başı fiyat + ekstra kişi ücreti kullanılır.
+        </div>
+      </div>
+
       <!-- Room Type Tabs (Sticky) -->
       <div class="sticky -top-6 z-10 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm pt-6 pb-0">
         <div class="flex gap-1 overflow-x-auto pb-px">
@@ -340,8 +366,8 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Base Price Row -->
-                <tr class="border-b border-gray-100 dark:border-slate-700 bg-green-50/50 dark:bg-green-900/10">
+                <!-- UNIT PRICING: Base Price Row -->
+                <tr v-if="currentRoomPricingType === 'unit'" class="border-b border-gray-100 dark:border-slate-700 bg-green-50/50 dark:bg-green-900/10">
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                       <span class="material-icons text-green-600 text-lg">hotel</span>
@@ -406,8 +432,8 @@
                   </td>
                 </tr>
 
-                <!-- Extra Adult Row -->
-                <tr class="border-b border-gray-100 dark:border-slate-700">
+                <!-- UNIT PRICING: Extra Adult Row -->
+                <tr v-if="currentRoomPricingType === 'unit'" class="border-b border-gray-100 dark:border-slate-700">
                   <td class="px-4 py-2">
                     <div class="flex items-center gap-2">
                       <span class="material-icons text-amber-500 text-sm">person_add</span>
@@ -436,6 +462,43 @@
                     </div>
                   </td>
                 </tr>
+
+                <!-- OBP PRICING: Occupancy Rows (1P, 2P, 3P...) -->
+                <template v-if="currentRoomPricingType === 'per_person'">
+                  <tr
+                    v-for="pax in maxAdultsForCurrentRoom"
+                    :key="'obp-' + pax"
+                    class="border-b border-gray-100 dark:border-slate-700"
+                    :class="pax <= 2 ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''"
+                  >
+                    <td class="px-4 py-2">
+                      <div class="flex items-center gap-2">
+                        <span class="material-icons text-indigo-500 text-sm">{{ pax === 1 ? 'person' : 'group' }}</span>
+                        <span class="font-medium text-gray-700 dark:text-slate-300">{{ pax }} Yetişkin</span>
+                        <span v-if="pax <= 2" class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded">Zorunlu</span>
+                      </div>
+                    </td>
+                    <td
+                      v-for="mp in filteredMealPlans"
+                      :key="mp._id"
+                      class="px-2 py-2 text-center"
+                    >
+                      <input
+                        v-if="roomPrices[selectedRoomTab]?.[mp._id]?.occupancyPricing"
+                        v-model.number="roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax]"
+                        type="number"
+                        min="0"
+                        class="w-24 text-center font-bold border-2 rounded-lg px-2 py-1.5 transition-colors"
+                        :class="[
+                          pax <= 2 && !roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax] ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' :
+                          roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax] > 0 ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20' :
+                          'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+                        ]"
+                        placeholder="0"
+                      />
+                    </td>
+                  </tr>
+                </template>
 
                 <!-- Child Order Pricing Rows -->
                 <tr
@@ -534,8 +597,8 @@
                   </td>
                 </tr>
 
-                <!-- Single Occupancy Discount Row -->
-                <tr class="bg-blue-50/50 dark:bg-blue-900/10">
+                <!-- Single Occupancy Discount Row (only for unit pricing) -->
+                <tr v-if="currentRoomPricingType === 'unit'" class="bg-blue-50/50 dark:bg-blue-900/10">
                   <td class="px-4 py-2">
                     <div class="flex items-center gap-2">
                       <span class="material-icons text-blue-500 text-sm">person</span>
@@ -680,7 +743,7 @@ const form = reactive({
   season: ''
 })
 
-// Room prices: { roomTypeId: { mealPlanId: { pricePerNight, extraAdult, childOrderPricing[], extraInfant } } }
+// Room prices: { roomTypeId: { mealPlanId: { pricePerNight, extraAdult, childOrderPricing[], extraInfant, pricingType, occupancyPricing } } }
 const roomPrices = reactive({})
 
 // Room restrictions: { roomTypeId: { allotment, minStay, maxStay, releaseDays, stopSale, closedToArrival, closedToDeparture, singleSupplement } }
@@ -845,6 +908,18 @@ const calculateRelativePrices = () => {
 // Current room type
 const currentRoomType = computed(() => filteredRoomTypes.value.find(rt => rt._id === selectedRoomTab.value))
 
+// Helper to get child age bounds from childAgeGroups
+const getAgeRangesFromGroups = (groups) => {
+  if (!groups || groups.length === 0) return null
+  const infant = groups.find(g => g.code === 'infant')
+  const childGroups = groups.filter(g => g.code !== 'infant')
+  const lastChild = childGroups.length > 0 ? childGroups[childGroups.length - 1] : null
+  return {
+    infantMaxAge: infant?.maxAge ?? null,
+    childMaxAge: lastChild?.maxAge ?? null
+  }
+}
+
 // Age settings with source (Season > Market > Hotel)
 const ageSettings = computed(() => {
   const hotel = props.hotel
@@ -852,30 +927,37 @@ const ageSettings = computed(() => {
   const selectedSeasonId = form.season
   const season = selectedSeasonId ? props.seasons.find(s => s._id === selectedSeasonId) : null
 
-  // Default from hotel
-  let childMaxAge = hotel?.policies?.maxChildAge ?? 12
-  let infantMaxAge = hotel?.policies?.maxBabyAge ?? 2
+  // Default from hotel's childAgeGroups
+  const hotelAges = getAgeRangesFromGroups(hotel?.childAgeGroups)
+  let childMaxAge = hotelAges?.childMaxAge ?? hotel?.policies?.maxChildAge ?? 12
+  let infantMaxAge = hotelAges?.infantMaxAge ?? hotel?.policies?.maxBabyAge ?? 2
   let childSource = 'hotel'
   let infantSource = 'hotel'
 
-  // Override from market if set
-  if (market?.childAgeRange?.max != null) {
-    childMaxAge = market.childAgeRange.max
-    childSource = 'market'
-  }
-  if (market?.infantAgeRange?.max != null) {
-    infantMaxAge = market.infantAgeRange.max
-    infantSource = 'market'
+  // Override from market if not inheriting from hotel
+  if (market?.childAgeSettings?.inheritFromHotel === false && market?.childAgeSettings?.childAgeGroups?.length) {
+    const marketAges = getAgeRangesFromGroups(market.childAgeSettings.childAgeGroups)
+    if (marketAges?.childMaxAge != null) {
+      childMaxAge = marketAges.childMaxAge
+      childSource = 'market'
+    }
+    if (marketAges?.infantMaxAge != null) {
+      infantMaxAge = marketAges.infantMaxAge
+      infantSource = 'market'
+    }
   }
 
-  // Future: Override from season if set
-  if (season?.childAgeRange?.max != null) {
-    childMaxAge = season.childAgeRange.max
-    childSource = 'season'
-  }
-  if (season?.infantAgeRange?.max != null) {
-    infantMaxAge = season.infantAgeRange.max
-    infantSource = 'season'
+  // Override from season if not inheriting from market
+  if (season?.childAgeSettings?.inheritFromMarket === false && season?.childAgeSettings?.childAgeGroups?.length) {
+    const seasonAges = getAgeRangesFromGroups(season.childAgeSettings.childAgeGroups)
+    if (seasonAges?.childMaxAge != null) {
+      childMaxAge = seasonAges.childMaxAge
+      childSource = 'season'
+    }
+    if (seasonAges?.infantMaxAge != null) {
+      infantMaxAge = seasonAges.infantMaxAge
+      infantSource = 'season'
+    }
   }
 
   return {
@@ -891,6 +973,17 @@ const maxChildrenForCurrentRoom = computed(() => {
   return currentRoomType.value?.occupancy?.maxChildren ?? 2
 })
 
+// Max adults for current room (for OBP rows)
+const maxAdultsForCurrentRoom = computed(() => {
+  return currentRoomType.value?.occupancy?.maxAdults ?? 4
+})
+
+// Current room's pricing type (from room type, read-only)
+const currentRoomPricingType = computed(() => {
+  if (!currentRoomType.value) return 'unit'
+  return currentRoomType.value.pricingType || 'unit'
+})
+
 const calculateNights = computed(() => {
   if (!dateRange.value.start || !dateRange.value.end) return 0
   const [sy, sm, sd] = dateRange.value.start.split('-').map(Number)
@@ -901,11 +994,24 @@ const calculateNights = computed(() => {
   return diff > 0 ? diff : 0
 })
 
-// Check if a room has any prices set
+// Check if a room has any prices set (handles both unit and OBP pricing)
 const hasRoomPrices = (roomTypeId) => {
   const prices = roomPrices[roomTypeId]
   if (!prices) return false
-  return Object.values(prices).some(mp => mp.pricePerNight > 0)
+
+  // Get pricing type from room type
+  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+  const pricingType = roomType?.pricingType || 'unit'
+
+  return Object.values(prices).some(mp => {
+    if (pricingType === 'per_person') {
+      // OBP: Check if at least 1 and 2 person prices are set
+      return mp.occupancyPricing?.[1] > 0 && mp.occupancyPricing?.[2] > 0
+    } else {
+      // Unit: Check pricePerNight
+      return mp.pricePerNight > 0
+    }
+  })
 }
 
 // Check if ALL filtered rooms have at least one meal plan price (required)
@@ -983,6 +1089,10 @@ const getMaxChildrenForRoom = (roomTypeId) => {
 const initializeRoomData = () => {
   props.roomTypes.forEach(rt => {
     const maxChildren = getMaxChildrenForRoom(rt._id)
+    const maxAdults = rt.occupancy?.maxAdults ?? 4
+
+    // Get pricing type from room type (set in room type form)
+    const roomPricingType = rt.pricingType || 'unit'
 
     // Initialize prices
     if (!roomPrices[rt._id]) {
@@ -990,12 +1100,20 @@ const initializeRoomData = () => {
     }
     props.mealPlans.forEach(mp => {
       if (!roomPrices[rt._id][mp._id]) {
+        // Initialize occupancy pricing object
+        const occupancyPricing = {}
+        for (let i = 1; i <= 10; i++) {
+          occupancyPricing[i] = 0
+        }
+
         roomPrices[rt._id][mp._id] = {
           pricePerNight: 0,
           extraAdult: 0,
           childOrderPricing: Array(maxChildren).fill(0),
           extraInfant: 0,
-          singleSupplement: 0
+          singleSupplement: 0,
+          pricingType: roomPricingType,
+          occupancyPricing
         }
       } else {
         // Add missing fields
@@ -1004,6 +1122,15 @@ const initializeRoomData = () => {
         }
         if (roomPrices[rt._id][mp._id].singleSupplement === undefined) {
           roomPrices[rt._id][mp._id].singleSupplement = 0
+        }
+        // Update pricingType from room type
+        roomPrices[rt._id][mp._id].pricingType = roomPricingType
+        if (!roomPrices[rt._id][mp._id].occupancyPricing) {
+          const occupancyPricing = {}
+          for (let i = 1; i <= 10; i++) {
+            occupancyPricing[i] = 0
+          }
+          roomPrices[rt._id][mp._id].occupancyPricing = occupancyPricing
         }
       }
     })
@@ -1192,17 +1319,29 @@ const copyFirstPriceToAllMealPlans = () => {
   toast.success(t('planning.pricing.copiedToMealPlans'))
 }
 
-// Copy current room's prices to all rooms - uses filtered
+// Copy current room's prices and restrictions to all rooms - uses filtered
 const copyCurrentRoomToAll = () => {
-  const source = roomPrices[selectedRoomTab.value]
-  if (!source) return
+  const sourcePrice = roomPrices[selectedRoomTab.value]
+  const sourceRestrictions = roomRestrictions[selectedRoomTab.value]
+  if (!sourcePrice) return
 
   filteredRoomTypes.value.forEach(rt => {
     if (rt._id !== selectedRoomTab.value) {
+      // Copy prices
       roomPrices[rt._id] = {}
       filteredMealPlans.value.forEach(mp => {
-        roomPrices[rt._id][mp._id] = { ...source[mp._id] }
+        roomPrices[rt._id][mp._id] = { ...sourcePrice[mp._id] }
       })
+
+      // Copy restrictions (allotment, minStay, releaseDays)
+      if (sourceRestrictions) {
+        roomRestrictions[rt._id] = {
+          ...roomRestrictions[rt._id],
+          allotment: sourceRestrictions.allotment,
+          minStay: sourceRestrictions.minStay,
+          releaseDays: sourceRestrictions.releaseDays
+        }
+      }
     }
   })
   toast.success(t('planning.pricing.copiedToRooms'))
@@ -1234,11 +1373,23 @@ const handleSave = async () => {
     filteredRoomTypes.value.forEach(rt => {
       const prices = roomPrices[rt._id]
       const restrictions = roomRestrictions[rt._id]
+      const pricingType = rt.pricingType || 'unit' // Get from room type
 
-      // For each filtered meal plan that has a price > 0
+      // For each filtered meal plan that has valid pricing
       filteredMealPlans.value.forEach(mp => {
         const mealPlanPrice = prices?.[mp._id]
-        if (mealPlanPrice?.pricePerNight > 0) {
+
+        // Check if this meal plan has valid prices based on pricing type
+        let hasValidPrice = false
+        if (pricingType === 'per_person') {
+          // OBP: need at least 1 and 2 person prices
+          hasValidPrice = mealPlanPrice?.occupancyPricing?.[1] > 0 && mealPlanPrice?.occupancyPricing?.[2] > 0
+        } else {
+          // Unit: need pricePerNight
+          hasValidPrice = mealPlanPrice?.pricePerNight > 0
+        }
+
+        if (hasValidPrice) {
           const data = {
             roomType: rt._id,
             mealPlan: mp._id,
@@ -1246,11 +1397,7 @@ const handleSave = async () => {
             startDate: dateRange.value.start,
             endDate: dateRange.value.end,
             season: form.season || undefined,
-            pricePerNight: mealPlanPrice.pricePerNight,
-            singleSupplement: mealPlanPrice.singleSupplement || 0,
-            extraAdult: mealPlanPrice.extraAdult || 0,
-            childOrderPricing: mealPlanPrice.childOrderPricing || [],
-            extraInfant: mealPlanPrice.extraInfant || 0,
+            pricingType: pricingType,
             currency: currency.value,
             allotment: restrictions?.allotment ?? 10,
             minStay: restrictions?.minStay || 1,
@@ -1259,7 +1406,27 @@ const handleSave = async () => {
             stopSale: restrictions?.stopSale || false,
             singleStop: restrictions?.singleStop || false,
             closedToArrival: restrictions?.closedToArrival || false,
-            closedToDeparture: restrictions?.closedToDeparture || false
+            closedToDeparture: restrictions?.closedToDeparture || false,
+            childOrderPricing: mealPlanPrice.childOrderPricing || [],
+            extraInfant: mealPlanPrice.extraInfant || 0
+          }
+
+          if (pricingType === 'per_person') {
+            // OBP: include occupancyPricing, clear unit-based fields
+            data.occupancyPricing = {}
+            for (let i = 1; i <= 10; i++) {
+              if (mealPlanPrice.occupancyPricing?.[i] > 0) {
+                data.occupancyPricing[i] = mealPlanPrice.occupancyPricing[i]
+              }
+            }
+            data.pricePerNight = 0
+            data.extraAdult = 0
+            data.singleSupplement = 0
+          } else {
+            // Unit: include unit-based pricing fields
+            data.pricePerNight = mealPlanPrice.pricePerNight
+            data.singleSupplement = mealPlanPrice.singleSupplement || 0
+            data.extraAdult = mealPlanPrice.extraAdult || 0
           }
 
           if (!data.season) delete data.season

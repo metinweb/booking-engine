@@ -74,6 +74,16 @@
           <span class="hidden sm:inline">{{ $t('planning.pricing.priceQuery') || 'Sorgula' }}</span>
         </button>
 
+        <!-- Contract Import Button -->
+        <button
+          @click="showContractImport = true"
+          class="flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+          :title="$t('planning.pricing.contractImport.button')"
+        >
+          <span class="material-icons text-lg">description</span>
+          <span class="hidden sm:inline">{{ $t('planning.pricing.contractImport.button') }}</span>
+        </button>
+
         <!-- Add Rate Button -->
         <button @click="openBulkModal" class="btn-primary flex items-center gap-2">
           <span class="material-icons text-lg">add</span>
@@ -434,7 +444,7 @@
     </div>
 
     <!-- Season Form Modal -->
-    <Modal v-model="showSeasonForm" :title="editingSeason ? $t('planning.pricing.editSeason') : $t('planning.pricing.addSeason')" size="lg">
+    <Modal v-model="showSeasonForm" :title="editingSeason ? $t('planning.pricing.editSeason') : $t('planning.pricing.addSeason')" size="xl" :close-on-overlay="false" content-class="!h-[70vh]">
       <SeasonForm
         :hotel="hotel"
         :season="editingSeason"
@@ -495,13 +505,22 @@
       :room-types="filteredRoomTypes"
       :meal-plans="filteredMealPlans"
       :markets="markets"
+      :initial-month="currentMonth"
+    />
+
+    <!-- Contract Import Wizard -->
+    <ContractImportWizard
+      :show="showContractImport"
+      :hotel-id="hotel._id"
+      @close="showContractImport = false"
+      @imported="handleContractImported"
     />
 
     <!-- Period Edit Modal -->
     <Modal
       v-model="showPeriodEditModal"
       :title="$t('planning.pricing.editPeriod')"
-      size="lg"
+      size="xl"
     >
       <PeriodEditForm
         v-if="editingPeriod"
@@ -510,9 +529,59 @@
         :room-types="filteredRoomTypes"
         :meal-plans="filteredMealPlans"
         :market="selectedMarket"
+        :child-age-groups="hotel.childAgeGroups || []"
         @saved="handlePeriodEditSaved"
         @cancel="showPeriodEditModal = false"
       />
+    </Modal>
+
+    <!-- Platform Admin: Delete All Pricing Data -->
+    <div v-if="authStore.isPlatformAdmin && selectedMarket" class="mt-8 pt-4 border-t border-gray-200 dark:border-slate-700">
+      <div class="flex justify-end">
+        <button
+          @click="showDeleteConfirm = true"
+          class="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 flex items-center gap-1 opacity-60 hover:opacity-100 transition-opacity"
+        >
+          <span class="material-icons text-sm">delete_forever</span>
+          Sezonları ve Fiyatları Sil
+        </button>
+      </div>
+    </div>
+
+    <!-- Delete Confirm Modal -->
+    <Modal
+      v-model="showDeleteConfirm"
+      title="⚠️ Fiyat Verilerini Sil"
+      size="sm"
+    >
+      <div class="text-center py-4">
+        <div class="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+          <span class="material-icons text-3xl text-red-600 dark:text-red-400">warning</span>
+        </div>
+        <p class="text-gray-700 dark:text-gray-300 mb-2">
+          <strong>{{ selectedMarket?.code }}</strong> pazarındaki tüm sezonlar ve fiyatlar silinecek.
+        </p>
+        <p class="text-sm text-red-600 dark:text-red-400 font-medium">Bu işlem geri alınamaz!</p>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <button
+            @click="showDeleteConfirm = false"
+            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+          >
+            İptal
+          </button>
+          <button
+            @click="deleteAllPricingData"
+            :disabled="isDeleting"
+            class="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white rounded-lg flex items-center gap-2"
+          >
+            <span v-if="isDeleting" class="material-icons animate-spin text-sm">refresh</span>
+            <span class="material-icons text-sm" v-else>delete_forever</span>
+            Evet, Sil
+          </button>
+        </div>
+      </template>
     </Modal>
   </div>
 </template>
@@ -529,7 +598,9 @@ import BulkEditModal from './BulkEditModal.vue'
 import AIPricingAssistant from './AIPricingAssistant.vue'
 import PriceQueryModal from './PriceQueryModal.vue'
 import PeriodEditForm from './PeriodEditForm.vue'
+import ContractImportWizard from './ContractImportWizard.vue'
 import planningService from '@/services/planningService'
+import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
   hotel: { type: Object, required: true }
@@ -537,6 +608,11 @@ const props = defineProps({
 
 const { t, locale } = useI18n()
 const toast = useToast()
+const authStore = useAuthStore()
+
+// Delete pricing data state
+const showDeleteConfirm = ref(false)
+const isDeleting = ref(false)
 
 // Data
 const rates = ref([])
@@ -570,6 +646,7 @@ const bulkEditCells = ref([])
 const showBulkEditModal = ref(false)
 const showPriceQueryModal = ref(false)
 const showPeriodEditModal = ref(false)
+const showContractImport = ref(false)
 const editingPeriod = ref(null)
 const calendarRef = ref(null)
 
@@ -1070,6 +1147,42 @@ const handleAIExecuted = () => {
   // Also clear calendar selection
   if (calendarRef.value?.clearSelection) {
     calendarRef.value.clearSelection()
+  }
+}
+
+// Handle contract import completion
+const handleContractImported = async (result) => {
+  showContractImport.value = false
+
+  // Refresh room types and meal plans (capacities may have been updated)
+  await fetchDependencies()
+
+  // Refresh rates
+  fetchRates()
+  if (viewMode.value === 'period') {
+    fetchPriceList()
+  }
+}
+
+// Delete all pricing data (Platform Admin only)
+const deleteAllPricingData = async () => {
+  if (!selectedMarket.value) return
+
+  isDeleting.value = true
+  try {
+    const result = await planningService.deleteMarketPricingData(props.hotel._id, selectedMarket.value._id)
+    toast.success(`${result.data.seasonsDeleted} sezon ve ${result.data.ratesDeleted} fiyat silindi`)
+    showDeleteConfirm.value = false
+    // Refresh data
+    await Promise.all([
+      fetchSeasons(),
+      fetchRates(),
+      viewMode.value === 'period' ? fetchPriceList() : null
+    ])
+  } catch (error) {
+    toast.error('Silme işlemi başarısız: ' + (error.response?.data?.message || error.message))
+  } finally {
+    isDeleting.value = false
   }
 }
 

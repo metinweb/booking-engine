@@ -66,14 +66,36 @@ const rateOverrideSchema = new mongoose.Schema({
 	// === OVERRIDABLE FIELDS ===
 	// All fields are optional - null means "use base Rate value"
 
-	// Price override
+	// Pricing type override (null = inherit from Rate)
+	pricingType: {
+		type: String,
+		enum: ['unit', 'per_person'],
+		default: null
+	},
+
+	// Unit-based price override
 	pricePerNight: { type: Number, default: null, min: 0 },
 
-	// Extra person pricing overrides
+	// Extra person pricing overrides (for unit pricing)
 	singleSupplement: { type: Number, default: null },
 	extraAdult: { type: Number, default: null, min: 0 },
 	extraChild: { type: Number, default: null, min: 0 },
 	extraInfant: { type: Number, default: null, min: 0 },
+
+	// Occupancy-based pricing override (for per_person pricing)
+	// null = inherit from Rate, object with values = override specific occupancies
+	occupancyPricing: {
+		1: { type: Number, default: null, min: 0 },
+		2: { type: Number, default: null, min: 0 },
+		3: { type: Number, default: null, min: 0 },
+		4: { type: Number, default: null, min: 0 },
+		5: { type: Number, default: null, min: 0 },
+		6: { type: Number, default: null, min: 0 },
+		7: { type: Number, default: null, min: 0 },
+		8: { type: Number, default: null, min: 0 },
+		9: { type: Number, default: null, min: 0 },
+		10: { type: Number, default: null, min: 0 }
+	},
 
 	// Inventory override
 	allotment: { type: Number, default: null, min: 0 },
@@ -95,6 +117,50 @@ const rateOverrideSchema = new mongoose.Schema({
 	// Arrival/Departure restrictions override
 	closedToArrival: { type: Boolean, default: null },
 	closedToDeparture: { type: Boolean, default: null },
+
+	// ===== MULTIPLIER OVERRIDE (for OBP with multipliers) =====
+	// If true, use this override's multipliers instead of room's or rate's
+	useMultiplierOverride: { type: Boolean, default: null },
+
+	// Override multipliers for this date (null = inherit from Rate or RoomType)
+	multiplierOverride: {
+		// Adult multipliers override { 1: 0.8, 2: 1.0, 3: 1.3, ... }
+		adultMultipliers: {
+			type: Map,
+			of: Number,
+			default: undefined
+		},
+
+		// Child multipliers override - per order, per age group
+		childMultipliers: {
+			type: Map,
+			of: {
+				type: Map,
+				of: Number
+			},
+			default: undefined
+		},
+
+		// Combination table override
+		combinationTable: [{
+			key: { type: String },
+			adults: { type: Number, min: 1 },
+			children: [{
+				order: { type: Number },
+				ageGroup: { type: String }
+			}],
+			calculatedMultiplier: { type: Number },
+			overrideMultiplier: { type: Number, default: null },
+			isActive: { type: Boolean, default: true }
+		}],
+
+		// Rounding rule override
+		roundingRule: {
+			type: String,
+			enum: ['none', 'nearest', 'up', 'down', 'nearest5', 'nearest10'],
+			default: undefined
+		}
+	},
 
 	// Source tracking (how was this override created)
 	source: {
@@ -202,18 +268,35 @@ rateOverrideSchema.statics.clearRange = function(hotelId, startDate, endDate, fi
 
 // Instance method: Check if this override has any actual overrides
 rateOverrideSchema.methods.hasOverrides = function() {
-	return this.pricePerNight !== null ||
+	// Check if any occupancy pricing is set
+	const hasOccupancyPricing = this.occupancyPricing &&
+		Object.values(this.occupancyPricing.toObject ? this.occupancyPricing.toObject() : this.occupancyPricing)
+			.some(v => v !== null && v !== undefined)
+
+	// Check if multiplier override has any data
+	const hasMultiplierOverride = this.multiplierOverride && (
+		(this.multiplierOverride.adultMultipliers && this.multiplierOverride.adultMultipliers.size > 0) ||
+		(this.multiplierOverride.childMultipliers && this.multiplierOverride.childMultipliers.size > 0) ||
+		(this.multiplierOverride.combinationTable && this.multiplierOverride.combinationTable.length > 0)
+	)
+
+	return this.pricingType !== null ||
+		this.pricePerNight !== null ||
 		this.singleSupplement !== null ||
 		this.extraAdult !== null ||
 		this.extraChild !== null ||
 		this.extraInfant !== null ||
+		hasOccupancyPricing ||
 		this.allotment !== null ||
 		this.minStay !== null ||
 		this.maxStay !== null ||
 		this.stopSale !== null ||
+		this.singleStop !== null ||
 		this.releaseDays !== null ||
 		this.closedToArrival !== null ||
-		this.closedToDeparture !== null
+		this.closedToDeparture !== null ||
+		this.useMultiplierOverride !== null ||
+		hasMultiplierOverride
 }
 
 // Instance method: Merge with base rate
@@ -226,19 +309,60 @@ rateOverrideSchema.methods.mergeWithBase = function(baseRate) {
 	}
 
 	// Override only non-null fields
+	if (this.pricingType !== null) merged.pricingType = this.pricingType
 	if (this.pricePerNight !== null) merged.pricePerNight = this.pricePerNight
 	if (this.singleSupplement !== null) merged.singleSupplement = this.singleSupplement
 	if (this.extraAdult !== null) merged.extraAdult = this.extraAdult
 	if (this.extraChild !== null) merged.extraChild = this.extraChild
 	if (this.extraInfant !== null) merged.extraInfant = this.extraInfant
+
+	// Merge occupancyPricing - override individual occupancy levels if set
+	if (this.occupancyPricing) {
+		merged.occupancyPricing = { ...(baseRate.occupancyPricing || {}) }
+		for (let i = 1; i <= 10; i++) {
+			if (this.occupancyPricing[i] !== null && this.occupancyPricing[i] !== undefined) {
+				merged.occupancyPricing[i] = this.occupancyPricing[i]
+			}
+		}
+	}
+
 	if (this.allotment !== null) merged.allotment = this.allotment
 	if (this.minStay !== null) merged.minStay = this.minStay
 	if (this.maxStay !== null) merged.maxStay = this.maxStay
 	if (this.stopSale !== null) merged.stopSale = this.stopSale
 	if (this.stopSaleReason !== null) merged.stopSaleReason = this.stopSaleReason
+	if (this.singleStop !== null) merged.singleStop = this.singleStop
 	if (this.releaseDays !== null) merged.releaseDays = this.releaseDays
 	if (this.closedToArrival !== null) merged.closedToArrival = this.closedToArrival
 	if (this.closedToDeparture !== null) merged.closedToDeparture = this.closedToDeparture
+
+	// Merge multiplier override
+	if (this.useMultiplierOverride !== null) merged.useMultiplierOverride = this.useMultiplierOverride
+
+	// Deep merge multiplierOverride if present
+	if (this.multiplierOverride) {
+		merged.multiplierOverride = { ...(baseRate.multiplierOverride || {}) }
+
+		// Override adultMultipliers if set
+		if (this.multiplierOverride.adultMultipliers && this.multiplierOverride.adultMultipliers.size > 0) {
+			merged.multiplierOverride.adultMultipliers = this.multiplierOverride.adultMultipliers
+		}
+
+		// Override childMultipliers if set
+		if (this.multiplierOverride.childMultipliers && this.multiplierOverride.childMultipliers.size > 0) {
+			merged.multiplierOverride.childMultipliers = this.multiplierOverride.childMultipliers
+		}
+
+		// Override combinationTable if set
+		if (this.multiplierOverride.combinationTable && this.multiplierOverride.combinationTable.length > 0) {
+			merged.multiplierOverride.combinationTable = this.multiplierOverride.combinationTable
+		}
+
+		// Override roundingRule if set
+		if (this.multiplierOverride.roundingRule) {
+			merged.multiplierOverride.roundingRule = this.multiplierOverride.roundingRule
+		}
+	}
 
 	return merged
 }

@@ -91,17 +91,18 @@ const seasonSchema = new mongoose.Schema({
 		ref: 'MealPlan'
 	}],
 
-	// Child age settings override
+	// Child age settings override (uses same structure as hotel.childAgeGroups)
 	childAgeSettings: {
 		inheritFromMarket: { type: Boolean, default: true },
-		childAgeRange: {
-			min: { type: Number, min: 0, max: 17, default: null },
-			max: { type: Number, min: 1, max: 17, default: null }
-		},
-		infantAgeRange: {
-			min: { type: Number, min: 0, max: 6, default: null },
-			max: { type: Number, min: 0, max: 6, default: null }
-		}
+		// Override child age groups for this season
+		childAgeGroups: [{
+			code: {
+				type: String,
+				enum: ['infant', 'first', 'second']
+			},
+			minAge: { type: Number, min: 0, max: 17 },
+			maxAge: { type: Number, min: 0, max: 17 }
+		}]
 	},
 
 	// Payment methods settings override
@@ -135,12 +136,76 @@ const seasonSchema = new mongoose.Schema({
 		},
 		markup: { type: Number, min: 0, max: 100, default: null },
 		commission: { type: Number, min: 0, max: 100, default: null }
-	}
+	},
+
+	// ===== PRICING OVERRIDES (per room type for this season) =====
+	// Array of room-specific pricing overrides for this season
+	// Hierarchy: RoomType -> Season.pricingOverrides -> Rate
+	pricingOverrides: [{
+		// Which room type this override applies to
+		roomType: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'RoomType',
+			required: true
+		},
+
+		// Pricing type override (unit or per_person)
+		// If true, use pricingType below instead of room's pricingType
+		usePricingTypeOverride: { type: Boolean, default: false },
+		pricingType: {
+			type: String,
+			enum: ['unit', 'per_person'],
+			default: 'unit'
+		},
+
+		// If true, use the multiplier override below instead of room's template
+		useMultiplierOverride: { type: Boolean, default: false },
+
+		// Override multipliers for this season (same structure as RoomType.multiplierTemplate)
+		multiplierOverride: {
+			// Adult multipliers override { 1: 0.8, 2: 1.0, 3: 1.3, ... }
+			adultMultipliers: {
+				type: Map,
+				of: Number,
+				default: undefined
+			},
+
+			// Child multipliers override - per order, per age group
+			childMultipliers: {
+				type: Map,
+				of: {
+					type: Map,
+					of: Number
+				},
+				default: undefined
+			},
+
+			// Combination table override
+			combinationTable: [{
+				key: { type: String },
+				adults: { type: Number, min: 1 },
+				children: [{
+					order: { type: Number },
+					ageGroup: { type: String }
+				}],
+				calculatedMultiplier: { type: Number },
+				overrideMultiplier: { type: Number, default: null },
+				isActive: { type: Boolean, default: true }
+			}],
+
+			// Rounding rule override
+			roundingRule: {
+				type: String,
+				enum: ['none', 'nearest', 'up', 'down', 'nearest5', 'nearest10'],
+				default: undefined
+			}
+		}
+	}]
 
 }, {
 	timestamps: true,
-	toJSON: { virtuals: true },
-	toObject: { virtuals: true }
+	toJSON: { virtuals: true, flattenMaps: true },
+	toObject: { virtuals: true, flattenMaps: true }
 })
 
 // Indexes

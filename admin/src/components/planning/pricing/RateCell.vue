@@ -6,6 +6,7 @@
     :data-cell="`${roomTypeId}-${mealPlanId}-${date}`"
     @click="handleClick"
     @dblclick="$emit('dblclick')"
+    @contextmenu.prevent="handleContextMenu"
     @mouseenter="showPopover"
     @mouseleave="hidePopover"
   >
@@ -44,6 +45,10 @@
 
       <!-- Has Rate (stop sale or not - same display, just different colors) -->
       <div v-else class="flex flex-col items-center justify-center h-full">
+        <!-- OBP Badge -->
+        <div v-if="isOBP" class="text-[6px] sm:text-[7px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-0.5 sm:px-1 rounded font-semibold mb-0.5">
+          OBP
+        </div>
         <!-- Price - RED if stop sale, GREEN if normal -->
         <div class="text-xs sm:text-sm font-bold" :class="rate.stopSale ? 'text-red-500' : 'text-green-600 dark:text-green-400'">
           {{ formattedPrice }}
@@ -74,11 +79,12 @@
         </div>
       </div>
 
-      <!-- Corner Indicator for Extra Prices -->
+      <!-- Corner Indicator for OBP or Extra Prices -->
       <div
-        v-if="hasExtraPrices"
-        class="absolute top-0 right-0 w-0 h-0 border-t-[6px] border-r-[6px] border-t-transparent border-r-blue-500 dark:border-r-blue-400"
-        :title="$t('planning.pricing.hasExtraPricing')"
+        v-if="isOBP || hasExtraPrices"
+        class="absolute top-0 right-0 w-0 h-0 border-t-[6px] border-r-[6px] border-t-transparent"
+        :class="isOBP ? 'border-r-indigo-500 dark:border-r-indigo-400' : 'border-r-blue-500 dark:border-r-blue-400'"
+        :title="isOBP ? 'Kişi Bazlı Fiyatlandırma (OBP)' : $t('planning.pricing.hasExtraPricing')"
       ></div>
     </template>
 
@@ -99,30 +105,63 @@
   <Teleport to="body">
     <Transition name="popover-fade">
       <div
-        v-if="isHovered && hasExtraPrices"
+        v-if="isHovered && rate"
         class="fixed z-[9999] pointer-events-none"
         :style="popoverStyle"
       >
         <div class="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 text-white rounded-xl shadow-xl border border-slate-600/50 overflow-hidden min-w-[140px]">
           <!-- Header -->
-          <div class="px-3 py-1.5 bg-blue-600/20 border-b border-slate-600/30">
-            <span class="text-[10px] font-semibold text-blue-300 uppercase tracking-wide">{{ $t('planning.pricing.extraPrices') }}</span>
+          <div class="px-3 py-1.5 border-b border-slate-600/30" :class="isOBP ? 'bg-indigo-600/20' : 'bg-green-600/20'">
+            <span class="text-[10px] font-semibold uppercase tracking-wide" :class="isOBP ? 'text-indigo-300' : 'text-green-300'">
+              {{ isOBP ? 'Kişi Bazlı Fiyat' : 'Ünite Bazlı Fiyat' }}
+            </span>
           </div>
 
           <!-- Content -->
           <div class="px-3 py-2 space-y-1.5">
-            <!-- Extra Adult -->
-            <div v-if="typeof rate.extraAdult === 'number' && rate.extraAdult >= 0" class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-1.5">
-                <span class="material-icons text-amber-400 text-xs">person_add</span>
-                <span class="text-[10px] text-slate-300">{{ $t('planning.pricing.extraAdultShort') }}</span>
+            <!-- OBP: Occupancy Pricing -->
+            <template v-if="isOBP && occupancyPricesForDisplay.length > 0">
+              <div
+                v-for="occ in occupancyPricesForDisplay"
+                :key="occ.pax"
+                class="flex items-center justify-between gap-3"
+              >
+                <div class="flex items-center gap-1.5">
+                  <span class="material-icons text-indigo-400 text-xs">group</span>
+                  <span class="text-[10px] text-slate-300">{{ occ.pax }} Yetişkin</span>
+                </div>
+                <span class="text-xs font-bold text-white">
+                  {{ occ.price.toLocaleString() }} {{ currency }}
+                </span>
               </div>
-              <span class="text-xs font-bold" :class="rate.extraAdult === 0 ? 'text-green-400' : 'text-white'">
-                {{ rate.extraAdult === 0 ? $t('common.free') : `+${rate.extraAdult} ${currency}` }}
-              </span>
-            </div>
+            </template>
 
-            <!-- Child Prices -->
+            <!-- Unit-based: Base price + Extra Adult -->
+            <template v-if="!isOBP">
+              <!-- Base Price -->
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-1.5">
+                  <span class="material-icons text-green-400 text-xs">hotel</span>
+                  <span class="text-[10px] text-slate-300">Oda Fiyatı</span>
+                </div>
+                <span class="text-xs font-bold text-white">
+                  {{ rate.pricePerNight?.toLocaleString() || 0 }} {{ currency }}
+                </span>
+              </div>
+
+              <!-- Extra Adult -->
+              <div v-if="typeof rate.extraAdult === 'number' && rate.extraAdult >= 0" class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-1.5">
+                  <span class="material-icons text-amber-400 text-xs">person_add</span>
+                  <span class="text-[10px] text-slate-300">{{ $t('planning.pricing.extraAdultShort') }}</span>
+                </div>
+                <span class="text-xs font-bold" :class="rate.extraAdult === 0 ? 'text-green-400' : 'text-white'">
+                  {{ rate.extraAdult === 0 ? $t('common.free') : `+${rate.extraAdult} ${currency}` }}
+                </span>
+              </div>
+            </template>
+
+            <!-- Child Prices (same for both pricing types) -->
             <template v-if="childPricesForDisplay.length > 0">
               <div
                 v-for="child in childPricesForDisplay"
@@ -150,8 +189,8 @@
               </span>
             </div>
 
-            <!-- Single Occupancy Discount -->
-            <div v-if="typeof rate.singleSupplement === 'number' && rate.singleSupplement > 0" class="flex items-center justify-between gap-3 pt-1.5 border-t border-slate-600/30">
+            <!-- Single Occupancy Discount (only for unit-based) -->
+            <div v-if="!isOBP && typeof rate.singleSupplement === 'number' && rate.singleSupplement > 0" class="flex items-center justify-between gap-3 pt-1.5 border-t border-slate-600/30">
               <div class="flex items-center gap-1.5">
                 <span class="material-icons text-blue-400 text-xs">person</span>
                 <span class="text-[10px] text-slate-300">{{ $t('planning.pricing.singleOccupancy') }}</span>
@@ -185,7 +224,7 @@ const props = defineProps({
   allowEditCalculated: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['click', 'dblclick', 'inline-change', 'inline-save', 'inline-next', 'inline-up', 'inline-down'])
+const emit = defineEmits(['click', 'dblclick', 'contextmenu', 'inline-change', 'inline-save', 'inline-next', 'inline-up', 'inline-down'])
 
 const inlineInput = ref(null)
 const cellRef = ref(null)
@@ -195,7 +234,8 @@ const popoverStyle = ref({})
 const showPopover = () => {
   // Don't show popover in inline edit mode
   if (props.inlineEditMode) return
-  if (!props.rate || !hasExtraPrices.value) return
+  // Show popover if we have a rate
+  if (!props.rate) return
 
   isHovered.value = true
 
@@ -237,6 +277,13 @@ const handleClick = (event) => {
   }
 }
 
+const handleContextMenu = (event) => {
+  // Only emit in inline edit mode
+  if (props.inlineEditMode) {
+    emit('contextmenu', event)
+  }
+}
+
 const cellClasses = computed(() => {
   const classes = ['relative']
 
@@ -253,11 +300,32 @@ const cellClasses = computed(() => {
   return classes
 })
 
+// Check if rate uses OBP (per_person pricing)
+const isOBP = computed(() => {
+  return props.rate?.pricingType === 'per_person'
+})
+
 const formattedPrice = computed(() => {
-  if (!props.rate?.pricePerNight && props.rate?.pricePerNight !== 0) return '-'
+  if (!props.rate) return '-'
+
+  // OBP: Show first available occupancy price (2 person is most common)
+  if (isOBP.value && props.rate.occupancyPricing) {
+    // Find the first defined price (prioritize 2, then 1, then others)
+    const priorities = [2, 1, 3, 4, 5, 6, 7, 8, 9, 10]
+    for (const pax of priorities) {
+      const price = props.rate.occupancyPricing[pax]
+      if (price !== undefined && price !== null && price >= 0) {
+        return price.toLocaleString()
+      }
+    }
+    return '-'
+  }
+
+  // Unit-based: Show pricePerNight
+  if (props.rate.pricePerNight === undefined && props.rate.pricePerNight !== 0) return '-'
 
   // Simple format without currency symbol for compactness
-  return props.rate.pricePerNight.toLocaleString()
+  return props.rate.pricePerNight?.toLocaleString() || '-'
 })
 
 const allotmentPercentage = computed(() => {
@@ -311,6 +379,20 @@ const childPricesForDisplay = computed(() => {
       isValid: typeof p === 'number' && p >= 0
     }))
     .filter(item => item.isValid)
+})
+
+// Get occupancy prices for OBP display in popover
+const occupancyPricesForDisplay = computed(() => {
+  if (!isOBP.value || !props.rate?.occupancyPricing) return []
+
+  const prices = []
+  for (let pax = 1; pax <= 10; pax++) {
+    const price = props.rate.occupancyPricing[pax]
+    if (price !== undefined && price !== null && price >= 0) {
+      prices.push({ pax, price })
+    }
+  }
+  return prices
 })
 </script>
 

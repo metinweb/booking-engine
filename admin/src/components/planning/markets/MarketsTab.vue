@@ -55,16 +55,17 @@
                   <span class="material-icons text-xs">payments</span>
                   %{{ market.paymentTerms.prepaymentPercentage || 30 }} {{ $t('planning.markets.prepaymentShort') }}
                 </span>
-                <!-- Child Age -->
-                <span v-if="market.childAgeRange?.max" class="flex items-center gap-1">
-                  <span class="material-icons text-xs">child_care</span>
-                  {{ $t('planning.markets.childShort') }}: {{ market.childAgeRange.min || 0 }}-{{ market.childAgeRange.max }}
-                </span>
-                <!-- Infant Age -->
-                <span v-if="market.infantAgeRange?.max" class="flex items-center gap-1">
-                  <span class="material-icons text-xs">baby_changing_station</span>
-                  {{ $t('planning.markets.infantShort') }}: {{ market.infantAgeRange.min || 0 }}-{{ market.infantAgeRange.max }}
-                </span>
+                <!-- Child Age Groups (only if not inheriting from hotel) -->
+                <template v-if="!market.childAgeSettings?.inheritFromHotel && market.childAgeSettings?.childAgeGroups?.length">
+                  <span
+                    v-for="group in market.childAgeSettings.childAgeGroups"
+                    :key="group.code"
+                    class="flex items-center gap-1"
+                  >
+                    <span class="material-icons text-xs">{{ group.code === 'infant' ? 'baby_changing_station' : 'child_care' }}</span>
+                    {{ $t(`planning.childGroups.${group.code}`) }}: {{ group.minAge }}-{{ group.maxAge }}
+                  </span>
+                </template>
               </div>
             </div>
           </div>

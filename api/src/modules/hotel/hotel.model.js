@@ -258,6 +258,20 @@ const hotelSchema = new mongoose.Schema({
 		hasElevator: { type: Boolean, default: false }
 	},
 
+	// Çocuk Yaş Grupları (Fiyatlandırma için)
+	// Varsayılan: infant (0-2), first (3-12) - İsteğe bağlı second eklenebilir
+	childAgeGroups: [{
+		code: {
+			type: String,
+			enum: ['infant', 'first', 'second'],
+			required: true
+		},
+		name: multiLangString(),
+		minAge: { type: Number, min: 0, max: 17, required: true },
+		maxAge: { type: Number, min: 0, max: 17, required: true },
+		order: { type: Number, default: 0 }
+	}],
+
 	// Pricing Settings (B2B Pricing Model)
 	pricingSettings: {
 		// Fiyatlandırma modeli: net (otel net fiyat verir) veya rack (afişe fiyat verir)
@@ -859,6 +873,26 @@ hotelSchema.pre('save', async function() {
 	// Sort cancellation rules by daysBeforeCheckIn descending
 	if (this.policies.cancellationRules && this.policies.cancellationRules.length > 0) {
 		this.policies.cancellationRules.sort((a, b) => b.daysBeforeCheckIn - a.daysBeforeCheckIn)
+	}
+
+	// Set default childAgeGroups if not defined (2 age groups: infant 0-2, child 3-12)
+	if (!this.childAgeGroups || this.childAgeGroups.length === 0) {
+		this.childAgeGroups = [
+			{
+				code: 'infant',
+				name: { tr: 'Bebek', en: 'Infant' },
+				minAge: 0,
+				maxAge: 2,
+				order: 0
+			},
+			{
+				code: 'first',
+				name: { tr: '1. Tip Çocuk', en: 'Child Type 1' },
+				minAge: 3,
+				maxAge: 12,
+				order: 1
+			}
+		]
 	}
 
 	// Validate roomTemplates - only for base hotels

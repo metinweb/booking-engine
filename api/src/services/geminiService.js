@@ -1580,6 +1580,552 @@ Sadece JSON döndür:`
   }
 }
 
+/**
+ * Parse hotel pricing contract (PDF/Word/Image) using Gemini AI
+ * Extracts room types, meal plans, periods, and pricing from contract documents
+ * @param {Buffer|string} fileContent - File content as base64 or buffer
+ * @param {string} mimeType - File MIME type (application/pdf, image/*, etc.)
+ * @param {object} context - Hotel context (existing room types, meal plans, currency)
+ * @returns {object} Parsed contract data with periods, rooms, meal plans, and prices
+ */
+export const parseHotelContract = async (fileContent, mimeType, context = {}) => {
+  const client = getAI()
+  if (!client) {
+    throw new Error('GEMINI_API_KEY is not configured')
+  }
+
+  // Convert Buffer to base64 if needed
+  const base64Content = Buffer.isBuffer(fileContent)
+    ? fileContent.toString('base64')
+    : fileContent
+
+  // Build context string
+  const existingRoomsStr = context.roomTypes?.map(rt => `${rt.code}: ${rt.name}`).join(', ') || 'Yok'
+  const existingMealPlansStr = context.mealPlans?.map(mp => `${mp.code}: ${mp.name}`).join(', ') || 'Yok'
+  const currency = context.currency || 'EUR'
+
+  const prompt = `Sen Türkiye'de bir seyahat acentesinde çalışan deneyimli bir KONTRAT ANALİSTİsin. Yıllardır otel kontratlarını okuyup sisteme giriyorsun. Türk turizm sektörünün tüm jargonlarını, kısaltmalarını ve yazılı olmayan kurallarını biliyorsun.
+
+Görevin: Bu kontrat dökümanını analiz edip TÜM fiyatları ve koşulları JSON formatına dönüştürmek.
+
+═══════════════════════════════════════════════════════════════
+MEVCUT SİSTEM VERİLERİ
+═══════════════════════════════════════════════════════════════
+Oda Tipleri: ${existingRoomsStr}
+Pansiyon Tipleri: ${existingMealPlansStr}
+Para Birimi: ${currency}
+
+═══════════════════════════════════════════════════════════════
+!!! EN KRİTİK KURAL - TÜM PERİYOTLAR !!!
+═══════════════════════════════════════════════════════════════
+Kontratta fiyat tablosu genellikle şu yapıdadır:
+
+TABLO YAPISI:
+┌─────────────────┬──────────┬──────────┬──────────┬──────────┐
+│ ODA TİPİ        │ Periyot1 │ Periyot2 │ Periyot3 │ Periyot4 │
+├─────────────────┼──────────┼──────────┼──────────┼──────────┤
+│ Standard Room   │   100    │   120    │   150    │   180    │
+│ Superior Room   │   130    │   150    │   180    │   210    │
+│ Deluxe Room     │   160    │   180    │   220    │   260    │
+│ Family Room     │   200    │   230    │   280    │   320    │
+└─────────────────┴──────────┴──────────┴──────────┴──────────┘
+
+YAPMAN GEREKEN:
+1. Tablodaki HER SÜTUNU (her periyot) oku
+2. Tablodaki HER SATIRI (her oda) oku
+3. Her oda × periyot kombinasyonu için ayrı pricing kaydı oluştur
+
+ÖRNEK: 4 oda ve 4 periyot varsa → 16 pricing kaydı olmalı
+- Standard + P1, Standard + P2, Standard + P3, Standard + P4
+- Superior + P1, Superior + P2, Superior + P3, Superior + P4
+- vs...
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! KRİTİK - EKSİKSİZ FİYAT ÇIKARIMI !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+HİÇBİR FİYAT ATLAMA! HER ODA İÇİN HER PERİYODUN FİYATI OLMALI!
+
+- Tabloda fiyat görüyorsan MUTLAKA pricing dizisine ekle
+- Bir oda için bazı periyotlarda fiyat eksik olamaz
+- Kontrol: pricing.length = oda sayısı × periyot sayısı × pansiyon sayısı
+- Eksik fiyat varsa kontrat geçersiz sayılır!
+
+SADECE İLK PERİYOT DEĞİL, TÜM PERİYOTLARIN FİYATLARINI ÇEK!
+SADECE İLK ODA DEĞİL, TÜM ODALARIN FİYATLARINI ÇEK!
+
+═══════════════════════════════════════════════════════════════
+PERİYOT TARİHLERİ
+═══════════════════════════════════════════════════════════════
+Periyotların tarihleri genelde tablonun üstünde veya ayrı bir yerde yazar:
+- "Dönem 1: 01.04.2025 - 31.05.2025"
+- "Dönem 2: 01.06.2025 - 30.06.2025"
+vs.
+
+Her periyot için code, name, startDate, endDate çıkar.
+
+═══════════════════════════════════════════════════════════════
+ÇIKTI JSON FORMATI
+═══════════════════════════════════════════════════════════════
+{
+  "success": true,
+  "contractInfo": {
+    "hotelName": "Otel adı",
+    "validFrom": "2025-04-01",
+    "validTo": "2025-10-31",
+    "currency": "${currency}",
+    "pricingType": "unit | per_person",
+    "notes": "Önemli notlar"
+  },
+  "childTypes": [
+    { "id": 1, "name": "Bebek", "minAge": 0, "maxAge": 2 },
+    { "id": 2, "name": "1. Çocuk", "minAge": 3, "maxAge": 6 },
+    { "id": 3, "name": "2. Çocuk", "minAge": 7, "maxAge": 12 }
+  ],
+  "periods": [
+    { "code": "P1", "name": "1. Dönem", "startDate": "2025-04-01", "endDate": "2025-05-31" },
+    { "code": "P2", "name": "2. Dönem", "startDate": "2025-06-01", "endDate": "2025-06-30" },
+    { "code": "P3", "name": "3. Dönem", "startDate": "2025-07-01", "endDate": "2025-08-31" },
+    { "code": "P4", "name": "4. Dönem", "startDate": "2025-09-01", "endDate": "2025-10-31" }
+  ],
+  "roomTypes": [
+    {
+      "contractName": "Kontrattaki oda adı",
+      "contractCode": "STD",
+      "matchedCode": "STD veya null",
+      "isNewRoom": true/false,
+      "suggestedCode": "3 harfli kod önerisi",
+      "confidence": 95,
+      "capacity": {
+        "standardOccupancy": 2,
+        "maxAdults": 2,
+        "maxChildren": 2,
+        "maxInfants": 1,
+        "maxOccupancy": 4
+      }
+    }
+  ],
+  "mealPlans": [
+    {
+      "contractName": "Pansiyon adı",
+      "contractCode": "AI",
+      "matchedCode": "AI veya null",
+      "isNewMealPlan": true/false,
+      "suggestedCode": "Kod önerisi",
+      "confidence": 90
+    }
+  ],
+  "pricing": [
+    // Ünite Bazlı (unit) örnekler - pricingType: "unit" veya belirtilmemiş
+    { "periodCode": "P1", "roomCode": "STD", "mealPlanCode": "AI", "pricePerNight": 100, "extraAdult": 30, "extraChild": [20, 15], "extraInfant": 0 },
+    { "periodCode": "P2", "roomCode": "STD", "mealPlanCode": "AI", "pricePerNight": 120, "extraAdult": 35, "extraChild": [25, 18], "extraInfant": 0 },
+    { "periodCode": "P1", "roomCode": "VIP", "mealPlanCode": "AI", "pricePerNight": 93000, "extraAdult": 20000, "extraChild": [15000, 12000], "extraInfant": 0 },
+
+    // Kişi Bazlı (OBP) örnek - pricingType: "per_person"
+    { "periodCode": "P1", "roomCode": "DLX", "mealPlanCode": "AI", "pricingType": "per_person", "occupancyPricing": { "1": 80, "2": 100, "3": 130 }, "extraChild": [30, 25] }
+  ],
+  "earlyBookingDiscounts": [
+    {
+      "name": "EB %20",
+      "discountPercentage": 20,
+      "salePeriod": { "startDate": "2024-11-01", "endDate": "2024-12-31" },
+      "stayPeriod": { "startDate": "2025-04-01", "endDate": "2025-10-31" },
+      "paymentDueDate": "2025-01-15",
+      "isCumulative": false
+    }
+  ],
+  "warnings": [],
+  "confidence": { "overall": 85, "periods": 90, "rooms": 85, "pricing": 80 }
+}
+
+═══════════════════════════════════════════════════════════════
+!!! KONTROL LİSTESİ - ÇIKMADAN ÖNCE MUTLAKA DOĞRULA !!!
+═══════════════════════════════════════════════════════════════
+
+★★★ FİYAT KONTROLÜ - EN ÖNEMLİ ★★★
+□ Kaç periyot var? → periods dizisinde hepsi var mı?
+□ Kaç oda tipi var? → roomTypes dizisinde hepsi var mı?
+□ pricing dizisi = periyot sayısı × oda sayısı × pansiyon sayısı mı?
+□ HER ODA İÇİN HER PERİYODUN FİYATI VAR MI? → EKSİK OLAMAZ!
+□ Tabloda gördüğün her fiyatı pricing dizisine ekledin mi?
+□ Her periyotta minStay değeri var mı?
+
+!!! EKSİK FİYAT = GEÇERSİZ KONTRAT !!!
+Eğer tabloda 13 oda ve 10 periyot varsa → 130 fiyat kaydı olmalı!
+Eksik varsa tekrar kontrol et ve ekle!
+
+□ EB indirimi var mı? → earlyBookingDiscounts dizisine ekle!
+  - salePeriod.startDate ve endDate (satış dönemi)
+  - stayPeriod.startDate ve endDate (konaklama dönemi)
+
+□ Her oda için KAPASİTE bilgisi doğru mu?
+  - STANDART DOLULUK: Fiyatın kaç kişi için olduğu → standardOccupancy
+    Örnek: "Ünite Fiyatı (8 Kişi)" → standardOccupancy = 8
+  - MAKSİMUM YETİŞKİN: Ekstra kişi varsa kaç kişi sığar → maxAdults
+    Örnek: "9. Kişi: 20.000 TL" varsa → maxAdults = 9
+  - MAKSİMUM KAPASİTE: Toplam kapasite → maxOccupancy
+  - roomTypes[].capacity objesine ekle
+
+□ Ekstra kişi fiyatları var mı?
+  - "X. Kişi: Y TL" → extraAdult = Y, maxAdults = X, maxOccupancy = X
+  - Çocuk fiyatlarını extraChild dizisine ekle [1.çocuk, 2.çocuk]
+  - pricing[] kaydına extraAdult, extraChild, extraInfant ekle
+
+ÖRNEK HESAPLAMA:
+- 5 periyot × 8 oda × 1 pansiyon = 40 pricing kaydı olmalı
+- 4 periyot × 6 oda × 2 pansiyon = 48 pricing kaydı olmalı
+- 10 periyot × 13 oda × 1 pansiyon = 130 pricing kaydı olmalı
+
+═══════════════════════════════════════════════════════════════
+EŞLEŞTİRME KURALLARI
+═══════════════════════════════════════════════════════════════
+
+PANSİYON:
+- "All Inclusive", "Her Şey Dahil", "AI" → AI
+- "Ultra All Inclusive", "UAI" → UAI
+- "Full Board", "Tam Pansiyon", "FB" → FB
+- "Half Board", "Yarım Pansiyon", "HB" → HB
+- "Bed & Breakfast", "Oda Kahvaltı", "BB" → BB
+- "Room Only", "Sadece Oda", "RO" → RO
+
+ODA TİPLERİ EŞLEŞTİRME (ÇOK ÖNEMLİ):
+Mevcut oda tiplerini (${existingRoomsStr}) kontrat oda isimleriyle eşleştir.
+
+EŞLEŞTİRME MANTIĞI:
+1. KOD BAZLI: Kontrat kodu = Mevcut kod → DOĞRUDAN EŞLEŞTİR
+   - "STD" → STD, "DLX" → DLX, "SNG" → SNG
+
+2. İSİM BAZLI EŞLEŞTIRME (fuzzy):
+   - "Standard Room", "Standart Oda", "Standard" → STD (varsa)
+   - "Deluxe Room", "Delüks Oda" → DLX (varsa)
+   - "Single Room", "Tek Kişilik" → SNG (varsa)
+   - "Double Room", "Çift Kişilik" → DBL (varsa)
+   - "Twin Room" → TWN (varsa)
+   - "Superior Room" → SUP (varsa)
+   - "Suite", "Suit" → SUI veya STE (varsa)
+   - "Family Room", "Aile Odası" → FAM veya FML (varsa)
+   - "Triple Room", "Üç Kişilik" → TRP (varsa)
+   - "Junior Suite" → JSU (varsa)
+   - "Economy", "Ekonomi" → ECO (varsa)
+
+3. ANAHTAR KELİME ARAMASI:
+   - İsimde "Standard" varsa STD kodlu odayı ara
+   - İsimde "Deluxe" varsa DLX kodlu odayı ara
+   - İsimde "Suite" varsa SUI veya STE kodlu odayı ara
+   - İsimde "Family" varsa FAM kodlu odayı ara
+
+4. MEVCUT İSİM KARŞILAŞTIRMASI:
+   - Mevcut oda isimlerinin içinde kontrat ismini ara
+   - Örnek: Mevcut "Standard Oda" → Kontrat "Standard Room" = EŞLEŞ
+
+5. HİÇ EŞLEŞME YOKSA:
+   - isNewRoom: true
+   - suggestedCode: 3 harfli kod öner (örn: "Deluxe Sea View" → "DSV")
+   - matchedCode: null
+
+!!! ÖNEMLİ !!!
+- matchedCode SADECE mevcut oda kodlarından biri olabilir: ${existingRoomsStr}
+- Eğer mevcut listede eşleşen yoksa matchedCode = null, isNewRoom = true
+- Eşleşme bulunursa matchedCode = o oda kodu, isNewRoom = false
+
+ÇOCUK YAŞLARI:
+- "0-2.99" → minAge:0, maxAge:2
+- "3-6.99" → minAge:3, maxAge:6
+- "7-12.99" → minAge:7, maxAge:12
+
+═══════════════════════════════════════════════════════════════
+MİNİMUM KONAKLAMA ŞARTLARI
+═══════════════════════════════════════════════════════════════
+
+Kontratda minimum gece şartları farklı şekillerde belirtilebilir:
+
+ÖRNEK 1 - TARİH ARALIĞI BAZLI:
+"01.04 - 08.04.2025 ve 07.10 - 31.10.2025 konaklamalarda minimum 3 gece konaklama şartı bulunmaktadır. Diğer tarih aralıkları için minimum 4 gece konaklama şartı bulunmaktadır."
+
+BU METNİN YORUMU:
+- P1 periyodu (01.04-08.04) → minStay: 3
+- Son periyot (07.10-31.10) → minStay: 3
+- Diğer periyotlar → minStay: 4
+
+ÖRNEK 2 - GENEL:
+"Tüm sezon için minimum 5 gece konaklama zorunludur"
+→ Tüm periyotlar için minStay: 5
+
+ÖRNEK 3 - PERİYOT BAZLI:
+Tabloda her periyot için ayrı minStay sütunu varsa, o değerleri kullan.
+
+HER PERİYOT İÇİN minStay BELİRLE!
+periods dizisinde her periyoda mutlaka minStay ekle.
+
+═══════════════════════════════════════════════════════════════
+FİYATLANDIRMA TİPİ
+═══════════════════════════════════════════════════════════════
+- "Ünite Bazlı" / "Unit Based" / "Per Room" → pricingType: "unit"
+- "Kişi Bazlı" / "Per Person" / "OBP" → pricingType: "per_person"
+
+═══════════════════════════════════════════════════════════════
+!!! KİŞİ BAZLI FİYATLANDIRMA (OBP) - ÇOK ÖNEMLİ !!!
+═══════════════════════════════════════════════════════════════
+
+Kişi bazlı (OBP - Occupancy Based Pricing) kontratlarda her yetişkin sayısı için ayrı fiyat belirlenir.
+
+ÖRNEK OBP KONTRAT:
+"Standard Oda
+1 Kişi: 80 €
+2 Kişi: 100 €
+3 Kişi: 130 €"
+
+BU METNİN YORUMU:
+- pricingType: "per_person"
+- occupancyPricing: { "1": 80, "2": 100, "3": 130 }
+- pricePerNight: KULLANILMAZ (0 veya null)
+- extraAdult: KULLANILMAZ (0)
+- singleSupplement: KULLANILMAZ (0)
+
+OBP'DE ÇOCUK FİYATLARI:
+- Çocuklar yetişkin sayısına DAHİL DEĞİL
+- Çocuk fiyatları ayrıca belirtilir (extraChild array)
+- Örnek: "1. Çocuk: 30 €, 2. Çocuk: 25 €" → extraChild: [30, 25]
+
+ÜNİTE BAZLI vs KİŞİ BAZLI AYIRT ETME:
+1. "X Kişi: Y TL" formatında fiyatlar varsa → per_person
+2. "1 Kişi", "2 Kişi", "3 Kişi" şeklinde ayrı fiyatlar → per_person
+3. "Ünite Fiyatı", "Oda Fiyatı", tek bir fiyat → unit
+4. "Ekstra Yatak/Kişi" varsa → unit
+
+pricing dizisinde OBP için:
+{
+  "periodCode": "P1",
+  "roomCode": "STD",
+  "mealPlanCode": "AI",
+  "pricingType": "per_person",
+  "occupancyPricing": {
+    "1": 80,
+    "2": 100,
+    "3": 130
+  },
+  "extraChild": [30, 25]
+}
+
+═══════════════════════════════════════════════════════════════
+!!! ODA KAPASİTESİ VE EKSTRA KİŞİ - ÇOK ÖNEMLİ !!!
+═══════════════════════════════════════════════════════════════
+
+Türk turizm kontratlarında kapasite ve ekstra kişi fiyatlandırması şu şekillerde ifade edilir:
+
+ÖRNEK 1 - VİLLA/BÜYÜK ODALAR:
+"VIP Villa
+Ünite Fiyatı (8 Kişi): 93.000 TL
+9. Kişi: 20.000 TL"
+
+BU METNİN YORUMU:
+- standardOccupancy: 8 (Standart doluluk - fiyata DAHİL kişi sayısı)
+- maxAdults: 9 (9. kişi fiyatı VAR = odaya 9 yetişkin SIĞABİLİYOR!)
+- maxOccupancy: 9 (maksimum toplam kapasite)
+- pricePerNight: 93000 (8 kişi dahil ünite fiyatı)
+- extraAdult: 20000 (9. kişi için ekstra ücret)
+
+!!! ÇOK ÖNEMLİ MANTIK !!!
+- "X Kişi" fiyatı = standart doluluk = standardOccupancy = X
+- "X+1. Kişi" fiyatı VARSA = odaya X+1 kişi sığar = maxAdults = X+1, maxOccupancy = X+1
+- "X+1. Kişi" fiyatı YOKSA = maxAdults = X, maxOccupancy = X
+
+ÖRNEK 2 - STANDART ODALAR:
+"Standard Oda (2+1)
+2 Yetişkin: 5.000 TL
+3. Kişi (Ekstra Yatak): 1.500 TL"
+
+BU METNİN YORUMU:
+- standardOccupancy: 2 (fiyata dahil kişi sayısı)
+- maxAdults: 3 (3. kişi kabul ediliyor = 3 yetişkin sığar)
+- maxOccupancy: 3
+- pricePerNight: 5000
+- extraAdult: 1500
+
+ÖRNEK 3 - PARANTEZ İÇİ KAPASİTE:
+"Aile Odası (2+2)" → standardOccupancy: 2, maxAdults: 2, maxChildren: 2, maxOccupancy: 4
+"Suite (4 Kişi)" ve "5. Kişi: X TL" varsa → standardOccupancy: 4, maxAdults: 5, maxOccupancy: 5
+"Villa (6+2)" → standardOccupancy: 6, maxAdults: 6, maxChildren: 2, maxOccupancy: 8
+
+KAPASİTE HESAPLAMA KURALLARI:
+1. "Ünite Fiyatı (X Kişi)" → standardOccupancy = X (fiyata dahil kişi sayısı)
+2. "X+1. Kişi: Y TL" veya "Ekstra Kişi: Y TL" varsa → maxAdults = X+1, maxOccupancy = X+1
+3. Ekstra kişi fiyatı YOKSA → maxAdults = standardOccupancy
+4. "X+Y" formatı → maxAdults = X, maxChildren = Y, maxOccupancy = X+Y
+
+ÇOCUK FİYATLARI:
+- "0-2 yaş FREE/Ücretsiz" → maxInfants: 1 veya 2
+- "1. Çocuk: X TL" → İlk çocuk fiyatı
+- "2. Çocuk: Y TL" → İkinci çocuk fiyatı
+
+pricing dizisine şunları ekle:
+{
+  "periodCode": "P1",
+  "roomCode": "VIP",
+  "mealPlanCode": "AI",
+  "pricePerNight": 93000,
+  "extraAdult": 20000,
+  "extraChild": [15000, 12000],  // 1. ve 2. çocuk fiyatları
+  "extraInfant": 0
+}
+
+roomTypes dizisinde kapasite:
+{
+  "contractName": "VIP Villa",
+  "contractCode": "VIP",
+  "capacity": {
+    "standardOccupancy": 8,
+    "maxAdults": 9,
+    "maxChildren": 2,
+    "maxInfants": 2,
+    "maxOccupancy": 9
+  }
+}
+
+NOT: minAdults KULLANMA! standardOccupancy kullan.
+
+═══════════════════════════════════════════════════════════════
+!!! ERKEN REZERVASYON (EB) İNDİRİMLERİ - ÇOK ÖNEMLİ !!!
+═══════════════════════════════════════════════════════════════
+
+EB metinlerini DİKKATLİCE yorumla. Türkiye turizm sektöründe EB şu şekilde ifade edilir:
+
+ÖRNEK METİN:
+"31.12.2024 tarihine kadar gönderilen tüm rezervasyonlar için %20 erken rezervasyon indirimi uygulanacaktır."
+
+BU METNİN YORUMU:
+- SATIŞ DÖNEMİ (salePeriod): Bugünden 31.12.2024'e kadar
+  - startDate: Kontratın geçerlilik başlangıcı veya bugün (hangisi önceyse)
+  - endDate: 31.12.2024
+- KONAKLAMA DÖNEMİ (stayPeriod): Tüm sezon
+  - startDate: Sezonun başlangıç tarihi (ilk periyodun başlangıcı)
+  - endDate: Sezonun bitiş tarihi (son periyodun bitişi)
+- discountPercentage: 20
+
+GENEL KURALLAR:
+1. "X tarihine kadar gönderilen/yapılan rezervasyonlar" → Satış bitiş tarihi X
+2. Satış başlangıç tarihi belirtilmemişse → Kontrat başlangıcı veya bugün
+3. Konaklama dönemi belirtilmemişse → Tüm sezon (validFrom - validTo)
+4. "Tüm sezon için geçerlidir" → stayPeriod = sezon tarihleri
+5. Birden fazla EB varsa hepsini ayrı ayrı çıkar (%15, %20, %25 gibi)
+
+DİĞER EB TERİMLERİ:
+- "Erken Rezervasyon", "Early Bird", "EB", "E.B"
+- "Ön Rezervasyon İndirimi"
+- "Advance Booking Discount"
+
+EB JSON FORMATI:
+{
+  "earlyBookingDiscounts": [
+    {
+      "name": "EB %20",
+      "discountPercentage": 20,
+      "salePeriod": {
+        "startDate": "2024-01-01",
+        "endDate": "2024-12-31"
+      },
+      "stayPeriod": {
+        "startDate": "2025-04-01",
+        "endDate": "2025-10-31"
+      },
+      "paymentDueDate": "2025-01-15",
+      "isCumulative": false,
+      "notes": "Ödeme 15.01.2025'e kadar yapılmalı"
+    }
+  ]
+}
+
+═══════════════════════════════════════════════════════════════
+SADECE GEÇERLİ JSON DÖNDÜR - AÇIKLAMA YAZMA!
+═══════════════════════════════════════════════════════════════`
+
+  try {
+    logger.info(`Parsing hotel contract - mimeType: ${mimeType}, contentSize: ${base64Content.length} chars`)
+
+    const response = await client.models.generateContentStream({
+      model: GEMINI_MODEL,
+      config: {
+        temperature: 0.1,
+        maxOutputTokens: 65536
+      },
+      contents: [{
+        role: 'user',
+        parts: [
+          {
+            inlineData: {
+              mimeType: mimeType,
+              data: base64Content
+            }
+          },
+          { text: prompt }
+        ]
+      }]
+    })
+
+    // Collect all chunks
+    let fullText = ''
+    let chunkCount = 0
+    for await (const chunk of response) {
+      chunkCount++
+      if (chunk.text) {
+        fullText += chunk.text
+      }
+    }
+
+    logger.info(`Contract parsing response - chunks: ${chunkCount}, length: ${fullText.length} chars`)
+
+    if (!fullText) {
+      throw new Error('No response received from AI')
+    }
+
+    // Clean up response
+    let cleanedResponse = fullText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      cleanedResponse = jsonMatch[0]
+    }
+
+    // Check for truncation and repair if needed
+    if (isJsonTruncated(cleanedResponse)) {
+      logger.warn('Contract parsing response appears truncated, attempting repair')
+      cleanedResponse = repairTruncatedJson(cleanedResponse)
+    }
+
+    const parsed = JSON.parse(cleanedResponse)
+
+    // Calculate expected vs actual prices
+    const periodCount = parsed.periods?.length || 0
+    const roomCount = parsed.roomTypes?.length || 0
+    const mealPlanCount = parsed.mealPlans?.length || 0
+    const actualPrices = parsed.pricing?.length || 0
+    const expectedPrices = periodCount * roomCount * mealPlanCount
+
+    logger.info(`Contract parsing completed:`)
+    logger.info(`  - Periods: ${periodCount}`)
+    logger.info(`  - Room types: ${roomCount}`)
+    logger.info(`  - Meal plans: ${mealPlanCount}`)
+    logger.info(`  - Prices: ${actualPrices} (expected: ${expectedPrices})`)
+
+    if (actualPrices < expectedPrices) {
+      const missing = expectedPrices - actualPrices
+      logger.warn(`  - MISSING ${missing} price entries (${Math.round(missing/expectedPrices*100)}% incomplete)`)
+      if (!parsed.warnings) parsed.warnings = []
+      parsed.warnings.push(`${missing} fiyat kaydı eksik olabilir (beklenen: ${expectedPrices}, bulunan: ${actualPrices})`)
+    }
+
+    return {
+      success: true,
+      data: parsed
+    }
+  } catch (error) {
+    logger.error('Contract parsing error: ' + error.message)
+    return {
+      success: false,
+      error: error.message
+    }
+  }
+}
+
 export default {
   translateText,
   translateFields,
@@ -1587,5 +2133,6 @@ export default {
   parsePricingCommand,
   extractHotelData,
   extractHotelDataFromUrl,
+  parseHotelContract,
   languageNames
 }

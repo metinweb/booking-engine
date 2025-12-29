@@ -52,6 +52,15 @@ const marketSchema = new mongoose.Schema({
 		default: 'EUR'
 	},
 
+	// Default pricing type for this market
+	// 'unit' = room-based pricing (default)
+	// 'per_person' = occupancy-based pricing (OBP)
+	defaultPricingType: {
+		type: String,
+		enum: ['unit', 'per_person'],
+		default: 'unit'
+	},
+
 	// Countries in this market (ISO 3166-1 alpha-2 codes)
 	countries: [{
 		type: String,
@@ -90,14 +99,18 @@ const marketSchema = new mongoose.Schema({
 		}
 	},
 
-	// Age range settings (overrides hotel settings if set)
-	childAgeRange: {
-		min: { type: Number, min: 0, max: 17, default: null },
-		max: { type: Number, min: 1, max: 17, default: null }
-	},
-	infantAgeRange: {
-		min: { type: Number, min: 0, max: 6, default: null },
-		max: { type: Number, min: 0, max: 6, default: null }
+	// Child age settings (overrides hotel settings if set)
+	childAgeSettings: {
+		inheritFromHotel: { type: Boolean, default: true },
+		// Override child age groups for this market (same structure as hotel.childAgeGroups)
+		childAgeGroups: [{
+			code: {
+				type: String,
+				enum: ['infant', 'first', 'second']
+			},
+			minAge: { type: Number, min: 0, max: 17 },
+			maxAge: { type: Number, min: 0, max: 17 }
+		}]
 	},
 
 	// Rate type - refundable or non-refundable
@@ -193,12 +206,75 @@ const marketSchema = new mongoose.Schema({
 	},
 
 	// Children allowed in this market
-	childrenAllowed: { type: Boolean, default: true }
+	childrenAllowed: { type: Boolean, default: true },
+
+	// ===== PRICING OVERRIDES (per room type for this market) =====
+	// Array of room-specific pricing overrides for this market
+	// Hierarchy: RoomType -> Market.pricingOverrides -> Season.pricingOverrides -> Rate
+	pricingOverrides: [{
+		// Which room type this override applies to
+		roomType: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'RoomType',
+			required: true
+		},
+
+		// Pricing type override (unit or per_person)
+		usePricingTypeOverride: { type: Boolean, default: false },
+		pricingType: {
+			type: String,
+			enum: ['unit', 'per_person'],
+			default: 'unit'
+		},
+
+		// Multiplier override
+		useMultiplierOverride: { type: Boolean, default: false },
+
+		// Override multipliers for this market (same structure as RoomType.multiplierTemplate)
+		multiplierOverride: {
+			// Adult multipliers override { 1: 0.8, 2: 1.0, 3: 1.3, ... }
+			adultMultipliers: {
+				type: Map,
+				of: Number,
+				default: undefined
+			},
+
+			// Child multipliers override - per order, per age group
+			childMultipliers: {
+				type: Map,
+				of: {
+					type: Map,
+					of: Number
+				},
+				default: undefined
+			},
+
+			// Combination table override
+			combinationTable: [{
+				key: { type: String },
+				adults: { type: Number, min: 1 },
+				children: [{
+					order: { type: Number },
+					ageGroup: { type: String }
+				}],
+				calculatedMultiplier: { type: Number },
+				overrideMultiplier: { type: Number, default: null },
+				isActive: { type: Boolean, default: true }
+			}],
+
+			// Rounding rule override
+			roundingRule: {
+				type: String,
+				enum: ['none', 'nearest', 'up', 'down', 'nearest5', 'nearest10'],
+				default: undefined
+			}
+		}
+	}]
 
 }, {
 	timestamps: true,
-	toJSON: { virtuals: true },
-	toObject: { virtuals: true }
+	toJSON: { virtuals: true, flattenMaps: true },
+	toObject: { virtuals: true, flattenMaps: true }
 })
 
 // Indexes

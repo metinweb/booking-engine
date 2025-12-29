@@ -140,6 +140,19 @@
 
             <!-- Price Entry Per Room + Meal Plan -->
             <div v-if="currentRoomId && roomPrices[currentRoomId]" class="space-y-4">
+              <!-- Current Room Pricing Type Badge -->
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-bold"
+                  :class="currentRoomPricingType === 'per_person'
+                    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                    : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'"
+                >
+                  {{ currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
+                </span>
+                <span class="text-xs text-gray-500">- {{ currentRoomTypeName }}</span>
+              </div>
+
               <!-- Meal Plan Cards -->
               <div
                 v-for="mp in uniqueMealPlans"
@@ -148,49 +161,37 @@
                 class="border border-gray-200 dark:border-slate-600 rounded-xl overflow-hidden"
               >
                 <!-- Meal Plan Header -->
-                <div class="bg-gray-50 dark:bg-slate-700 px-4 py-3 flex items-center justify-between">
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="px-2 py-0.5 rounded text-xs font-bold"
-                      :class="getMealPlanColor(mp.code)"
-                    >
-                      {{ mp.code }}
-                    </span>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ getMealPlanName(mp) }}</span>
-                  </div>
-                  <!-- Toggle expand -->
-                  <button
-                    type="button"
-                    @click="toggleMealPlanExpand(mp._id)"
-                    class="text-gray-400 hover:text-gray-600"
+                <div class="bg-gray-50 dark:bg-slate-700 px-4 py-2 flex items-center gap-2">
+                  <span
+                    class="px-2 py-0.5 rounded text-xs font-bold"
+                    :class="getMealPlanColor(mp.code)"
                   >
-                    <span class="material-icons text-sm">
-                      {{ expandedMealPlans[mp._id] ? 'expand_less' : 'expand_more' }}
-                    </span>
-                  </button>
+                    {{ mp.code }}
+                  </span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ getMealPlanName(mp) }}</span>
                 </div>
 
                 <!-- Pricing Fields -->
-                <div class="p-4 bg-white dark:bg-slate-800">
-                  <!-- Base Price (always visible) -->
-                  <div class="flex items-center gap-3 mb-3">
-                    <label class="text-sm text-gray-600 dark:text-gray-400 w-28">{{ $t('planning.pricing.pricePerNight') }}</label>
-                    <div class="flex items-center gap-2 flex-1">
-                      <input
-                        v-model.number="roomPrices[currentRoomId][mp._id].pricePerNight"
-                        type="number"
-                        min="0"
-                        step="10"
-                        class="form-input w-32 text-center font-bold"
-                        :class="roomPrices[currentRoomId]?.[mp._id]?.pricePerNight > 0 ? 'border-green-300 dark:border-green-700 text-green-700 dark:text-green-400' : ''"
-                        placeholder="0"
-                      />
-                      <span class="text-sm text-gray-400">{{ currency }}</span>
+                <div class="p-4 bg-white dark:bg-slate-800 space-y-3">
+                  <!-- UNIT PRICING -->
+                  <template v-if="currentRoomPricingType === 'unit'">
+                    <!-- Base Price -->
+                    <div class="flex items-center gap-3">
+                      <label class="text-sm text-gray-600 dark:text-gray-400 w-28">{{ $t('planning.pricing.pricePerNight') }}</label>
+                      <div class="flex items-center gap-2 flex-1">
+                        <input
+                          v-model.number="roomPrices[currentRoomId][mp._id].pricePerNight"
+                          type="number"
+                          min="0"
+                          step="10"
+                          class="form-input w-32 text-center font-bold"
+                          :class="roomPrices[currentRoomId]?.[mp._id]?.pricePerNight > 0 ? 'border-green-300 dark:border-green-700 text-green-700 dark:text-green-400' : ''"
+                          placeholder="0"
+                        />
+                        <span class="text-sm text-gray-400">{{ currency }}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <!-- Extra Person Prices (expandable) -->
-                  <div v-show="expandedMealPlans[mp._id]" class="space-y-3 pt-3 border-t border-gray-100 dark:border-slate-700">
                     <!-- Extra Adult -->
                     <div class="flex items-center gap-3">
                       <label class="text-sm text-gray-500 dark:text-gray-400 w-28">{{ $t('planning.pricing.extraAdultShort') }}</label>
@@ -206,57 +207,11 @@
                       </div>
                     </div>
 
-                    <!-- Child Order Pricing -->
-                    <div>
-                      <div class="flex items-center mb-2">
-                        <label class="text-sm text-gray-500 dark:text-gray-400">
-                          {{ $t('planning.pricing.childOrderPricing') }}
-                          <span class="text-xs text-purple-600 dark:text-purple-400 font-medium ml-1">{{ childAgeLabel }}</span>
-                        </label>
-                      </div>
-                      <div class="grid grid-cols-2 gap-2">
-                        <div
-                          v-for="childIndex in currentRoomMaxChildren"
-                          :key="childIndex"
-                          class="flex items-center gap-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2"
-                        >
-                          <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ childIndex }}. {{ $t('planning.pricing.child') }}</span>
-                          <input
-                            v-model.number="roomPrices[currentRoomId][mp._id].childOrderPricing[childIndex - 1]"
-                            type="number"
-                            min="0"
-                            class="form-input flex-1 w-20 text-center text-sm py-1"
-                            placeholder="0"
-                          />
-                          <span class="text-xs text-gray-400">{{ currency }}</span>
-                        </div>
-                      </div>
-                      <p class="text-xs text-gray-400 mt-1 italic">{{ $t('planning.pricing.childPricingHint') }}</p>
-                    </div>
-
-                    <!-- Extra Infant -->
-                    <div class="flex items-center gap-3">
-                      <label class="text-sm text-gray-500 dark:text-gray-400 w-28">
-                        {{ $t('planning.pricing.extraInfantShort') }}
-                        <span class="text-xs text-purple-600 dark:text-purple-400 font-medium">{{ infantAgeLabel }}</span>
-                      </label>
-                      <div class="flex items-center gap-2">
-                        <input
-                          v-model.number="roomPrices[currentRoomId][mp._id].extraInfant"
-                          type="number"
-                          min="0"
-                          class="form-input w-24 text-center text-sm"
-                          placeholder="0"
-                        />
-                        <span class="text-xs text-gray-400">{{ currency }}</span>
-                      </div>
-                    </div>
-
                     <!-- Single Occupancy Discount -->
-                    <div class="flex items-center gap-3 pt-2 border-t border-gray-100 dark:border-slate-700">
+                    <div class="flex items-center gap-3">
                       <label class="text-sm text-gray-500 dark:text-gray-400 w-28 flex items-center gap-1">
                         <span class="material-icons text-blue-500 text-sm">person</span>
-                        {{ $t('planning.pricing.singleOccupancy') }}
+                        Tek Kişi İnd.
                       </label>
                       <div class="flex items-center gap-2">
                         <span class="text-xs text-gray-400">-</span>
@@ -270,20 +225,70 @@
                         <span class="text-xs text-gray-400">{{ currency }}</span>
                       </div>
                     </div>
+                  </template>
+
+                  <!-- OBP PRICING -->
+                  <template v-else>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                      <div
+                        v-for="(price, pax) in roomPrices[currentRoomId][mp._id].occupancyPricing"
+                        :key="pax"
+                        class="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg px-2 py-1.5"
+                      >
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 w-6">{{ pax }}P</span>
+                        <input
+                          v-model.number="roomPrices[currentRoomId][mp._id].occupancyPricing[pax]"
+                          type="number"
+                          min="0"
+                          class="form-input flex-1 w-16 text-center text-sm py-1 font-bold"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- Child Pricing (both types) -->
+                  <div class="pt-2 border-t border-gray-100 dark:border-slate-700">
+                    <div class="text-xs text-gray-500 mb-2">Çocuk Fiyatları {{ childAgeLabel }}</div>
+                    <div class="grid grid-cols-2 gap-2">
+                      <div
+                        v-for="childIndex in currentRoomMaxChildren"
+                        :key="childIndex"
+                        class="flex items-center gap-1 bg-pink-50 dark:bg-pink-900/20 rounded-lg px-2 py-1.5"
+                      >
+                        <span class="text-xs text-pink-600 dark:text-pink-400 w-12">{{ childIndex }}. Çocuk</span>
+                        <input
+                          v-model.number="roomPrices[currentRoomId][mp._id].childOrderPricing[childIndex - 1]"
+                          type="number"
+                          min="0"
+                          class="form-input flex-1 w-16 text-center text-sm py-1"
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Infant -->
+                  <div class="flex items-center gap-3">
+                    <label class="text-sm text-gray-500 dark:text-gray-400 w-28">
+                      Bebek {{ infantAgeLabel }}
+                    </label>
+                    <div class="flex items-center gap-2">
+                      <input
+                        v-model.number="roomPrices[currentRoomId][mp._id].extraInfant"
+                        type="number"
+                        min="0"
+                        class="form-input w-24 text-center text-sm"
+                        placeholder="0"
+                      />
+                      <span class="text-xs text-gray-400">{{ currency }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- Quick Actions -->
               <div class="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  @click="expandAllMealPlans"
-                  class="text-xs px-3 py-1.5 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-200 flex items-center gap-1"
-                >
-                  <span class="material-icons text-sm">unfold_more</span>
-                  {{ $t('planning.pricing.expandAll') }}
-                </button>
                 <button
                   v-if="uniqueMealPlans.length > 1"
                   @click="copyFirstMealPlanToAll"
@@ -598,10 +603,35 @@ const currentRoomId = computed(() => {
   return selectedRoomTab.value || uniqueRoomTypes.value[0]?._id
 })
 
+// Current room's pricing type
+const currentRoomPricingType = computed(() => {
+  const roomId = currentRoomId.value
+  if (!roomId) return 'unit'
+  const roomType = props.roomTypes.find(rt => rt._id === roomId)
+  return roomType?.pricingType || 'unit'
+})
+
+// Current room name for display
+const currentRoomTypeName = computed(() => {
+  const roomId = currentRoomId.value
+  if (!roomId) return ''
+  const rt = props.roomTypes.find(r => r._id === roomId)
+  return getRoomTypeName(rt)
+})
+
 const hasRoomPrice = (roomTypeId) => {
   const prices = roomPrices[roomTypeId]
   if (!prices) return false
-  return Object.values(prices).some(p => p?.pricePerNight > 0)
+  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+  const pricingType = roomType?.pricingType || 'unit'
+
+  return Object.values(prices).some(p => {
+    if (pricingType === 'per_person') {
+      // OBP: Check if at least 1P and 2P prices are set
+      return p?.occupancyPricing?.[1] > 0 || p?.occupancyPricing?.[2] > 0
+    }
+    return p?.pricePerNight > 0
+  })
 }
 
 const getRoomTypeName = (rt) => {
@@ -715,17 +745,27 @@ const initRoomPrices = () => {
     if (!roomPrices[rt._id]) {
       roomPrices[rt._id] = {}
     }
-    // Get max children for this room type
+    // Get room type settings
     const maxChildren = rt.occupancy?.maxChildren ?? 2
+    const maxAdults = rt.occupancy?.maxAdults ?? 4
+    const pricingType = rt.pricingType || 'unit'
+
     for (const mp of uniqueMealPlans.value) {
       if (!roomPrices[rt._id][mp._id]) {
+        // Initialize occupancy pricing for OBP
+        const occupancyPricing = {}
+        for (let i = 1; i <= maxAdults; i++) {
+          occupancyPricing[i] = ''
+        }
+
         roomPrices[rt._id][mp._id] = {
+          pricingType,
           pricePerNight: '',  // Empty = don't update
           extraAdult: '',
           extraInfant: '',
           singleSupplement: '',
-          // Pre-populate child pricing array with empty strings
-          childOrderPricing: Array(maxChildren).fill('')
+          childOrderPricing: Array(maxChildren).fill(''),
+          occupancyPricing
         }
       }
     }
@@ -747,19 +787,32 @@ const removeChildPrice = (index) => {
 
 const currency = computed(() => props.market?.currency || 'EUR')
 
-// Age ranges from market (with defaults)
+// Get child age groups from market (or defaults if inheriting from hotel)
+const marketChildAgeGroups = computed(() => {
+  const market = props.market
+  if (market?.childAgeSettings?.inheritFromHotel === false && market?.childAgeSettings?.childAgeGroups?.length) {
+    return market.childAgeSettings.childAgeGroups
+  }
+  return []
+})
+
+// Age ranges from market's childAgeGroups (with defaults)
 const childAgeRange = computed(() => {
-  const range = props.market?.childAgeRange
-  if (range?.min != null && range?.max != null) {
-    return { min: range.min, max: range.max }
+  const groups = marketChildAgeGroups.value
+  const childGroups = groups.filter(g => g.code !== 'infant')
+  if (childGroups.length > 0) {
+    const firstChild = childGroups[0]
+    const lastChild = childGroups[childGroups.length - 1]
+    return { min: firstChild.minAge, max: lastChild.maxAge }
   }
   return { min: 3, max: 12 } // Default child age
 })
 
 const infantAgeRange = computed(() => {
-  const range = props.market?.infantAgeRange
-  if (range?.min != null && range?.max != null) {
-    return { min: range.min, max: range.max }
+  const groups = marketChildAgeGroups.value
+  const infant = groups.find(g => g.code === 'infant')
+  if (infant) {
+    return { min: infant.minAge, max: infant.maxAge }
   }
   return { min: 0, max: 2 } // Default infant age
 })
@@ -850,17 +903,36 @@ const save = async () => {
       const roomKeys = Object.keys(roomPrices)
 
       for (const rtId of roomKeys) {
+        const roomType = props.roomTypes.find(rt => rt._id === rtId)
+        const pricingType = roomType?.pricingType || 'unit'
         const mpKeys = Object.keys(roomPrices[rtId] || {})
+
         for (const mpId of mpKeys) {
           const priceData = roomPrices[rtId][mpId]
-          // Check if any field has a value set (including 0)
-          const hasBasePrice = isValueSet(priceData?.pricePerNight)
-          const hasExtraAdult = isValueSet(priceData?.extraAdult)
+
+          // Check based on pricing type
+          if (pricingType === 'per_person') {
+            // OBP: Check occupancy pricing
+            const hasOccupancyPrice = Object.values(priceData?.occupancyPricing || {}).some(p => isValueSet(p))
+            if (hasOccupancyPrice) {
+              hasAnyPrice = true
+              break
+            }
+          } else {
+            // Unit: Check base price and extras
+            const hasBasePrice = isValueSet(priceData?.pricePerNight)
+            const hasExtraAdult = isValueSet(priceData?.extraAdult)
+            const hasSingleSupplement = isValueSet(priceData?.singleSupplement)
+            if (hasBasePrice || hasExtraAdult || hasSingleSupplement) {
+              hasAnyPrice = true
+              break
+            }
+          }
+
+          // Child pricing applies to both
           const hasExtraInfant = isValueSet(priceData?.extraInfant)
           const hasChildPricing = priceData?.childOrderPricing?.some(p => isValueSet(p))
-          const hasSingleSupplement = isValueSet(priceData?.singleSupplement)
-
-          if (hasBasePrice || hasExtraAdult || hasExtraInfant || hasChildPricing || hasSingleSupplement) {
+          if (hasExtraInfant || hasChildPricing) {
             hasAnyPrice = true
             break
           }
@@ -872,66 +944,82 @@ const save = async () => {
       if (hasAnyPrice) {
         // Process per room type and meal plan
         const uniqueDates = [...new Set(props.selectedCells.map(c => c.date))].sort()
-        console.log('uniqueDates (sorted):', uniqueDates.length, 'dates')
-        console.log('First 5 dates:', uniqueDates.slice(0, 5))
-        console.log('Last 5 dates:', uniqueDates.slice(-5))
         let totalUpdates = 0
 
         for (const rtId of Object.keys(roomPrices)) {
+          const roomType = props.roomTypes.find(rt => rt._id === rtId)
+          const pricingType = roomType?.pricingType || 'unit'
+
           for (const mpId of Object.keys(roomPrices[rtId])) {
             const priceData = roomPrices[rtId][mpId]
-            // Process if any pricing is set (empty = don't update, 0 = free)
-            const hasBasePrice = isValueSet(priceData?.pricePerNight)
-            const hasExtraAdult = isValueSet(priceData?.extraAdult)
-            const hasExtraInfant = isValueSet(priceData?.extraInfant)
-            const hasChildPricing = priceData?.childOrderPricing?.some(p => isValueSet(p))
-            const hasSingleSupplement = isValueSet(priceData?.singleSupplement)
 
-            if (hasBasePrice || hasExtraAdult || hasExtraInfant || hasChildPricing || hasSingleSupplement) {
+            // Check if this room+meal plan has any values
+            let hasValues = false
+            if (pricingType === 'per_person') {
+              hasValues = Object.values(priceData?.occupancyPricing || {}).some(p => isValueSet(p))
+            } else {
+              hasValues = isValueSet(priceData?.pricePerNight) || isValueSet(priceData?.extraAdult) || isValueSet(priceData?.singleSupplement)
+            }
+            hasValues = hasValues || isValueSet(priceData?.extraInfant) || priceData?.childOrderPricing?.some(p => isValueSet(p))
+
+            if (hasValues) {
               // Build cells for this room+mealplan combination
               const cells = uniqueDates.map(date => ({
                 date,
                 roomTypeId: rtId,
                 mealPlanId: mpId
               }))
-              console.log('Sending cells:', cells.length, 'pricePerNight:', priceData.pricePerNight, 'marketId:', props.market?._id)
 
-              // Build update fields - only include fields with actual values (not empty string)
-              const priceUpdateFields = {}
-
-              // Include base price if set
-              if (isValueSet(priceData.pricePerNight)) {
-                priceUpdateFields.pricePerNight = Number(priceData.pricePerNight)
+              // Build update fields based on pricing type
+              const priceUpdateFields = {
+                pricingType
               }
 
-              // Include extra person pricing if set
-              if (isValueSet(priceData.extraAdult)) {
-                priceUpdateFields.extraAdult = Number(priceData.extraAdult)
+              if (pricingType === 'per_person') {
+                // OBP: Save occupancy pricing
+                const occupancyPricing = {}
+                for (const [pax, price] of Object.entries(priceData.occupancyPricing || {})) {
+                  if (isValueSet(price)) {
+                    occupancyPricing[pax] = Number(price)
+                  }
+                }
+                if (Object.keys(occupancyPricing).length > 0) {
+                  priceUpdateFields.occupancyPricing = occupancyPricing
+                }
+                // OBP doesn't use these
+                priceUpdateFields.pricePerNight = 0
+                priceUpdateFields.extraAdult = 0
+                priceUpdateFields.singleSupplement = 0
+              } else {
+                // Unit pricing
+                if (isValueSet(priceData.pricePerNight)) {
+                  priceUpdateFields.pricePerNight = Number(priceData.pricePerNight)
+                }
+                if (isValueSet(priceData.extraAdult)) {
+                  priceUpdateFields.extraAdult = Number(priceData.extraAdult)
+                }
+                if (isValueSet(priceData.singleSupplement)) {
+                  priceUpdateFields.singleSupplement = Number(priceData.singleSupplement)
+                }
               }
+
+              // Child pricing - same for both types
               if (isValueSet(priceData.extraInfant)) {
                 priceUpdateFields.extraInfant = Number(priceData.extraInfant)
               }
-              // Only include child pricing values that are set
               if (priceData.childOrderPricing?.some(p => isValueSet(p))) {
                 priceUpdateFields.childOrderPricing = priceData.childOrderPricing.map(p =>
                   isValueSet(p) ? Number(p) : null
                 )
               }
-              // Include single supplement if set
-              if (isValueSet(priceData.singleSupplement)) {
-                priceUpdateFields.singleSupplement = Number(priceData.singleSupplement)
-              }
 
               try {
-                console.log(`Calling API for RT:${rtId.slice(-6)} MP:${mpId.slice(-6)} with ${cells.length} cells`)
-                console.log('First cell date:', cells[0]?.date, 'Last cell date:', cells[cells.length - 1]?.date)
                 const result = await planningService.bulkUpdateByDates(
                   props.hotelId,
                   cells,
                   priceUpdateFields,
                   props.market?._id
                 )
-                console.log('API result:', JSON.stringify(result?.data))
                 totalUpdates += (result?.data?.created || 0) + (result?.data?.updated || 0) + (result?.data?.split || 0)
               } catch (err) {
                 console.error('API error for RT/MP:', rtId.slice(-6), mpId.slice(-6), err.message || err)

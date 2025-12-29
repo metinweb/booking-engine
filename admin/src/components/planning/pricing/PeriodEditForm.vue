@@ -306,6 +306,52 @@
           {{ $t('planning.pricing.copyToAllRooms') }}
         </button>
       </div>
+
+      <!-- Multiplier Override Section (for OBP rooms with multipliers) -->
+      <div v-if="currentRoomUsesMultipliers" class="mt-6">
+        <!-- Override Toggle Header -->
+        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 border border-indigo-200 dark:border-indigo-800">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-indigo-500 flex items-center justify-center">
+                <span class="material-icons text-white">calculate</span>
+              </div>
+              <div>
+                <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.pricing.multiplierOverride') }}</h4>
+                <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.multiplierOverrideHint') }}</p>
+              </div>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="roomData[selectedRoomTab].useMultiplierOverride"
+                class="sr-only peer"
+              />
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+              <span class="ms-2 text-sm font-medium" :class="roomData[selectedRoomTab].useMultiplierOverride ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-slate-400'">
+                {{ roomData[selectedRoomTab].useMultiplierOverride ? $t('common.active') : $t('common.inactive') }}
+              </span>
+            </label>
+          </div>
+
+          <!-- Info when disabled -->
+          <div v-if="!roomData[selectedRoomTab].useMultiplierOverride" class="mt-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+            <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2">
+              <span class="material-icons text-sm text-blue-500">info</span>
+              {{ $t('planning.pricing.usingRoomMultipliers') }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Multiplier Template (when override enabled) -->
+        <div v-if="roomData[selectedRoomTab].useMultiplierOverride" class="mt-4">
+          <MultiplierTemplate
+            v-model="roomData[selectedRoomTab].multiplierOverride"
+            :occupancy="currentRoomType.occupancy"
+            :child-age-groups="childAgeGroups"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Footer Buttons -->
@@ -336,6 +382,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import planningService from '@/services/planningService'
+import MultiplierTemplate from '@/components/planning/rooms/MultiplierTemplate.vue'
 
 const props = defineProps({
   hotelId: { type: String, required: true },
@@ -343,7 +390,8 @@ const props = defineProps({
   roomTypes: { type: Array, default: () => [] },
   mealPlans: { type: Array, default: () => [] },
   market: { type: Object, default: null },
-  existingRates: { type: Array, default: () => [] }
+  existingRates: { type: Array, default: () => [] },
+  childAgeGroups: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['saved', 'cancel'])
@@ -363,6 +411,19 @@ const currentRoomType = computed(() => props.roomTypes.find(rt => rt._id === sel
 
 const maxChildrenForCurrentRoom = computed(() => {
   return currentRoomType.value?.occupancy?.maxChildren ?? 2
+})
+
+// Check if current room uses OBP with multipliers
+const currentRoomUsesMultipliers = computed(() => {
+  const rt = currentRoomType.value
+  return rt?.pricingType === 'per_person' && rt?.useMultipliers === true
+})
+
+// Get current room's multiplier template for override editing
+const currentRoomMultiplierTemplate = computed(() => {
+  const rt = currentRoomType.value
+  if (!rt?.multiplierTemplate) return null
+  return rt.multiplierTemplate
 })
 
 const calculateNights = computed(() => {
@@ -417,11 +478,19 @@ const initializeRoomData = () => {
       return rRoomId === rt._id
     })
 
+    // Check if room uses OBP with multipliers
+    const usesMultipliers = rt.pricingType === 'per_person' && rt.useMultipliers === true
+
     roomData[rt._id] = {
       prices: {},
       allotment: existingRate?.allotment ?? props.period.allotment ?? 10,
       minStay: existingRate?.minStay ?? props.period.minStay ?? 1,
-      releaseDays: existingRate?.releaseDays ?? props.period.releaseDays ?? 0
+      releaseDays: existingRate?.releaseDays ?? props.period.releaseDays ?? 0,
+      // Multiplier override for OBP rooms
+      useMultiplierOverride: existingRate?.useMultiplierOverride ?? false,
+      multiplierOverride: usesMultipliers
+        ? (existingRate?.multiplierOverride ?? JSON.parse(JSON.stringify(rt.multiplierTemplate || {})))
+        : null
     }
 
     // Initialize prices for each meal plan
@@ -532,6 +601,15 @@ const handleSave = async () => {
           allotment: data.allotment ?? 10,
           minStay: data.minStay || 1,
           releaseDays: data.releaseDays || 0
+        }
+
+        // Add multiplier override if room uses OBP with multipliers
+        const usesMultipliers = rt.pricingType === 'per_person' && rt.useMultipliers === true
+        if (usesMultipliers) {
+          rateData.useMultiplierOverride = data.useMultiplierOverride || false
+          if (data.useMultiplierOverride && data.multiplierOverride) {
+            rateData.multiplierOverride = data.multiplierOverride
+          }
         }
 
         promises.push(planningService.createRate(props.hotelId, rateData))

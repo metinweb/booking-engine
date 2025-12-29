@@ -53,8 +53,18 @@
           <RoomTypeBasicForm
             ref="basicFormRef"
             :room-type="roomType"
+            :hotel="hotel"
             :saving="saving"
             :is-new="isNew"
+          />
+        </div>
+
+        <!-- Capacity & Pricing Tab -->
+        <div v-show="activeTab === 'capacity'">
+          <RoomTypeCapacityForm
+            ref="capacityFormRef"
+            :room-type="roomType"
+            :hotel="hotel"
           />
         </div>
 
@@ -96,6 +106,7 @@ import { useI18n } from 'vue-i18n'
 import planningService from '@/services/planningService'
 import FormTabs from '@/components/common/FormTabs.vue'
 import RoomTypeBasicForm from '@/components/planning/rooms/RoomTypeBasicForm.vue'
+import RoomTypeCapacityForm from '@/components/planning/rooms/RoomTypeCapacityForm.vue'
 import RoomTypeGallery from '@/components/planning/rooms/RoomTypeGallery.vue'
 
 const route = useRoute()
@@ -135,12 +146,14 @@ function getEmptyRoomType() {
 }
 
 const roomType = ref(getEmptyRoomType())
+const hotel = ref(null)
 const loading = ref(false)
 const saving = ref(false)
 const activeTab = ref('basic')
 
 // Form refs
 const basicFormRef = ref(null)
+const capacityFormRef = ref(null)
 
 // Get IDs from route
 const hotelId = computed(() => route.params.hotelId)
@@ -149,6 +162,7 @@ const isNew = computed(() => !roomTypeId.value || route.name === 'room-type-new'
 
 const tabs = computed(() => [
   { id: 'basic', label: t('planning.roomTypes.tabs.basic'), icon: 'info', requiresSave: false },
+  { id: 'capacity', label: t('planning.roomTypes.tabs.capacity'), icon: 'people', requiresSave: false },
   { id: 'gallery', label: t('planning.roomTypes.tabs.gallery'), icon: 'photo_library', requiresSave: true }
 ])
 
@@ -166,6 +180,17 @@ const getRoomTypeName = (roomType) => {
 
 const goBack = () => {
   router.push({ name: 'planning', query: { hotelId: hotelId.value, tab: 'rooms' } })
+}
+
+const fetchHotel = async () => {
+  try {
+    const response = await planningService.getHotel(hotelId.value)
+    if (response.success) {
+      hotel.value = response.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch hotel:', error)
+  }
 }
 
 const fetchRoomType = async () => {
@@ -210,8 +235,10 @@ const handleSave = async () => {
     return
   }
 
-  // Get form data from basic form
-  const formData = basicFormRef.value?.getFormData?.() || {}
+  // Get form data from both forms and merge
+  const basicData = basicFormRef.value?.getFormData?.() || {}
+  const capacityData = capacityFormRef.value?.getFormData?.() || {}
+  const formData = { ...basicData, ...capacityData }
 
   saving.value = true
   try {
@@ -271,6 +298,8 @@ watch(() => route.params.id, (newId) => {
 }, { immediate: true })
 
 onMounted(() => {
+  // Always fetch hotel for childAgeGroups
+  fetchHotel()
   if (!isNew.value) {
     fetchRoomType()
   }

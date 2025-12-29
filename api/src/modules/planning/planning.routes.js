@@ -1,6 +1,6 @@
 import express from 'express'
 import * as planningService from './planning.service.js'
-import { protect, requireAdmin } from '../../middleware/auth.js'
+import { protect, requireAdmin, requirePlatformAdmin } from '../../middleware/auth.js'
 import { partnerContext } from '../../middlewares/partnerContext.js'
 import { roomTypeUpload } from '../../helpers/roomTypeUpload.js'
 
@@ -85,5 +85,12 @@ router.patch('/hotels/:hotelId/campaigns/:id/status', planningService.updateCamp
 // ==================== AI PRICING ASSISTANT ====================
 router.post('/hotels/:hotelId/ai/parse-command', planningService.parseAIPricingCommand)
 router.post('/hotels/:hotelId/ai/execute-command', planningService.executeAIPricingCommand)
+
+// ==================== CONTRACT IMPORT ====================
+router.post('/hotels/:hotelId/contract/parse', planningService.parseContract)
+router.post('/hotels/:hotelId/contract/import', planningService.importContractPricing)
+
+// ==================== PLATFORM ADMIN ONLY ====================
+router.delete('/hotels/:hotelId/markets/:marketId/pricing-data', requirePlatformAdmin, planningService.deleteMarketPricingData)
 
 export default router

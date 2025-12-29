@@ -69,20 +69,42 @@ const rateSchema = new mongoose.Schema({
 		default: null
 	},
 
-	// Pricing
-	pricePerNight: {
-		type: Number,
-		required: [true, 'REQUIRED_PRICE'],
-		min: 0
+	// Pricing Type: 'unit' (room-based) or 'per_person' (occupancy-based/OBP)
+	pricingType: {
+		type: String,
+		enum: ['unit', 'per_person'],
+		default: 'unit'
 	},
 
-	// Single person supplement (deduction from base price)
+	// Unit-based pricing (default)
+	pricePerNight: {
+		type: Number,
+		min: 0,
+		default: 0
+	},
+
+	// Single person supplement (deduction from base price) - only for unit pricing
 	singleSupplement: { type: Number, default: 0 },
 
-	// Extra person pricing
+	// Extra person pricing - only for unit pricing
 	extraAdult: { type: Number, default: 0, min: 0 },
 	extraChild: { type: Number, default: 0, min: 0 }, // Fallback single child price
 	extraInfant: { type: Number, default: 0, min: 0 },
+
+	// Occupancy-based pricing (OBP) - price per number of adults
+	// Used when pricingType === 'per_person'
+	occupancyPricing: {
+		1: { type: Number, min: 0 },  // 1 adult price
+		2: { type: Number, min: 0 },  // 2 adults price
+		3: { type: Number, min: 0 },  // 3 adults price
+		4: { type: Number, min: 0 },  // 4 adults price
+		5: { type: Number, min: 0 },  // 5 adults price
+		6: { type: Number, min: 0 },  // 6 adults price
+		7: { type: Number, min: 0 },  // 7 adults price
+		8: { type: Number, min: 0 },  // 8 adults price
+		9: { type: Number, min: 0 },  // 9 adults price
+		10: { type: Number, min: 0 } // 10 adults price
+	},
 
 	// Per-child-order pricing: [1st child price, 2nd child price, ...]
 	// Example: [0, 50, 75] means 1st child free, 2nd child €50, 3rd child €75
@@ -93,6 +115,50 @@ const rateSchema = new mongoose.Schema({
 
 	// Age-based child pricing tiers (alternative to order-based)
 	childPricing: [childPricingSchema],
+
+	// ===== MULTIPLIER OVERRIDE (for OBP with multipliers) =====
+	// If true, use multiplierOverride instead of room's multiplierTemplate
+	useMultiplierOverride: { type: Boolean, default: false },
+
+	// Override multipliers for this period (same structure as RoomType.multiplierTemplate)
+	multiplierOverride: {
+		// Adult multipliers override { 1: 0.8, 2: 1.0, 3: 1.3, ... }
+		adultMultipliers: {
+			type: Map,
+			of: Number,
+			default: undefined
+		},
+
+		// Child multipliers override - per order, per age group
+		childMultipliers: {
+			type: Map,
+			of: {
+				type: Map,
+				of: Number
+			},
+			default: undefined
+		},
+
+		// Combination table override (optional - usually auto-calculated)
+		combinationTable: [{
+			key: { type: String },
+			adults: { type: Number, min: 1 },
+			children: [{
+				order: { type: Number },
+				ageGroup: { type: String }
+			}],
+			calculatedMultiplier: { type: Number },
+			overrideMultiplier: { type: Number, default: null },
+			isActive: { type: Boolean, default: true }
+		}],
+
+		// Rounding rule override
+		roundingRule: {
+			type: String,
+			enum: ['none', 'nearest', 'up', 'down', 'nearest5', 'nearest10'],
+			default: undefined
+		}
+	},
 
 	// Currency (stored for historical reference)
 	currency: {
@@ -126,7 +192,7 @@ const rateSchema = new mongoose.Schema({
 	// Source tracking (how was this rate created/updated)
 	source: {
 		type: String,
-		enum: ['manual', 'ai', 'bulk', 'import'],
+		enum: ['manual', 'ai', 'bulk', 'import', 'contract'],
 		default: 'manual'
 	},
 

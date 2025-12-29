@@ -98,6 +98,17 @@
           />
         </div>
 
+        <!-- Pricing Override Tab -->
+        <div v-show="activeTab === 'pricing'">
+          <MarketPricingForm
+            ref="pricingFormRef"
+            :market="market"
+            :hotel="hotel"
+            :room-types="roomTypes"
+            :saving="saving"
+          />
+        </div>
+
         <!-- Save Button (Bottom) -->
         <div class="pt-6 border-t border-gray-200 dark:border-slate-700 flex justify-end mt-6">
           <button type="submit" class="btn-primary" :disabled="saving">
@@ -128,6 +139,7 @@ import MarketCountriesForm from '@/components/planning/markets/MarketCountriesFo
 import MarketChannelsForm from '@/components/planning/markets/MarketChannelsForm.vue'
 import MarketPaymentForm from '@/components/planning/markets/MarketPaymentForm.vue'
 import MarketPoliciesForm from '@/components/planning/markets/MarketPoliciesForm.vue'
+import MarketPricingForm from '@/components/planning/markets/MarketPricingForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -169,7 +181,8 @@ function getEmptyMarket() {
     },
     isDefault: false,
     status: 'active',
-    displayOrder: 0
+    displayOrder: 0,
+    pricingOverrides: []
   }
 }
 
@@ -188,6 +201,7 @@ const countriesFormRef = ref(null)
 const channelsFormRef = ref(null)
 const paymentFormRef = ref(null)
 const policiesFormRef = ref(null)
+const pricingFormRef = ref(null)
 
 // Get IDs from route
 const hotelId = computed(() => route.params.hotelId)
@@ -199,7 +213,8 @@ const tabs = computed(() => [
   { id: 'countries', label: t('planning.markets.tabs.countries'), icon: 'public' },
   { id: 'channels', label: t('planning.markets.tabs.channels'), icon: 'storefront' },
   { id: 'payment', label: t('planning.markets.tabs.payment'), icon: 'payments' },
-  { id: 'policies', label: t('planning.markets.tabs.policies'), icon: 'gavel' }
+  { id: 'policies', label: t('planning.markets.tabs.policies'), icon: 'gavel' },
+  { id: 'pricing', label: t('planning.markets.pricingTab'), icon: 'tune' }
 ])
 
 const getMarketName = (market) => {
@@ -290,13 +305,15 @@ const handleSave = async () => {
   const channelsData = channelsFormRef.value?.getFormData?.() || {}
   const paymentData = paymentFormRef.value?.getFormData?.() || {}
   const policiesData = policiesFormRef.value?.getFormData?.() || {}
+  const pricingData = pricingFormRef.value?.getFormData?.() || {}
 
   const formData = {
     ...basicData,
     ...countriesData,
     ...channelsData,
     ...paymentData,
-    ...policiesData
+    ...policiesData,
+    ...pricingData
   }
 
   // Validate

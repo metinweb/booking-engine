@@ -293,6 +293,7 @@
                   :allow-edit-calculated="inlineAllowEditCalculated"
                   @click="handleCellClick($event, roomType._id, mealPlan._id, day.date)"
                   @dblclick="handleCellDblClick(roomType._id, mealPlan._id, day.date)"
+                  @contextmenu="handleCellContextMenu($event, roomType._id, mealPlan._id, day.date)"
                   @inline-change="handleInlineChange(roomType._id, mealPlan._id, day.date, $event)"
                   @inline-up="navigateCell(roomType._id, mealPlan._id, day.date, 'up')"
                   @inline-down="navigateCell(roomType._id, mealPlan._id, day.date, 'down')"
@@ -378,6 +379,7 @@
         <div class="flex items-center justify-between mb-3">
           <h4 class="font-semibold text-gray-800 dark:text-white text-sm">
             {{ $t('planning.pricing.quickEdit') }}
+            <span class="text-purple-600 dark:text-purple-400">({{ editingCellLabel }})</span>
           </h4>
           <button @click="closeInlineEdit" class="text-gray-400 hover:text-gray-600">
             <span class="material-icons text-sm">close</span>
@@ -385,8 +387,20 @@
         </div>
 
         <div class="space-y-3">
-          <!-- Price -->
-          <div>
+          <!-- Pricing Type Badge -->
+          <div class="flex items-center gap-2 text-xs">
+            <span
+              class="px-2 py-0.5 rounded-full font-medium"
+              :class="inlineForm.pricingType === 'per_person'
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'"
+            >
+              {{ inlineForm.pricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
+            </span>
+          </div>
+
+          <!-- UNIT PRICING: Price Per Night -->
+          <div v-if="inlineForm.pricingType === 'unit'">
             <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.pricePerNight') }} ({{ currency }})</label>
             <input
               v-model.number="inlineForm.pricePerNight"
@@ -398,8 +412,32 @@
             />
           </div>
 
-          <!-- Extra Person Pricing -->
-          <div class="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg space-y-2">
+          <!-- OBP PRICING: Occupancy Prices -->
+          <div v-else class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg space-y-2">
+            <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1">
+              <span class="material-icons text-sm">groups</span>
+              Kişi Bazlı Fiyatlar ({{ currency }})
+            </div>
+            <div
+              v-for="(price, pax) in inlineForm.occupancyPricing"
+              :key="pax"
+              class="flex items-center gap-2"
+            >
+              <span class="w-12 text-xs font-medium text-indigo-600 dark:text-indigo-400">{{ pax }}P</span>
+              <input
+                v-model.number="inlineForm.occupancyPricing[pax]"
+                type="number"
+                min="0"
+                class="form-input flex-1 text-sm py-1 font-bold"
+                :class="pax <= 2 ? 'text-green-600' : 'text-gray-600'"
+                placeholder="0"
+                @keyup.enter="saveInlineEdit"
+              />
+            </div>
+          </div>
+
+          <!-- Extra Person Pricing (for Unit pricing) -->
+          <div v-if="inlineForm.pricingType === 'unit'" class="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg space-y-2">
             <div class="text-xs font-medium text-gray-600 dark:text-slate-300 mb-2">{{ $t('planning.pricing.extraPrices') }}</div>
 
             <!-- Extra Adult -->
@@ -414,6 +452,27 @@
                 placeholder="0"
               />
             </div>
+
+            <!-- Single Occupancy Discount -->
+            <div class="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-slate-600 mt-2">
+              <span class="material-icons text-blue-500 text-sm">person</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 w-20">{{ $t('planning.pricing.singleOccupancy') }}</span>
+              <div class="flex items-center gap-1">
+                <span class="text-xs text-gray-400">-</span>
+                <input
+                  v-model.number="inlineForm.singleSupplement"
+                  type="number"
+                  min="0"
+                  class="form-input flex-1 text-sm py-1"
+                  placeholder="0"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Child Pricing (for both Unit and OBP) -->
+          <div class="p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg space-y-2">
+            <div class="text-xs font-medium text-pink-700 dark:text-pink-300 mb-2">Çocuk Fiyatları</div>
 
             <!-- Child Order Pricing -->
             <div
@@ -443,22 +502,6 @@
                 class="form-input flex-1 text-sm py-1"
                 placeholder="0"
               />
-            </div>
-
-            <!-- Single Occupancy Discount -->
-            <div class="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-slate-600 mt-2">
-              <span class="material-icons text-blue-500 text-sm">person</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400 w-20">{{ $t('planning.pricing.singleOccupancy') }}</span>
-              <div class="flex items-center gap-1">
-                <span class="text-xs text-gray-400">-</span>
-                <input
-                  v-model.number="inlineForm.singleSupplement"
-                  type="number"
-                  min="0"
-                  class="form-input flex-1 text-sm py-1"
-                  placeholder="0"
-                />
-              </div>
             </div>
           </div>
 
@@ -494,19 +537,87 @@
           </div>
         </div>
 
-        <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
-          <button @click="closeInlineEdit" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800">
-            {{ $t('common.cancel') }}
-          </button>
-          <button
-            @click="saveInlineEdit"
-            class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-            :disabled="savingInline"
-          >
-            {{ savingInline ? '...' : $t('common.save') }}
-          </button>
+        <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
+          <!-- Copy to next days -->
+          <div class="flex items-center gap-1">
+            <span class="text-xs text-gray-500 dark:text-slate-400">→</span>
+            <input
+              v-model.number="popoverCopyDays"
+              type="number"
+              min="1"
+              max="31"
+              class="w-12 text-center text-xs font-bold border border-gray-300 dark:border-slate-600 rounded py-1 bg-white dark:bg-slate-800"
+            />
+            <button
+              @click="copyPopoverToNextDays"
+              class="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
+            >
+              {{ $t('planning.pricing.copyToNextDays') }}
+            </button>
+          </div>
+
+          <!-- Cancel / Save -->
+          <div class="flex gap-2">
+            <button @click="closeInlineEdit" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800">
+              {{ $t('common.cancel') }}
+            </button>
+            <button
+              @click="saveInlineEdit"
+              class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              :disabled="savingInline"
+            >
+              {{ savingInline ? '...' : $t('common.save') }}
+            </button>
+          </div>
         </div>
       </div>
+    </Teleport>
+
+    <!-- Context Menu for Inline Edit -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div
+          v-if="showContextMenu && contextMenuCell"
+          ref="contextMenuRef"
+          class="fixed z-[9999] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-3 min-w-[200px]"
+          :style="{ top: `${contextMenuPosition.y}px`, left: `${contextMenuPosition.x}px` }"
+        >
+          <div class="flex flex-col gap-2">
+            <!-- Header -->
+            <div class="text-xs text-gray-500 dark:text-slate-400 border-b border-gray-100 dark:border-slate-700 pb-2">
+              {{ $t('planning.pricing.copyValue') }}: <span class="font-bold text-green-600">{{ contextMenuCell?.value }}</span>
+            </div>
+
+            <!-- Input and Button -->
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-gray-600 dark:text-slate-400 whitespace-nowrap">{{ $t('planning.pricing.copyToNextDays') }}</span>
+              <input
+                v-model.number="copyDaysCount"
+                type="number"
+                min="1"
+                max="31"
+                class="w-14 text-center text-sm font-bold border-2 border-purple-300 dark:border-purple-700 rounded-lg py-1 bg-white dark:bg-slate-800"
+                @keyup.enter="copyToRightDays"
+              />
+              <button
+                @click="copyToRightDays"
+                class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-1"
+              >
+                <span class="material-icons text-sm">content_copy</span>
+                {{ $t('common.copy') }}
+              </button>
+            </div>
+
+            <!-- Cancel -->
+            <button
+              @click="closeContextMenu"
+              class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 mt-1"
+            >
+              {{ $t('common.cancel') }}
+            </button>
+          </div>
+        </div>
+      </Transition>
     </Teleport>
   </div>
 </template>
@@ -645,8 +756,19 @@ const inlineForm = reactive({
   extraAdult: '',
   extraInfant: '',
   childOrderPricing: [],
-  singleSupplement: ''
+  singleSupplement: '',
+  // OBP fields
+  pricingType: 'unit',
+  occupancyPricing: {}
 })
+
+// Context menu state for inline edit
+const showContextMenu = ref(false)
+const contextMenuPosition = ref({ x: 0, y: 0 })
+const contextMenuCell = ref(null) // { roomTypeId, mealPlanId, date }
+const copyDaysCount = ref(7)
+const contextMenuRef = ref(null)
+const popoverCopyDays = ref(7) // For quick edit popover copy
 
 // Helper: Format date to YYYY-MM-DD without timezone issues
 const formatDateToString = (date) => {
@@ -664,6 +786,16 @@ const parseDateString = (dateStr) => {
 
 // Computed
 const currency = computed(() => props.market?.currency || 'EUR')
+
+// Label for editing cell (e.g., "FAM,HD 02.07")
+const editingCellLabel = computed(() => {
+  if (!editingCell.value) return ''
+  const { roomTypeId, mealPlanId, date } = editingCell.value
+  const room = props.roomTypes.find(r => r._id === roomTypeId)
+  const meal = props.mealPlans.find(m => m._id === mealPlanId)
+  const [year, month, day] = date.split('-')
+  return `${room?.code || ''},${meal?.code || ''} ${day}.${month}`
+})
 
 const filteredMealPlans = computed(() => {
   return props.mealPlans.filter(mp => mp.status === 'active')
@@ -824,6 +956,79 @@ const handleCellClick = (event, roomTypeId, mealPlanId, date) => {
 const handleCellDblClick = (roomTypeId, mealPlanId, date) => {
   const rate = getRateForCell(roomTypeId, mealPlanId, date)
   openInlineEdit(roomTypeId, mealPlanId, date, rate)
+}
+
+// Handle right-click context menu in inline edit mode
+const handleCellContextMenu = (event, roomTypeId, mealPlanId, date) => {
+  // Only show context menu in inline edit mode
+  if (!inlineEditMode.value) return
+
+  event.preventDefault()
+
+  // Get the current value from inline edit prices
+  const key = `${roomTypeId}-${mealPlanId}-${date}`
+  const currentValue = inlineEditPrices[key]
+
+  // Only show if there's a value to copy
+  if (currentValue === '' || currentValue === null || currentValue === undefined) return
+
+  contextMenuCell.value = { roomTypeId, mealPlanId, date, value: currentValue }
+  contextMenuPosition.value = { x: event.clientX, y: event.clientY }
+  showContextMenu.value = true
+}
+
+// Close context menu
+const closeContextMenu = () => {
+  showContextMenu.value = false
+  contextMenuCell.value = null
+}
+
+// Copy value to next X days
+const copyToRightDays = () => {
+  if (!contextMenuCell.value || !copyDaysCount.value) return
+
+  const { roomTypeId, mealPlanId, date, value } = contextMenuCell.value
+  const startDate = parseDateString(date)
+  const count = Math.min(copyDaysCount.value, 31) // Max 31 days
+
+  // Copy to the next X days (starting from the day after current date)
+  for (let i = 1; i <= count; i++) {
+    const targetDate = new Date(startDate)
+    targetDate.setDate(targetDate.getDate() + i)
+    const targetDateStr = formatDateToString(targetDate)
+
+    // Only copy if it's within the current month
+    const targetMonth = targetDate.getMonth()
+    const currentMonth = currentDate.value.getMonth()
+    if (targetMonth !== currentMonth) continue
+
+    const targetKey = `${roomTypeId}-${mealPlanId}-${targetDateStr}`
+    inlineEditPrices[targetKey] = value
+
+    // If relative pricing is active and this is the base cell, calculate for other cells
+    if (inlineRelativePricing.value && hasBaseRoom.value && isBaseCellFn(roomTypeId, mealPlanId)) {
+      const basePrice = parseFloat(value) || 0
+      if (basePrice > 0) {
+        props.roomTypes.forEach(room => {
+          props.mealPlans.forEach(meal => {
+            if (isBaseCellFn(room._id, meal._id)) return
+
+            const roomAdj = room.priceAdjustment || 0
+            const mealAdj = meal.priceAdjustment || 0
+            const afterRoom = basePrice * (1 + roomAdj / 100)
+            const afterMeal = afterRoom * (1 + mealAdj / 100)
+            const calculatedPrice = Math.round(afterMeal * 100) / 100
+
+            const calcKey = `${room._id}-${meal._id}-${targetDateStr}`
+            inlineEditPrices[calcKey] = calculatedPrice
+          })
+        })
+      }
+    }
+  }
+
+  toast.success(t('planning.pricing.copiedToDays', { count }))
+  closeContextMenu()
 }
 
 const selectRange = (start, end) => {
@@ -1266,8 +1471,12 @@ const getMaxChildrenForRoom = (roomTypeId) => {
 const openInlineEdit = async (roomTypeId, mealPlanId, date, rate) => {
   editingCell.value = { roomTypeId, mealPlanId, date, rate }
 
-  const maxChildren = getMaxChildrenForRoom(roomTypeId)
+  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+  const maxChildren = roomType?.occupancy?.maxChildren ?? 2
+  const maxAdults = roomType?.occupancy?.maxAdults ?? 4
+  const pricingType = roomType?.pricingType || 'unit'
 
+  inlineForm.pricingType = pricingType
   inlineForm.pricePerNight = rate?.pricePerNight || 0
   inlineForm.allotment = rate?.allotment || 0
   inlineForm.minStay = rate?.minStay || 1
@@ -1278,6 +1487,13 @@ const openInlineEdit = async (roomTypeId, mealPlanId, date, rate) => {
   inlineForm.extraAdult = rate?.extraAdult ?? ''
   inlineForm.extraInfant = rate?.extraInfant ?? ''
   inlineForm.singleSupplement = rate?.singleSupplement ?? ''
+
+  // OBP occupancy pricing - initialize for maxAdults
+  inlineForm.occupancyPricing = {}
+  for (let i = 1; i <= maxAdults; i++) {
+    inlineForm.occupancyPricing[i] = rate?.occupancyPricing?.[i] ?? ''
+  }
+
   // Pre-populate child pricing array
   inlineForm.childOrderPricing = Array(maxChildren).fill('').map((_, i) => {
     const existing = rate?.childOrderPricing?.[i]
@@ -1349,32 +1565,51 @@ const saveInlineEdit = async () => {
       market: props.market?._id,
       startDate: date,
       endDate: date,
-      pricePerNight: inlineForm.pricePerNight,
       allotment: inlineForm.allotment,
       minStay: inlineForm.minStay,
       stopSale: inlineForm.stopSale,
       singleStop: inlineForm.singleStop,
       closedToArrival: inlineForm.closedToArrival,
       closedToDeparture: inlineForm.closedToDeparture,
-      currency: currency.value
+      currency: currency.value,
+      pricingType: inlineForm.pricingType
     }
 
-    // Add extra person pricing if set
-    if (inlineForm.extraAdult !== '' && inlineForm.extraAdult !== null) {
-      data.extraAdult = Number(inlineForm.extraAdult)
+    // Handle pricing based on type
+    if (inlineForm.pricingType === 'per_person') {
+      // OBP: Save occupancy pricing
+      const occupancyPricing = {}
+      for (const [pax, price] of Object.entries(inlineForm.occupancyPricing)) {
+        if (price !== '' && price !== null) {
+          occupancyPricing[pax] = Number(price)
+        }
+      }
+      data.occupancyPricing = occupancyPricing
+      data.pricePerNight = 0 // Not used in OBP
+      data.extraAdult = 0 // Not used in OBP
+      data.singleSupplement = 0 // Not used in OBP
+    } else {
+      // Unit pricing
+      data.pricePerNight = inlineForm.pricePerNight
+
+      // Add extra person pricing if set
+      if (inlineForm.extraAdult !== '' && inlineForm.extraAdult !== null) {
+        data.extraAdult = Number(inlineForm.extraAdult)
+      }
+      // Add single supplement if set
+      if (inlineForm.singleSupplement !== '' && inlineForm.singleSupplement !== null) {
+        data.singleSupplement = Number(inlineForm.singleSupplement)
+      }
     }
+
+    // Child pricing - same for both types
     if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
       data.extraInfant = Number(inlineForm.extraInfant)
     }
-    // Add child pricing - convert empty strings to null
     if (inlineForm.childOrderPricing?.length > 0) {
       data.childOrderPricing = inlineForm.childOrderPricing.map(p =>
         p !== '' && p !== null ? Number(p) : null
       )
-    }
-    // Add single supplement if set
-    if (inlineForm.singleSupplement !== '' && inlineForm.singleSupplement !== null) {
-      data.singleSupplement = Number(inlineForm.singleSupplement)
     }
 
     if (rate?._id) {
@@ -1393,10 +1628,110 @@ const saveInlineEdit = async () => {
   }
 }
 
-// Click outside to close inline edit
+// Copy all values from quick edit popover to next X days
+const copyPopoverToNextDays = async () => {
+  if (!editingCell.value || !popoverCopyDays.value) return
+
+  const { roomTypeId, mealPlanId, date } = editingCell.value
+  const startDate = parseDateString(date)
+  const count = Math.min(popoverCopyDays.value, 31)
+
+  savingInline.value = true
+  try {
+    const promises = []
+
+    // Build data from inlineForm
+    const baseData = {
+      roomType: roomTypeId,
+      mealPlan: mealPlanId,
+      market: props.market?._id,
+      allotment: inlineForm.allotment,
+      minStay: inlineForm.minStay,
+      stopSale: inlineForm.stopSale,
+      singleStop: inlineForm.singleStop,
+      closedToArrival: inlineForm.closedToArrival,
+      closedToDeparture: inlineForm.closedToDeparture,
+      currency: currency.value,
+      pricingType: inlineForm.pricingType
+    }
+
+    // Handle pricing based on type
+    if (inlineForm.pricingType === 'per_person') {
+      // OBP: Save occupancy pricing
+      const occupancyPricing = {}
+      for (const [pax, price] of Object.entries(inlineForm.occupancyPricing)) {
+        if (price !== '' && price !== null) {
+          occupancyPricing[pax] = Number(price)
+        }
+      }
+      baseData.occupancyPricing = occupancyPricing
+      baseData.pricePerNight = 0
+      baseData.extraAdult = 0
+      baseData.singleSupplement = 0
+    } else {
+      // Unit pricing
+      baseData.pricePerNight = inlineForm.pricePerNight
+      if (inlineForm.extraAdult !== '' && inlineForm.extraAdult !== null) {
+        baseData.extraAdult = Number(inlineForm.extraAdult)
+      }
+      if (inlineForm.singleSupplement !== '' && inlineForm.singleSupplement !== null) {
+        baseData.singleSupplement = Number(inlineForm.singleSupplement)
+      }
+    }
+
+    // Child pricing - same for both types
+    if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
+      baseData.extraInfant = Number(inlineForm.extraInfant)
+    }
+    if (inlineForm.childOrderPricing?.length > 0) {
+      baseData.childOrderPricing = inlineForm.childOrderPricing.map(p =>
+        p !== '' && p !== null ? Number(p) : null
+      )
+    }
+
+    // Copy to next X days (starting from day after current)
+    for (let i = 1; i <= count; i++) {
+      const targetDate = new Date(startDate)
+      targetDate.setDate(targetDate.getDate() + i)
+      const targetDateStr = formatDateToString(targetDate)
+
+      // Check if within current month
+      if (targetDate.getMonth() !== currentDate.value.getMonth()) continue
+
+      const existingRate = getRateForCell(roomTypeId, mealPlanId, targetDateStr)
+      const data = {
+        ...baseData,
+        startDate: targetDateStr,
+        endDate: targetDateStr
+      }
+
+      if (existingRate?._id) {
+        promises.push(planningService.updateRate(props.hotelId, existingRate._id, data))
+      } else {
+        promises.push(planningService.createRate(props.hotelId, data))
+      }
+    }
+
+    if (promises.length > 0) {
+      await Promise.all(promises)
+      toast.success(t('planning.pricing.copiedToDays', { count: promises.length }))
+      emit('refresh')
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('common.operationFailed'))
+  } finally {
+    savingInline.value = false
+  }
+}
+
+// Click outside to close inline edit and context menu
 const handleClickOutside = (e) => {
   if (popoverRef.value && !popoverRef.value.contains(e.target)) {
     closeInlineEdit()
+  }
+  // Close context menu on click outside (but not inside the menu)
+  if (showContextMenu.value && contextMenuRef.value && !contextMenuRef.value.contains(e.target)) {
+    closeContextMenu()
   }
 }
 

@@ -69,7 +69,7 @@ const roomTypeSchema = new mongoose.Schema({
 	occupancy: {
 		maxAdults: { type: Number, min: 1, max: 10, default: 2 },
 		maxChildren: { type: Number, min: 0, max: 6, default: 2 },
-		maxInfants: { type: Number, min: 0, max: 2, default: 1 },
+		maxInfants: { type: Number, min: 0, max: 4, default: 1 },
 		totalMaxGuests: { type: Number, min: 1, max: 12, default: 4 },
 		baseOccupancy: { type: Number, min: 1, max: 10, default: 2 } // Standard pricing occupancy
 	},
@@ -129,12 +129,76 @@ const roomTypeSchema = new mongoose.Schema({
 		default: 0,
 		min: -100,
 		max: 500
+	},
+
+	// Pricing type for this room
+	// 'unit' = room-based pricing (pricePerNight + extraAdult)
+	// 'per_person' = occupancy-based pricing (OBP - different price per adult count)
+	pricingType: {
+		type: String,
+		enum: ['unit', 'per_person'],
+		default: 'unit'
+	},
+
+	// ===== OBP ÇARPAN SİSTEMİ =====
+	// Çarpan özelliği aktif mi? (sadece per_person için geçerli)
+	useMultipliers: {
+		type: Boolean,
+		default: false
+	},
+
+	// Çarpan şablonu
+	multiplierTemplate: {
+		// Yetişkin çarpanları { 1: 0.8, 2: 1.0, 3: 1.3, ... }
+		adultMultipliers: {
+			type: Map,
+			of: Number,
+			default: new Map()
+		},
+
+		// Çocuk çarpanları - sıra bazında (1. çocuk, 2. çocuk, 3. çocuk)
+		// Her sıra için yaş grubu bazında çarpan
+		// { 1: { infant: 0, first: 0, second: 0 }, 2: { infant: 0, first: 0.3, second: 0 }, ... }
+		childMultipliers: {
+			type: Map,
+			of: {
+				type: Map,
+				of: Number
+			},
+			default: new Map()
+		},
+
+		// Kombinasyon tablosu (otomatik oluşturulur + override edilebilir)
+		combinationTable: [{
+			// Benzersiz anahtar: "1" (tek kişi), "2" (çift kişi), "1+1_infant", "2+2_first_second"
+			key: { type: String, required: true },
+			// Yetişkin sayısı
+			adults: { type: Number, required: true, min: 1 },
+			// Çocuklar (sıralı)
+			children: [{
+				order: { type: Number, required: true }, // 1, 2, 3...
+				ageGroup: { type: String, required: true } // infant, first, second
+			}],
+			// Sistem tarafından hesaplanan çarpan
+			calculatedMultiplier: { type: Number, required: true },
+			// Kullanıcı override'ı (null = hesaplananı kullan)
+			overrideMultiplier: { type: Number, default: null },
+			// Bu kombinasyon satışta mı? (false = -1 gibi, satışa kapalı)
+			isActive: { type: Boolean, default: true }
+		}],
+
+		// Yuvarlama kuralı
+		roundingRule: {
+			type: String,
+			enum: ['none', 'nearest', 'up', 'down', 'nearest5', 'nearest10'],
+			default: 'none'
+		}
 	}
 
 }, {
 	timestamps: true,
-	toJSON: { virtuals: true },
-	toObject: { virtuals: true }
+	toJSON: { virtuals: true, flattenMaps: true },
+	toObject: { virtuals: true, flattenMaps: true }
 })
 
 // Indexes

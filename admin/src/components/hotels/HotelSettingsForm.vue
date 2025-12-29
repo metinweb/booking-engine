@@ -234,7 +234,7 @@
       </h3>
       <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.policies.childAgeSettingsDesc') }}</p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <!-- Max Baby Age -->
         <div>
           <label class="form-label">{{ $t('hotels.policies.maxBabyAge') }}</label>
@@ -248,6 +248,107 @@
           <input v-model.number="form.policies.maxChildAge" type="number" min="0" max="18" class="form-input" />
           <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ $t('hotels.policies.maxChildAgeHelp') }}</p>
         </div>
+      </div>
+
+      <!-- Child Age Groups -->
+      <div class="border-t border-gray-200 dark:border-slate-700 pt-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h4 class="font-medium text-gray-800 dark:text-white flex items-center gap-2">
+              <span class="material-icons text-sm text-indigo-500">category</span>
+              Çocuk Yaş Grupları
+            </h4>
+            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+              Fiyatlandırmada kullanılacak çocuk yaş grubu tanımları
+            </p>
+          </div>
+          <button
+            v-if="form.childAgeGroups.length < 3"
+            type="button"
+            @click="addChildAgeGroup"
+            class="px-3 py-1.5 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors flex items-center gap-1"
+          >
+            <span class="material-icons text-sm">add</span>
+            Yaş Grubu Ekle
+          </button>
+        </div>
+
+        <div class="space-y-3">
+          <div
+            v-for="(ageGroup, index) in form.childAgeGroups"
+            :key="index"
+            class="flex items-center gap-4 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
+          >
+            <!-- Age Group Name (fixed based on code) -->
+            <div class="w-32 flex-shrink-0">
+              <span
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium"
+                :class="ageGroup.code === 'infant'
+                  ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                  : ageGroup.code === 'first'
+                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'"
+              >
+                <span class="material-icons text-sm">
+                  {{ ageGroup.code === 'infant' ? 'baby_changing_station' : 'child_care' }}
+                </span>
+                {{ getAgeGroupName(ageGroup.code) }}
+              </span>
+            </div>
+
+            <!-- Age Range -->
+            <div class="flex items-center gap-2">
+              <div class="w-16">
+                <input
+                  :value="ageGroup.minAge"
+                  type="number"
+                  min="0"
+                  max="17"
+                  class="form-input text-sm py-1.5 text-center"
+                  :class="index === 0 ? 'bg-gray-100 dark:bg-slate-600 cursor-not-allowed' : ''"
+                  :disabled="index === 0"
+                  :title="index === 0 ? 'Bebek her zaman 0 yaşından başlar' : ''"
+                  readonly
+                />
+                <span class="text-[10px] text-gray-400 block text-center">min</span>
+              </div>
+
+              <span class="text-gray-400 font-bold">—</span>
+
+              <div class="w-16">
+                <input
+                  v-model.number="ageGroup.maxAge"
+                  type="number"
+                  :min="ageGroup.minAge"
+                  max="17"
+                  class="form-input text-sm py-1.5 text-center"
+                  @change="onMaxAgeChange(index)"
+                />
+                <span class="text-[10px] text-gray-400 block text-center">max</span>
+              </div>
+
+              <span class="text-sm text-gray-500 dark:text-slate-400">yaş</span>
+            </div>
+
+            <div class="flex-1"></div>
+
+            <!-- Delete Button -->
+            <button
+              v-if="form.childAgeGroups.length > 1"
+              type="button"
+              @click="removeChildAgeGroup(index)"
+              class="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+              title="Sil"
+            >
+              <span class="material-icons text-sm">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-500 dark:text-slate-400 mt-3">
+          <span class="material-icons text-xs align-middle">info</span>
+          En fazla 3 yaş grubu tanımlanabilir (bebek, 1. çocuk tipi, 2. çocuk tipi)
+        </p>
       </div>
     </div>
 
@@ -337,6 +438,23 @@ const createMultiLangObject = () => {
   return obj
 }
 
+// Age group names (fixed)
+const AGE_GROUP_NAMES = {
+  infant: { tr: 'Bebek', en: 'Infant' },
+  first: { tr: '1. Tip Çocuk', en: 'Child Type 1' },
+  second: { tr: '2. Tip Çocuk', en: 'Child Type 2' }
+}
+
+const getAgeGroupName = (code) => {
+  return AGE_GROUP_NAMES[code]?.tr || code
+}
+
+// Default child age groups
+const getDefaultChildAgeGroups = () => [
+  { code: 'infant', name: AGE_GROUP_NAMES.infant, minAge: 0, maxAge: 2, order: 0 },
+  { code: 'first', name: AGE_GROUP_NAMES.first, minAge: 3, maxAge: 12, order: 1 }
+]
+
 const form = ref({
   status: 'draft',
   featured: false,
@@ -364,8 +482,72 @@ const form = ref({
     maxBabyAge: 2,
     maxChildAge: 12
   },
+  childAgeGroups: getDefaultChildAgeGroups(),
   displayOrder: 0
 })
+
+// Add new child age group
+const addChildAgeGroup = () => {
+  if (form.value.childAgeGroups.length >= 3) return
+
+  const existingCodes = form.value.childAgeGroups.map(g => g.code)
+  let newCode = 'second' // Default to second since infant and first usually exist
+
+  if (!existingCodes.includes('infant')) {
+    newCode = 'infant'
+  } else if (!existingCodes.includes('first')) {
+    newCode = 'first'
+  } else if (!existingCodes.includes('second')) {
+    newCode = 'second'
+  }
+
+  // Calculate minAge based on last group's maxAge
+  const lastGroup = form.value.childAgeGroups[form.value.childAgeGroups.length - 1]
+  const newMinAge = lastGroup ? lastGroup.maxAge + 1 : 0
+
+  form.value.childAgeGroups.push({
+    code: newCode,
+    name: AGE_GROUP_NAMES[newCode],
+    minAge: newMinAge,
+    maxAge: Math.min(newMinAge + 5, 17),
+    order: form.value.childAgeGroups.length
+  })
+}
+
+// Remove child age group
+const removeChildAgeGroup = (index) => {
+  if (form.value.childAgeGroups.length <= 1) return
+  form.value.childAgeGroups.splice(index, 1)
+  // Update order and fix minAge gaps
+  form.value.childAgeGroups.forEach((g, i) => {
+    g.order = i
+    if (i === 0) {
+      g.minAge = 0 // First group always starts at 0
+    } else {
+      g.minAge = form.value.childAgeGroups[i - 1].maxAge + 1
+    }
+  })
+}
+
+// When maxAge changes, update next group's minAge
+const onMaxAgeChange = (index) => {
+  const groups = form.value.childAgeGroups
+  const currentGroup = groups[index]
+
+  // Ensure maxAge is at least minAge
+  if (currentGroup.maxAge < currentGroup.minAge) {
+    currentGroup.maxAge = currentGroup.minAge
+  }
+
+  // Update next group's minAge if exists
+  if (index < groups.length - 1) {
+    groups[index + 1].minAge = currentGroup.maxAge + 1
+    // Ensure next group's maxAge is valid
+    if (groups[index + 1].maxAge < groups[index + 1].minAge) {
+      groups[index + 1].maxAge = groups[index + 1].minAge
+    }
+  }
+}
 
 // Watch for hotel changes
 watch(() => props.hotel, (newHotel) => {
@@ -397,6 +579,15 @@ watch(() => props.hotel, (newHotel) => {
         maxBabyAge: newHotel.policies?.maxBabyAge ?? 2,
         maxChildAge: newHotel.policies?.maxChildAge ?? 12
       },
+      childAgeGroups: newHotel.childAgeGroups?.length > 0
+        ? newHotel.childAgeGroups.map(g => ({
+            code: g.code,
+            name: { tr: g.name?.tr || '', en: g.name?.en || '' },
+            minAge: g.minAge,
+            maxAge: g.maxAge,
+            order: g.order || 0
+          }))
+        : getDefaultChildAgeGroups(),
       displayOrder: newHotel.displayOrder || 0
     }
   }
