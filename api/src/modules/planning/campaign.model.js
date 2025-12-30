@@ -94,7 +94,8 @@ const campaignSchema = new mongoose.Schema({
 	conditions: {
 		minNights: { type: Number, min: 1, default: 1 },
 		maxNights: { type: Number, min: 1 },
-		advanceBookingDays: { type: Number, min: 0 }, // For early_bird
+		advanceBookingDays: { type: Number, min: 0 }, // For early_bird: book at least X days before
+		maxAdvanceBookingDays: { type: Number, min: 0 }, // For last_minute: book at most X days before
 
 		// Applicable to specific items (empty = all)
 		applicableRoomTypes: [{
@@ -266,6 +267,25 @@ campaignSchema.statics.findApplicable = async function(hotelId, params) {
 		// Check nights
 		if (nights && c.minNights && nights < c.minNights) return false
 		if (nights && c.maxNights && nights > c.maxNights) return false
+
+		// Calculate days before check-in
+		const checkIn = new Date(checkInDate)
+		const booking = new Date(bookingDate)
+		checkIn.setHours(0, 0, 0, 0)
+		booking.setHours(0, 0, 0, 0)
+		const daysBeforeCheckIn = Math.floor((checkIn - booking) / (1000 * 60 * 60 * 24))
+
+		// Early Bird: must book at least X days before check-in
+		if (c.advanceBookingDays && daysBeforeCheckIn < c.advanceBookingDays) {
+			return false
+		}
+
+		// Last Minute: must book at most X days before check-in
+		if (c.maxAdvanceBookingDays !== undefined && c.maxAdvanceBookingDays !== null) {
+			if (daysBeforeCheckIn > c.maxAdvanceBookingDays) {
+				return false
+			}
+		}
 
 		// Check room type
 		if (roomTypeId && c.applicableRoomTypes.length > 0) {

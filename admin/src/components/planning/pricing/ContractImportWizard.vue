@@ -784,6 +784,7 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
+import { useDate } from '@/composables/useDate'
 import Modal from '@/components/common/Modal.vue'
 import planningService from '@/services/planningService'
 
@@ -796,6 +797,7 @@ const emit = defineEmits(['close', 'imported'])
 
 const { t, locale } = useI18n()
 const toast = useToast()
+const { formatDisplayDate } = useDate()
 
 // Helper to get localized name from multilingual object
 const getLocalizedName = (nameObj) => {
@@ -1249,11 +1251,8 @@ const formatFileSize = (bytes) => {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('tr-TR')
-}
+// formatDate replaced by useDate composable's formatDisplayDate
+const formatDate = formatDisplayDate
 
 const getConfidenceColor = (confidence) => {
   if (confidence >= 80) return 'bg-green-500'
@@ -1295,16 +1294,6 @@ const startParsing = async () => {
 
     if (response.success) {
       parsedData.value = response.data
-
-      // DEBUG: Log parsed data to see what AI returned
-      console.log('=== PARSED CONTRACT DATA ===')
-      console.log('Periods:', parsedData.value.periods?.length, parsedData.value.periods)
-      console.log('Room Types:', parsedData.value.roomTypes?.length, parsedData.value.roomTypes)
-      console.log('Meal Plans:', parsedData.value.mealPlans?.length, parsedData.value.mealPlans)
-      console.log('Pricing:', parsedData.value.pricing?.length, parsedData.value.pricing)
-      console.log('EB Discounts:', parsedData.value.earlyBookingDiscounts?.length, parsedData.value.earlyBookingDiscounts)
-      console.log('Full Data:', JSON.stringify(parsedData.value, null, 2))
-      console.log('============================')
 
       // Auto-fill mappings based on AI matches
       if (response.data.roomTypes) {

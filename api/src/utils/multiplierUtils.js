@@ -7,12 +7,13 @@
  * Varsayılan yetişkin çarpanlarını oluştur
  * @param {number} maxAdults - Maksimum yetişkin sayısı
  * @param {number} baseOccupancy - Baz doluluk (genellikle 2)
+ * @param {number} minAdults - Minimum yetişkin sayısı (varsayılan 1)
  * @returns {Object} { 1: 0.8, 2: 1.0, 3: 1.2, ... }
  */
-export function generateDefaultAdultMultipliers(maxAdults, baseOccupancy = 2) {
+export function generateDefaultAdultMultipliers(maxAdults, baseOccupancy = 2, minAdults = 1) {
 	const multipliers = {}
 
-	for (let i = 1; i <= maxAdults; i++) {
+	for (let i = minAdults; i <= maxAdults; i++) {
 		if (i < baseOccupancy) {
 			// Baz altı: azalan (her kişi için -0.2)
 			// Örnek: baseOccupancy=2 ise, 1 kişi = 1.0 - 0.2 = 0.8
@@ -164,19 +165,19 @@ function generateChildCombinations(count, ageGroupCodes, currentOrder = 1, curre
 
 /**
  * Tüm kombinasyon tablosunu oluştur
- * @param {Object} occupancy - { maxAdults, maxChildren, totalMaxGuests, baseOccupancy }
+ * @param {Object} occupancy - { maxAdults, minAdults, maxChildren, totalMaxGuests, baseOccupancy }
  * @param {Array} ageGroups - Yaş grupları
  * @param {Object} adultMultipliers - Yetişkin çarpanları (opsiyonel, yoksa varsayılan oluşturulur)
  * @param {Object} childMultipliers - Çocuk çarpanları (opsiyonel, yoksa varsayılan oluşturulur)
  * @returns {Array} Kombinasyon tablosu
  */
 export function generateCombinationTable(occupancy, ageGroups, adultMultipliers = null, childMultipliers = null) {
-	const { maxAdults, maxChildren, totalMaxGuests, baseOccupancy } = occupancy
+	const { maxAdults, minAdults = 1, maxChildren, totalMaxGuests, baseOccupancy } = occupancy
 	const ageGroupCodes = ageGroups.map(ag => ag.code)
 
 	// Varsayılan çarpanlar
 	if (!adultMultipliers) {
-		adultMultipliers = generateDefaultAdultMultipliers(maxAdults, baseOccupancy)
+		adultMultipliers = generateDefaultAdultMultipliers(maxAdults, baseOccupancy, minAdults)
 	}
 	if (!childMultipliers) {
 		childMultipliers = generateDefaultChildMultipliers(maxChildren, ageGroups)
@@ -184,8 +185,8 @@ export function generateCombinationTable(occupancy, ageGroups, adultMultipliers 
 
 	const combinations = []
 
-	// Her yetişkin sayısı için
-	for (let adults = 1; adults <= maxAdults; adults++) {
+	// Her yetişkin sayısı için (minAdults'tan başla)
+	for (let adults = minAdults; adults <= maxAdults; adults++) {
 		// Sadece yetişkinler
 		const adultOnlyKey = generateCombinationKey(adults, [])
 		combinations.push({
@@ -300,9 +301,10 @@ export function calculatePrice(basePrice, multiplier, roundingRule = 'none') {
 /**
  * Kombisanyon tablosunu doğrula
  * @param {Array} table - Kombinasyon tablosu
+ * @param {number} minAdults - Minimum yetişkin sayısı (varsayılan 1)
  * @returns {Object} { isValid: boolean, errors: [] }
  */
-export function validateCombinationTable(table) {
+export function validateCombinationTable(table, minAdults = 1) {
 	const errors = []
 
 	// En az bir aktif kombinasyon olmalı
@@ -312,9 +314,12 @@ export function validateCombinationTable(table) {
 	}
 
 	// Çift kişilik (2 yetişkin) aktif olmalı (bu baz fiyat için gerekli)
-	const doubleCombo = table.find(c => c.adults === 2 && c.children.length === 0)
-	if (doubleCombo && !doubleCombo.isActive) {
-		errors.push('Çift kişilik (2 yetişkin) kombinasyonu aktif olmalı - bu baz fiyat referansıdır')
+	// Ancak minAdults > 2 ise bu kontrol atlanmalı
+	if (minAdults <= 2) {
+		const doubleCombo = table.find(c => c.adults === 2 && c.children.length === 0)
+		if (doubleCombo && !doubleCombo.isActive) {
+			errors.push('Çift kişilik (2 yetişkin) kombinasyonu aktif olmalı - bu baz fiyat referansıdır')
+		}
 	}
 
 	// Override değerleri negatif olmamalı

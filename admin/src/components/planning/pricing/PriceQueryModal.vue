@@ -10,7 +10,7 @@
       <!-- Draggable Modal -->
       <div
         ref="modalRef"
-        class="absolute bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-[95vw] max-w-6xl max-h-[90vh] overflow-hidden flex flex-col pointer-events-auto"
+        class="absolute bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-[95vw] max-w-6xl h-[85vh] overflow-hidden flex flex-col pointer-events-auto"
         :style="modalStyle"
       >
         <!-- Header (Drag Handle) -->
@@ -157,460 +157,347 @@
             </p>
           </div>
 
-          <!-- Results Table -->
-          <div v-else>
-            <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
-              <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                  <!-- Header: Meal Plans -->
-                  <thead>
-                    <tr class="bg-gray-50 dark:bg-slate-700/50">
-                      <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-slate-400 sticky left-0 bg-gray-50 dark:bg-slate-700/50 min-w-[220px]">
-                        {{ $t('planning.pricing.roomType') }}
-                      </th>
-                      <th
-                        v-for="mp in mealPlans"
-                        :key="mp._id"
-                        class="px-3 py-3 text-center min-w-[120px]"
+          <!-- Results - Card Based Design -->
+          <div v-else class="space-y-3">
+            <!-- Room Cards -->
+            <div
+              v-for="roomResult in results"
+              :key="roomResult.roomType._id"
+              class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+            >
+              <!-- Room Header -->
+              <div class="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-b border-gray-200 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                  <!-- Room Image -->
+                  <div class="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-700 flex-shrink-0">
+                    <img
+                      v-if="getRoomImage(roomResult.roomType)"
+                      :src="getRoomImage(roomResult.roomType)"
+                      :alt="getRoomTypeName(roomResult.roomType)"
+                      class="w-full h-full object-cover"
+                    />
+                    <div v-else class="w-full h-full flex items-center justify-center">
+                      <span class="material-icons text-gray-400 text-xl">hotel</span>
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="px-2 py-0.5 rounded-lg bg-indigo-600 text-white text-xs font-bold whitespace-nowrap">
+                        {{ roomResult.roomType.code }}
+                      </span>
+                      <span class="font-semibold text-gray-800 dark:text-white">
+                        {{ getRoomTypeName(roomResult.roomType) }}
+                      </span>
+                    </div>
+                    <div class="text-xs text-gray-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
+                      <span class="material-icons text-xs">person</span>
+                      <span>
+                        {{ roomResult.roomType.occupancy?.minAdults > 1 ? roomResult.roomType.occupancy.minAdults + '-' : '' }}{{ roomResult.roomType.occupancy?.maxAdults || 2 }} yetişkin, {{ roomResult.roomType.occupancy?.totalMaxGuests || 4 }} kişi
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Meal Plan Prices Grid -->
+              <div class="grid gap-2 p-3 overflow-x-auto" :style="{ gridTemplateColumns: `repeat(${mealPlans.length}, minmax(120px, 1fr))` }">
+                <div
+                  v-for="mpResult in roomResult.mealPlans"
+                  :key="mpResult.mealPlan._id"
+                  class="relative p-3 rounded-xl cursor-pointer transition-all hover:shadow-md"
+                  :class="[
+                    mpResult.capacityExceeded ? 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800' :
+                    !mpResult.hasRates ? 'bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600' :
+                    mpResult.available ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' :
+                    'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'
+                  ]"
+                  @click="toggleDetails(roomResult.roomType._id, mpResult.mealPlan._id)"
+                >
+                  <!-- Meal Plan Badge -->
+                  <div class="text-center mb-2">
+                    <span
+                      class="inline-block px-2 py-0.5 rounded-lg text-xs font-bold"
+                      :class="getMealPlanBadgeClass(mpResult.mealPlan.code)"
+                    >
+                      {{ mpResult.mealPlan.code }}
+                    </span>
+                  </div>
+
+                  <!-- Capacity Exceeded -->
+                  <div v-if="mpResult.capacityExceeded" class="text-center py-2">
+                    <span class="material-icons text-rose-500 text-2xl">group_off</span>
+                    <div class="text-xs text-rose-600 font-medium mt-1">Kapasite Aşımı</div>
+                  </div>
+
+                  <!-- No Rates -->
+                  <div v-else-if="!mpResult.hasRates" class="text-center py-2">
+                    <span class="text-gray-400 dark:text-slate-500 text-lg">—</span>
+                    <div class="text-xs text-gray-400 mt-1">Fiyat yok</div>
+                  </div>
+
+                  <!-- Has Rates -->
+                  <div v-else class="text-center">
+                    <!-- Campaign Discount Badge -->
+                    <div v-if="mpResult.campaign" class="absolute -top-2 -right-2 z-10">
+                      <span class="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-bold rounded-full shadow-lg">
+                        {{ mpResult.discountText }}
+                      </span>
+                    </div>
+
+                    <!-- Original Price (if campaign) -->
+                    <div v-if="mpResult.campaign" class="text-sm text-gray-400 line-through mb-0.5">
+                      {{ formatPrice(mpResult.originalPrice) }} {{ currency }}
+                    </div>
+
+                    <!-- Main Price -->
+                    <div
+                      class="text-xl font-bold"
+                      :class="mpResult.available ? (mpResult.campaign ? 'text-green-600' : 'text-gray-900 dark:text-white') : 'text-gray-400 line-through'"
+                    >
+                      {{ formatPrice(mpResult.totalPrice) }}
+                      <span class="text-sm font-normal text-gray-500">{{ currency }}</span>
+                    </div>
+
+                    <!-- Per Night -->
+                    <div class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                      {{ formatPrice(mpResult.avgPerNight) }} {{ currency }} / gece
+                    </div>
+
+                    <!-- Availability Status -->
+                    <div class="flex items-center justify-center gap-1 mt-2">
+                      <span
+                        class="material-icons text-sm"
+                        :class="mpResult.available ? 'text-green-500' : 'text-amber-500'"
                       >
-                        <span
-                          class="inline-block px-2 py-1 rounded text-xs font-bold"
-                          :class="getMealPlanBadgeClass(mp.code)"
-                        >
-                          {{ mp.code }}
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <template v-for="roomResult in results" :key="roomResult.roomType._id">
-                      <!-- Room Row -->
-                      <tr
-                        class="border-t border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/30"
+                        {{ mpResult.available ? 'check_circle' : 'warning' }}
+                      </span>
+                      <span
+                        class="text-xs font-medium"
+                        :class="mpResult.available ? 'text-green-600' : 'text-amber-600'"
                       >
-                        <!-- Room Type with Image -->
-                        <td class="px-4 py-3 sticky left-0 bg-white dark:bg-slate-800">
-                          <div class="flex items-center gap-3">
-                            <!-- Room Image -->
-                            <div class="w-14 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-slate-700">
-                              <img
-                                v-if="getRoomImage(roomResult.roomType)"
-                                :src="getRoomImage(roomResult.roomType)"
-                                :alt="getRoomTypeName(roomResult.roomType)"
-                                class="w-full h-full object-cover"
-                              />
-                              <div v-else class="w-full h-full flex items-center justify-center">
-                                <span class="material-icons text-gray-400 dark:text-slate-500 text-lg">hotel</span>
-                              </div>
-                            </div>
-                            <div>
-                              <div class="font-medium text-gray-800 dark:text-white text-sm flex items-center gap-1">
-                                <span class="px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
-                                  {{ roomResult.roomType.code }}
-                                </span>
-                                {{ getRoomTypeName(roomResult.roomType) }}
-                              </div>
-                              <div class="text-xs text-gray-400 dark:text-slate-500">
-                                max {{ roomResult.roomType.occupancy?.maxAdults || 2 }} yetişkin,
-                                {{ roomResult.roomType.occupancy?.totalMaxGuests || 4 }} kişi
-                              </div>
-                            </div>
-                          </div>
-                        </td>
+                        {{ mpResult.available ? 'Müsait' : 'Kısıtlı' }}
+                      </span>
+                    </div>
 
-                        <!-- Meal Plan Prices -->
-                        <td
-                          v-for="mpResult in roomResult.mealPlans"
-                          :key="mpResult.mealPlan._id"
-                          class="px-3 py-2 text-center cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-600/30 transition-colors"
-                          @click="toggleDetails(roomResult.roomType._id, mpResult.mealPlan._id)"
+                    <!-- OBP Badge -->
+                    <div v-if="mpResult.isOBP" class="mt-2">
+                      <span class="px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 text-[10px] font-bold rounded">
+                        Kişi Bazlı
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Expanded Detail Section -->
+              <div v-if="getExpandedMealPlan(roomResult.roomType._id)" class="border-t border-gray-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30 p-4">
+                <!-- Detail Header -->
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-gray-800 dark:text-white">
+                      {{ roomResult.roomType.code }} - {{ getRoomTypeName(roomResult.roomType) }}
+                    </span>
+                    <span
+                      class="px-2 py-0.5 rounded text-xs font-bold"
+                      :class="getMealPlanBadgeClass(getExpandedMealPlanData(roomResult)?.mealPlan?.code)"
+                    >
+                      {{ getExpandedMealPlanData(roomResult)?.mealPlan?.code }}
+                    </span>
+                  </div>
+                  <button @click="expandedRow = null" class="p-1 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors">
+                    <span class="material-icons text-gray-500">close</span>
+                  </button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-4 gap-3 mb-4">
+                  <!-- Total Price -->
+                  <div class="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Toplam</div>
+                    <div v-if="getExpandedMealPlanData(roomResult)?.campaign" class="text-xs text-gray-400 line-through">
+                      {{ formatPrice(getExpandedMealPlanData(roomResult)?.originalPrice || 0) }} {{ currency }}
+                    </div>
+                    <div class="text-lg font-bold text-green-600">
+                      {{ formatPrice(getExpandedMealPlanData(roomResult)?.totalPrice || 0) }} {{ currency }}
+                    </div>
+                  </div>
+                  <!-- Per Night -->
+                  <div class="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Gecelik</div>
+                    <div class="text-lg font-bold text-blue-600">
+                      {{ formatPrice(getExpandedMealPlanData(roomResult)?.avgPerNight || 0) }} {{ currency }}
+                    </div>
+                  </div>
+                  <!-- Status -->
+                  <div class="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Durum</div>
+                    <div class="flex items-center justify-center gap-1">
+                      <span
+                        class="material-icons"
+                        :class="getExpandedMealPlanData(roomResult)?.available ? 'text-green-500' : 'text-red-500'"
+                      >
+                        {{ getExpandedMealPlanData(roomResult)?.available ? 'check_circle' : 'cancel' }}
+                      </span>
+                      <span
+                        class="font-bold"
+                        :class="getExpandedMealPlanData(roomResult)?.available ? 'text-green-600' : 'text-red-600'"
+                      >
+                        {{ getExpandedMealPlanData(roomResult)?.available ? 'Müsait' : 'Yok' }}
+                      </span>
+                    </div>
+                  </div>
+                  <!-- Campaign -->
+                  <div v-if="getExpandedMealPlanData(roomResult)?.campaign" class="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 text-center shadow-sm">
+                    <div class="text-xs text-purple-600 mb-1">Kampanya</div>
+                    <div class="text-lg font-bold text-purple-600">
+                      {{ getExpandedMealPlanData(roomResult).discountText }}
+                    </div>
+                  </div>
+                  <div v-else class="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">Gece</div>
+                    <div class="text-lg font-bold text-gray-800 dark:text-white">{{ nights }}</div>
+                  </div>
+                </div>
+
+                <!-- Issues -->
+                <div v-if="getExpandedMealPlanData(roomResult)?.issues?.length > 0" class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                  <div class="flex items-center gap-2 text-red-600 font-medium text-sm mb-2">
+                    <span class="material-icons text-sm">warning</span>
+                    Müsaitlik Sorunları
+                  </div>
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="(issue, idx) in getExpandedMealPlanData(roomResult).issues"
+                      :key="idx"
+                      class="px-2 py-0.5 rounded-lg text-xs font-medium"
+                      :class="getIssueBadgeClass(issue.type)"
+                    >
+                      {{ issue.date ? formatDate(issue.date) : '' }} {{ getIssueShortLabel(issue.type) }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Daily Breakdown Table -->
+                <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-600">
+                  <div class="px-3 py-2 bg-gray-100 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
+                    <h4 class="font-medium text-gray-800 dark:text-white text-sm flex items-center gap-2">
+                      <span class="material-icons text-sm">calendar_month</span>
+                      Günlük Fiyat Detayı
+                    </h4>
+                  </div>
+                  <div class="overflow-x-auto max-h-[250px] overflow-y-auto">
+                    <table class="w-full text-xs">
+                      <thead class="sticky top-0 z-10">
+                        <tr class="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400">
+                          <th class="px-2 py-1.5 text-left font-medium">Tarih</th>
+                          <th v-if="getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-1.5 text-center font-medium">{{ query.adults }}P</th>
+                          <template v-else>
+                            <th class="px-2 py-1.5 text-center font-medium">Baz</th>
+                            <th v-if="hasExtraAdults" class="px-2 py-1.5 text-center font-medium">+Yt</th>
+                          </template>
+                          <th v-if="query.childrenCount > 0" class="px-2 py-1.5 text-center font-medium">Çc</th>
+                          <th class="px-2 py-1.5 text-center font-medium">Toplam</th>
+                          <th class="px-2 py-1.5 text-center font-medium w-16"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          v-for="(day, idx) in getExpandedMealPlanData(roomResult)?.dailyBreakdown || []"
+                          :key="idx"
+                          class="border-b border-gray-100 dark:border-slate-700"
+                          :class="day.hasIssue ? 'bg-red-50 dark:bg-red-900/10' : ''"
                         >
-                          <!-- Capacity Exceeded - No price available -->
-                          <div v-if="mpResult.capacityExceeded" class="text-center">
-                            <div class="text-rose-500 dark:text-rose-400">
-                              <span class="material-icons text-lg">group_off</span>
-                            </div>
-                            <div class="text-[10px] text-rose-600 dark:text-rose-400 font-medium mt-0.5">
-                              Kapasite Aşımı
-                            </div>
-                          </div>
-                          <div v-else-if="mpResult.hasRates">
-                            <!-- OBP Badge -->
-                            <div v-if="mpResult.isOBP" class="text-[9px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-1 py-0.5 rounded mb-0.5 inline-block font-semibold">
-                              OBP
-                            </div>
-                            <!-- Campaign Applied -->
-                            <template v-if="mpResult.campaign">
-                              <!-- Original Price (strikethrough) -->
-                              <div class="text-xs text-gray-400 dark:text-slate-500 line-through">
-                                {{ formatPrice(mpResult.originalPrice) }}
-                              </div>
-                              <!-- Discounted Price -->
-                              <div
-                                class="font-bold text-base"
-                                :class="mpResult.available ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-slate-500 line-through'"
-                              >
-                                {{ formatPrice(mpResult.totalPrice) }}
-                              </div>
-                              <!-- Campaign Badge -->
-                              <div class="text-[10px] bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-1 py-0.5 rounded mt-0.5 inline-block">
-                                {{ mpResult.discountText }}
-                              </div>
+                          <td class="px-2 py-1.5">
+                            <span class="font-medium text-gray-900 dark:text-white">{{ formatDate(day.date) }}</span>
+                          </td>
+                          <td v-if="getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-1.5 text-center">
+                            <span v-if="day.rate && day.obpPrice !== null" class="font-medium">{{ day.obpPrice }} {{ currency }}</span>
+                            <span v-else class="text-red-500">-</span>
+                          </td>
+                          <template v-else>
+                            <td class="px-2 py-1.5 text-center">
+                              <span v-if="day.rate" class="font-medium">{{ day.basePrice }}</span>
+                              <span v-else class="text-red-500">-</span>
+                            </td>
+                            <td v-if="hasExtraAdults" class="px-2 py-1.5 text-center text-amber-600">
+                              {{ day.extraAdultPrice > 0 ? '+' + day.extraAdultPrice : '-' }}
+                            </td>
+                          </template>
+                          <td v-if="query.childrenCount > 0" class="px-2 py-1.5 text-center">
+                            <span v-if="day.childrenPrice > 0" class="text-pink-600">+{{ day.childrenPrice }}</span>
+                            <span v-else-if="day.isMultiplierOBP && day.rate" class="text-purple-500 text-[10px]">Dahil</span>
+                            <span v-else class="text-gray-400">-</span>
+                          </td>
+                          <td class="px-2 py-1.5 text-center">
+                            <template v-if="day.rate">
+                              <span v-if="day.campaignApplied" class="text-green-600 font-bold">{{ day.isFreeNight ? 'FREE' : Math.round(day.dailyTotal) }}</span>
+                              <span v-else class="font-bold text-gray-900 dark:text-white">{{ Math.round(day.dailyTotal) }}</span>
                             </template>
-                            <!-- No Campaign -->
-                            <template v-else>
-                              <!-- Price -->
-                              <div
-                                class="font-bold text-base"
-                                :class="mpResult.available ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-slate-500 line-through'"
-                              >
-                                {{ formatPrice(mpResult.totalPrice) }}
-                              </div>
-                            </template>
-                            <!-- Per Night -->
-                            <div class="text-xs text-gray-400 dark:text-slate-500">
-                              {{ formatPrice(mpResult.avgPerNight) }}/g
-                            </div>
-                            <!-- Status Badges -->
-                            <div v-if="!mpResult.available" class="flex flex-wrap justify-center gap-0.5 mt-1">
-                              <span
-                                v-for="(issue, idx) in getUniqueIssueTypes(mpResult.issues).slice(0, 3)"
-                                :key="idx"
-                                class="px-1 py-0.5 rounded text-[10px] font-medium"
-                                :class="getIssueBadgeClass(issue)"
-                              >
-                                {{ getIssueShortLabel(issue) }}
-                              </span>
-                            </div>
-                            <!-- Available Badge -->
-                            <div v-else class="mt-1">
-                              <span class="material-icons text-green-500 text-sm">check_circle</span>
-                            </div>
-                            <!-- Expand indicator -->
-                            <div class="mt-1">
-                              <span class="material-icons text-xs text-gray-400" :class="{ 'rotate-180': isExpanded(roomResult.roomType._id, mpResult.mealPlan._id) }">
-                                expand_more
-                              </span>
-                            </div>
-                          </div>
-                          <div v-else class="text-gray-300 dark:text-slate-600">
-                            <span class="material-icons text-lg">remove</span>
-                          </div>
-                        </td>
-                      </tr>
-
-                      <!-- Accordion Detail Row -->
-                      <tr v-if="getExpandedMealPlan(roomResult.roomType._id)">
-                        <td :colspan="mealPlans.length + 1" class="p-0">
-                          <div class="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-slate-700/50 dark:to-slate-800/50 border-t border-b border-gray-200 dark:border-slate-600">
-                            <div class="p-4">
-                              <!-- Accordion Header -->
-                              <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center gap-3">
-                                  <!-- Room Image in Detail -->
-                                  <div class="w-16 h-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-700">
-                                    <img
-                                      v-if="getRoomImage(roomResult.roomType)"
-                                      :src="getRoomImage(roomResult.roomType)"
-                                      :alt="getRoomTypeName(roomResult.roomType)"
-                                      class="w-full h-full object-cover"
-                                    />
-                                    <div v-else class="w-full h-full flex items-center justify-center">
-                                      <span class="material-icons text-gray-400 dark:text-slate-500">hotel</span>
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <h4 class="font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                      {{ roomResult.roomType.code }} - {{ getRoomTypeName(roomResult.roomType) }}
-                                      <span
-                                        class="px-2 py-0.5 rounded text-xs font-bold"
-                                        :class="getMealPlanBadgeClass(getExpandedMealPlanData(roomResult)?.mealPlan?.code)"
-                                      >
-                                        {{ getExpandedMealPlanData(roomResult)?.mealPlan?.code }}
-                                      </span>
-                                      <span v-if="getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-0.5 rounded text-xs font-bold bg-indigo-500 text-white">
-                                        OBP
-                                      </span>
-                                    </h4>
-                                    <p class="text-sm text-gray-500 dark:text-slate-400">
-                                      {{ getMealPlanName(getExpandedMealPlanData(roomResult)?.mealPlan) }}
-                                    </p>
-                                  </div>
-                                </div>
-                                <button
-                                  @click="expandedRow = null"
-                                  class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 flex items-center justify-center"
-                                >
-                                  <span class="material-icons text-gray-600 dark:text-slate-300">close</span>
-                                </button>
-                              </div>
-
-                              <!-- Summary Cards -->
-                              <div class="grid grid-cols-3 gap-3 mb-4">
-                                <!-- Total Price -->
-                                <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-3 text-center">
-                                  <div class="text-xs text-green-600 dark:text-green-400 font-medium mb-1">Toplam Fiyat</div>
-                                  <div v-if="getExpandedMealPlanData(roomResult)?.campaign" class="text-xs text-gray-400 line-through">
-                                    {{ formatPrice(getExpandedMealPlanData(roomResult)?.originalPrice || 0) }} {{ currency }}
-                                  </div>
-                                  <div class="text-xl font-bold text-green-700 dark:text-green-300">
-                                    {{ formatPrice(getExpandedMealPlanData(roomResult)?.totalPrice || 0) }}
-                                    <span class="text-sm font-normal">{{ currency }}</span>
-                                  </div>
-                                </div>
-
-                                <!-- Per Night -->
-                                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-3 text-center">
-                                  <div class="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Gecelik Ortalama</div>
-                                  <div class="text-xl font-bold text-blue-700 dark:text-blue-300">
-                                    {{ formatPrice(getExpandedMealPlanData(roomResult)?.avgPerNight || 0) }}
-                                    <span class="text-sm font-normal">{{ currency }}</span>
-                                  </div>
-                                </div>
-
-                                <!-- Availability -->
-                                <div
-                                  class="rounded-xl p-3 text-center"
-                                  :class="getExpandedMealPlanData(roomResult)?.available
-                                    ? 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20'
-                                    : 'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20'"
-                                >
-                                  <div class="text-xs font-medium mb-1" :class="getExpandedMealPlanData(roomResult)?.available ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">
-                                    Durum
-                                  </div>
-                                  <div class="flex items-center justify-center gap-1">
-                                    <span
-                                      class="material-icons text-xl"
-                                      :class="getExpandedMealPlanData(roomResult)?.available ? 'text-emerald-600' : 'text-red-600'"
-                                    >
-                                      {{ getExpandedMealPlanData(roomResult)?.available ? 'check_circle' : 'cancel' }}
-                                    </span>
-                                    <span class="font-bold text-sm" :class="getExpandedMealPlanData(roomResult)?.available ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'">
-                                      {{ getExpandedMealPlanData(roomResult)?.available ? 'Müsait' : 'Müsait Değil' }}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <!-- Campaign Info -->
-                              <div v-if="getExpandedMealPlanData(roomResult)?.campaign" class="mb-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-3">
-                                <div class="flex items-center justify-between">
-                                  <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-purple-500 flex items-center justify-center">
-                                      <span class="material-icons text-white text-sm">campaign</span>
-                                    </div>
-                                    <div>
-                                      <div class="font-medium text-purple-800 dark:text-purple-200 text-sm">
-                                        {{ getCampaignName(getExpandedMealPlanData(roomResult).campaign) }}
-                                      </div>
-                                      <div class="text-xs text-purple-600 dark:text-purple-400">
-                                        {{ $t(`planning.campaigns.types.${getExpandedMealPlanData(roomResult).campaign.type}`) }}
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div class="text-right">
-                                    <div class="font-bold text-purple-700 dark:text-purple-300">
-                                      {{ getExpandedMealPlanData(roomResult).discountText }}
-                                    </div>
-                                    <div class="text-xs text-purple-500 dark:text-purple-400">
-                                      -{{ formatPrice(getExpandedMealPlanData(roomResult).discountAmount || 0) }} {{ currency }}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <!-- Issues Alert -->
-                              <div v-if="getExpandedMealPlanData(roomResult)?.issues?.length > 0" class="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3">
-                                <div class="flex items-center gap-2 text-red-700 dark:text-red-400 font-medium text-sm mb-2">
-                                  <span class="material-icons text-sm">warning</span>
-                                  Müsaitlik Sorunları
-                                </div>
-                                <div class="space-y-1">
-                                  <div
-                                    v-for="(issue, idx) in getExpandedMealPlanData(roomResult).issues.slice(0, 5)"
-                                    :key="idx"
-                                    class="flex items-center gap-2 text-xs"
-                                    :class="getIssueClass(issue.type)"
-                                  >
-                                    <span class="material-icons text-xs">{{ getIssueIcon(issue.type) }}</span>
-                                    <span class="font-medium">{{ issue.date ? formatDate(issue.date) + ':' : '' }}</span>
-                                    {{ issue.message }}
-                                  </div>
-                                  <div v-if="getExpandedMealPlanData(roomResult).issues.length > 5" class="text-xs text-gray-500">
-                                    ... ve {{ getExpandedMealPlanData(roomResult).issues.length - 5 }} sorun daha
-                                  </div>
-                                </div>
-                              </div>
-
-                              <!-- Daily Breakdown Table -->
-                              <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-gray-200 dark:border-slate-600">
-                                <div class="px-3 py-2 bg-gray-100 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
-                                  <h4 class="font-bold text-gray-800 dark:text-white text-sm flex items-center gap-2">
-                                    <span class="material-icons text-sm">calendar_month</span>
-                                    Günlük Fiyat Detayı
-                                  </h4>
-                                </div>
-                                <div class="overflow-x-auto max-h-[300px] overflow-y-auto">
-                                  <table class="w-full text-xs">
-                                    <thead class="sticky top-0">
-                                      <tr class="bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-400">
-                                        <th class="px-3 py-2 text-left font-medium">Tarih</th>
-                                        <!-- OBP: X Yetişkin Fiyatı -->
-                                        <th v-if="getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-2 text-center font-medium">
-                                          {{ query.adults }}P Fiyat
-                                        </th>
-                                        <!-- Unit-based: Baz Fiyat + Ek Yetişkin + Tek Kişi -->
-                                        <template v-else>
-                                          <th class="px-2 py-2 text-center font-medium">Baz Fiyat</th>
-                                          <th v-if="hasExtraAdults" class="px-2 py-2 text-center font-medium">Ek Yetişkin</th>
-                                        </template>
-                                        <th v-if="query.childrenCount > 0" class="px-2 py-2 text-center font-medium">Çocuk</th>
-                                        <th v-if="hasSingleSupplement && !getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-2 text-center font-medium">Tek Kişi</th>
-                                        <th class="px-2 py-2 text-center font-medium">Toplam</th>
-                                        <th class="px-2 py-2 text-center font-medium">Durum</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      <tr
-                                        v-for="(day, idx) in getExpandedMealPlanData(roomResult)?.dailyBreakdown || []"
-                                        :key="idx"
-                                        class="border-b border-gray-100 dark:border-slate-700"
-                                        :class="day.hasIssue ? 'bg-red-50 dark:bg-red-900/10' : ''"
-                                      >
-                                        <td class="px-3 py-2">
-                                          <div class="font-medium text-gray-900 dark:text-white">{{ formatDate(day.date) }}</div>
-                                          <div class="text-[10px] text-gray-500 dark:text-slate-400">{{ getDayName(day.date) }}</div>
-                                        </td>
-                                        <!-- OBP: Yetişkin fiyatı -->
-                                        <td v-if="getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-2 text-center">
-                                          <template v-if="day.rate">
-                                            <span v-if="day.obpPrice !== null" class="font-semibold text-gray-900 dark:text-white">{{ day.obpPrice }}</span>
-                                            <span v-else class="text-red-500 text-[10px]">{{ query.adults }}P yok</span>
-                                          </template>
-                                          <span v-else class="text-red-500">-</span>
-                                        </td>
-                                        <!-- Unit-based -->
-                                        <template v-else>
-                                          <td class="px-2 py-2 text-center">
-                                            <span v-if="day.rate" class="font-semibold text-gray-900 dark:text-white">{{ day.basePrice }}</span>
-                                            <span v-else class="text-red-500">-</span>
-                                          </td>
-                                          <td v-if="hasExtraAdults" class="px-2 py-2 text-center">
-                                            <span v-if="day.extraAdultPrice > 0" class="text-amber-600 dark:text-amber-400">+{{ day.extraAdultPrice }}</span>
-                                            <span v-else class="text-gray-400">-</span>
-                                          </td>
-                                        </template>
-                                        <td v-if="query.childrenCount > 0" class="px-2 py-2 text-center">
-                                          <span v-if="day.childrenPrice > 0" class="text-pink-600 dark:text-pink-400">+{{ day.childrenPrice }}</span>
-                                          <span v-else-if="day.childrenPrice === 0 && day.rate" class="text-green-600 dark:text-green-400 text-[10px]">Ücretsiz</span>
-                                          <span v-else class="text-gray-400">-</span>
-                                        </td>
-                                        <td v-if="hasSingleSupplement && !getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-2 text-center">
-                                          <span v-if="day.singleSupplementPrice" class="text-blue-600 dark:text-blue-400">{{ day.singleSupplementPrice }}</span>
-                                          <span v-else class="text-gray-400">-</span>
-                                        </td>
-                                        <td class="px-2 py-2 text-center">
-                                          <template v-if="day.rate">
-                                            <template v-if="day.campaignApplied && day.originalDailyTotal">
-                                              <div class="text-[10px] text-gray-400 line-through">{{ Math.round(day.originalDailyTotal) }}</div>
-                                              <div class="font-bold" :class="day.isFreeNight ? 'text-purple-600 dark:text-purple-400' : 'text-green-600 dark:text-green-400'">
-                                                {{ day.isFreeNight ? 'ÜCRETSİZ' : Math.round(day.dailyTotal) }}
-                                              </div>
-                                            </template>
-                                            <span v-else class="font-bold text-green-600 dark:text-green-400">{{ Math.round(day.dailyTotal) }}</span>
-                                          </template>
-                                          <span v-else class="text-red-500 font-bold">-</span>
-                                        </td>
-                                        <td class="px-2 py-2 text-center">
-                                          <div v-if="!day.rate" class="flex items-center justify-center">
-                                            <span class="px-1 py-0.5 bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-slate-400 rounded text-[10px]">Yok</span>
-                                          </div>
-                                          <div v-else-if="day.hasIssue" class="flex flex-wrap justify-center gap-0.5">
-                                            <span v-if="day.rate?.stopSale" class="px-1 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded text-[10px] font-medium">STOP</span>
-                                            <span v-if="day.rate?.singleStop && query.adults === 1" class="px-1 py-0.5 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 rounded text-[10px] font-medium">1P</span>
-                                            <span v-if="day.rate?.closedToArrival && day.isCheckIn" class="px-1 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded text-[10px] font-medium">CTA</span>
-                                            <span v-if="day.rate?.closedToDeparture && day.isCheckOut" class="px-1 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded text-[10px] font-medium">CTD</span>
-                                            <span v-if="day.minStayIssue" class="px-1 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-[10px] font-medium">Min{{ day.rate?.minStay }}</span>
-                                          </div>
-                                          <div v-else class="flex items-center justify-center">
-                                            <span class="material-icons text-green-500 text-sm">check_circle</span>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                    <tfoot>
-                                      <tr class="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 font-bold sticky bottom-0">
-                                        <td class="px-3 py-2 text-gray-900 dark:text-white">
-                                          TOPLAM ({{ nights }}g)
-                                        </td>
-                                        <!-- OBP: Yetişkin toplam -->
-                                        <td v-if="getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-2 text-center text-gray-900 dark:text-white">
-                                          {{ getExpandedMealPlanData(roomResult)?.totals?.obpTotal || 0 }}
-                                        </td>
-                                        <!-- Unit-based -->
-                                        <template v-else>
-                                          <td class="px-2 py-2 text-center text-gray-900 dark:text-white">{{ getExpandedMealPlanData(roomResult)?.totals?.basePrice || 0 }}</td>
-                                          <td v-if="hasExtraAdults" class="px-2 py-2 text-center text-amber-600 dark:text-amber-400">+{{ getExpandedMealPlanData(roomResult)?.totals?.extraAdult || 0 }}</td>
-                                        </template>
-                                        <td v-if="query.childrenCount > 0" class="px-2 py-2 text-center text-pink-600 dark:text-pink-400">+{{ getExpandedMealPlanData(roomResult)?.totals?.children || 0 }}</td>
-                                        <td v-if="hasSingleSupplement && !getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-2 text-center text-blue-600 dark:text-blue-400">{{ getExpandedMealPlanData(roomResult)?.totals?.singleSupplement || 0 }}</td>
-                                        <td class="px-2 py-2 text-center text-green-700 dark:text-green-300">{{ getExpandedMealPlanData(roomResult)?.totalPrice || 0 }} {{ currency }}</td>
-                                        <td class="px-2 py-2"></td>
-                                      </tr>
-                                    </tfoot>
-                                  </table>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    </template>
-                  </tbody>
-                </table>
+                            <span v-else class="text-red-500">-</span>
+                          </td>
+                          <td class="px-2 py-1.5 text-center">
+                            <span v-if="!day.rate" class="text-[10px] text-gray-400">Yok</span>
+                            <span v-else-if="day.hasIssue" class="text-[10px] text-red-500 font-medium">
+                              {{ day.rate?.stopSale ? 'STOP' : day.rate?.closedToArrival && day.isCheckIn ? 'CTA' : day.minStayIssue ? 'Min' + day.rate?.minStay : '!' }}
+                            </span>
+                            <span v-else class="material-icons text-green-500 text-xs">check</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr class="bg-green-50 dark:bg-green-900/20 font-bold sticky bottom-0">
+                          <td class="px-2 py-1.5 text-gray-900 dark:text-white">TOPLAM</td>
+                          <td v-if="getExpandedMealPlanData(roomResult)?.isOBP" class="px-2 py-1.5 text-center">
+                            {{ getExpandedMealPlanData(roomResult)?.totals?.obpTotal || 0 }}
+                          </td>
+                          <template v-else>
+                            <td class="px-2 py-1.5 text-center">{{ getExpandedMealPlanData(roomResult)?.totals?.basePrice || 0 }}</td>
+                            <td v-if="hasExtraAdults" class="px-2 py-1.5 text-center text-amber-600">+{{ getExpandedMealPlanData(roomResult)?.totals?.extraAdult || 0 }}</td>
+                          </template>
+                          <td v-if="query.childrenCount > 0" class="px-2 py-1.5 text-center text-pink-600">
+                            {{ getExpandedMealPlanData(roomResult)?.isMultiplierOBP ? 'Dahil' : '+' + (getExpandedMealPlanData(roomResult)?.totals?.children || 0) }}
+                          </td>
+                          <td class="px-2 py-1.5 text-center text-green-600">{{ getExpandedMealPlanData(roomResult)?.totalPrice || 0 }} {{ currency }}</td>
+                          <td class="px-2 py-1.5"></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Legend -->
-            <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
-              <span class="flex items-center gap-1">
-                <span class="material-icons text-green-500 text-sm">check_circle</span>
-                Müsait
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="px-1 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded text-[10px] font-semibold">OBP</span>
-                Kişi Bazlı Fiyat
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="px-1 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded text-[10px]">STOP</span>
-                Satış Kapalı
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="px-1 py-0.5 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded text-[10px]">KAP</span>
-                Kapasite Aşımı
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="px-1 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded text-[10px]">CTA</span>
-                Girişe Kapalı
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="px-1 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded text-[10px]">CTD</span>
-                Çıkışa Kapalı
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="px-1 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded text-[10px]">MIN</span>
-                Min. Konaklama
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="px-1 py-0.5 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded text-[10px]">1P</span>
-                Tek Kişi Kapalı
-              </span>
+            <!-- Legend - only show when there are results -->
+            <div v-if="results.length > 0" class="mt-4 p-3 bg-gray-50 dark:bg-slate-800/50 rounded-xl">
+              <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600 dark:text-slate-400">
+                <span class="flex items-center gap-1">
+                  <span class="material-icons text-green-500 text-sm">check_circle</span>
+                  Müsait
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="material-icons text-amber-500 text-sm">warning</span>
+                  Kısıtlı
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded text-[10px] font-bold">OBP</span>
+                  Kişi Bazlı
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="px-1.5 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded text-[10px] font-bold">-%</span>
+                  Kampanya
+                </span>
+              </div>
             </div>
 
             <!-- No Results -->
-            <div v-if="results.length === 0" class="text-center py-16">
-              <span class="material-icons text-6xl text-gray-300 dark:text-slate-600">search_off</span>
-              <p class="mt-4 text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.noRatesFound') }}</p>
+            <div v-if="results.length === 0" class="flex flex-col items-center justify-center py-16">
+              <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mb-4">
+                <span class="material-icons text-4xl text-gray-400 dark:text-slate-500">search_off</span>
+              </div>
+              <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">Sonuç Bulunamadı</h3>
+              <p class="text-gray-500 dark:text-slate-400 text-center max-w-sm">
+                Seçilen tarih aralığında uygun oda veya fiyat bulunamadı. Farklı tarihler deneyin.
+              </p>
             </div>
           </div>
         </div>
@@ -1036,12 +923,15 @@ const searchAvailability = async () => {
       }
 
       const maxAdults = roomType.occupancy?.maxAdults || 2
+      const minAdults = roomType.occupancy?.minAdults || 1
       const maxChildren = roomType.occupancy?.maxChildren || 2
       const maxOccupancy = roomType.occupancy?.totalMaxGuests || (maxAdults + maxChildren)
       const baseOccupancy = roomType.occupancy?.baseOccupancy || maxAdults
 
       const totalPax = query.value.adults + query.value.childrenCount
-      const capacityExceeded = totalPax > maxOccupancy || query.value.adults > maxAdults
+      // Check both min and max adults capacity
+      const belowMinAdults = query.value.adults < minAdults
+      const capacityExceeded = totalPax > maxOccupancy || query.value.adults > maxAdults || belowMinAdults
 
       for (const mealPlan of props.mealPlans) {
         const mpResult = {
@@ -1056,6 +946,13 @@ const searchAvailability = async () => {
         }
 
         if (capacityExceeded) {
+          if (belowMinAdults) {
+            mpResult.issues.push({
+              type: 'capacity',
+              date: null,
+              message: `Minimum ${minAdults} yetişkin gerekli`
+            })
+          }
           if (query.value.adults > maxAdults) {
             mpResult.issues.push({
               type: 'capacity',
@@ -1084,6 +981,7 @@ const searchAvailability = async () => {
         let totalOBP = 0
         let hasAnyRate = false
         let isOBPRate = false
+        const isMultiplierOBPRoom = roomType.pricingType === 'per_person' && roomType.useMultipliers === true
 
         for (let i = 0; i < dates.length; i++) {
           const dateStr = dates[i]
@@ -1116,9 +1014,72 @@ const searchAvailability = async () => {
             hasAnyRate = true
 
             const isOBP = rate.pricingType === 'per_person'
+            const isMultiplierOBP = isOBP && roomType.useMultipliers === true
             if (isOBP) isOBPRate = true
 
-            if (isOBP) {
+            if (isMultiplierOBP) {
+              // Multiplier OBP: use pricePerNight as base price and apply multiplier
+              const basePrice = rate.pricePerNight || 0
+
+              if (basePrice > 0) {
+                // Find the appropriate multiplier from roomType's multiplierTemplate
+                const multiplierTemplate = roomType.multiplierTemplate || {}
+                const adultMultipliers = multiplierTemplate.adultMultipliers || {}
+
+                // Get multiplier for the requested number of adults
+                const adultMultiplier = adultMultipliers[query.value.adults] || adultMultipliers[String(query.value.adults)] || 1
+
+                // Calculate children multipliers if any
+                let childMultiplier = 0
+                if (query.value.childrenCount > 0 && multiplierTemplate.childMultipliers) {
+                  const childMults = multiplierTemplate.childMultipliers
+                  for (let c = 0; c < query.value.childrenCount; c++) {
+                    const childOrder = c + 1
+                    const childAge = query.value.childAges?.[c] || 0
+
+                    // Determine age group
+                    let ageGroup = 'first'
+                    const childAgeGroups = props.childAgeGroups || []
+                    for (const ag of childAgeGroups) {
+                      if (childAge >= ag.minAge && childAge <= ag.maxAge) {
+                        ageGroup = ag.code
+                        break
+                      }
+                    }
+
+                    // Get child multiplier
+                    const orderMults = childMults[childOrder] || childMults[String(childOrder)] || {}
+                    const mult = orderMults[ageGroup] || 0
+                    childMultiplier += mult
+                  }
+                }
+
+                const totalMultiplier = adultMultiplier + childMultiplier
+                const calculatedPrice = Math.round(basePrice * totalMultiplier)
+
+                dayData.obpPrice = calculatedPrice
+                dayData.basePrice = calculatedPrice
+                dayData.multiplierInfo = { basePrice, adultMultiplier, childMultiplier, totalMultiplier }
+                totalOBP += calculatedPrice
+                totalBase += calculatedPrice
+              } else {
+                dayData.obpPrice = null
+                dayData.hasIssue = true
+                mpResult.available = false
+                mpResult.issues.push({
+                  type: 'no_rate',
+                  date: dateStr,
+                  message: `Baz fiyat tanımlı değil`
+                })
+              }
+
+              dayData.extraAdultPrice = 0
+              dayData.singleSupplementPrice = 0
+              dayData.childrenPrice = 0
+              dayData.isMultiplierOBP = true // Children are included in multiplier calculation
+
+            } else if (isOBP) {
+              // Standard OBP: use occupancyPricing directly
               const adultPrice = rate.occupancyPricing?.[query.value.adults]
 
               if (adultPrice !== undefined && adultPrice !== null) {
@@ -1155,7 +1116,8 @@ const searchAvailability = async () => {
               }
             }
 
-            if (query.value.childrenCount > 0) {
+            // Child pricing - skip for multiplier OBP (children are included in multiplier)
+            if (query.value.childrenCount > 0 && !isMultiplierOBP) {
               let childTotal = 0
               for (let c = 0; c < query.value.childrenCount; c++) {
                 if (rate.childOrderPricing && rate.childOrderPricing[c] !== undefined) {
@@ -1168,9 +1130,15 @@ const searchAvailability = async () => {
               totalChildren += childTotal
             }
 
-            if (isOBP && dayData.obpPrice !== null) {
+            // Daily total calculation
+            if (isMultiplierOBP && dayData.obpPrice !== null) {
+              // Multiplier OBP: obpPrice already includes everything
+              dayData.dailyTotal = dayData.obpPrice
+            } else if (isOBP && dayData.obpPrice !== null) {
+              // Standard OBP: obpPrice + children
               dayData.dailyTotal = dayData.obpPrice + dayData.childrenPrice
             } else if (!isOBP) {
+              // Unit pricing
               dayData.dailyTotal = dayData.basePrice + dayData.extraAdultPrice + dayData.childrenPrice + dayData.singleSupplementPrice
             } else {
               dayData.dailyTotal = 0
@@ -1215,9 +1183,13 @@ const searchAvailability = async () => {
 
         mpResult.hasRates = hasAnyRate
         mpResult.isOBP = isOBPRate
+        mpResult.isMultiplierOBP = isMultiplierOBPRoom
 
         let originalPrice
-        if (isOBPRate) {
+        if (isMultiplierOBPRoom) {
+          // Multiplier OBP: totalOBP already includes children
+          originalPrice = totalOBP
+        } else if (isOBPRate) {
           originalPrice = totalOBP + totalChildren
         } else {
           originalPrice = totalBase + totalExtraAdult + totalChildren + totalSingleSupplement
@@ -1229,7 +1201,7 @@ const searchAvailability = async () => {
         mpResult.totals = {
           basePrice: totalBase,
           extraAdult: totalExtraAdult,
-          children: totalChildren,
+          children: isMultiplierOBPRoom ? 0 : totalChildren, // Children included in multiplier
           singleSupplement: totalSingleSupplement,
           obpTotal: totalOBP
         }

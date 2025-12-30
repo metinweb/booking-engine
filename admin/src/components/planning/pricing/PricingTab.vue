@@ -130,29 +130,125 @@
           <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
         </div>
 
-        <div v-else-if="seasons.length > 0" class="flex flex-wrap gap-3">
-          <div
-            v-for="season in seasons"
-            :key="season._id"
-            class="group relative rounded-xl p-3 min-w-[140px] text-white shadow-lg cursor-pointer hover:scale-105 transition-transform"
-            :style="{ backgroundColor: season.color || '#6366f1' }"
-            @click="editSeason(season)"
-          >
-            <div class="flex items-start justify-between">
-              <div>
-                <div class="font-bold text-sm">{{ season.code }}</div>
-                <div class="text-xs opacity-90 mt-0.5">{{ getSeasonName(season) }}</div>
+        <div v-else-if="seasons.length > 0" class="space-y-4">
+          <!-- Season Cards -->
+          <div class="flex flex-wrap gap-3">
+            <div
+              v-for="season in seasons"
+              :key="season._id"
+              class="group relative rounded-xl p-3 min-w-[140px] text-white shadow-lg cursor-pointer hover:scale-105 transition-transform"
+              :style="{ backgroundColor: season.color || '#6366f1' }"
+              @click="editSeason(season)"
+            >
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="font-bold text-sm">{{ season.code }}</div>
+                  <div class="text-xs opacity-90 mt-0.5">{{ getSeasonName(season) }}</div>
+                </div>
+                <button
+                  @click.stop="confirmDeleteSeason(season)"
+                  class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/20 rounded"
+                >
+                  <span class="material-icons text-sm">close</span>
+                </button>
               </div>
-              <button
-                @click.stop="confirmDeleteSeason(season)"
-                class="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-white/20 rounded"
-              >
-                <span class="material-icons text-sm">close</span>
-              </button>
+              <div class="text-xs mt-2 opacity-75 flex items-center gap-1">
+                <span class="material-icons text-xs">event</span>
+                {{ formatSeasonDates(season) }}
+              </div>
             </div>
-            <div class="text-xs mt-2 opacity-75 flex items-center gap-1">
-              <span class="material-icons text-xs">event</span>
-              {{ formatSeasonDates(season) }}
+          </div>
+
+          <!-- Season Timeline Visualization -->
+          <div class="mt-4 bg-white dark:bg-slate-800 rounded-xl p-4 border border-amber-200 dark:border-amber-700">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="material-icons text-amber-600 text-lg">timeline</span>
+              <h5 class="font-medium text-gray-700 dark:text-gray-300">{{ $t('planning.pricing.seasonTimeline') }}</h5>
+              <!-- Year Navigation -->
+              <div class="ml-auto flex items-center gap-2">
+                <button
+                  @click="timelineYear--"
+                  class="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700"
+                >
+                  <span class="material-icons text-sm">chevron_left</span>
+                </button>
+                <span class="text-sm font-bold text-gray-700 dark:text-gray-300 min-w-[50px] text-center">{{ timelineYear }}</span>
+                <button
+                  @click="timelineYear++"
+                  class="p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700"
+                >
+                  <span class="material-icons text-sm">chevron_right</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Month Headers -->
+            <div class="flex mb-1">
+              <div class="flex-1 flex">
+                <div
+                  v-for="month in 12"
+                  :key="month"
+                  class="flex-1 text-center text-[10px] font-medium text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-slate-600 last:border-r-0"
+                >
+                  {{ getMonthShortName(month) }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Single Timeline with all seasons -->
+            <div class="relative h-10 bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden">
+              <!-- Month grid lines -->
+              <div class="absolute inset-0 flex">
+                <div v-for="month in 12" :key="'grid-'+month" class="flex-1 border-r border-gray-200/50 dark:border-slate-600/50 last:border-r-0"></div>
+              </div>
+
+              <!-- Season bars -->
+              <div
+                v-for="(range, idx) in allSeasonRanges"
+                :key="idx"
+                class="absolute h-full cursor-pointer hover:brightness-110 transition-all flex items-center justify-center overflow-hidden"
+                :style="{
+                  left: range.left + '%',
+                  width: range.width + '%',
+                  backgroundColor: range.color
+                }"
+                :title="`${range.season.code}: ${range.dateLabel}`"
+                @click="editSeason(range.season)"
+              >
+                <!-- Season name on bar -->
+                <span class="text-white font-bold text-xs px-1 truncate drop-shadow-sm">
+                  {{ range.season.code }}
+                </span>
+              </div>
+
+              <!-- Today marker -->
+              <div
+                v-if="todayPosition >= 0 && todayPosition <= 100"
+                class="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10"
+                :style="{ left: todayPosition + '%' }"
+              >
+                <div class="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-500 rounded-full"></div>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="mt-3 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-3 flex-wrap">
+                <span
+                  v-for="season in seasons"
+                  :key="'legend-' + season._id"
+                  class="flex items-center gap-1 cursor-pointer hover:opacity-80"
+                  @click="editSeason(season)"
+                >
+                  <span class="w-3 h-3 rounded" :style="{ backgroundColor: season.color || '#6366f1' }"></span>
+                  <span class="font-medium" :style="{ color: season.color || '#6366f1' }">{{ season.code }}</span>
+                  <span class="text-gray-400">{{ getSeasonName(season) }}</span>
+                </span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-500">
+                <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                <span>{{ $t('planning.pricing.today') }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -229,6 +325,7 @@
       <template v-if="viewMode === 'calendar'">
         <MonthlyCalendar
           ref="calendarRef"
+          :key="`calendar-${calendarKey}`"
           :hotel-id="hotel._id"
           :room-types="filteredRoomTypes"
           :meal-plans="filteredMealPlans"
@@ -238,6 +335,7 @@
           :loading="loadingRates"
           :initial-month="currentMonth"
           :current-seasons="currentMonthSeasons"
+          :child-age-groups="hotel.childAgeGroups || []"
           @refresh="handleCalendarRefresh"
           @bulk-edit="openBulkEditModal"
           @selection-change="handleSelectionChange"
@@ -451,6 +549,7 @@
         :market="selectedMarket"
         :room-types="filteredRoomTypes"
         :meal-plans="filteredMealPlans"
+        :existing-seasons="seasons"
         @saved="handleSeasonSaved"
         @cancel="showSeasonForm = false"
       />
@@ -494,6 +593,7 @@
       :meal-plans="filteredMealPlans"
       :rates="rates"
       :market="selectedMarket"
+      :child-age-groups="hotel.childAgeGroups || []"
       @saved="handleBulkEditSaved"
     />
 
@@ -521,6 +621,7 @@
       v-model="showPeriodEditModal"
       :title="$t('planning.pricing.editPeriod')"
       size="xl"
+      content-class="!h-[75vh] !overflow-y-auto"
     >
       <PeriodEditForm
         v-if="editingPeriod"
@@ -590,6 +691,7 @@
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
+import { useDate } from '@/composables/useDate'
 import Modal from '@/components/common/Modal.vue'
 import MonthlyCalendar from './MonthlyCalendar.vue'
 import SeasonForm from './SeasonForm.vue'
@@ -603,10 +705,13 @@ import planningService from '@/services/planningService'
 import { useAuthStore } from '@/stores/auth'
 
 const props = defineProps({
-  hotel: { type: Object, required: true }
+  hotel: { type: Object, required: true },
+  active: { type: Boolean, default: true }, // Whether this tab is currently active
+  refreshTrigger: { type: Number, default: 0 } // Increment to force refresh
 })
 
 const { t, locale } = useI18n()
+const { formatShortDate, formatDisplayDate, calculateDays } = useDate()
 const toast = useToast()
 const authStore = useAuthStore()
 
@@ -627,12 +732,16 @@ const loadingRates = ref(false)
 const loadingSeasons = ref(false)
 const loadingPriceList = ref(false)
 
+// Calendar refresh key - increment to force re-render
+const calendarKey = ref(0)
+
 // Price List Data (for list view)
 const priceListData = ref([])
 
 // UI State
 const viewMode = ref('calendar')
 const showSeasonPanel = ref(false)
+const timelineYear = ref(new Date().getFullYear())
 const showSeasonForm = ref(false)
 const showRateModal = ref(false)
 const showDeleteModal = ref(false)
@@ -881,17 +990,117 @@ const getRoomTypeName = (roomType) => {
 const formatSeasonDates = (season) => {
   if (!season.dateRanges?.length) return '-'
   const range = season.dateRanges[0]
-  return `${formatDate(range.startDate)} - ${formatDate(range.endDate)}`
+  return `${formatShortDate(range.startDate)} - ${formatShortDate(range.endDate)}`
 }
 
-const formatDate = (date) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit'
+// Timeline helper functions
+const getMonthShortName = (month) => {
+  const date = new Date(2024, month - 1, 1)
+  return date.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', { month: 'short' })
+}
+
+const formatTodayDate = () => {
+  return new Date().toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
   })
 }
+
+const getSeasonTimelineRanges = (season) => {
+  if (!season.dateRanges?.length) return []
+
+  const year = timelineYear.value
+  const yearStart = new Date(year, 0, 1).getTime()
+  const yearEnd = new Date(year, 11, 31, 23, 59, 59).getTime()
+  const yearDuration = yearEnd - yearStart
+
+  return season.dateRanges
+    .map(range => {
+      const start = new Date(range.startDate).getTime()
+      const end = new Date(range.endDate).getTime()
+
+      // Skip if range doesn't overlap with selected year
+      if (end < yearStart || start > yearEnd) return null
+
+      // Clamp to year boundaries
+      const clampedStart = Math.max(start, yearStart)
+      const clampedEnd = Math.min(end, yearEnd)
+
+      const left = ((clampedStart - yearStart) / yearDuration) * 100
+      const width = ((clampedEnd - clampedStart) / yearDuration) * 100
+
+      // Format label
+      const startDate = new Date(range.startDate)
+      const endDate = new Date(range.endDate)
+      const label = `${startDate.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })} - ${endDate.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`
+
+      // Short label for narrow bars
+      const shortLabel = `${startDate.getDate()}/${startDate.getMonth() + 1}-${endDate.getDate()}/${endDate.getMonth() + 1}`
+
+      return { left, width, label, shortLabel }
+    })
+    .filter(Boolean)
+}
+
+// Today's position on timeline (percentage)
+const todayPosition = computed(() => {
+  const year = timelineYear.value
+  const yearStart = new Date(year, 0, 1).getTime()
+  const yearEnd = new Date(year, 11, 31, 23, 59, 59).getTime()
+  const yearDuration = yearEnd - yearStart
+  const today = new Date().getTime()
+
+  if (today < yearStart || today > yearEnd) return -1 // Not in current year
+  return ((today - yearStart) / yearDuration) * 100
+})
+
+// All season ranges combined for single timeline view
+const allSeasonRanges = computed(() => {
+  const year = timelineYear.value
+  const yearStart = new Date(year, 0, 1).getTime()
+  const yearEnd = new Date(year, 11, 31, 23, 59, 59).getTime()
+  const yearDuration = yearEnd - yearStart
+
+  const ranges = []
+
+  for (const season of seasons.value) {
+    if (!season.dateRanges?.length) continue
+
+    for (const range of season.dateRanges) {
+      const start = new Date(range.startDate).getTime()
+      const end = new Date(range.endDate).getTime()
+
+      // Skip if range doesn't overlap with selected year
+      if (end < yearStart || start > yearEnd) continue
+
+      // Clamp to year boundaries
+      const clampedStart = Math.max(start, yearStart)
+      const clampedEnd = Math.min(end, yearEnd)
+
+      const left = ((clampedStart - yearStart) / yearDuration) * 100
+      const width = ((clampedEnd - clampedStart) / yearDuration) * 100
+
+      // Format label
+      const startDate = new Date(range.startDate)
+      const endDate = new Date(range.endDate)
+      const dateLabel = `${startDate.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })} - ${endDate.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}`
+
+      ranges.push({
+        season,
+        left,
+        width,
+        dateLabel,
+        color: season.color || '#6366f1'
+      })
+    }
+  }
+
+  // Sort by left position
+  return ranges.sort((a, b) => a.left - b.left)
+})
+
+// formatDate replaced by useDate composable's formatShortDate
 
 const formatPrice = (price, currency) => {
   return new Intl.NumberFormat(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
@@ -943,30 +1152,11 @@ const getMealPlanHeaderClass = (code) => {
   return colors[code] || 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200'
 }
 
-const formatShortDate = (date) => {
-  if (!date) return '-'
-  const d = new Date(date)
-  const day = d.getUTCDate()
-  const month = d.getUTCMonth() + 1
-  return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}`
-}
+// formatPeriodDate replaced by useDate composable's formatDisplayDate
+const formatPeriodDate = formatDisplayDate
 
-const formatPeriodDate = (date) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  })
-}
-
-const getPeriodDays = (startDate, endDate) => {
-  if (!startDate || !endDate) return 0
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-  const diffTime = Math.abs(end - start)
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
-}
+// getPeriodDays replaced by useDate composable's calculateDays
+const getPeriodDays = calculateDays
 
 const hasExtraPricing = (rate) => {
   if (!rate) return false
@@ -1020,8 +1210,6 @@ const fetchRates = async (params = {}) => {
       queryParams.endDate = endDate
     }
 
-    console.log('fetchRates queryParams:', queryParams)
-
     // Use getRatesCalendar for calendar view to get both rates AND overrides
     // Use getRates for other views (only returns rates)
     const response = viewMode.value === 'calendar'
@@ -1039,7 +1227,8 @@ const fetchRates = async (params = {}) => {
         rates.value = response.data.rates || []
         overrides.value = response.data.overrides || []
       }
-      console.log('fetchRates response:', rates.value.length, 'rates,', overrides.value.length, 'overrides')
+      // Increment calendar key to force re-render
+      calendarKey.value++
     }
   } catch (error) {
     toast.error(t('common.fetchError'))
@@ -1311,6 +1500,26 @@ watch(() => props.hotel?._id, (newId) => {
     fetchRates()
   }
 }, { immediate: true })
+
+// Refresh when tab becomes active (handles case when switching from other tabs)
+watch(() => props.active, (isActive, wasActive) => {
+  if (isActive && !wasActive) {
+    // Tab just became active, refresh dependencies (room types, meal plans) that may have changed
+    fetchDependencies()
+    fetchRates()
+    if (viewMode.value === 'period') {
+      fetchPriceList()
+    }
+  }
+})
+
+// Handle external refresh trigger (e.g., from RoomsTab after adding a room)
+watch(() => props.refreshTrigger, (newVal, oldVal) => {
+  if (newVal !== oldVal && props.active) {
+    fetchDependencies()
+    fetchRates()
+  }
+})
 </script>
 
 <style scoped>

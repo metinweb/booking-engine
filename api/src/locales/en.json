@@ -5,6 +5,7 @@
   "REQUIRED_COMPANY_NAME": "Company name is required",
   "REQUIRED_AGENCY_NAME": "Agency name is required",
   "REQUIRED_PARTNER": "Partner is required",
+  "MARKET_REQUIRES_COUNTRIES": "Non-default markets must have at least one country",
   "REQUIRED_ACCOUNT_TYPE": "Account type is required",
   "REQUIRED_ACCOUNT_ID": "Account ID is required",
 

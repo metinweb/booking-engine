@@ -418,6 +418,16 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end gap-1">
+                    <button
+                      @click="toggleFeatured(hotel)"
+                      class="p-2 rounded-lg transition-colors"
+                      :class="hotel.featured
+                        ? 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                        : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
+                      :title="hotel.featured ? $t('hotels.removeFeatured') : $t('hotels.makeFeatured')"
+                    >
+                      <span class="material-icons text-lg">{{ hotel.featured ? 'star' : 'star_border' }}</span>
+                    </button>
                     <router-link
                       :to="`/hotels/${hotel._id}`"
                       class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
@@ -540,6 +550,16 @@
                   {{ $t('common.edit') }}
                 </router-link>
                 <div class="flex items-center gap-1">
+                  <button
+                    @click="toggleFeatured(hotel)"
+                    class="p-1.5 rounded-lg transition-colors"
+                    :class="hotel.featured
+                      ? 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                      : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
+                    :title="hotel.featured ? $t('hotels.removeFeatured') : $t('hotels.makeFeatured')"
+                  >
+                    <span class="material-icons text-lg">{{ hotel.featured ? 'star' : 'star_border' }}</span>
+                  </button>
                   <button
                     @click="toggleStatus(hotel)"
                     class="p-1.5 rounded-lg transition-colors"
@@ -883,6 +903,20 @@ const toggleStatus = async (hotel) => {
     if (response.success) {
       hotel.status = newStatus
       toast.success(t('hotels.statusUpdated'))
+      fetchStats()
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('common.operationFailed'))
+  }
+}
+
+const toggleFeatured = async (hotel) => {
+  const newFeatured = !hotel.featured
+  try {
+    const response = await hotelService.toggleFeatured(hotel._id, newFeatured)
+    if (response.success) {
+      hotel.featured = newFeatured
+      toast.success(newFeatured ? t('hotels.markedFeatured') : t('hotels.unmarkedFeatured'))
       fetchStats()
     }
   } catch (error) {

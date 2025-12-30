@@ -185,6 +185,140 @@
       </div>
     </div>
 
+    <!-- Compact Allotment Status Bar -->
+    <div
+      v-if="allotmentStats.totalCells > 0 && (allotmentStats.critical > 0 || allotmentStats.low > 0 || allotmentStats.stopSale > 0)"
+      class="mb-3 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600"
+    >
+      <div class="flex items-center gap-4 text-xs">
+        <!-- Critical -->
+        <span
+          v-if="allotmentStats.critical > 0"
+          class="flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full cursor-pointer hover:bg-red-200 transition-colors"
+          @click="highlightAllotmentLevel('critical')"
+        >
+          <span class="material-icons text-sm">error</span>
+          <span class="font-bold">{{ allotmentStats.critical }}</span>
+          <span class="hidden sm:inline">stok yok</span>
+        </span>
+        <!-- Low -->
+        <span
+          v-if="allotmentStats.low > 0"
+          class="flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full cursor-pointer hover:bg-amber-200 transition-colors"
+          @click="highlightAllotmentLevel('low')"
+        >
+          <span class="material-icons text-sm">warning</span>
+          <span class="font-bold">{{ allotmentStats.low }}</span>
+          <span class="hidden sm:inline">düşük</span>
+        </span>
+        <!-- Stop Sale -->
+        <span
+          v-if="allotmentStats.stopSale > 0"
+          class="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full cursor-pointer hover:bg-purple-200 transition-colors"
+          @click="highlightAllotmentLevel('stopSale')"
+        >
+          <span class="material-icons text-sm">block</span>
+          <span class="font-bold">{{ allotmentStats.stopSale }}</span>
+          <span class="hidden sm:inline">stop</span>
+        </span>
+        <!-- Normal -->
+        <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
+          <span class="material-icons text-sm">check_circle</span>
+          <span class="font-bold">{{ allotmentStats.normal }}</span>
+          <span class="hidden sm:inline">normal</span>
+        </span>
+      </div>
+      <!-- Details Link -->
+      <button
+        @click="showAllotmentModal = true"
+        class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 hover:underline flex items-center gap-1"
+      >
+        <span class="material-icons text-sm">info</span>
+        Detaylar
+      </button>
+    </div>
+
+    <!-- Allotment Details Modal -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div
+          v-if="showAllotmentModal"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          @click.self="showAllotmentModal = false"
+        >
+          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="material-icons">monitoring</span>
+                <h3 class="text-lg font-bold">Kontenjan Durumu</h3>
+              </div>
+              <button
+                @click="showAllotmentModal = false"
+                class="p-1 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+            <!-- Modal Content -->
+            <div class="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
+              <!-- Summary Cards -->
+              <div class="grid grid-cols-4 gap-3 mb-6">
+                <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl text-center">
+                  <div class="text-2xl font-bold text-red-600">{{ allotmentStats.critical }}</div>
+                  <div class="text-xs text-red-500">Stok Yok (0)</div>
+                </div>
+                <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-center">
+                  <div class="text-2xl font-bold text-amber-600">{{ allotmentStats.low }}</div>
+                  <div class="text-xs text-amber-500">Düşük (1-3)</div>
+                </div>
+                <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
+                  <div class="text-2xl font-bold text-green-600">{{ allotmentStats.normal }}</div>
+                  <div class="text-xs text-green-500">Normal (4+)</div>
+                </div>
+                <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-center">
+                  <div class="text-2xl font-bold text-purple-600">{{ allotmentStats.stopSale }}</div>
+                  <div class="text-xs text-purple-500">Stop Sale</div>
+                </div>
+              </div>
+
+              <!-- Details List -->
+              <div v-if="allotmentDetails.length > 0" class="space-y-2">
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Oda Bazlı Detay</h4>
+                <div
+                  v-for="detail in allotmentDetails"
+                  :key="detail.key"
+                  class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-purple-600">{{ detail.roomCode }}</span>
+                    <span class="px-2 py-0.5 rounded text-xs font-medium" :class="getMealPlanBadgeClass(detail.mealPlanCode)">
+                      {{ detail.mealPlanCode }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span v-if="detail.critical > 0" class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full">
+                      {{ detail.critical }} stok yok
+                    </span>
+                    <span v-if="detail.low > 0" class="text-xs px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full">
+                      {{ detail.low }} düşük
+                    </span>
+                    <span v-if="detail.stopSale > 0" class="text-xs px-2 py-0.5 bg-purple-100 text-purple-600 rounded-full">
+                      {{ detail.stopSale }} stop
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-center py-8 text-gray-500">
+                <span class="material-icons text-4xl text-green-500 mb-2">check_circle</span>
+                <p>Tüm odalar normal stokta</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Loading State -->
     <div v-if="loading" class="py-12 text-center">
       <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mx-auto"></div>
@@ -246,7 +380,9 @@
                 @click="selectRoomRow(roomType._id, mealPlan._id, $event)"
                 :title="$t('planning.pricing.clickToSelectRow')"
               >
-                <div v-if="mpIndex === 0" class="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[150px]">
+                <div v-if="mpIndex === 0" class="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[160px]">
+                  <span class="text-purple-600 dark:text-purple-400">{{ roomType.code }}</span>
+                  <span class="text-gray-400 mx-0.5">·</span>
                   {{ getRoomTypeName(roomType) }}
                   <span
                     v-if="roomType.status === 'inactive'"
@@ -283,6 +419,7 @@
                   :date="day.date"
                   :room-type-id="roomType._id"
                   :meal-plan-id="mealPlan._id"
+                  :room-type="roomType"
                   :currency="currency"
                   :is-selected="isCellSelected(roomType._id, mealPlan._id, day.date)"
                   :is-past="day.isPast"
@@ -369,209 +506,20 @@
     </Transition>
 
     <!-- Inline Edit Popover -->
-    <Teleport to="body">
-      <div
-        v-if="editingCell"
-        ref="popoverRef"
-        class="fixed z-50 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-4 min-w-[280px] max-h-[calc(100vh-16px)] overflow-y-auto"
-        :style="popoverStyle"
-      >
-        <div class="flex items-center justify-between mb-3">
-          <h4 class="font-semibold text-gray-800 dark:text-white text-sm">
-            {{ $t('planning.pricing.quickEdit') }}
-            <span class="text-purple-600 dark:text-purple-400">({{ editingCellLabel }})</span>
-          </h4>
-          <button @click="closeInlineEdit" class="text-gray-400 hover:text-gray-600">
-            <span class="material-icons text-sm">close</span>
-          </button>
-        </div>
-
-        <div class="space-y-3">
-          <!-- Pricing Type Badge -->
-          <div class="flex items-center gap-2 text-xs">
-            <span
-              class="px-2 py-0.5 rounded-full font-medium"
-              :class="inlineForm.pricingType === 'per_person'
-                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'"
-            >
-              {{ inlineForm.pricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
-            </span>
-          </div>
-
-          <!-- UNIT PRICING: Price Per Night -->
-          <div v-if="inlineForm.pricingType === 'unit'">
-            <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.pricePerNight') }} ({{ currency }})</label>
-            <input
-              v-model.number="inlineForm.pricePerNight"
-              type="number"
-              min="0"
-              step="1"
-              class="form-input mt-1 text-lg font-bold text-green-600"
-              @keyup.enter="saveInlineEdit"
-            />
-          </div>
-
-          <!-- OBP PRICING: Occupancy Prices -->
-          <div v-else class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg space-y-2">
-            <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1">
-              <span class="material-icons text-sm">groups</span>
-              Kişi Bazlı Fiyatlar ({{ currency }})
-            </div>
-            <div
-              v-for="(price, pax) in inlineForm.occupancyPricing"
-              :key="pax"
-              class="flex items-center gap-2"
-            >
-              <span class="w-12 text-xs font-medium text-indigo-600 dark:text-indigo-400">{{ pax }}P</span>
-              <input
-                v-model.number="inlineForm.occupancyPricing[pax]"
-                type="number"
-                min="0"
-                class="form-input flex-1 text-sm py-1 font-bold"
-                :class="pax <= 2 ? 'text-green-600' : 'text-gray-600'"
-                placeholder="0"
-                @keyup.enter="saveInlineEdit"
-              />
-            </div>
-          </div>
-
-          <!-- Extra Person Pricing (for Unit pricing) -->
-          <div v-if="inlineForm.pricingType === 'unit'" class="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg space-y-2">
-            <div class="text-xs font-medium text-gray-600 dark:text-slate-300 mb-2">{{ $t('planning.pricing.extraPrices') }}</div>
-
-            <!-- Extra Adult -->
-            <div class="flex items-center gap-2">
-              <span class="material-icons text-amber-500 text-sm">person_add</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400 w-20">{{ $t('planning.pricing.extraAdultShort') }}</span>
-              <input
-                v-model.number="inlineForm.extraAdult"
-                type="number"
-                min="0"
-                class="form-input flex-1 text-sm py-1"
-                placeholder="0"
-              />
-            </div>
-
-            <!-- Single Occupancy Discount -->
-            <div class="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-slate-600 mt-2">
-              <span class="material-icons text-blue-500 text-sm">person</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400 w-20">{{ $t('planning.pricing.singleOccupancy') }}</span>
-              <div class="flex items-center gap-1">
-                <span class="text-xs text-gray-400">-</span>
-                <input
-                  v-model.number="inlineForm.singleSupplement"
-                  type="number"
-                  min="0"
-                  class="form-input flex-1 text-sm py-1"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Child Pricing (for both Unit and OBP) -->
-          <div class="p-3 bg-pink-50 dark:bg-pink-900/20 rounded-lg space-y-2">
-            <div class="text-xs font-medium text-pink-700 dark:text-pink-300 mb-2">Çocuk Fiyatları</div>
-
-            <!-- Child Order Pricing -->
-            <div
-              v-for="(price, index) in inlineForm.childOrderPricing"
-              :key="index"
-              class="flex items-center gap-2"
-            >
-              <span class="material-icons text-pink-500 text-sm">child_care</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400 w-20">{{ index + 1 }}. {{ $t('planning.pricing.child') }}</span>
-              <input
-                v-model.number="inlineForm.childOrderPricing[index]"
-                type="number"
-                min="0"
-                class="form-input flex-1 text-sm py-1"
-                placeholder="0"
-              />
-            </div>
-
-            <!-- Extra Infant -->
-            <div class="flex items-center gap-2">
-              <span class="material-icons text-purple-500 text-sm">baby_changing_station</span>
-              <span class="text-xs text-gray-500 dark:text-gray-400 w-20">{{ $t('planning.pricing.extraInfantShort') }}</span>
-              <input
-                v-model.number="inlineForm.extraInfant"
-                type="number"
-                min="0"
-                class="form-input flex-1 text-sm py-1"
-                placeholder="0"
-              />
-            </div>
-          </div>
-
-          <!-- Allotment -->
-          <div>
-            <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.allotment') }}</label>
-            <input
-              v-model.number="inlineForm.allotment"
-              type="number"
-              min="0"
-              class="form-input mt-1"
-            />
-          </div>
-
-          <!-- Quick toggles -->
-          <div class="flex flex-wrap gap-2">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" v-model="inlineForm.stopSale" class="rounded border-gray-300 text-red-600" />
-              <span class="text-xs text-red-600">Stop Sale</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" v-model="inlineForm.singleStop" class="rounded border-gray-300 text-pink-600" />
-              <span class="text-xs text-pink-600">1P Stop</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" v-model="inlineForm.closedToArrival" class="rounded border-gray-300 text-orange-600" />
-              <span class="text-xs">CTA</span>
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" v-model="inlineForm.closedToDeparture" class="rounded border-gray-300 text-orange-600" />
-              <span class="text-xs">CTD</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
-          <!-- Copy to next days -->
-          <div class="flex items-center gap-1">
-            <span class="text-xs text-gray-500 dark:text-slate-400">→</span>
-            <input
-              v-model.number="popoverCopyDays"
-              type="number"
-              min="1"
-              max="31"
-              class="w-12 text-center text-xs font-bold border border-gray-300 dark:border-slate-600 rounded py-1 bg-white dark:bg-slate-800"
-            />
-            <button
-              @click="copyPopoverToNextDays"
-              class="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 transition-colors whitespace-nowrap"
-            >
-              {{ $t('planning.pricing.copyToNextDays') }}
-            </button>
-          </div>
-
-          <!-- Cancel / Save -->
-          <div class="flex gap-2">
-            <button @click="closeInlineEdit" class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800">
-              {{ $t('common.cancel') }}
-            </button>
-            <button
-              @click="saveInlineEdit"
-              class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-              :disabled="savingInline"
-            >
-              {{ savingInline ? '...' : $t('common.save') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <QuickEditPopover
+      ref="quickEditPopoverRef"
+      :visible="!!editingCell"
+      :cell-label="editingCellLabel"
+      :form="inlineForm"
+      :currency="currency"
+      :position="popoverStyle"
+      :saving="savingInline"
+      :room-type="editingRoomType"
+      :child-age-groups="childAgeGroups"
+      @close="closeInlineEdit"
+      @save="saveInlineEdit"
+      @copy-to-days="copyPopoverToNextDays"
+    />
 
     <!-- Context Menu for Inline Edit -->
     <Teleport to="body">
@@ -627,6 +575,7 @@ import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import RateCell from './RateCell.vue'
+import QuickEditPopover from './QuickEditPopover.vue'
 import planningService from '@/services/planningService'
 
 const props = defineProps({
@@ -638,7 +587,8 @@ const props = defineProps({
   overrides: { type: Array, default: () => [] }, // RateOverride records (daily exceptions)
   loading: { type: Boolean, default: false },
   initialMonth: { type: Object, default: null }, // { year, month }
-  currentSeasons: { type: Array, default: () => [] } // Seasons in current month
+  currentSeasons: { type: Array, default: () => [] }, // Seasons in current month
+  childAgeGroups: { type: Array, default: () => [] } // For formatting combination keys
 })
 
 const emit = defineEmits(['update', 'bulk-edit', 'refresh', 'selection-change'])
@@ -669,6 +619,127 @@ const inlineEditPrices = reactive({}) // { `${roomTypeId}-${mealPlanId}-${date}`
 const inlineRelativePricing = ref(true) // Use relative pricing in inline edit mode
 const inlineAllowEditCalculated = ref(false) // Allow editing calculated cells
 
+// Allotment monitoring
+const showAllotmentModal = ref(false)
+const highlightedAllotmentLevel = ref(null)
+
+// Allotment stats computed
+const allotmentStats = computed(() => {
+  const stats = { critical: 0, low: 0, normal: 0, stopSale: 0, totalCells: 0 }
+
+  for (const rt of props.roomTypes) {
+    for (const mp of filteredMealPlans.value) {
+      for (let day = 1; day <= daysInMonth.value; day++) {
+        const date = formatDateKey(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, day)
+        const rateInfo = getRateForCell(rt._id, mp._id, date)
+
+        if (rateInfo) {
+          stats.totalCells++
+
+          if (rateInfo.stopSale) {
+            stats.stopSale++
+          } else if (rateInfo.allotment === 0) {
+            stats.critical++
+          } else if (rateInfo.allotment <= 3) {
+            stats.low++
+          } else {
+            stats.normal++
+          }
+        }
+      }
+    }
+  }
+
+  return stats
+})
+
+// Allotment details per room/meal plan
+const allotmentDetails = computed(() => {
+  const details = []
+
+  for (const rt of props.roomTypes) {
+    for (const mp of filteredMealPlans.value) {
+      const detail = {
+        key: `${rt._id}-${mp._id}`,
+        roomCode: rt.code,
+        mealPlanCode: mp.code,
+        critical: 0,
+        low: 0,
+        stopSale: 0
+      }
+
+      for (let day = 1; day <= daysInMonth.value; day++) {
+        const date = formatDateKey(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, day)
+        const rateInfo = getRateForCell(rt._id, mp._id, date)
+
+        if (rateInfo) {
+          if (rateInfo.stopSale) {
+            detail.stopSale++
+          } else if (rateInfo.allotment === 0) {
+            detail.critical++
+          } else if (rateInfo.allotment <= 3) {
+            detail.low++
+          }
+        }
+      }
+
+      // Only include if there are issues
+      if (detail.critical > 0 || detail.low > 0 || detail.stopSale > 0) {
+        details.push(detail)
+      }
+    }
+  }
+
+  return details.sort((a, b) => (b.critical + b.low + b.stopSale) - (a.critical + a.low + a.stopSale))
+})
+
+const highlightAllotmentLevel = (level) => {
+  highlightedAllotmentLevel.value = highlightedAllotmentLevel.value === level ? null : level
+  // Auto-select cells with this allotment level
+  if (highlightedAllotmentLevel.value) {
+    const cells = []
+    for (const rt of props.roomTypes) {
+      for (const mp of filteredMealPlans.value) {
+        for (let day = 1; day <= daysInMonth.value; day++) {
+          const date = formatDateKey(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, day)
+          const rateInfo = getRateForCell(rt._id, mp._id, date)
+
+          if (rateInfo) {
+            let matches = false
+            if (level === 'critical' && !rateInfo.stopSale && rateInfo.allotment === 0) matches = true
+            if (level === 'low' && !rateInfo.stopSale && rateInfo.allotment > 0 && rateInfo.allotment <= 3) matches = true
+            if (level === 'stopSale' && rateInfo.stopSale) matches = true
+
+            if (matches) {
+              cells.push({ roomTypeId: rt._id, mealPlanId: mp._id, date })
+            }
+          }
+        }
+      }
+    }
+    selectedCells.value = cells
+    emit('selection-change', cells)
+    if (cells.length > 0) {
+      toast.info(t('planning.pricing.cellsSelected', { count: cells.length }))
+    }
+  } else {
+    selectedCells.value = []
+    emit('selection-change', [])
+  }
+}
+
+const getMealPlanBadgeClass = (code) => {
+  const colors = {
+    'RO': 'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium',
+    'BB': 'px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium',
+    'HB': 'px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded text-xs font-medium',
+    'FB': 'px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium',
+    'AI': 'px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs font-medium',
+    'UAI': 'px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded text-xs font-medium'
+  }
+  return colors[code] || 'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium'
+}
+
 // Base room/meal plan for relative pricing (only if explicitly set)
 const baseRoom = computed(() => props.roomTypes.find(rt => rt.isBaseRoom) || null)
 const baseMealPlan = computed(() => {
@@ -678,6 +749,12 @@ const baseMealPlan = computed(() => {
   return baseRoom.value ? props.mealPlans[0] : null
 })
 const hasBaseRoom = computed(() => props.roomTypes.some(rt => rt.isBaseRoom === true))
+
+// Current editing room type (for QuickEditPopover)
+const editingRoomType = computed(() => {
+  if (!editingCell.value) return null
+  return props.roomTypes.find(rt => rt._id === editingCell.value.roomTypeId) || null
+})
 
 // Check if a cell is the base cell
 const isBaseCellFn = (roomTypeId, mealPlanId) => {
@@ -742,7 +819,7 @@ const navigateCell = (currentRoomId, currentMealPlanId, currentDate, direction) 
 
 // Inline edit state
 const editingCell = ref(null)
-const popoverRef = ref(null)
+const quickEditPopoverRef = ref(null)
 const popoverStyle = ref({})
 const savingInline = ref(false)
 const inlineForm = reactive({
@@ -776,6 +853,11 @@ const formatDateToString = (date) => {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+// Helper: Format year, month, day to YYYY-MM-DD key
+const formatDateKey = (year, month, day) => {
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
 }
 
 // Helper: Parse YYYY-MM-DD string to local Date without timezone issues
@@ -1576,8 +1658,20 @@ const saveInlineEdit = async () => {
     }
 
     // Handle pricing based on type
-    if (inlineForm.pricingType === 'per_person') {
-      // OBP: Save occupancy pricing
+    const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+    const usesMultipliers = roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
+
+    if (inlineForm.pricingType === 'per_person' && usesMultipliers) {
+      // OBP with Multipliers: pricePerNight is the base price
+      // Adult and child prices calculated from multipliers at runtime
+      data.pricePerNight = inlineForm.pricePerNight || 0
+      data.occupancyPricing = {} // Prices calculated from adultMultipliers
+      data.childOrderPricing = [] // Prices calculated from childMultipliers
+      data.extraInfant = 0 // Prices calculated from infantMultiplier
+      data.extraAdult = 0
+      data.singleSupplement = 0
+    } else if (inlineForm.pricingType === 'per_person') {
+      // OBP without Multipliers: Save direct occupancy pricing
       const occupancyPricing = {}
       for (const [pax, price] of Object.entries(inlineForm.occupancyPricing)) {
         if (price !== '' && price !== null) {
@@ -1585,9 +1679,19 @@ const saveInlineEdit = async () => {
         }
       }
       data.occupancyPricing = occupancyPricing
-      data.pricePerNight = 0 // Not used in OBP
-      data.extraAdult = 0 // Not used in OBP
-      data.singleSupplement = 0 // Not used in OBP
+      data.pricePerNight = 0 // Not used in direct OBP
+      data.extraAdult = 0
+      data.singleSupplement = 0
+
+      // Child pricing for standard OBP
+      if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
+        data.extraInfant = Number(inlineForm.extraInfant)
+      }
+      if (inlineForm.childOrderPricing?.length > 0) {
+        data.childOrderPricing = inlineForm.childOrderPricing.map(p =>
+          p !== '' && p !== null ? Number(p) : null
+        )
+      }
     } else {
       // Unit pricing
       data.pricePerNight = inlineForm.pricePerNight
@@ -1600,16 +1704,16 @@ const saveInlineEdit = async () => {
       if (inlineForm.singleSupplement !== '' && inlineForm.singleSupplement !== null) {
         data.singleSupplement = Number(inlineForm.singleSupplement)
       }
-    }
 
-    // Child pricing - same for both types
-    if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
-      data.extraInfant = Number(inlineForm.extraInfant)
-    }
-    if (inlineForm.childOrderPricing?.length > 0) {
-      data.childOrderPricing = inlineForm.childOrderPricing.map(p =>
-        p !== '' && p !== null ? Number(p) : null
-      )
+      // Child pricing for unit pricing
+      if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
+        data.extraInfant = Number(inlineForm.extraInfant)
+      }
+      if (inlineForm.childOrderPricing?.length > 0) {
+        data.childOrderPricing = inlineForm.childOrderPricing.map(p =>
+          p !== '' && p !== null ? Number(p) : null
+        )
+      }
     }
 
     if (rate?._id) {
@@ -1629,23 +1733,25 @@ const saveInlineEdit = async () => {
 }
 
 // Copy all values from quick edit popover to next X days
-const copyPopoverToNextDays = async () => {
-  if (!editingCell.value || !popoverCopyDays.value) return
+const copyPopoverToNextDays = async (days) => {
+  const copyCount = days || popoverCopyDays.value || 7
+  if (!editingCell.value || !copyCount) return
 
   const { roomTypeId, mealPlanId, date } = editingCell.value
   const startDate = parseDateString(date)
-  const count = Math.min(popoverCopyDays.value, 31)
+  const count = Math.min(copyCount, 31)
 
   savingInline.value = true
   try {
     const promises = []
 
     // Build data from inlineForm
+    // NOTE: allotment is NOT copied - only prices and restrictions are copied
     const baseData = {
       roomType: roomTypeId,
       mealPlan: mealPlanId,
       market: props.market?._id,
-      allotment: inlineForm.allotment,
+      // allotment: NOT copied - each day keeps its own allotment
       minStay: inlineForm.minStay,
       stopSale: inlineForm.stopSale,
       singleStop: inlineForm.singleStop,
@@ -1656,7 +1762,19 @@ const copyPopoverToNextDays = async () => {
     }
 
     // Handle pricing based on type
-    if (inlineForm.pricingType === 'per_person') {
+    const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+    const usesMultipliers = roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
+
+    if (inlineForm.pricingType === 'per_person' && usesMultipliers) {
+      // OBP with Multipliers: pricePerNight is the base price
+      // Adult and child prices calculated from multipliers at runtime
+      baseData.pricePerNight = inlineForm.pricePerNight || 0
+      baseData.occupancyPricing = {} // Prices calculated from adultMultipliers
+      baseData.childOrderPricing = [] // Prices calculated from childMultipliers
+      baseData.extraInfant = 0 // Prices calculated from infantMultiplier
+      baseData.extraAdult = 0
+      baseData.singleSupplement = 0
+    } else if (inlineForm.pricingType === 'per_person') {
       // OBP: Save occupancy pricing
       const occupancyPricing = {}
       for (const [pax, price] of Object.entries(inlineForm.occupancyPricing)) {
@@ -1668,6 +1786,16 @@ const copyPopoverToNextDays = async () => {
       baseData.pricePerNight = 0
       baseData.extraAdult = 0
       baseData.singleSupplement = 0
+
+      // Child pricing for standard OBP
+      if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
+        baseData.extraInfant = Number(inlineForm.extraInfant)
+      }
+      if (inlineForm.childOrderPricing?.length > 0) {
+        baseData.childOrderPricing = inlineForm.childOrderPricing.map(p =>
+          p !== '' && p !== null ? Number(p) : null
+        )
+      }
     } else {
       // Unit pricing
       baseData.pricePerNight = inlineForm.pricePerNight
@@ -1677,16 +1805,16 @@ const copyPopoverToNextDays = async () => {
       if (inlineForm.singleSupplement !== '' && inlineForm.singleSupplement !== null) {
         baseData.singleSupplement = Number(inlineForm.singleSupplement)
       }
-    }
 
-    // Child pricing - same for both types
-    if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
-      baseData.extraInfant = Number(inlineForm.extraInfant)
-    }
-    if (inlineForm.childOrderPricing?.length > 0) {
-      baseData.childOrderPricing = inlineForm.childOrderPricing.map(p =>
-        p !== '' && p !== null ? Number(p) : null
-      )
+      // Child pricing for unit pricing
+      if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
+        baseData.extraInfant = Number(inlineForm.extraInfant)
+      }
+      if (inlineForm.childOrderPricing?.length > 0) {
+        baseData.childOrderPricing = inlineForm.childOrderPricing.map(p =>
+          p !== '' && p !== null ? Number(p) : null
+        )
+      }
     }
 
     // Copy to next X days (starting from day after current)
@@ -1706,8 +1834,12 @@ const copyPopoverToNextDays = async () => {
       }
 
       if (existingRate?._id) {
+        // Preserve existing allotment when updating
+        data.allotment = existingRate.allotment ?? 10
         promises.push(planningService.updateRate(props.hotelId, existingRate._id, data))
       } else {
+        // New rate - use default allotment
+        data.allotment = 10
         promises.push(planningService.createRate(props.hotelId, data))
       }
     }
@@ -1726,7 +1858,8 @@ const copyPopoverToNextDays = async () => {
 
 // Click outside to close inline edit and context menu
 const handleClickOutside = (e) => {
-  if (popoverRef.value && !popoverRef.value.contains(e.target)) {
+  const popoverEl = quickEditPopoverRef.value?.popoverRef
+  if (popoverEl && !popoverEl.contains(e.target)) {
     closeInlineEdit()
   }
   // Close context menu on click outside (but not inside the menu)
@@ -1790,5 +1923,23 @@ defineExpose({
 .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+/* Slide down transition for details */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.slide-down-enter-to,
+.slide-down-leave-from {
+  max-height: 500px;
 }
 </style>

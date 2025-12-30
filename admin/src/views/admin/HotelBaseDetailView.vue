@@ -134,6 +134,15 @@
           />
         </div>
 
+        <!-- SEO Tab -->
+        <div v-show="activeTab === 'seo'">
+          <HotelSeoForm
+            ref="seoFormRef"
+            :hotel="hotel"
+            :saving="saving"
+          />
+        </div>
+
         <!-- Room Templates Tab -->
         <div v-show="activeTab === 'roomTemplates'">
           <RoomTemplatesTab
@@ -163,6 +172,7 @@ import HotelGallery from '@/components/hotels/HotelGallery.vue'
 import HotelAmenities from '@/components/hotels/HotelAmenities.vue'
 import HotelPolicies from '@/components/hotels/HotelPolicies.vue'
 import HotelProfile from '@/components/hotels/HotelProfile.vue'
+import HotelSeoForm from '@/components/hotels/HotelSeoForm.vue'
 import RoomTemplatesTab from '@/components/hotels/RoomTemplatesTab.vue'
 import { useUIStore } from '@/stores/ui'
 
@@ -266,6 +276,7 @@ const addressFormRef = ref(null)
 const amenitiesFormRef = ref(null)
 const policiesFormRef = ref(null)
 const profileFormRef = ref(null)
+const seoFormRef = ref(null)
 
 // Tab errors tracking
 const tabErrors = reactive({
@@ -276,6 +287,7 @@ const tabErrors = reactive({
   gallery: {},
   amenities: {},
   policies: {},
+  seo: {},
   roomTemplates: {}
 })
 
@@ -288,6 +300,7 @@ const tabFields = {
   gallery: [],
   amenities: [],
   policies: [],
+  seo: [],
   roomTemplates: []
 }
 
@@ -342,6 +355,7 @@ const collectFormData = () => {
   const amenitiesData = amenitiesFormRef.value?.getFormData?.() || {}
   const policiesData = policiesFormRef.value?.getFormData?.() || {}
   const profileData = profileFormRef.value?.getFormData?.() || {}
+  const seoData = seoFormRef.value?.getFormData?.() || {}
 
   // Merge all form data with base type
   return {
@@ -351,6 +365,7 @@ const collectFormData = () => {
     ...amenitiesData,
     ...policiesData,
     ...profileData,
+    ...seoData,
     hotelType: 'base'
   }
 }
@@ -365,6 +380,7 @@ const tabs = computed(() => [
   { id: 'gallery', label: t('hotels.tabs.gallery'), icon: 'photo_library', requiresSave: true },
   { id: 'amenities', label: t('hotels.tabs.amenities'), icon: 'wifi', requiresSave: false },
   { id: 'policies', label: t('hotels.tabs.policies'), icon: 'policy', requiresSave: false },
+  { id: 'seo', label: t('hotels.tabs.seo'), icon: 'search', requiresSave: false },
   { id: 'roomTemplates', label: t('hotels.tabs.roomTemplates'), icon: 'bedroom_parent', requiresSave: true }
 ])
 

@@ -227,6 +227,10 @@ const marketSchema = new mongoose.Schema({
 			default: 'unit'
 		},
 
+		// Minimum adults override
+		useMinAdultsOverride: { type: Boolean, default: false },
+		minAdults: { type: Number, min: 1, max: 10, default: null },
+
 		// Multiplier override
 		useMultiplierOverride: { type: Boolean, default: false },
 
@@ -284,14 +288,24 @@ marketSchema.index({ partner: 1, hotel: 1, isDefault: 1 })
 marketSchema.index({ partner: 1, hotel: 1, countries: 1 })
 marketSchema.index({ displayOrder: 1 })
 
-// Ensure only one default market per hotel
+// Validation and ensure only one default market per hotel
 marketSchema.pre('save', async function(next) {
+	// Rule 1: Non-default markets MUST have at least one country
+	// Only the default market can have empty countries (meaning "all countries")
+	if (!this.isDefault && (!this.countries || this.countries.length === 0)) {
+		const error = new Error('MARKET_REQUIRES_COUNTRIES')
+		error.name = 'ValidationError'
+		return next(error)
+	}
+
+	// Rule 2: If setting isDefault to true, unset other default markets
 	if (this.isDefault && this.isModified('isDefault')) {
 		await this.constructor.updateMany(
 			{ hotel: this.hotel, _id: { $ne: this._id } },
 			{ isDefault: false }
 		)
 	}
+
 	next()
 })
 

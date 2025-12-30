@@ -10,7 +10,7 @@
       <!-- Two Row Layout -->
       <div class="space-y-4">
         <!-- Row 1: Guest Types -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
           <!-- Max Adults -->
           <div class="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-800/50 flex items-center justify-center flex-shrink-0">
@@ -22,9 +22,9 @@
                 <button
                   type="button"
                   @click="adjustCapacity('maxAdults', -1)"
-                  :disabled="formData.occupancy.maxAdults <= 1"
+                  :disabled="formData.occupancy.maxAdults <= formData.occupancy.minAdults"
                   class="w-6 h-6 rounded flex items-center justify-center transition-all"
-                  :class="formData.occupancy.maxAdults <= 1
+                  :class="formData.occupancy.maxAdults <= formData.occupancy.minAdults
                     ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
                     : 'text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800'"
                 >
@@ -39,6 +39,41 @@
                   :class="formData.occupancy.maxAdults >= maxAllowedAdults
                     ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
                     : 'text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800'"
+                >
+                  <span class="material-icons text-sm">add</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Min Adults -->
+          <div class="flex items-center gap-3 p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+            <div class="w-9 h-9 rounded-full bg-cyan-100 dark:bg-cyan-800/50 flex items-center justify-center flex-shrink-0">
+              <span class="material-icons text-cyan-600 dark:text-cyan-400 text-lg">person_outline</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <label class="text-xs text-gray-500 dark:text-slate-400 block">Min. Yetişkin</label>
+              <div class="flex items-center gap-1 mt-1">
+                <button
+                  type="button"
+                  @click="adjustCapacity('minAdults', -1)"
+                  :disabled="formData.occupancy.minAdults <= 1"
+                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
+                  :class="formData.occupancy.minAdults <= 1
+                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
+                    : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-800'"
+                >
+                  <span class="material-icons text-sm">remove</span>
+                </button>
+                <span class="w-6 text-center font-bold text-gray-800 dark:text-white">{{ formData.occupancy.minAdults }}</span>
+                <button
+                  type="button"
+                  @click="adjustCapacity('minAdults', 1)"
+                  :disabled="formData.occupancy.minAdults >= formData.occupancy.maxAdults"
+                  class="w-6 h-6 rounded flex items-center justify-center transition-all"
+                  :class="formData.occupancy.minAdults >= formData.occupancy.maxAdults
+                    ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
+                    : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-800'"
                 >
                   <span class="material-icons text-sm">add</span>
                 </button>
@@ -253,6 +288,7 @@
           v-model="formData.multiplierTemplate"
           :occupancy="formData.occupancy"
           :child-age-groups="childAgeGroups"
+          :currency="hotel?.defaultCurrency || 'EUR'"
           @update:model-value="(val) => { formData.useMultipliers = !!val }"
         />
       </div>
@@ -281,6 +317,7 @@ const childAgeGroups = computed(() => {
 const formData = ref({
   occupancy: {
     maxAdults: 2,
+    minAdults: 1,
     maxChildren: 2,
     maxInfants: 1,
     totalMaxGuests: 4,
@@ -322,8 +359,14 @@ const adjustCapacity = (field, delta) => {
       break
 
     case 'maxAdults':
-      if (newValue >= 1 && newValue <= occupancy.totalMaxGuests) {
+      if (newValue >= occupancy.minAdults && newValue <= occupancy.totalMaxGuests) {
         occupancy.maxAdults = newValue
+      }
+      break
+
+    case 'minAdults':
+      if (newValue >= 1 && newValue <= occupancy.maxAdults) {
+        occupancy.minAdults = newValue
       }
       break
 
@@ -354,6 +397,7 @@ watch(() => props.roomType, (newVal) => {
     formData.value = {
       occupancy: {
         maxAdults: newVal.occupancy?.maxAdults || 2,
+        minAdults: newVal.occupancy?.minAdults || 1,
         maxChildren: newVal.occupancy?.maxChildren || 2,
         maxInfants: newVal.occupancy?.maxInfants || 1,
         totalMaxGuests: newVal.occupancy?.totalMaxGuests || 4,

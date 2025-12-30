@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-full">
-    <!-- Tab Navigation (Sticky) -->
-    <div class="flex border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 -mx-4 px-4">
+    <!-- Tab Navigation (Sticky) - Hidden in preview mode -->
+    <div v-if="!showPreview" class="flex border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 -mx-4 px-4">
       <button
         v-for="tab in tabs"
         :key="tab.id"
@@ -21,8 +21,8 @@
       </button>
     </div>
 
-    <!-- Tab Content -->
-    <div class="space-y-6 flex-1 overflow-y-auto overflow-x-hidden mt-6">
+    <!-- Tab Content - Hidden in preview mode -->
+    <div v-if="!showPreview" class="space-y-6 flex-1 overflow-y-auto overflow-x-hidden mt-6">
       <!-- General Settings Tab -->
       <div v-show="activeTab === 'general'">
         <!-- Code -->
@@ -545,7 +545,69 @@
               </div>
             </div>
 
-            <!-- 2. Multiplier Override (only for OBP with multipliers) -->
+            <!-- 2. Min Adults Override -->
+            <div class="bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-xl p-4 border border-cyan-200 dark:border-cyan-800">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center">
+                    <span class="material-icons text-white">person_outline</span>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-gray-900 dark:text-white">Min. Yetişkin Override</h4>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">Bu sezonda minimum yetişkin sayısını değiştir</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    v-model="currentRoomOverride.useMinAdultsOverride"
+                    class="sr-only peer"
+                  />
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 dark:peer-focus:ring-cyan-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-cyan-600"></div>
+                </label>
+              </div>
+
+              <!-- MinAdults Input (when override enabled) -->
+              <div v-if="currentRoomOverride.useMinAdultsOverride" class="flex items-center gap-4 p-3 bg-white dark:bg-slate-800 rounded-lg">
+                <label class="text-sm text-gray-600 dark:text-slate-400">Minimum Yetişkin:</label>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    @click="adjustMinAdultsOverride(-1)"
+                    :disabled="(currentRoomOverride.minAdults || 1) <= 1"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                    :class="(currentRoomOverride.minAdults || 1) <= 1
+                      ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
+                      : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/30'"
+                  >
+                    <span class="material-icons">remove</span>
+                  </button>
+                  <span class="w-10 text-center text-xl font-bold text-gray-800 dark:text-white">{{ currentRoomOverride.minAdults || 1 }}</span>
+                  <button
+                    type="button"
+                    @click="adjustMinAdultsOverride(1)"
+                    :disabled="(currentRoomOverride.minAdults || 1) >= (currentSelectedRoom?.occupancy?.maxAdults || 10)"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                    :class="(currentRoomOverride.minAdults || 1) >= (currentSelectedRoom?.occupancy?.maxAdults || 10)
+                      ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
+                      : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/30'"
+                  >
+                    <span class="material-icons">add</span>
+                  </button>
+                </div>
+                <span class="text-xs text-gray-500 dark:text-slate-400">(Oda max: {{ currentSelectedRoom?.occupancy?.maxAdults || 2 }})</span>
+              </div>
+
+              <!-- Info when disabled -->
+              <div v-else class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+                <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2">
+                  <span class="material-icons text-sm text-cyan-500">info</span>
+                  Oda/Market ayarı kullanılıyor: <span class="font-semibold">{{ currentSelectedRoom?.occupancy?.minAdults || 1 }} yetişkin</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- 3. Multiplier Override (only for OBP with multipliers) -->
             <div
               v-if="effectivePricingType === 'per_person' && (currentSelectedRoom.useMultipliers || currentRoomOverride.usePricingTypeOverride)"
               class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 border border-indigo-200 dark:border-indigo-800"
@@ -588,6 +650,7 @@
                 v-model="currentRoomOverride.multiplierOverride"
                 :occupancy="currentSelectedRoom.occupancy"
                 :child-age-groups="hotel.childAgeGroups || []"
+                :currency="market.currency"
               />
             </div>
           </div>
@@ -595,11 +658,120 @@
       </div>
     </div>
 
-    <!-- Actions -->
-    <div class="flex justify-end gap-3 pt-4 mt-6 border-t border-gray-200 dark:border-slate-700">
+    <!-- Preview Mode Content -->
+    <div v-if="showPreview" class="flex flex-col h-full">
+      <!-- Preview Header -->
+      <div class="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-slate-700 -mx-4 px-4">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+          <span class="material-icons text-white">fact_check</span>
+        </div>
+        <div>
+          <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.seasons.periodPreview') }}</h3>
+          <p class="text-sm text-gray-500 dark:text-slate-400">{{ form.code }} - {{ form.name?.tr || form.name?.en }}</p>
+        </div>
+      </div>
+
+      <!-- Preview Content -->
+      <div class="flex-1 overflow-y-auto py-4 space-y-4">
+        <!-- Summary Stats -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ previewSummary.totalDays }}</div>
+            <div class="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-medium">{{ $t('planning.seasons.totalDays') }}</div>
+          </div>
+          <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ previewSummary.dateRanges }}</div>
+            <div class="text-xs text-purple-600/70 dark:text-purple-400/70 font-medium">{{ $t('planning.seasons.dateRangeCount') }}</div>
+          </div>
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ previewSummary.roomTypes }}</div>
+            <div class="text-xs text-blue-600/70 dark:text-blue-400/70 font-medium">{{ $t('planning.pricing.roomTypes') }}</div>
+          </div>
+          <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4 text-center">
+            <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ previewSummary.mealPlans }}</div>
+            <div class="text-xs text-green-600/70 dark:text-green-400/70 font-medium">{{ $t('planning.pricing.mealPlans') }}</div>
+          </div>
+        </div>
+
+        <!-- Date Ranges Detail -->
+        <div class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4">
+          <h5 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+            <span class="material-icons text-indigo-500">date_range</span>
+            {{ $t('planning.pricing.dateRanges') }}
+          </h5>
+          <div class="space-y-2">
+            <div
+              v-for="(range, idx) in validDateRanges"
+              :key="idx"
+              class="flex items-center gap-3 p-2 bg-white dark:bg-slate-800 rounded-lg"
+            >
+              <span class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
+                {{ idx + 1 }}
+              </span>
+              <div class="flex items-center gap-2 flex-1">
+                <span class="font-medium text-gray-700 dark:text-slate-300">{{ formatDisplayDate(range.startDate) }}</span>
+                <span class="material-icons text-gray-400 text-sm">arrow_forward</span>
+                <span class="font-medium text-gray-700 dark:text-slate-300">{{ formatDisplayDate(range.endDate) }}</span>
+              </div>
+              <span class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full font-medium">
+                {{ calculateDays(range.startDate, range.endDate) }} {{ $t('common.days') }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overrides Summary -->
+        <div v-if="hasAnyOverrides" class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4">
+          <h5 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+            <span class="material-icons text-amber-500">tune</span>
+            {{ $t('planning.seasons.activeOverrides') }}
+          </h5>
+          <div class="flex flex-wrap gap-2">
+            <span v-if="!form.childAgeSettings.inheritFromMarket" class="px-3 py-1.5 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 rounded-lg text-sm flex items-center gap-1.5">
+              <span class="material-icons text-sm">child_care</span>
+              {{ $t('planning.seasons.childAgeOverride') }}
+            </span>
+            <span v-if="!form.paymentSettings.inheritFromMarket" class="px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm flex items-center gap-1.5">
+              <span class="material-icons text-sm">payments</span>
+              {{ $t('planning.seasons.paymentSettings') }}
+            </span>
+            <span v-if="!form.childrenSettings.inheritFromMarket" class="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-sm flex items-center gap-1.5">
+              <span class="material-icons text-sm">family_restroom</span>
+              {{ $t('planning.markets.childrenAllowed') }}
+            </span>
+            <span v-if="hasPricingOverrides" class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-sm flex items-center gap-1.5">
+              <span class="material-icons text-sm">calculate</span>
+              {{ $t('planning.seasons.pricingOverrides') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preview Actions -->
+      <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-slate-700">
+        <p class="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1">
+          <span class="material-icons text-xs">info</span>
+          {{ $t('planning.seasons.previewHint') }}
+        </p>
+        <div class="flex gap-3">
+          <button @click="showPreview = false" type="button" class="btn-secondary">
+            <span class="material-icons text-sm mr-1">arrow_back</span>
+            {{ $t('common.back') }}
+          </button>
+          <button @click="confirmAndSave" type="button" class="btn-primary" :disabled="saving">
+            <span class="material-icons text-sm mr-1">check</span>
+            {{ saving ? $t('common.loading') : $t('planning.pricing.confirmAndSave') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions (hide when preview is open) -->
+    <div v-if="!showPreview" class="flex justify-end gap-3 pt-4 mt-6 border-t border-gray-200 dark:border-slate-700">
       <button type="button" @click="$emit('cancel')" class="btn-secondary">{{ $t('common.cancel') }}</button>
-      <button type="button" @click="handleSave" class="btn-primary" :disabled="saving">
-        {{ saving ? $t('common.loading') : $t('common.save') }}
+      <button type="button" @click="handlePreview" class="btn-primary" :disabled="saving">
+        <span class="material-icons text-sm mr-1">visibility</span>
+        {{ $t('planning.seasons.reviewAndSave') }}
       </button>
     </div>
   </div>
@@ -619,7 +791,8 @@ const props = defineProps({
   season: { type: Object, default: null },
   market: { type: Object, required: true },
   roomTypes: { type: Array, default: () => [] },
-  mealPlans: { type: Array, default: () => [] }
+  mealPlans: { type: Array, default: () => [] },
+  existingSeasons: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['saved', 'cancel'])
@@ -629,6 +802,7 @@ const toast = useToast()
 const saving = ref(false)
 const activeTab = ref('general')
 const selectedPricingRoom = ref('')
+const showPreview = ref(false)
 
 // Tab definitions
 const tabs = computed(() => [
@@ -677,6 +851,8 @@ const currentRoomOverride = computed(() => {
     return {
       usePricingTypeOverride: false,
       pricingType: 'unit',
+      useMinAdultsOverride: false,
+      minAdults: 1,
       useMultiplierOverride: false,
       multiplierOverride: null
     }
@@ -687,12 +863,25 @@ const currentRoomOverride = computed(() => {
     pricingOverrides[selectedPricingRoom.value] = {
       usePricingTypeOverride: false,
       pricingType: room?.pricingType || 'unit',
+      useMinAdultsOverride: false,
+      minAdults: room?.occupancy?.minAdults || 1,
       useMultiplierOverride: false,
       multiplierOverride: room?.multiplierTemplate ? JSON.parse(JSON.stringify(room.multiplierTemplate)) : null
     }
   }
   return pricingOverrides[selectedPricingRoom.value]
 })
+
+// Adjust minAdults override value
+const adjustMinAdultsOverride = (delta) => {
+  if (!currentRoomOverride.value) return
+  const current = currentRoomOverride.value.minAdults || 1
+  const maxAdults = currentSelectedRoom.value?.occupancy?.maxAdults || 10
+  const newValue = current + delta
+  if (newValue >= 1 && newValue <= maxAdults) {
+    currentRoomOverride.value.minAdults = newValue
+  }
+}
 
 // Effective pricing type (considering override)
 const effectivePricingType = computed(() => {
@@ -706,14 +895,131 @@ const effectivePricingType = computed(() => {
 // Check if any room has overrides
 const hasPricingOverrides = computed(() => {
   return Object.values(pricingOverrides).some(o =>
-    o.usePricingTypeOverride || o.useMultiplierOverride
+    o.usePricingTypeOverride || o.useMinAdultsOverride || o.useMultiplierOverride
   )
 })
 
 // Check if specific room has override
 const hasRoomOverride = (roomId) => {
   const override = pricingOverrides[roomId]
-  return override?.usePricingTypeOverride || override?.useMultiplierOverride || false
+  return override?.usePricingTypeOverride || override?.useMinAdultsOverride || override?.useMultiplierOverride || false
+}
+
+// Period Edit Preview
+const validDateRanges = computed(() => {
+  return form.dateRanges.filter(r => r.startDate && r.endDate)
+})
+
+const calculateDays = (startDate, endDate) => {
+  if (!startDate || !endDate) return 0
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  const diffTime = Math.abs(end - start)
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
+}
+
+const previewSummary = computed(() => {
+  const totalDays = validDateRanges.value.reduce((sum, range) => {
+    return sum + calculateDays(range.startDate, range.endDate)
+  }, 0)
+
+  const roomTypesCount = form.activeRoomTypes.length > 0
+    ? form.activeRoomTypes.length
+    : filteredRoomTypes.value.length
+
+  const mealPlansCount = form.activeMealPlans.length > 0
+    ? form.activeMealPlans.length
+    : filteredMealPlans.value.length
+
+  return {
+    totalDays,
+    dateRanges: validDateRanges.value.length,
+    roomTypes: roomTypesCount,
+    mealPlans: mealPlansCount
+  }
+})
+
+const hasAnyOverrides = computed(() => {
+  return !form.childAgeSettings.inheritFromMarket ||
+         !form.paymentSettings.inheritFromMarket ||
+         !form.childrenSettings.inheritFromMarket ||
+         hasPricingOverrides.value
+})
+
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  })
+}
+
+// Check if two date ranges overlap
+const datesOverlap = (start1, end1, start2, end2) => {
+  const s1 = new Date(start1).getTime()
+  const e1 = new Date(end1).getTime()
+  const s2 = new Date(start2).getTime()
+  const e2 = new Date(end2).getTime()
+  return s1 <= e2 && s2 <= e1
+}
+
+// Check for date overlaps with existing seasons
+const checkDateOverlaps = () => {
+  const currentSeasonId = props.season?._id
+  const existingSeasons = props.existingSeasons || []
+
+  for (const range of validDateRanges.value) {
+    for (const existingSeason of existingSeasons) {
+      // Skip current season when editing
+      if (existingSeason._id === currentSeasonId) continue
+
+      // Check each date range of existing season
+      for (const existingRange of (existingSeason.dateRanges || [])) {
+        if (datesOverlap(range.startDate, range.endDate, existingRange.startDate, existingRange.endDate)) {
+          return {
+            hasOverlap: true,
+            conflictingSeason: existingSeason,
+            conflictingRange: existingRange,
+            newRange: range
+          }
+        }
+      }
+    }
+  }
+
+  return { hasOverlap: false }
+}
+
+const handlePreview = () => {
+  const hasName = SUPPORTED_LANGUAGES.some(l => form.name[l]?.trim())
+  if (!form.code || !hasName) {
+    toast.error(t('validation.required'))
+    return
+  }
+
+  if (validDateRanges.value.length === 0) {
+    toast.error(t('planning.seasons.selectDateRanges'))
+    return
+  }
+
+  // Check for date overlaps
+  const overlapCheck = checkDateOverlaps()
+  if (overlapCheck.hasOverlap) {
+    const seasonCode = overlapCheck.conflictingSeason.code
+    const startDate = new Date(overlapCheck.conflictingRange.startDate).toLocaleDateString('tr-TR')
+    const endDate = new Date(overlapCheck.conflictingRange.endDate).toLocaleDateString('tr-TR')
+    toast.error(`Tarih çakışması! "${seasonCode}" sezonu ile çakışıyor (${startDate} - ${endDate})`)
+    return
+  }
+
+  showPreview.value = true
+}
+
+const confirmAndSave = () => {
+  showPreview.value = false
+  handleSave()
 }
 
 // Hotel's child age groups
@@ -810,14 +1116,26 @@ const handleSave = async () => {
     return
   }
 
+  // Double-check for date overlaps before saving
+  const overlapCheck = checkDateOverlaps()
+  if (overlapCheck.hasOverlap) {
+    const seasonCode = overlapCheck.conflictingSeason.code
+    const startDate = new Date(overlapCheck.conflictingRange.startDate).toLocaleDateString('tr-TR')
+    const endDate = new Date(overlapCheck.conflictingRange.endDate).toLocaleDateString('tr-TR')
+    toast.error(`Tarih çakışması! "${seasonCode}" sezonu ile çakışıyor (${startDate} - ${endDate})`)
+    return
+  }
+
   // Build pricing overrides array
   const pricingOverridesArray = []
   for (const [roomId, override] of Object.entries(pricingOverrides)) {
-    if (override.usePricingTypeOverride || override.useMultiplierOverride) {
+    if (override.usePricingTypeOverride || override.useMinAdultsOverride || override.useMultiplierOverride) {
       pricingOverridesArray.push({
         roomType: roomId,
         usePricingTypeOverride: override.usePricingTypeOverride || false,
         pricingType: override.pricingType || 'unit',
+        useMinAdultsOverride: override.useMinAdultsOverride || false,
+        minAdults: override.minAdults || 1,
         useMultiplierOverride: override.useMultiplierOverride || false,
         multiplierOverride: override.multiplierOverride
       })
@@ -920,6 +1238,8 @@ onMounted(() => {
         pricingOverrides[roomId] = {
           usePricingTypeOverride: override.usePricingTypeOverride || false,
           pricingType: override.pricingType || 'unit',
+          useMinAdultsOverride: override.useMinAdultsOverride || false,
+          minAdults: override.minAdults || 1,
           useMultiplierOverride: override.useMultiplierOverride || false,
           multiplierOverride: override.multiplierOverride || null
         }
@@ -938,3 +1258,16 @@ onMounted(() => {
   }
 })
 </script>
+
+<style scoped>
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+</style>

@@ -6,10 +6,44 @@
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('planning.campaigns.title') }}</h3>
         <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.campaigns.description') }}</p>
       </div>
-      <button @click="showCampaignForm = true" class="btn-primary flex items-center gap-2">
-        <span class="material-icons text-sm">add</span>
-        {{ $t('planning.campaigns.add') }}
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- Status Filter -->
+        <div class="flex items-center gap-2 bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
+          <button
+            @click="statusFilter = 'active'"
+            class="px-3 py-1.5 text-sm rounded-md transition-colors"
+            :class="statusFilter === 'active'
+              ? 'bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm font-medium'
+              : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'"
+          >
+            {{ $t('planning.campaigns.filterActive') }}
+            <span class="ml-1 text-xs">({{ activeCampaignsCount }})</span>
+          </button>
+          <button
+            @click="statusFilter = 'inactive'"
+            class="px-3 py-1.5 text-sm rounded-md transition-colors"
+            :class="statusFilter === 'inactive'
+              ? 'bg-white dark:bg-slate-600 text-gray-600 dark:text-gray-400 shadow-sm font-medium'
+              : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'"
+          >
+            {{ $t('planning.campaigns.filterInactive') }}
+            <span class="ml-1 text-xs">({{ inactiveCampaignsCount }})</span>
+          </button>
+          <button
+            @click="statusFilter = 'all'"
+            class="px-3 py-1.5 text-sm rounded-md transition-colors"
+            :class="statusFilter === 'all'
+              ? 'bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm font-medium'
+              : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'"
+          >
+            {{ $t('common.all') }}
+          </button>
+        </div>
+        <button @click="openNewCampaignForm" class="btn-primary flex items-center gap-2">
+          <span class="material-icons text-sm">add</span>
+          {{ $t('planning.campaigns.add') }}
+        </button>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -18,11 +52,12 @@
     </div>
 
     <!-- Campaigns List -->
-    <div v-else-if="campaigns.length > 0" class="grid gap-4">
+    <div v-else-if="filteredCampaigns.length > 0" class="grid gap-4">
       <div
-        v-for="campaign in campaigns"
+        v-for="campaign in filteredCampaigns"
         :key="campaign._id"
         class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4"
+        :class="{ 'opacity-60': isCampaignPast(campaign) || campaign.status !== 'active' }"
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
@@ -69,6 +104,21 @@
         </div>
         <!-- Settings Badges -->
         <div class="mt-2 flex flex-wrap gap-1.5">
+          <!-- Markets -->
+          <span
+            v-for="marketId in campaign.applicableMarkets"
+            :key="marketId"
+            class="px-1.5 py-0.5 text-[10px] rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400"
+          >
+            <span class="material-icons text-[10px] align-middle">public</span> {{ getMarketName(marketId) }}
+          </span>
+          <!-- All Markets badge if no specific markets selected -->
+          <span
+            v-if="!campaign.applicableMarkets || campaign.applicableMarkets.length === 0"
+            class="px-1.5 py-0.5 text-[10px] rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400"
+          >
+            <span class="material-icons text-[10px] align-middle">public</span> {{ $t('common.allMarkets') }}
+          </span>
           <!-- B2C -->
           <span v-if="campaign.visibility?.b2c" class="px-1.5 py-0.5 text-[10px] rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
             <span class="material-icons text-[10px] align-middle">person</span> B2C
@@ -117,7 +167,9 @@
     <!-- Empty State -->
     <div v-else class="text-center py-12 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
       <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">campaign</span>
-      <p class="mt-3 text-gray-500 dark:text-slate-400">{{ $t('planning.campaigns.empty') }}</p>
+      <p class="mt-3 text-gray-500 dark:text-slate-400">
+        {{ campaigns.length > 0 ? $t('planning.campaigns.noMatchingCampaigns') : $t('planning.campaigns.empty') }}
+      </p>
     </div>
 
     <!-- Campaign Form Modal -->
@@ -151,7 +203,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import Modal from '@/components/common/Modal.vue'
@@ -175,6 +227,53 @@ const editingCampaign = ref(null)
 const showDeleteModal = ref(false)
 const deleteTarget = ref(null)
 const deleting = ref(false)
+const statusFilter = ref('active')
+
+// Check if booking window has expired
+const isBookingWindowExpired = (campaign) => {
+  if (!campaign.bookingWindow?.endDate) return false
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const endDate = new Date(campaign.bookingWindow.endDate)
+  endDate.setHours(0, 0, 0, 0)
+  return endDate < today
+}
+
+// Check if campaign is currently active (status active + booking window not expired)
+const isCampaignActive = (campaign) => {
+  return campaign.status === 'active' && !isBookingWindowExpired(campaign)
+}
+
+// Check if campaign is past (status active but booking window expired)
+const isCampaignPast = (campaign) => {
+  return campaign.status === 'active' && isBookingWindowExpired(campaign)
+}
+
+// Filtered campaigns based on status filter
+const filteredCampaigns = computed(() => {
+  if (statusFilter.value === 'all') return campaigns.value
+  if (statusFilter.value === 'active') {
+    // Aktif: status=active ve satış tarihi geçmemiş
+    return campaigns.value.filter(c => isCampaignActive(c))
+  }
+  // Geçmiş: status=active ama satış tarihi geçmiş (manuel pasife alınanlar hariç)
+  return campaigns.value.filter(c => isCampaignPast(c))
+})
+
+// Count active and past campaigns
+const activeCampaignsCount = computed(() => {
+  return campaigns.value.filter(c => isCampaignActive(c)).length
+})
+
+const inactiveCampaignsCount = computed(() => {
+  return campaigns.value.filter(c => isCampaignPast(c)).length
+})
+
+// Get market name by ID
+const getMarketName = (marketId) => {
+  const market = markets.value.find(m => m._id === marketId)
+  return market?.name?.[locale.value] || market?.name?.tr || market?.name?.en || market?.code || ''
+}
 
 const getCampaignName = (campaign) => {
   return campaign.name?.[locale.value] || campaign.name?.tr || campaign.name?.en || campaign.code
@@ -249,6 +348,11 @@ const fetchRelatedData = async () => {
   } catch (error) {
     console.error('Error fetching related data:', error)
   }
+}
+
+const openNewCampaignForm = () => {
+  editingCampaign.value = null
+  showCampaignForm.value = true
 }
 
 const editCampaign = (campaign) => {

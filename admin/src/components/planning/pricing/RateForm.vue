@@ -145,25 +145,31 @@
       </div>
 
       <!-- Pricing Type Info (read-only, from room type) -->
-      <div class="rounded-xl p-4 border" :class="currentRoomPricingType === 'per_person' ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800'">
+      <div class="rounded-xl p-4 border" :class="currentRoomUsesMultipliers ? 'bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-900/20 dark:to-fuchsia-900/20 border-purple-200 dark:border-purple-800' : currentRoomPricingType === 'per_person' ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800'">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="material-icons" :class="currentRoomPricingType === 'per_person' ? 'text-indigo-600' : 'text-green-600'">sell</span>
+            <span class="material-icons" :class="currentRoomUsesMultipliers ? 'text-purple-600' : currentRoomPricingType === 'per_person' ? 'text-indigo-600' : 'text-green-600'">sell</span>
             <div>
               <div class="font-medium text-gray-800 dark:text-white">Fiyatlandırma Tipi</div>
               <div class="text-xs text-gray-500 dark:text-slate-400">Oda tipi ayarlarından alınır</div>
             </div>
           </div>
-          <div class="flex items-center gap-2 px-4 py-2 rounded-lg" :class="currentRoomPricingType === 'per_person' ? 'bg-indigo-500 text-white' : 'bg-green-500 text-white'">
-            <span class="material-icons text-sm">{{ currentRoomPricingType === 'per_person' ? 'groups' : 'hotel' }}</span>
-            <span class="font-medium">{{ currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}</span>
+          <div class="flex items-center gap-2 px-4 py-2 rounded-lg" :class="currentRoomUsesMultipliers ? 'bg-purple-500 text-white' : currentRoomPricingType === 'per_person' ? 'bg-indigo-500 text-white' : 'bg-green-500 text-white'">
+            <span class="material-icons text-sm">{{ currentRoomUsesMultipliers ? 'calculate' : currentRoomPricingType === 'per_person' ? 'groups' : 'hotel' }}</span>
+            <span class="font-medium">{{ currentRoomUsesMultipliers ? 'Çarpanlı OBP' : currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}</span>
           </div>
         </div>
-        <!-- OBP Info -->
-        <div v-if="currentRoomPricingType === 'per_person'" class="mt-3 p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-sm text-indigo-700 dark:text-indigo-300">
+        <!-- Multiplier OBP Info -->
+        <div v-if="currentRoomUsesMultipliers" class="mt-3 p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-sm text-purple-700 dark:text-purple-300">
+          <span class="material-icons text-sm align-middle mr-1">info</span>
+          Çarpanlı OBP modunda sadece baz fiyat girilir. Tüm kombinasyon fiyatları çarpanlarla hesaplanır.
+        </div>
+        <!-- Standard OBP Info -->
+        <div v-else-if="currentRoomPricingType === 'per_person'" class="mt-3 p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-sm text-indigo-700 dark:text-indigo-300">
           <span class="material-icons text-sm align-middle mr-1">info</span>
           OBP modunda her yetişkin sayısı için ayrı fiyat girilir. Ekstra yetişkin ve tek kişi indirimi kullanılmaz.
         </div>
+        <!-- Unit Info -->
         <div v-else class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-700 dark:text-green-300">
           <span class="material-icons text-sm align-middle mr-1">info</span>
           Ünite bazlı modda oda başı fiyat + ekstra kişi ücreti kullanılır.
@@ -463,19 +469,83 @@
                   </td>
                 </tr>
 
-                <!-- OBP PRICING: Occupancy Rows (1P, 2P, 3P...) -->
-                <template v-if="currentRoomPricingType === 'per_person'">
+                <!-- OBP WITH MULTIPLIERS: Base Price Row -->
+                <template v-if="currentRoomUsesMultipliers">
+                  <tr class="border-b border-gray-100 dark:border-slate-700 bg-purple-50/50 dark:bg-purple-900/10">
+                    <td class="px-4 py-3">
+                      <div class="flex items-center gap-2">
+                        <span class="material-icons text-purple-600 text-lg">calculate</span>
+                        <span class="font-medium text-gray-700 dark:text-slate-300">Baz Fiyat</span>
+                        <span class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded">Zorunlu</span>
+                      </div>
+                    </td>
+                    <td
+                      v-for="mp in filteredMealPlans"
+                      :key="mp._id"
+                      class="px-2 py-3 text-center"
+                    >
+                      <input
+                        v-if="roomPrices[selectedRoomTab]?.[mp._id]"
+                        v-model.number="roomPrices[selectedRoomTab][mp._id].pricePerNight"
+                        type="number"
+                        min="0"
+                        step="1"
+                        class="w-24 text-center text-lg font-bold border-2 rounded-lg px-2 py-1.5 transition-colors"
+                        :class="[
+                          !roomPrices[selectedRoomTab][mp._id].pricePerNight ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' :
+                          'border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20'
+                        ]"
+                        placeholder="0"
+                      />
+                    </td>
+                  </tr>
+                  <!-- Calculated Combinations (Read-only info) -->
+                  <tr class="border-b border-gray-100 dark:border-slate-700">
+                    <td colspan="100%" class="px-4 py-3">
+                      <div class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                        <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1">
+                          <span class="material-icons text-sm">table_chart</span>
+                          Tüm Kombinasyonlar (Çarpan × Baz Fiyat)
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                          <div
+                            v-for="combo in currentRoomCombinations"
+                            :key="combo.key"
+                            class="flex items-center justify-between text-xs py-1 px-2 bg-white dark:bg-slate-700 rounded"
+                          >
+                            <span class="text-indigo-600 dark:text-indigo-400">
+                              {{ formatCombinationKey(combo) }}
+                              <span class="text-gray-400">(×{{ combo.overrideMultiplier || combo.calculatedMultiplier }})</span>
+                            </span>
+                            <span class="font-bold" :class="roomPrices[selectedRoomTab]?.[filteredMealPlans[0]?._id]?.pricePerNight ? 'text-green-600' : 'text-gray-400'">
+                              {{ roomPrices[selectedRoomTab]?.[filteredMealPlans[0]?._id]?.pricePerNight
+                                ? Math.round(roomPrices[selectedRoomTab][filteredMealPlans[0]._id].pricePerNight * (combo.overrideMultiplier || combo.calculatedMultiplier)).toLocaleString()
+                                : '-' }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-500 dark:text-slate-400">
+                          <span class="material-icons text-xs align-middle mr-1">info</span>
+                          Bu fiyatlar ilk pansiyon için gösterilmektedir. Diğer pansiyonlar için baz fiyatları ayrı girin.
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+
+                <!-- OBP STANDARD PRICING: Occupancy Rows (minAdults to maxAdults) - Only when NOT using multipliers -->
+                <template v-else-if="currentRoomPricingType === 'per_person'">
                   <tr
-                    v-for="pax in maxAdultsForCurrentRoom"
+                    v-for="pax in adultsRangeForCurrentRoom"
                     :key="'obp-' + pax"
                     class="border-b border-gray-100 dark:border-slate-700"
-                    :class="pax <= 2 ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''"
+                    :class="pax <= minAdultsForCurrentRoom + 1 ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''"
                   >
                     <td class="px-4 py-2">
                       <div class="flex items-center gap-2">
                         <span class="material-icons text-indigo-500 text-sm">{{ pax === 1 ? 'person' : 'group' }}</span>
                         <span class="font-medium text-gray-700 dark:text-slate-300">{{ pax }} Yetişkin</span>
-                        <span v-if="pax <= 2" class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded">Zorunlu</span>
+                        <span v-if="pax <= minAdultsForCurrentRoom + 1" class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded">Zorunlu</span>
                       </div>
                     </td>
                     <td
@@ -500,7 +570,8 @@
                   </tr>
                 </template>
 
-                <!-- Child Order Pricing Rows -->
+                <!-- Child Order Pricing Rows - NOT shown for multiplier OBP -->
+                <template v-if="!currentRoomUsesMultipliers">
                 <tr
                   v-for="childIndex in maxChildrenForCurrentRoom"
                   :key="'child-' + childIndex"
@@ -550,9 +621,10 @@
                     </div>
                   </td>
                 </tr>
+                </template>
 
-                <!-- Extra Infant Row -->
-                <tr class="border-b border-gray-100 dark:border-slate-700">
+                <!-- Extra Infant Row - NOT shown for multiplier OBP -->
+                <tr v-if="!currentRoomUsesMultipliers" class="border-b border-gray-100 dark:border-slate-700">
                   <td class="px-4 py-2">
                     <div class="flex flex-col gap-0.5">
                       <div class="flex items-center gap-2">
@@ -978,6 +1050,60 @@ const maxAdultsForCurrentRoom = computed(() => {
   return currentRoomType.value?.occupancy?.maxAdults ?? 4
 })
 
+// Get effective minAdults for a room considering override hierarchy:
+// RoomType (base) → Market (override) → Season (override)
+const getEffectiveMinAdults = (roomTypeId) => {
+  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+  if (!roomType) return 1
+
+  const baseMinAdults = roomType.occupancy?.minAdults || 1
+
+  // Check Market override
+  let marketOverride = null
+  if (props.market?.pricingOverrides?.length > 0) {
+    const override = props.market.pricingOverrides.find(po => {
+      const rtId = typeof po.roomType === 'object' ? po.roomType._id : po.roomType
+      return rtId === roomTypeId && po.useMinAdultsOverride
+    })
+    if (override) {
+      marketOverride = override.minAdults
+    }
+  }
+
+  // Check Season override (most specific wins)
+  let seasonOverride = null
+  if (form.season) {
+    const season = props.seasons.find(s => s._id === form.season)
+    if (season?.pricingOverrides?.length > 0) {
+      const override = season.pricingOverrides.find(po => {
+        const rtId = typeof po.roomType === 'object' ? po.roomType._id : po.roomType
+        return rtId === roomTypeId && po.useMinAdultsOverride
+      })
+      if (override) {
+        seasonOverride = override.minAdults
+      }
+    }
+  }
+
+  // Priority: Season > Market > RoomType
+  return seasonOverride || marketOverride || baseMinAdults
+}
+
+// Min adults for current room (considering override hierarchy)
+const minAdultsForCurrentRoom = computed(() => {
+  if (!currentRoomType.value) return 1
+  return getEffectiveMinAdults(currentRoomType.value._id)
+})
+
+// Adults range for current room (minAdults to maxAdults)
+const adultsRangeForCurrentRoom = computed(() => {
+  const range = []
+  for (let i = minAdultsForCurrentRoom.value; i <= maxAdultsForCurrentRoom.value; i++) {
+    range.push(i)
+  }
+  return range
+})
+
 // Get effective pricing type for a room considering override hierarchy:
 // RoomType (base) → Market (override) → Season (override)
 const getEffectivePricingType = (roomTypeId) => {
@@ -1023,6 +1149,55 @@ const currentRoomPricingType = computed(() => {
   return getEffectivePricingType(currentRoomType.value._id)
 })
 
+// Check if current room uses multiplier system
+const currentRoomUsesMultipliers = computed(() => {
+  const rt = currentRoomType.value
+  // Both conditions must be true:
+  // 1. Effective pricing type is per_person (considering override hierarchy)
+  // 2. Room has useMultipliers enabled
+  return currentRoomPricingType.value === 'per_person' && rt?.useMultipliers === true
+})
+
+// Get active combinations for multiplier OBP (filtered by minAdults)
+const currentRoomCombinations = computed(() => {
+  const rt = currentRoomType.value
+  const table = rt?.multiplierTemplate?.combinationTable || []
+  const minAdults = minAdultsForCurrentRoom.value
+  // Filter by isActive and adults >= minAdults
+  return table.filter(c => c.isActive !== false && c.adults >= minAdults)
+})
+
+// Format combination key with age ranges: "1+3 (0-2, 3-6, 3-6)"
+const formatCombinationKey = (combo) => {
+  const adults = combo.adults
+  const children = combo.children || []
+
+  if (children.length === 0) {
+    return `${adults}`
+  }
+
+  // Get age ranges from hotel's childAgeGroups
+  const ageGroups = props.hotel?.childAgeGroups || []
+
+  const getAgeRange = (ageGroupCode) => {
+    const group = ageGroups.find(g => g.code === ageGroupCode)
+    if (group) {
+      return `${group.minAge}-${group.maxAge}`
+    }
+    // Fallback if not found
+    const fallbacks = {
+      'infant': '0-2',
+      'first': '3-6',
+      'second': '7-11',
+      'third': '12-17'
+    }
+    return fallbacks[ageGroupCode] || ageGroupCode
+  }
+
+  const ageRanges = children.map(c => getAgeRange(c.ageGroup))
+  return `${adults}+${children.length} (${ageRanges.join(', ')})`
+}
+
 const calculateNights = computed(() => {
   if (!dateRange.value.start || !dateRange.value.end) return 0
   const [sy, sm, sd] = dateRange.value.start.split('-').map(Number)
@@ -1033,7 +1208,7 @@ const calculateNights = computed(() => {
   return diff > 0 ? diff : 0
 })
 
-// Check if a room has any prices set (handles both unit and OBP pricing)
+// Check if a room has any prices set (handles unit, standard OBP, and multiplier OBP)
 const hasRoomPrices = (roomTypeId) => {
   const prices = roomPrices[roomTypeId]
   if (!prices) return false
@@ -1041,10 +1216,21 @@ const hasRoomPrices = (roomTypeId) => {
   // Get effective pricing type considering override hierarchy
   const pricingType = getEffectivePricingType(roomTypeId)
 
+  // Get effective minAdults considering override hierarchy
+  const minAdults = getEffectiveMinAdults(roomTypeId)
+
+  // Check if room uses multipliers
+  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+  const usesMultipliers = pricingType === 'per_person' && roomType?.useMultipliers === true
+
   return Object.values(prices).some(mp => {
-    if (pricingType === 'per_person') {
-      // OBP: Check if at least 1 and 2 person prices are set
-      return mp.occupancyPricing?.[1] > 0 && mp.occupancyPricing?.[2] > 0
+    if (usesMultipliers) {
+      // Multiplier OBP: Check pricePerNight (base price)
+      return mp.pricePerNight > 0
+    } else if (pricingType === 'per_person') {
+      // Standard OBP: Check if minAdults and minAdults+1 person prices are set
+      // (e.g., if minAdults=2, check 2 and 3 person prices)
+      return mp.occupancyPricing?.[minAdults] > 0 && mp.occupancyPricing?.[minAdults + 1] > 0
     } else {
       // Unit: Check pricePerNight
       return mp.pricePerNight > 0
@@ -1413,14 +1599,20 @@ const handleSave = async () => {
       const restrictions = roomRestrictions[rt._id]
       const pricingType = getEffectivePricingType(rt._id) // Get from override hierarchy
 
+      // Check if room uses multipliers
+      const usesMultipliers = pricingType === 'per_person' && rt.useMultipliers === true
+
       // For each filtered meal plan that has valid pricing
       filteredMealPlans.value.forEach(mp => {
         const mealPlanPrice = prices?.[mp._id]
 
         // Check if this meal plan has valid prices based on pricing type
         let hasValidPrice = false
-        if (pricingType === 'per_person') {
-          // OBP: need at least 1 and 2 person prices
+        if (usesMultipliers) {
+          // Multiplier OBP: need pricePerNight (base price)
+          hasValidPrice = mealPlanPrice?.pricePerNight > 0
+        } else if (pricingType === 'per_person') {
+          // Standard OBP: need at least 1 and 2 person prices
           hasValidPrice = mealPlanPrice?.occupancyPricing?.[1] > 0 && mealPlanPrice?.occupancyPricing?.[2] > 0
         } else {
           // Unit: need pricePerNight
@@ -1444,19 +1636,28 @@ const handleSave = async () => {
             stopSale: restrictions?.stopSale || false,
             singleStop: restrictions?.singleStop || false,
             closedToArrival: restrictions?.closedToArrival || false,
-            closedToDeparture: restrictions?.closedToDeparture || false,
-            childOrderPricing: mealPlanPrice.childOrderPricing || [],
-            extraInfant: mealPlanPrice.extraInfant || 0
+            closedToDeparture: restrictions?.closedToDeparture || false
           }
 
-          if (pricingType === 'per_person') {
-            // OBP: include occupancyPricing, clear unit-based fields
+          if (usesMultipliers) {
+            // Multiplier OBP: include pricePerNight as base price
+            // occupancyPricing, childOrderPricing, extraInfant will be calculated from multiplierTemplate
+            data.pricePerNight = mealPlanPrice.pricePerNight
+            data.occupancyPricing = {} // Will be calculated from adultMultipliers
+            data.childOrderPricing = [] // Will be calculated from childMultipliers
+            data.extraInfant = 0 // Will be calculated from infantMultiplier
+            data.extraAdult = 0
+            data.singleSupplement = 0
+          } else if (pricingType === 'per_person') {
+            // Standard OBP: include occupancyPricing, clear unit-based fields
             data.occupancyPricing = {}
             for (let i = 1; i <= 10; i++) {
               if (mealPlanPrice.occupancyPricing?.[i] > 0) {
                 data.occupancyPricing[i] = mealPlanPrice.occupancyPricing[i]
               }
             }
+            data.childOrderPricing = mealPlanPrice.childOrderPricing || []
+            data.extraInfant = mealPlanPrice.extraInfant || 0
             data.pricePerNight = 0
             data.extraAdult = 0
             data.singleSupplement = 0
@@ -1465,6 +1666,8 @@ const handleSave = async () => {
             data.pricePerNight = mealPlanPrice.pricePerNight
             data.singleSupplement = mealPlanPrice.singleSupplement || 0
             data.extraAdult = mealPlanPrice.extraAdult || 0
+            data.childOrderPricing = mealPlanPrice.childOrderPricing || []
+            data.extraInfant = mealPlanPrice.extraInfant || 0
           }
 
           if (!data.season) delete data.season
@@ -1538,9 +1741,6 @@ const fetchLastRateAndSetDates = async () => {
 
       dateRange.value.start = formatDate(nextStartDate)
       dateRange.value.end = formatDate(nextEndDate)
-
-      console.log('Last rate date:', formatDate(lastDate))
-      console.log('Suggested next period:', dateRange.value.start, '-', dateRange.value.end)
     } else {
       // No existing rates - start from first day of last season
       const formatDate = (date) => {
@@ -1571,8 +1771,6 @@ const fetchLastRateAndSetDates = async () => {
 
         dateRange.value.start = formatDate(startDate)
         dateRange.value.end = formatDate(endDate)
-
-        console.log('No rates found - starting from last season:', lastSeason.season.code)
       } else {
         // No seasons either - default to today + 30 days
         const today = new Date()

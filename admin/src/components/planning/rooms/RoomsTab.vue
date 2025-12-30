@@ -87,6 +87,14 @@
               >
                 {{ $t(`common.status.${roomType.status}`) }}
               </span>
+              <!-- Pricing Type Tag -->
+              <span
+                class="px-2 py-0.5 rounded text-xs font-medium"
+                :class="getPricingTypeClass(roomType)"
+                :title="getPricingTypeTooltip(roomType)"
+              >
+                {{ getPricingTypeLabel(roomType) }}
+              </span>
             </div>
             <!-- Markets that have this room type active -->
             <div v-if="markets.length > 0" class="mt-1 flex items-center gap-1 flex-wrap">
@@ -480,6 +488,34 @@ const getMealPlanName = (plan) => {
 
 const getMarketName = (market) => {
   return market.name?.[locale.value] || market.name?.tr || market.name?.en || market.code
+}
+
+// Pricing type helpers
+const getPricingTypeLabel = (roomType) => {
+  if (roomType.pricingType === 'per_person') {
+    return roomType.useMultipliers ? 'OBP ×' : 'OBP'
+  }
+  return t('planning.pricing.unit')
+}
+
+const getPricingTypeClass = (roomType) => {
+  if (roomType.pricingType === 'per_person') {
+    if (roomType.useMultipliers) {
+      return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+    }
+    return 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+  }
+  return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+}
+
+const getPricingTypeTooltip = (roomType) => {
+  if (roomType.pricingType === 'per_person') {
+    if (roomType.useMultipliers) {
+      return t('planning.pricing.obpMultiplierTooltip')
+    }
+    return t('planning.pricing.obpTooltip')
+  }
+  return t('planning.pricing.unitTooltip')
 }
 
 // Get markets that have this room type active (empty activeRoomTypes = all active)

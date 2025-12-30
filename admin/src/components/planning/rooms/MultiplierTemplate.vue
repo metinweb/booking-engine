@@ -43,7 +43,7 @@
             </h5>
             <div class="space-y-2">
               <div
-                v-for="i in maxAdults"
+                v-for="i in adultsRange"
                 :key="'adult-' + i"
                 class="flex items-center gap-3"
               >
@@ -64,7 +64,7 @@
                 />
                 <span v-if="i === baseOccupancy" class="text-xs text-green-600 dark:text-green-400 font-medium">(Baz)</span>
                 <span v-if="previewPrice" class="text-xs text-gray-500 dark:text-slate-400">
-                  → {{ calculatePreviewPrice(getAdultMultiplier(i)) }}€
+                  → {{ calculatePreviewPrice(getAdultMultiplier(i)) }}{{ currencySymbol }}
                 </span>
               </div>
             </div>
@@ -169,7 +169,7 @@
                 class="w-32 px-3 py-2 border border-green-300 dark:border-green-600 rounded-lg bg-white dark:bg-slate-800 text-gray-800 dark:text-white text-sm"
                 placeholder="100"
               />
-              <span class="text-sm text-gray-500 dark:text-slate-400">€ (Örnek baz fiyat)</span>
+              <span class="text-sm text-gray-500 dark:text-slate-400">{{ currencySymbol }} (Örnek baz fiyat)</span>
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@
                   </td>
                   <td v-if="previewPrice" class="px-3 py-2 text-center">
                     <span class="text-green-600 dark:text-green-400 font-medium">
-                      {{ calculatePreviewPrice(getEffectiveMultiplier(combo)) }}€
+                      {{ calculatePreviewPrice(getEffectiveMultiplier(combo)) }}{{ currencySymbol }}
                     </span>
                   </td>
                   <td class="px-3 py-2 text-center">
@@ -298,7 +298,28 @@ const props = defineProps({
   childAgeGroups: {
     type: Array,
     default: () => []
+  },
+  currency: {
+    type: String,
+    default: 'EUR'
   }
+})
+
+// Currency symbol mapping
+const currencySymbol = computed(() => {
+  const symbols = {
+    'TRY': '₺',
+    'USD': '$',
+    'EUR': '€',
+    'GBP': '£',
+    'RUB': '₽',
+    'SAR': '﷼',
+    'AED': 'د.إ',
+    'CHF': 'CHF',
+    'JPY': '¥',
+    'CNY': '¥'
+  }
+  return symbols[props.currency] || props.currency
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -313,14 +334,24 @@ const previewPrice = ref(100)
 const isLoadingFromSaved = ref(false) // Flag to prevent regenerating when loading saved data
 
 // Computed
+const minAdults = computed(() => props.occupancy?.minAdults || 1)
 const maxAdults = computed(() => props.occupancy?.maxAdults || 2)
 const maxChildren = computed(() => props.occupancy?.maxChildren || 0)
 const baseOccupancy = computed(() => props.occupancy?.baseOccupancy || 2)
 const totalMaxGuests = computed(() => props.occupancy?.totalMaxGuests || 4)
 
+// Adults range for iteration (minAdults to maxAdults)
+const adultsRange = computed(() => {
+  const range = []
+  for (let i = minAdults.value; i <= maxAdults.value; i++) {
+    range.push(i)
+  }
+  return range
+})
+
 // Initialize default adult multipliers
 const initializeAdultMultipliers = () => {
-  for (let i = 1; i <= maxAdults.value; i++) {
+  for (let i = minAdults.value; i <= maxAdults.value; i++) {
     if (adultMultipliers[i] === undefined) {
       if (i < baseOccupancy.value) {
         adultMultipliers[i] = Math.round((1 - ((baseOccupancy.value - i) * 0.2)) * 100) / 100
@@ -461,14 +492,8 @@ const generateCombinations = () => {
   const ageGroupCodes = props.childAgeGroups.map(ag => ag.code)
   const combinations = []
 
-  console.log('[MultiplierTemplate] Generating combinations:', {
-    maxAdults: maxAdults.value,
-    maxChildren: maxChildren.value,
-    totalMaxGuests: totalMaxGuests.value,
-    ageGroupCodes
-  })
-
-  for (let adults = 1; adults <= maxAdults.value; adults++) {
+  // Start from minAdults instead of 1
+  for (let adults = minAdults.value; adults <= maxAdults.value; adults++) {
     // Adults only
     combinations.push({
       key: generateCombinationKey(adults, []),
@@ -483,8 +508,6 @@ const generateCombinations = () => {
     if (ageGroupCodes.length > 0) {
       const remainingCapacity = totalMaxGuests.value - adults
       const maxChildrenForAdult = Math.min(maxChildren.value, remainingCapacity)
-
-      console.log(`[MultiplierTemplate] Adults=${adults}: remainingCapacity=${remainingCapacity}, maxChildrenForAdult=${maxChildrenForAdult}`)
 
       for (let childCount = 1; childCount <= maxChildrenForAdult; childCount++) {
         const childCombinations = generateChildCombinations(childCount, ageGroupCodes)
@@ -503,7 +526,6 @@ const generateCombinations = () => {
     }
   }
 
-  console.log('[MultiplierTemplate] Generated combinations:', combinations.length, combinations.map(c => c.key))
   combinationTable.value = combinations
 }
 
@@ -599,14 +621,15 @@ watch(() => props.occupancy, (newVal, oldVal) => {
   if (isLoadingFromSaved.value) return
   if (!isEnabled.value) return
 
-  // Only regenerate if maxAdults or baseOccupancy actually changed
+  // Only regenerate if minAdults, maxAdults or baseOccupancy actually changed
   // (not just a new object reference)
+  const minChanged = newVal?.minAdults !== oldVal?.minAdults
   const maxChanged = newVal?.maxAdults !== oldVal?.maxAdults
   const baseChanged = newVal?.baseOccupancy !== oldVal?.baseOccupancy
   const maxChildrenChanged = newVal?.maxChildren !== oldVal?.maxChildren
   const totalChanged = newVal?.totalMaxGuests !== oldVal?.totalMaxGuests
 
-  if (maxChanged || baseChanged || maxChildrenChanged || totalChanged) {
+  if (minChanged || maxChanged || baseChanged || maxChildrenChanged || totalChanged) {
     initializeAdultMultipliers()
     initializeChildMultipliers()
     generateCombinations()

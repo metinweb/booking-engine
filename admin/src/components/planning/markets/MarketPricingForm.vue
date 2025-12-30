@@ -181,6 +181,7 @@
             v-model="currentRoomOverride.multiplierOverride"
             :occupancy="currentSelectedRoom.occupancy"
             :child-age-groups="hotel?.childAgeGroups || []"
+            :currency="market?.currency"
           />
         </div>
       </div>

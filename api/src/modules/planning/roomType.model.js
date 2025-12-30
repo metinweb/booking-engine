@@ -68,6 +68,7 @@ const roomTypeSchema = new mongoose.Schema({
 	// Booking.com style occupancy
 	occupancy: {
 		maxAdults: { type: Number, min: 1, max: 10, default: 2 },
+		minAdults: { type: Number, min: 1, max: 10, default: 1 }, // Minimum adults for this room
 		maxChildren: { type: Number, min: 0, max: 6, default: 2 },
 		maxInfants: { type: Number, min: 0, max: 4, default: 1 },
 		totalMaxGuests: { type: Number, min: 1, max: 12, default: 4 },
@@ -207,46 +208,124 @@ roomTypeSchema.index({ partner: 1, hotel: 1, code: 1 }, { unique: true })
 roomTypeSchema.index({ partner: 1, hotel: 1, status: 1 })
 roomTypeSchema.index({ displayOrder: 1 })
 
-// Validate total max guests
+// Multiplier validation constants
+const MULTIPLIER_MIN = 0
+const MULTIPLIER_MAX = 5 // Max 5x multiplier (e.g., 500% of base price)
+const ADULT_COUNT_MAX = 10
+const CHILD_ORDER_MAX = 6
+
+/**
+ * Validate multiplier value
+ */
+function validateMultiplier(value, context = '') {
+	if (typeof value !== 'number' || isNaN(value)) {
+		throw new Error(`Invalid multiplier value for ${context}: must be a number`)
+	}
+	if (value < MULTIPLIER_MIN) {
+		throw new Error(`Multiplier for ${context} cannot be negative`)
+	}
+	if (value > MULTIPLIER_MAX) {
+		throw new Error(`Multiplier for ${context} exceeds maximum (${MULTIPLIER_MAX})`)
+	}
+	return true
+}
+
+// Validate total max guests and multipliers
 roomTypeSchema.pre('save', async function(next) {
-	// Ensure totalMaxGuests >= baseOccupancy
-	if (this.occupancy.totalMaxGuests < this.occupancy.baseOccupancy) {
-		this.occupancy.totalMaxGuests = this.occupancy.baseOccupancy
-	}
+	try {
+		// Ensure minAdults <= maxAdults
+		if (this.occupancy.minAdults > this.occupancy.maxAdults) {
+			this.occupancy.minAdults = this.occupancy.maxAdults
+		}
 
-	// Ensure totalMaxGuests >= maxAdults
-	if (this.occupancy.totalMaxGuests < this.occupancy.maxAdults) {
-		this.occupancy.totalMaxGuests = this.occupancy.maxAdults
-	}
+		// Ensure totalMaxGuests >= baseOccupancy
+		if (this.occupancy.totalMaxGuests < this.occupancy.baseOccupancy) {
+			this.occupancy.totalMaxGuests = this.occupancy.baseOccupancy
+		}
 
-	// Ensure only one main image
-	const mainImages = this.images.filter(img => img.isMain)
-	if (mainImages.length > 1) {
-		let foundFirst = false
-		this.images.forEach(img => {
-			if (img.isMain) {
-				if (foundFirst) {
-					img.isMain = false
-				} else {
-					foundFirst = true
+		// Ensure totalMaxGuests >= maxAdults
+		if (this.occupancy.totalMaxGuests < this.occupancy.maxAdults) {
+			this.occupancy.totalMaxGuests = this.occupancy.maxAdults
+		}
+
+		// Ensure only one main image
+		const mainImages = this.images.filter(img => img.isMain)
+		if (mainImages.length > 1) {
+			let foundFirst = false
+			this.images.forEach(img => {
+				if (img.isMain) {
+					if (foundFirst) {
+						img.isMain = false
+					} else {
+						foundFirst = true
+					}
+				}
+			})
+		} else if (mainImages.length === 0 && this.images.length > 0) {
+			this.images[0].isMain = true
+		}
+
+		// Validate multiplier template
+		if (this.useMultipliers && this.multiplierTemplate) {
+			// Validate adult multipliers
+			if (this.multiplierTemplate.adultMultipliers) {
+				const adultMults = this.multiplierTemplate.adultMultipliers
+				const map = adultMults instanceof Map ? adultMults : new Map(Object.entries(adultMults))
+
+				for (const [key, value] of map) {
+					const adultCount = parseInt(key)
+					if (adultCount < 1 || adultCount > ADULT_COUNT_MAX) {
+						return next(new Error(`Invalid adult count in multiplier: ${key}`))
+					}
+					validateMultiplier(value, `${adultCount} adults`)
 				}
 			}
-		})
-	} else if (mainImages.length === 0 && this.images.length > 0) {
-		this.images[0].isMain = true
-	}
 
-	// Base room logic: if this room is set as base, clear isBaseRoom from others
-	if (this.isBaseRoom && this.isModified('isBaseRoom')) {
-		await this.constructor.updateMany(
-			{ hotel: this.hotel, _id: { $ne: this._id } },
-			{ isBaseRoom: false }
-		)
-		// Base room always has 0 adjustment
-		this.priceAdjustment = 0
-	}
+			// Validate child multipliers
+			if (this.multiplierTemplate.childMultipliers) {
+				const childMults = this.multiplierTemplate.childMultipliers
+				const map = childMults instanceof Map ? childMults : new Map(Object.entries(childMults))
 
-	next()
+				for (const [orderKey, ageGroupMap] of map) {
+					const order = parseInt(orderKey)
+					if (order < 1 || order > CHILD_ORDER_MAX) {
+						return next(new Error(`Invalid child order in multiplier: ${orderKey}`))
+					}
+
+					const ageMap = ageGroupMap instanceof Map ? ageGroupMap : new Map(Object.entries(ageGroupMap))
+					for (const [ageGroup, value] of ageMap) {
+						validateMultiplier(value, `child ${order} (${ageGroup})`)
+					}
+				}
+			}
+
+			// Validate combination table if present
+			if (this.multiplierTemplate.combinationTable) {
+				for (const combo of this.multiplierTemplate.combinationTable) {
+					if (combo.calculatedMultiplier !== undefined && combo.calculatedMultiplier !== null) {
+						validateMultiplier(combo.calculatedMultiplier, `combination ${combo.key} (calculated)`)
+					}
+					if (combo.overrideMultiplier !== undefined && combo.overrideMultiplier !== null) {
+						validateMultiplier(combo.overrideMultiplier, `combination ${combo.key} (override)`)
+					}
+				}
+			}
+		}
+
+		// Base room logic: if this room is set as base, clear isBaseRoom from others
+		if (this.isBaseRoom && this.isModified('isBaseRoom')) {
+			await this.constructor.updateMany(
+				{ hotel: this.hotel, _id: { $ne: this._id } },
+				{ isBaseRoom: false }
+			)
+			// Base room always has 0 adjustment
+			this.priceAdjustment = 0
+		}
+
+		next()
+	} catch (error) {
+		next(error)
+	}
 })
 
 // Statics

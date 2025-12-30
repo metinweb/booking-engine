@@ -5,6 +5,7 @@
   "REQUIRED_COMPANY_NAME": "Şirket adı gereklidir",
   "REQUIRED_AGENCY_NAME": "Acente adı gereklidir",
   "REQUIRED_PARTNER": "Partner bilgisi gereklidir",
+  "MARKET_REQUIRES_COUNTRIES": "Varsayılan olmayan pazarlar en az bir ülke içermelidir",
   "REQUIRED_ACCOUNT_TYPE": "Hesap tipi gereklidir",
   "REQUIRED_ACCOUNT_ID": "Hesap ID gereklidir",
 

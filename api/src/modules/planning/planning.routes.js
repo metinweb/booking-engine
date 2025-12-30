@@ -90,7 +90,24 @@ router.post('/hotels/:hotelId/ai/execute-command', planningService.executeAIPric
 router.post('/hotels/:hotelId/contract/parse', planningService.parseContract)
 router.post('/hotels/:hotelId/contract/import', planningService.importContractPricing)
 
+// ==================== PRICING CALCULATIONS ====================
+router.post('/hotels/:hotelId/rates/:rateId/calculate-price', planningService.calculateRatePrice)
+router.post('/hotels/:hotelId/pricing/calculate', planningService.calculatePriceByQuery)
+router.post('/hotels/:hotelId/pricing/bulk-calculate', planningService.bulkCalculatePrices)
+router.post('/hotels/:hotelId/pricing/check-availability', planningService.checkPricingAvailability)
+router.get('/hotels/:hotelId/pricing/effective-rate', planningService.getEffectiveRateEndpoint)
+router.get('/hotels/:hotelId/pricing/effective-multipliers', planningService.getEffectiveMultipliers)
+router.get('/hotels/:hotelId/pricing/combination-table', planningService.getCombinationTable)
+router.get('/hotels/:hotelId/pricing/child-age-groups', planningService.getEffectiveChildAgeGroups)
+router.post('/hotels/:hotelId/pricing/calculate-with-campaigns', planningService.calculatePriceWithCampaigns)
+router.get('/hotels/:hotelId/pricing/applicable-campaigns', planningService.getApplicableCampaigns)
+
 // ==================== PLATFORM ADMIN ONLY ====================
 router.delete('/hotels/:hotelId/markets/:marketId/pricing-data', requirePlatformAdmin, planningService.deleteMarketPricingData)
+
+// ==================== CACHE MANAGEMENT (Platform Admin) ====================
+router.get('/cache/stats', requirePlatformAdmin, planningService.getCacheStats)
+router.post('/cache/clear', requirePlatformAdmin, planningService.clearCache)
+router.post('/cache/invalidate/:entityType/:entityId', requirePlatformAdmin, planningService.invalidateCache)
 
 export default router

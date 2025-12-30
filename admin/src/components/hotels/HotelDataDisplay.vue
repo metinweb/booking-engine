@@ -419,6 +419,41 @@
       </div>
     </section>
 
+    <!-- SEO Settings -->
+    <section v-if="hotel.seo" class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+      <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+          <span class="material-icons text-purple-600">search</span>
+          {{ $t('hotels.tabs.seo') }}
+        </h3>
+      </div>
+      <div class="p-6 space-y-4">
+        <!-- SEO Title -->
+        <div v-if="getLocalizedText(hotel.seo.title)">
+          <label class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide">{{ $t('hotels.seo.metaTitle') }}</label>
+          <p class="mt-1 text-gray-800 dark:text-white">{{ getLocalizedText(hotel.seo.title) }}</p>
+        </div>
+
+        <!-- SEO Description -->
+        <div v-if="getLocalizedText(hotel.seo.description)">
+          <label class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide">{{ $t('hotels.seo.metaDescription') }}</label>
+          <p class="mt-1 text-gray-800 dark:text-white whitespace-pre-wrap">{{ getLocalizedText(hotel.seo.description) }}</p>
+        </div>
+
+        <!-- SEO Keywords -->
+        <div v-if="getLocalizedText(hotel.seo.keywords)">
+          <label class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide">{{ $t('hotels.seo.keywords') }}</label>
+          <p class="mt-1 text-gray-800 dark:text-white">{{ getLocalizedText(hotel.seo.keywords) }}</p>
+        </div>
+
+        <!-- Empty state -->
+        <div v-if="!getLocalizedText(hotel.seo.title) && !getLocalizedText(hotel.seo.description) && !getLocalizedText(hotel.seo.keywords)" class="text-center py-4">
+          <span class="material-icons text-3xl text-gray-300 dark:text-slate-600">search_off</span>
+          <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.seo.noSeoData') }}</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Profile Sections -->
     <section v-if="hotel.profile" class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
       <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">

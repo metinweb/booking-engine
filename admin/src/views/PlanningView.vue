@@ -31,6 +31,15 @@
 
       <!-- Tab Content -->
       <div class="p-6">
+        <!-- Hotel Settings Tab -->
+        <div v-show="activeTab === 'settings'">
+          <HotelSettingsTab
+            v-if="selectedHotel"
+            :hotel="selectedHotel"
+            @refresh="handleRefresh"
+          />
+        </div>
+
         <!-- Rooms & Meal Plans Tab -->
         <div v-show="activeTab === 'rooms'">
           <RoomsTab
@@ -63,6 +72,8 @@
           <PricingTab
             v-if="selectedHotel"
             :hotel="selectedHotel"
+            :active="activeTab === 'pricing'"
+            :refresh-trigger="refreshTrigger"
             @refresh="handleRefresh"
           />
         </div>
@@ -77,6 +88,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useHotelStore } from '@/stores/hotel'
 import { useUIStore } from '@/stores/ui'
+import HotelSettingsTab from '@/components/planning/settings/HotelSettingsTab.vue'
 import RoomsTab from '@/components/planning/rooms/RoomsTab.vue'
 import MarketsTab from '@/components/planning/markets/MarketsTab.vue'
 import CampaignsTab from '@/components/planning/campaigns/CampaignsTab.vue'
@@ -106,12 +118,12 @@ onUnmounted(() => {
 })
 
 // Valid tab IDs
-const validTabs = ['rooms', 'markets', 'campaigns', 'pricing']
+const validTabs = ['settings', 'rooms', 'markets', 'campaigns', 'pricing']
 
-// Initialize activeTab from route query or default to 'rooms'
+// Initialize activeTab from route query or default to 'settings'
 const getInitialTab = () => {
   const tabFromRoute = route.query.tab
-  return validTabs.includes(tabFromRoute) ? tabFromRoute : 'rooms'
+  return validTabs.includes(tabFromRoute) ? tabFromRoute : 'settings'
 }
 
 const activeTab = ref(getInitialTab())
@@ -135,6 +147,11 @@ watch(() => route.query.tab, (newTab) => {
 // Tabs configuration
 const tabs = computed(() => [
   {
+    id: 'settings',
+    label: t('planning.tabs.settings'),
+    icon: 'settings'
+  },
+  {
     id: 'rooms',
     label: t('planning.tabs.rooms'),
     icon: 'bed'
@@ -156,7 +173,11 @@ const tabs = computed(() => [
   }
 ])
 
+// Refresh trigger for cross-tab data updates
+const refreshTrigger = ref(0)
+
 const handleRefresh = () => {
-  // Can be used to trigger data refresh across tabs
+  // Increment trigger to force child components to refresh their data
+  refreshTrigger.value++
 }
 </script>

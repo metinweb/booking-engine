@@ -370,12 +370,30 @@ rateSchema.statics.getPeriodsView = async function(hotelId, filters = {}) {
 	const periods = []
 	let currentPeriod = null
 
-	// Fields to compare for grouping
-	const compareFields = [
-		'pricePerNight', 'singleSupplement', 'extraAdult', 'extraChild', 'extraInfant',
-		'allotment', 'minStay', 'maxStay', 'stopSale', 'singleStop',
-		'closedToArrival', 'closedToDeparture', 'releaseDays'
-	]
+	// Helper to get base price - works for unit, OBP with occupancyPricing, and OBP with multipliers
+	const getBasePrice = (rate) => {
+		// For unit pricing, always use pricePerNight
+		if (rate.pricingType === 'unit') {
+			return rate.pricePerNight || 0
+		}
+
+		// For OBP (per_person):
+		// 1. If using multiplier system, pricePerNight is the base price
+		if (rate.useMultiplierOverride || rate.multiplierOverride) {
+			return rate.pricePerNight || 0
+		}
+
+		// 2. If occupancyPricing exists and has values, use occupancyPricing[2] as base
+		if (rate.occupancyPricing) {
+			const occ2 = rate.occupancyPricing[2] || rate.occupancyPricing['2']
+			const occ1 = rate.occupancyPricing[1] || rate.occupancyPricing['1']
+			if (occ2 > 0) return occ2
+			if (occ1 > 0) return occ1
+		}
+
+		// 3. Fallback to pricePerNight (may be used as base in multiplier system)
+		return rate.pricePerNight || 0
+	}
 
 	const isSameValues = (a, b) => {
 		// Must be same room/meal/market
@@ -383,17 +401,10 @@ rateSchema.statics.getPeriodsView = async function(hotelId, filters = {}) {
 		if (a.mealPlan._id.toString() !== b.mealPlan._id.toString()) return false
 		if (a.market._id.toString() !== b.market._id.toString()) return false
 
-		// Compare value fields
-		for (const field of compareFields) {
-			const valA = JSON.stringify(a[field])
-			const valB = JSON.stringify(b[field])
-			if (valA !== valB) return false
-		}
-
-		// Compare childOrderPricing array
-		const copA = JSON.stringify(a.childOrderPricing || [])
-		const copB = JSON.stringify(b.childOrderPricing || [])
-		if (copA !== copB) return false
+		// Compare base price only (works for both unit and OBP)
+		const priceA = getBasePrice(a)
+		const priceB = getBasePrice(b)
+		if (priceA !== priceB) return false
 
 		return true
 	}
@@ -405,27 +416,27 @@ rateSchema.statics.getPeriodsView = async function(hotelId, filters = {}) {
 		return diffDays === 1
 	}
 
+	// Create period object with normalized pricePerNight for display
+	const createPeriodObj = (rate) => ({
+		...rate,
+		startDate: rate.date,
+		endDate: rate.date,
+		_id: rate._id,
+		// Ensure pricePerNight is set for both unit and OBP pricing
+		pricePerNight: getBasePrice(rate)
+	})
+
 	for (const rate of rates) {
 		if (!currentPeriod) {
 			// Start new period
-			currentPeriod = {
-				...rate,
-				startDate: rate.date,
-				endDate: rate.date,
-				_id: rate._id
-			}
+			currentPeriod = createPeriodObj(rate)
 		} else if (isSameValues(currentPeriod, rate) && isConsecutiveDay(currentPeriod.endDate, rate.date)) {
 			// Extend current period
 			currentPeriod.endDate = rate.date
 		} else {
 			// Save current period and start new one
 			periods.push(currentPeriod)
-			currentPeriod = {
-				...rate,
-				startDate: rate.date,
-				endDate: rate.date,
-				_id: rate._id
-			}
+			currentPeriod = createPeriodObj(rate)
 		}
 	}
 
@@ -507,6 +518,119 @@ rateSchema.statics.createForDateRange = async function(baseData, startDate, endD
 
 	return this.bulkUpsert(rates)
 }
+
+// ==================== VALIDATION ====================
+
+// Multiplier validation constants
+const MULTIPLIER_MIN = 0
+const MULTIPLIER_MAX = 5 // Max 5x multiplier (e.g., 500% of base price)
+const ADULT_COUNT_MAX = 10
+const CHILD_ORDER_MAX = 6
+
+/**
+ * Validate multiplier value
+ */
+function validateMultiplier(value, context = '') {
+	if (typeof value !== 'number' || isNaN(value)) {
+		throw new Error(`Invalid multiplier value for ${context}: must be a number`)
+	}
+	if (value < MULTIPLIER_MIN) {
+		throw new Error(`Multiplier for ${context} cannot be negative`)
+	}
+	if (value > MULTIPLIER_MAX) {
+		throw new Error(`Multiplier for ${context} exceeds maximum (${MULTIPLIER_MAX})`)
+	}
+	return true
+}
+
+/**
+ * Pre-save validation for multipliers and pricing
+ */
+rateSchema.pre('save', function(next) {
+	try {
+		// Validate occupancyPricing
+		if (this.occupancyPricing) {
+			for (let i = 1; i <= ADULT_COUNT_MAX; i++) {
+				const price = this.occupancyPricing[i]
+				if (price !== undefined && price !== null) {
+					if (typeof price !== 'number' || price < 0) {
+						return next(new Error(`Invalid occupancy price for ${i} adults`))
+					}
+				}
+			}
+		}
+
+		// Validate multiplierOverride
+		if (this.useMultiplierOverride && this.multiplierOverride) {
+			// Validate adult multipliers
+			if (this.multiplierOverride.adultMultipliers) {
+				const adultMults = this.multiplierOverride.adultMultipliers
+				const map = adultMults instanceof Map ? adultMults : new Map(Object.entries(adultMults))
+
+				for (const [key, value] of map) {
+					const adultCount = parseInt(key)
+					if (adultCount < 1 || adultCount > ADULT_COUNT_MAX) {
+						return next(new Error(`Invalid adult count in multiplier: ${key}`))
+					}
+					validateMultiplier(value, `${adultCount} adults`)
+				}
+			}
+
+			// Validate child multipliers
+			if (this.multiplierOverride.childMultipliers) {
+				const childMults = this.multiplierOverride.childMultipliers
+				const map = childMults instanceof Map ? childMults : new Map(Object.entries(childMults))
+
+				for (const [orderKey, ageGroupMap] of map) {
+					const order = parseInt(orderKey)
+					if (order < 1 || order > CHILD_ORDER_MAX) {
+						return next(new Error(`Invalid child order in multiplier: ${orderKey}`))
+					}
+
+					const ageMap = ageGroupMap instanceof Map ? ageGroupMap : new Map(Object.entries(ageGroupMap))
+					for (const [ageGroup, value] of ageMap) {
+						validateMultiplier(value, `child ${order} (${ageGroup})`)
+					}
+				}
+			}
+
+			// Validate combination table if present
+			if (this.multiplierOverride.combinationTable) {
+				for (const combo of this.multiplierOverride.combinationTable) {
+					if (combo.calculatedMultiplier !== undefined && combo.calculatedMultiplier !== null) {
+						validateMultiplier(combo.calculatedMultiplier, `combination ${combo.key} (calculated)`)
+					}
+					if (combo.overrideMultiplier !== undefined && combo.overrideMultiplier !== null) {
+						validateMultiplier(combo.overrideMultiplier, `combination ${combo.key} (override)`)
+					}
+				}
+			}
+		}
+
+		// Validate childOrderPricing
+		if (this.childOrderPricing && this.childOrderPricing.length > CHILD_ORDER_MAX) {
+			return next(new Error(`Too many child order pricing entries (max ${CHILD_ORDER_MAX})`))
+		}
+
+		// Validate childPricing age ranges
+		if (this.childPricing && this.childPricing.length > 0) {
+			for (const tier of this.childPricing) {
+				if (tier.minAge > tier.maxAge) {
+					return next(new Error(`Invalid child pricing tier: minAge (${tier.minAge}) > maxAge (${tier.maxAge})`))
+				}
+			}
+		}
+
+		// Validate minStay <= maxStay
+		if (this.minStay > this.maxStay) {
+			return next(new Error(`minStay (${this.minStay}) cannot exceed maxStay (${this.maxStay})`))
+		}
+
+		next()
+	} catch (error) {
+		next(error)
+	}
+})
 
 // Apply audit plugin
 rateSchema.plugin(auditPlugin, {

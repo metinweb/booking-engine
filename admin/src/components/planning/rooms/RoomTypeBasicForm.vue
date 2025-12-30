@@ -208,7 +208,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import MultiLangInput from '@/components/common/MultiLangInput.vue'
@@ -247,6 +247,7 @@ const highlightedIndex = ref(-1)
 const selectedCodeDef = ref(null)
 const codeError = ref('')
 const dropdownPosition = reactive({ top: 0, left: 0, width: 0 })
+const blurTimeoutId = ref(null)
 
 // Dropdown style for fixed positioning
 const dropdownStyle = computed(() => ({
@@ -299,10 +300,21 @@ const handleCodeFocus = () => {
 
 // Handle blur
 const handleCodeBlur = () => {
-  setTimeout(() => {
+  // Clear any existing timeout to prevent memory leaks
+  if (blurTimeoutId.value) {
+    clearTimeout(blurTimeoutId.value)
+  }
+  blurTimeoutId.value = setTimeout(() => {
     showCodeSuggestions.value = false
   }, 200)
 }
+
+// Cleanup timeout on unmount
+onUnmounted(() => {
+  if (blurTimeoutId.value) {
+    clearTimeout(blurTimeoutId.value)
+  }
+})
 
 // Navigate suggestions
 const navigateSuggestion = (direction) => {

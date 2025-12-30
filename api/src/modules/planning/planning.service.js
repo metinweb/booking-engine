@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import RoomType from './roomType.model.js'
 import MealPlan from './mealPlan.model.js'
 import Market from './market.model.js'
@@ -223,7 +224,9 @@ export const setBaseRoom = asyncHandler(async (req, res) => {
 		{ new: true }
 	)
 
-	if (!roomType) throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
+	if (!roomType) {
+		throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
+	}
 
 	logger.info(`Base room set: ${roomType.code} for hotel ${hotelId}`)
 
@@ -377,10 +380,20 @@ export const uploadRoomTypeImage = asyncHandler(async (req, res) => {
 
 	const fileUrl = getRoomTypeFileUrl(partnerId, hotelId, roomTypeId, req.file.filename)
 
+	// Parse caption with error handling
+	let caption = {}
+	if (req.body.caption) {
+		try {
+			caption = JSON.parse(req.body.caption)
+		} catch (e) {
+			throw new BadRequestError('INVALID_CAPTION_FORMAT')
+		}
+	}
+
 	// Add image to room type
 	const newImage = {
 		url: fileUrl,
-		caption: req.body.caption ? JSON.parse(req.body.caption) : {},
+		caption,
 		order: roomType.images.length,
 		isMain: roomType.images.length === 0 // First image is main by default
 	}
@@ -1047,16 +1060,36 @@ export const getRates = asyncHandler(async (req, res) => {
 	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
 	await verifyHotelOwnership(hotelId, partnerId)
 
-	const { roomType, mealPlan, market, startDate, endDate, status } = req.query
+	const { roomType, mealPlan, market, startDate, endDate, status, page = 1, limit = 500 } = req.query
 	const filters = { roomType, mealPlan, market, startDate, endDate, status }
 
-	const rates = await Rate.findByHotel(hotelId, filters)
-		.populate('roomType', 'name code')
-		.populate('mealPlan', 'name code')
-		.populate('market', 'name code currency')
-		.populate('season', 'name code color')
+	// Pagination
+	const pageNum = Math.max(1, parseInt(page) || 1)
+	const limitNum = Math.min(1000, Math.max(1, parseInt(limit) || 500))
+	const skip = (pageNum - 1) * limitNum
 
-	res.json({ success: true, data: rates })
+	const [rates, total] = await Promise.all([
+		Rate.findByHotel(hotelId, filters)
+			.populate('roomType', 'name code')
+			.populate('mealPlan', 'name code')
+			.populate('market', 'name code currency')
+			.populate('season', 'name code color')
+			.skip(skip)
+			.limit(limitNum)
+			.lean(),
+		Rate.countDocuments({ hotel: hotelId, ...filters })
+	])
+
+	res.json({
+		success: true,
+		data: rates,
+		pagination: {
+			page: pageNum,
+			limit: limitNum,
+			total,
+			pages: Math.ceil(total / limitNum)
+		}
+	})
 })
 
 export const getRatesCalendar = asyncHandler(async (req, res) => {
@@ -1283,6 +1316,7 @@ export const bulkCreateRates = asyncHandler(async (req, res) => {
 
 	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
 	if (!Array.isArray(rates) || rates.length === 0) throw new BadRequestError('RATES_REQUIRED')
+	if (rates.length > 1000) throw new BadRequestError('MAX_1000_RATES_PER_REQUEST')
 
 	await verifyHotelOwnership(hotelId, partnerId)
 
@@ -1395,6 +1429,7 @@ export const quickUpdateRates = asyncHandler(async (req, res) => {
 
 	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
 	if (!Array.isArray(rateIds) || !field) throw new BadRequestError('INVALID_PARAMS')
+	if (rateIds.length > 1000) throw new BadRequestError('MAX_1000_RATES_PER_REQUEST')
 
 	await verifyHotelOwnership(hotelId, partnerId)
 
@@ -3121,5 +3156,547 @@ export const deleteMarketPricingData = asyncHandler(async (req, res) => {
 			ratesDeleted: ratesDeleted.deletedCount,
 			seasonsDeleted: seasonsDeleted.deletedCount
 		}
+	})
+})
+
+// ==================== PRICING CALCULATION ENDPOINTS ====================
+import pricingService from '../../services/pricingService.js'
+import cache from '../../services/cacheService.js'
+
+/**
+ * Calculate price for a specific rate and occupancy
+ * POST /planning/hotels/:hotelId/rates/:rateId/calculate-price
+ * Body: { adults, children: [{ age, ageGroup }], nights }
+ */
+export const calculateRatePrice = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId, rateId } = req.params
+	const { adults = 2, children = [], nights = 1 } = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Get rate with all relations
+	const rate = await Rate.findById(rateId)
+		.populate('roomType')
+		.populate('mealPlan')
+		.populate('market')
+
+	if (!rate) throw new NotFoundError('RATE_NOT_FOUND')
+	if (rate.hotel.toString() !== hotelId) throw new ForbiddenError('FORBIDDEN')
+
+	// Get hotel for child age groups
+	const hotel = await Hotel.findById(hotelId).select('childAgeGroups').lean()
+
+	// Get season for the rate's date
+	const season = await Season.findByDate(hotelId, rate.market._id, rate.date)
+
+	// Check restrictions
+	const restrictionCheck = pricingService.checkRestrictions(rate, {
+		adults,
+		bookingDate: new Date()
+	})
+
+	// Calculate price
+	const priceResult = pricingService.calculateOccupancyPrice(
+		rate,
+		{ adults, children, nights },
+		{
+			roomType: rate.roomType,
+			market: rate.market,
+			season,
+			hotel
+		}
+	)
+
+	res.json({
+		success: true,
+		data: {
+			...priceResult,
+			restrictions: restrictionCheck,
+			rate: {
+				_id: rate._id,
+				date: rate.date,
+				roomType: rate.roomType?.code,
+				mealPlan: rate.mealPlan?.code,
+				market: rate.market?.code
+			}
+		}
+	})
+})
+
+/**
+ * Calculate price by query (without rate ID)
+ * POST /planning/hotels/:hotelId/pricing/calculate
+ * Body: { roomTypeId, mealPlanId, marketId, date, adults, children, nights }
+ */
+export const calculatePriceByQuery = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { roomTypeId, mealPlanId, marketId, date, adults = 2, children = [], nights = 1 } = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!roomTypeId || !mealPlanId || !marketId || !date) {
+		throw new BadRequestError('MISSING_REQUIRED_FIELDS')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	const result = await pricingService.calculateBookingPrice({
+		hotelId,
+		roomTypeId,
+		mealPlanId,
+		marketId,
+		date,
+		adults,
+		children,
+		nights
+	})
+
+	res.json({
+		success: result.success,
+		data: result
+	})
+})
+
+/**
+ * Bulk calculate prices
+ * POST /planning/hotels/:hotelId/pricing/bulk-calculate
+ * Body: { queries: [{ roomTypeId, mealPlanId, marketId, date, adults, children, nights }, ...] }
+ */
+export const bulkCalculatePrices = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { queries } = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!Array.isArray(queries) || queries.length === 0) {
+		throw new BadRequestError('QUERIES_REQUIRED')
+	}
+	if (queries.length > 100) {
+		throw new BadRequestError('MAX_100_QUERIES')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Add hotelId to all queries
+	const queriesWithHotel = queries.map(q => ({ ...q, hotelId }))
+
+	const results = await pricingService.bulkCalculatePrices(queriesWithHotel)
+
+	res.json({
+		success: true,
+		data: results
+	})
+})
+
+/**
+ * Check availability for a date range
+ * POST /planning/hotels/:hotelId/pricing/check-availability
+ * Body: { roomTypeId, mealPlanId, marketId, startDate, endDate, adults }
+ */
+export const checkPricingAvailability = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { roomTypeId, mealPlanId, marketId, startDate, endDate, adults = 2 } = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!roomTypeId || !mealPlanId || !marketId || !startDate || !endDate) {
+		throw new BadRequestError('MISSING_REQUIRED_FIELDS')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	const result = await pricingService.checkAvailability({
+		hotelId,
+		roomTypeId,
+		mealPlanId,
+		marketId,
+		startDate,
+		endDate,
+		adults
+	})
+
+	res.json({
+		success: true,
+		data: result
+	})
+})
+
+/**
+ * Get effective rate with all overrides applied
+ * GET /planning/hotels/:hotelId/pricing/effective-rate
+ * Query: { roomTypeId, mealPlanId, marketId, date }
+ */
+export const getEffectiveRateEndpoint = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { roomTypeId, mealPlanId, marketId, date } = req.query
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!roomTypeId || !mealPlanId || !marketId || !date) {
+		throw new BadRequestError('MISSING_REQUIRED_FIELDS')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	const result = await pricingService.getEffectiveRate(hotelId, roomTypeId, mealPlanId, marketId, date)
+
+	res.json({
+		success: true,
+		data: result
+	})
+})
+
+/**
+ * Get effective multipliers for a room type (considering all overrides)
+ * GET /planning/hotels/:hotelId/pricing/effective-multipliers
+ * Query: { roomTypeId, marketId, date }
+ */
+export const getEffectiveMultipliers = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { roomTypeId, marketId, date } = req.query
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!roomTypeId) {
+		throw new BadRequestError('ROOM_TYPE_REQUIRED')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Get room type
+	const roomType = await RoomType.findById(roomTypeId).lean()
+	if (!roomType) throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
+
+	// Get market if provided
+	let market = null
+	if (marketId) {
+		market = await Market.findById(marketId).lean()
+	}
+
+	// Get season for date if provided
+	let season = null
+	if (date && marketId) {
+		season = await Season.findByDate(hotelId, marketId, date)
+		if (season) season = season.toObject()
+	}
+
+	// Get effective multipliers
+	const effectiveMultipliers = pricingService.getEffectiveMultiplierTemplate(roomType, market, season)
+	const effectivePricingType = pricingService.getEffectivePricingType(roomType, market, season)
+
+	// Get hotel for child age groups
+	const hotel = await Hotel.findById(hotelId).select('childAgeGroups').lean()
+	const effectiveChildAgeGroups = pricingService.getEffectiveChildAgeGroups(hotel, market, season)
+
+	res.json({
+		success: true,
+		data: {
+			roomType: {
+				_id: roomType._id,
+				code: roomType.code,
+				pricingType: roomType.pricingType,
+				useMultipliers: roomType.useMultipliers
+			},
+			market: market ? {
+				_id: market._id,
+				code: market.code
+			} : null,
+			season: season ? {
+				_id: season._id,
+				code: season.code,
+				name: season.name
+			} : null,
+			effectivePricingType,
+			effectiveMultipliers,
+			effectiveChildAgeGroups
+		}
+	})
+})
+
+/**
+ * Get combination table for a room type (with effective overrides)
+ * GET /planning/hotels/:hotelId/pricing/combination-table
+ * Query: { roomTypeId, marketId, date }
+ */
+export const getCombinationTable = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { roomTypeId, marketId, date } = req.query
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!roomTypeId) {
+		throw new BadRequestError('ROOM_TYPE_REQUIRED')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Get room type
+	const roomType = await RoomType.findById(roomTypeId).lean()
+	if (!roomType) throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
+
+	// Get market if provided
+	let market = null
+	if (marketId) {
+		market = await Market.findById(marketId).lean()
+	}
+
+	// Get season for date if provided
+	let season = null
+	if (date && marketId) {
+		season = await Season.findByDate(hotelId, marketId, date)
+		if (season) season = season.toObject()
+	}
+
+	// Get effective multipliers (includes combination table)
+	const effectiveMultipliers = pricingService.getEffectiveMultiplierTemplate(roomType, market, season)
+
+	res.json({
+		success: true,
+		data: {
+			roomType: {
+				_id: roomType._id,
+				code: roomType.code,
+				occupancy: roomType.occupancy
+			},
+			effectivePricingType: pricingService.getEffectivePricingType(roomType, market, season),
+			useMultipliers: effectiveMultipliers.useMultipliers,
+			combinationTable: effectiveMultipliers.combinationTable,
+			adultMultipliers: effectiveMultipliers.adultMultipliers,
+			childMultipliers: effectiveMultipliers.childMultipliers,
+			roundingRule: effectiveMultipliers.roundingRule
+		}
+	})
+})
+
+/**
+ * Get effective child age groups (considering inheritance)
+ * GET /planning/hotels/:hotelId/pricing/child-age-groups
+ * Query: { marketId, date }
+ */
+export const getEffectiveChildAgeGroups = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { marketId, date } = req.query
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Get hotel
+	const hotel = await Hotel.findById(hotelId).select('childAgeGroups').lean()
+
+	// Get market if provided
+	let market = null
+	if (marketId) {
+		market = await Market.findById(marketId).lean()
+	}
+
+	// Get season for date if provided
+	let season = null
+	if (date && marketId) {
+		season = await Season.findByDate(hotelId, marketId, date)
+		if (season) season = season.toObject()
+	}
+
+	// Get effective child age groups
+	const effectiveChildAgeGroups = pricingService.getEffectiveChildAgeGroups(hotel, market, season)
+
+	// Determine source
+	let source = 'hotel'
+	if (season && !season.childAgeSettings?.inheritFromMarket) {
+		source = 'season'
+	} else if (market && !market.childAgeSettings?.inheritFromHotel) {
+		source = 'market'
+	}
+
+	res.json({
+		success: true,
+		data: {
+			childAgeGroups: effectiveChildAgeGroups,
+			source,
+			hotel: {
+				childAgeGroups: hotel?.childAgeGroups || []
+			},
+			market: market ? {
+				_id: market._id,
+				code: market.code,
+				inheritFromHotel: market.childAgeSettings?.inheritFromHotel !== false,
+				childAgeGroups: market.childAgeSettings?.childAgeGroups || []
+			} : null,
+			season: season ? {
+				_id: season._id,
+				code: season.code,
+				inheritFromMarket: season.childAgeSettings?.inheritFromMarket !== false,
+				childAgeGroups: season.childAgeSettings?.childAgeGroups || []
+			} : null
+		}
+	})
+})
+
+/**
+ * Calculate complete booking price with campaigns (server-side)
+ * POST /planning/hotels/:hotelId/pricing/calculate-with-campaigns
+ * Body: { roomTypeId, mealPlanId, marketId, checkInDate, checkOutDate, adults, children, includeCampaigns }
+ */
+export const calculatePriceWithCampaigns = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const {
+		roomTypeId,
+		mealPlanId,
+		marketId,
+		checkInDate,
+		checkOutDate,
+		adults = 2,
+		children = [],
+		includeCampaigns = true
+	} = req.body
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!roomTypeId || !mealPlanId || !marketId || !checkInDate || !checkOutDate) {
+		throw new BadRequestError('MISSING_REQUIRED_FIELDS')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	const result = await pricingService.calculatePriceWithCampaigns({
+		hotelId,
+		roomTypeId,
+		mealPlanId,
+		marketId,
+		checkInDate,
+		checkOutDate,
+		adults,
+		children,
+		includeCampaigns
+	})
+
+	res.json({
+		success: true,
+		data: result
+	})
+})
+
+/**
+ * Get applicable campaigns for a booking query
+ * GET /planning/hotels/:hotelId/pricing/applicable-campaigns
+ * Query: { roomTypeId, marketId, mealPlanId, checkInDate, checkOutDate }
+ */
+export const getApplicableCampaigns = asyncHandler(async (req, res) => {
+	const partnerId = getPartnerId(req)
+	const { hotelId } = req.params
+	const { roomTypeId, marketId, mealPlanId, checkInDate, checkOutDate } = req.query
+
+	if (!partnerId) throw new BadRequestError('PARTNER_REQUIRED')
+	if (!checkInDate || !checkOutDate) {
+		throw new BadRequestError('DATES_REQUIRED')
+	}
+
+	await verifyHotelOwnership(hotelId, partnerId)
+
+	// Calculate nights
+	const checkIn = new Date(checkInDate)
+	const checkOut = new Date(checkOutDate)
+	const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
+
+	const campaigns = await pricingService.getApplicableCampaigns(hotelId, {
+		checkInDate,
+		checkOutDate,
+		roomTypeId,
+		marketId,
+		mealPlanId,
+		nights
+	})
+
+	res.json({
+		success: true,
+		data: {
+			campaigns: campaigns.map(c => ({
+				_id: c._id,
+				code: c.code,
+				name: c.name,
+				type: c.type,
+				discount: c.discount,
+				conditions: c.conditions,
+				combinable: c.combinable,
+				priority: c.priority,
+				applicationType: c.applicationType,
+				calculationType: c.calculationType,
+				stayWindow: c.stayWindow,
+				bookingWindow: c.bookingWindow
+			})),
+			count: campaigns.length,
+			query: {
+				checkInDate,
+				checkOutDate,
+				nights,
+				roomTypeId: roomTypeId || 'all',
+				marketId: marketId || 'all',
+				mealPlanId: mealPlanId || 'all'
+			}
+		}
+	})
+})
+
+// ==================== CACHE MANAGEMENT ====================
+
+/**
+ * Get cache statistics
+ * GET /planning/cache/stats
+ * Platform Admin only
+ */
+export const getCacheStats = asyncHandler(async (req, res) => {
+	const stats = cache.getStats()
+
+	res.json({
+		success: true,
+		data: stats
+	})
+})
+
+/**
+ * Clear entire cache
+ * POST /planning/cache/clear
+ * Platform Admin only
+ */
+export const clearCache = asyncHandler(async (req, res) => {
+	const { pattern } = req.body
+
+	let clearedCount = 0
+	if (pattern) {
+		clearedCount = cache.deleteByPattern(pattern)
+	} else {
+		cache.clear()
+		clearedCount = -1 // Indicates full clear
+	}
+
+	// Log the action
+	logger.info(`Cache cleared by ${req.user.email}`, { pattern, clearedCount })
+
+	res.json({
+		success: true,
+		message: pattern ? `Cleared ${clearedCount} cache entries matching pattern: ${pattern}` : 'Entire cache cleared',
+		clearedCount
+	})
+})
+
+/**
+ * Invalidate cache for a specific entity
+ * POST /planning/cache/invalidate/:entityType/:entityId
+ * Platform Admin only
+ */
+export const invalidateCache = asyncHandler(async (req, res) => {
+	const { entityType, entityId } = req.params
+
+	cache.invalidateEntity(entityType, entityId)
+
+	// Log the action
+	logger.info(`Cache invalidated for ${entityType}:${entityId} by ${req.user.email}`)
+
+	res.json({
+		success: true,
+		message: `Cache invalidated for ${entityType}:${entityId}`
 	})
 })

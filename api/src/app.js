@@ -73,6 +73,7 @@ import planningRoutes from './modules/planning/planning.routes.js'
 import tagRoutes from './modules/tag/tag.routes.js'
 import locationRoutes from './modules/location/location.routes.js'
 import auditRoutes from './modules/audit/audit.routes.js'
+import publicRoutes from './modules/public/public.routes.js'
 
 app.use('/api/auth', authRoutes)
 app.use('/api/partners', partnerRoutes)
@@ -85,6 +86,7 @@ app.use('/api/planning', planningRoutes)
 app.use('/api/tags', tagRoutes)
 app.use('/api/locations', locationRoutes)
 app.use('/api/audit-logs', auditRoutes)
+app.use('/api/public', publicRoutes)
 
 // 404 handler
 app.use(notFoundHandler)

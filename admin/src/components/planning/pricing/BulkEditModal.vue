@@ -144,11 +144,13 @@
               <div class="flex items-center gap-2">
                 <span
                   class="px-3 py-1 rounded-full text-xs font-bold"
-                  :class="currentRoomPricingType === 'per_person'
-                    ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                    : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'"
+                  :class="currentRoomUsesMultipliers
+                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+                    : currentRoomPricingType === 'per_person'
+                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                      : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'"
                 >
-                  {{ currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
+                  {{ currentRoomUsesMultipliers ? 'Çarpanlı OBP' : currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
                 </span>
                 <span class="text-xs text-gray-500">- {{ currentRoomTypeName }}</span>
               </div>
@@ -227,7 +229,53 @@
                     </div>
                   </template>
 
-                  <!-- OBP PRICING -->
+                  <!-- OBP WITH MULTIPLIERS -->
+                  <template v-else-if="currentRoomUsesMultipliers">
+                    <!-- Base Price Input -->
+                    <div class="flex items-center gap-3">
+                      <label class="text-sm text-gray-600 dark:text-gray-400 w-28 flex items-center gap-1">
+                        <span class="material-icons text-purple-500 text-sm">calculate</span>
+                        Baz Fiyat
+                      </label>
+                      <div class="flex items-center gap-2 flex-1">
+                        <input
+                          v-model.number="roomPrices[currentRoomId][mp._id].pricePerNight"
+                          type="number"
+                          min="0"
+                          step="10"
+                          class="form-input w-32 text-center font-bold text-purple-600"
+                          :class="roomPrices[currentRoomId]?.[mp._id]?.pricePerNight > 0 ? 'border-purple-300 dark:border-purple-700' : ''"
+                          placeholder="0"
+                        />
+                        <span class="text-sm text-gray-400">{{ currency }}</span>
+                      </div>
+                    </div>
+
+                    <!-- Calculated Combinations (Read-only) -->
+                    <div class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg max-h-[180px] overflow-y-auto">
+                      <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1 sticky top-0 bg-indigo-50 dark:bg-indigo-900/20 py-1">
+                        <span class="material-icons text-sm">table_chart</span>
+                        Hesaplanan Fiyatlar
+                      </div>
+                      <div class="grid grid-cols-2 gap-1">
+                        <div
+                          v-for="combo in currentRoomCombinations"
+                          :key="combo.key"
+                          class="flex items-center justify-between text-xs py-0.5 px-1"
+                        >
+                          <span class="text-indigo-600 dark:text-indigo-400 truncate">
+                            {{ formatCombinationKey(combo) }}
+                            <span class="text-gray-400">(×{{ combo.overrideMultiplier || combo.calculatedMultiplier }})</span>
+                          </span>
+                          <span class="font-bold ml-1" :class="roomPrices[currentRoomId]?.[mp._id]?.pricePerNight ? 'text-green-600' : 'text-gray-400'">
+                            {{ roomPrices[currentRoomId]?.[mp._id]?.pricePerNight ? Math.round(roomPrices[currentRoomId][mp._id].pricePerNight * (combo.overrideMultiplier || combo.calculatedMultiplier)).toLocaleString() : '-' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- OBP STANDARD (without multipliers) -->
                   <template v-else>
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                       <div
@@ -247,8 +295,8 @@
                     </div>
                   </template>
 
-                  <!-- Child Pricing (both types) -->
-                  <div class="pt-2 border-t border-gray-100 dark:border-slate-700">
+                  <!-- Child Pricing (only for Unit & Standard OBP - not for Multiplier OBP) -->
+                  <div v-if="!currentRoomUsesMultipliers" class="pt-2 border-t border-gray-100 dark:border-slate-700">
                     <div class="text-xs text-gray-500 mb-2">Çocuk Fiyatları {{ childAgeLabel }}</div>
                     <div class="grid grid-cols-2 gap-2">
                       <div
@@ -268,8 +316,8 @@
                     </div>
                   </div>
 
-                  <!-- Infant -->
-                  <div class="flex items-center gap-3">
+                  <!-- Infant (only for Unit & Standard OBP) -->
+                  <div v-if="!currentRoomUsesMultipliers" class="flex items-center gap-3">
                     <label class="text-sm text-gray-500 dark:text-gray-400 w-28">
                       Bebek {{ infantAgeLabel }}
                     </label>
@@ -499,6 +547,219 @@
           </div>
         </div>
 
+        <!-- Preview Panel (overlay on content) -->
+        <Transition name="slide-up">
+          <div
+            v-if="showPreview"
+            class="absolute inset-0 bg-white dark:bg-slate-800 z-10 flex flex-col"
+          >
+            <!-- Preview Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-emerald-500 to-teal-600">
+              <div class="text-white">
+                <h3 class="text-lg font-bold flex items-center gap-2">
+                  <span class="material-icons">preview</span>
+                  {{ $t('planning.pricing.previewChanges') }}
+                </h3>
+                <p class="text-sm opacity-90 mt-0.5">
+                  {{ $t('planning.pricing.reviewBeforeApply') }}
+                </p>
+              </div>
+              <button
+                @click="showPreview = false"
+                class="p-2 rounded-lg hover:bg-white/20 text-white transition-colors"
+              >
+                <span class="material-icons">arrow_back</span>
+              </button>
+            </div>
+
+            <!-- Preview Content -->
+            <div class="flex-1 overflow-y-auto p-6">
+              <!-- Impact Summary -->
+              <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                    <span class="material-icons text-2xl">info</span>
+                  </div>
+                  <div>
+                    <div class="text-lg font-bold text-gray-800 dark:text-white">
+                      {{ $t('planning.pricing.impactSummary') }}
+                    </div>
+                    <div class="text-sm text-gray-600 dark:text-gray-400">
+                      {{ previewSummary.totalCells }} {{ $t('planning.pricing.cellsWillBeUpdated') }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mt-4">
+                  <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600">{{ previewSummary.roomTypes }}</div>
+                    <div class="text-xs text-gray-500">{{ $t('planning.pricing.roomTypes') }}</div>
+                  </div>
+                  <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                    <div class="text-2xl font-bold text-orange-600">{{ previewSummary.mealPlans }}</div>
+                    <div class="text-xs text-gray-500">{{ $t('planning.pricing.mealPlans') }}</div>
+                  </div>
+                  <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600">{{ previewSummary.days }}</div>
+                    <div class="text-xs text-gray-500">{{ $t('planning.pricing.days') }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Changes List -->
+              <div class="space-y-4">
+                <h4 class="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <span class="material-icons text-amber-500">change_circle</span>
+                  {{ $t('planning.pricing.changesWillApply') }}
+                </h4>
+
+                <!-- Price Changes -->
+                <div v-if="activeTab === 'price' && previewChanges.prices.length > 0" class="space-y-2">
+                  <div
+                    v-for="(change, idx) in previewChanges.prices"
+                    :key="'price-' + idx"
+                    class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded bg-purple-500 text-white text-xs font-bold">{{ change.roomCode }}</span>
+                        <span class="px-2 py-0.5 rounded text-xs font-medium" :class="getMealPlanColor(change.mealPlanCode)">{{ change.mealPlanCode }}</span>
+                      </div>
+                      <span class="text-xs text-gray-500">{{ change.pricingType === 'per_person' ? 'OBP' : 'Unit' }}</span>
+                    </div>
+                    <div class="mt-2 text-sm text-gray-700 dark:text-gray-300">
+                      <template v-if="change.pricingType === 'unit'">
+                        <div v-if="change.pricePerNight !== null" class="flex items-center gap-2">
+                          <span class="material-icons text-sm text-green-500">payments</span>
+                          {{ $t('planning.pricing.pricePerNight') }}: <strong>{{ change.pricePerNight }} {{ currency }}</strong>
+                        </div>
+                        <div v-if="change.extraAdult !== null" class="flex items-center gap-2">
+                          <span class="material-icons text-sm text-blue-500">person_add</span>
+                          {{ $t('planning.pricing.extraAdultShort') }}: <strong>{{ change.extraAdult }} {{ currency }}</strong>
+                        </div>
+                        <div v-if="change.singleSupplement !== null" class="flex items-center gap-2">
+                          <span class="material-icons text-sm text-indigo-500">person</span>
+                          {{ $t('planning.pricing.singleSupplement') }}: <strong>-{{ change.singleSupplement }} {{ currency }}</strong>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <div v-for="(price, pax) in change.occupancyPricing" :key="pax" class="inline-flex items-center gap-1 mr-3">
+                          <span class="text-xs font-bold text-indigo-600">{{ pax }}P:</span>
+                          <strong>{{ price }} {{ currency }}</strong>
+                        </div>
+                      </template>
+                      <div v-if="change.childPrices?.length > 0" class="flex items-center gap-2 mt-1">
+                        <span class="material-icons text-sm text-pink-500">child_care</span>
+                        {{ $t('planning.pricing.childPrices') }}:
+                        <span v-for="(cp, ci) in change.childPrices" :key="ci" class="mr-2">
+                          {{ ci + 1 }}. <strong>{{ cp }} {{ currency }}</strong>
+                        </span>
+                      </div>
+                      <div v-if="change.extraInfant !== null" class="flex items-center gap-2 mt-1">
+                        <span class="material-icons text-sm text-rose-500">baby_changing_station</span>
+                        {{ $t('planning.pricing.infant') }}: <strong>{{ change.extraInfant }} {{ currency }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Inventory Changes -->
+                <div v-if="activeTab === 'inventory'" class="space-y-2">
+                  <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                    <div v-if="form.allotmentValue > 0" class="flex items-center gap-2 mb-2">
+                      <span class="material-icons text-blue-500">inventory_2</span>
+                      <span class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('planning.pricing.allotment') }}:
+                        <strong>{{ allotmentModeLabel }} {{ form.allotmentValue }}</strong>
+                      </span>
+                    </div>
+                    <div v-if="form.minStay > 1" class="flex items-center gap-2 mb-2">
+                      <span class="material-icons text-purple-500">nights_stay</span>
+                      <span class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('planning.pricing.minStay') }}: <strong>{{ form.minStay }} {{ $t('planning.pricing.nights') }}</strong>
+                      </span>
+                    </div>
+                    <div v-if="form.releaseDays > 0" class="flex items-center gap-2">
+                      <span class="material-icons text-orange-500">schedule</span>
+                      <span class="text-sm text-gray-700 dark:text-gray-300">
+                        {{ $t('planning.pricing.releaseDays') }}: <strong>{{ form.releaseDays }} {{ $t('planning.pricing.days') }}</strong>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Restriction Changes -->
+                <div v-if="activeTab === 'restrictions'" class="space-y-2">
+                  <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                    <div v-if="form.stopSale" class="flex items-center gap-2 mb-2">
+                      <span class="material-icons text-red-500">block</span>
+                      <span class="text-sm font-medium text-red-600">{{ $t('planning.pricing.stopSale') }}: {{ $t('common.enabled') }}</span>
+                    </div>
+                    <div v-if="form.singleStop" class="flex items-center gap-2 mb-2">
+                      <span class="material-icons text-pink-500">person_off</span>
+                      <span class="text-sm font-medium text-pink-600">{{ $t('planning.pricing.singleStop') }}: {{ $t('common.enabled') }}</span>
+                    </div>
+                    <div v-if="form.closedToArrival" class="flex items-center gap-2 mb-2">
+                      <span class="material-icons text-orange-500">no_meeting_room</span>
+                      <span class="text-sm font-medium text-orange-600">CTA: {{ $t('common.enabled') }}</span>
+                    </div>
+                    <div v-if="form.closedToDeparture" class="flex items-center gap-2">
+                      <span class="material-icons text-orange-500">logout</span>
+                      <span class="text-sm font-medium text-orange-600">CTD: {{ $t('common.enabled') }}</span>
+                    </div>
+                    <div v-if="!form.stopSale && !form.singleStop && !form.closedToArrival && !form.closedToDeparture" class="text-sm text-gray-500">
+                      {{ $t('planning.pricing.noRestrictionsSet') }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- No Changes Warning -->
+                <div
+                  v-if="!hasAnyChanges"
+                  class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-700 flex items-center gap-3"
+                >
+                  <span class="material-icons text-amber-500 text-2xl">warning</span>
+                  <div>
+                    <div class="font-medium text-amber-700 dark:text-amber-300">{{ $t('planning.pricing.noChangesDetected') }}</div>
+                    <div class="text-sm text-amber-600 dark:text-amber-400">{{ $t('planning.pricing.pleaseEnterValues') }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Date Range Preview -->
+              <div class="mt-6 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+                <h4 class="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-3">
+                  <span class="material-icons text-blue-500">date_range</span>
+                  {{ $t('planning.pricing.dateRange') }}
+                </h4>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ dateRangeSummary }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Preview Footer -->
+            <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+              <button
+                @click="showPreview = false"
+                class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors flex items-center gap-2"
+              >
+                <span class="material-icons text-sm">arrow_back</span>
+                {{ $t('planning.pricing.backToEdit') }}
+              </button>
+              <button
+                @click="confirmSave"
+                :disabled="saving || !hasAnyChanges"
+                class="px-6 py-2.5 text-sm font-medium bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-emerald-500/25"
+              >
+                <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                <span class="material-icons text-sm" v-else>check_circle</span>
+                {{ saving ? $t('common.saving') : $t('planning.pricing.confirmAndApply') }}
+              </button>
+            </div>
+          </div>
+        </Transition>
+
         <!-- Footer -->
         <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
           <div class="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1">
@@ -513,13 +774,12 @@
               {{ $t('common.cancel') }}
             </button>
             <button
-              @click="save"
+              @click="showPreviewPanel"
               :disabled="saving"
               class="px-6 py-2.5 text-sm font-medium bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-purple-500/25"
             >
-              <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
-              <span class="material-icons text-sm" v-else>check</span>
-              {{ saving ? $t('common.saving') : $t('planning.pricing.applyChanges') }}
+              <span class="material-icons text-sm">preview</span>
+              {{ $t('planning.pricing.previewChanges') }}
             </button>
           </div>
         </div>
@@ -532,6 +792,7 @@
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
+import { useDate } from '@/composables/useDate'
 import planningService from '@/services/planningService'
 
 const props = defineProps({
@@ -541,16 +802,19 @@ const props = defineProps({
   roomTypes: { type: Array, default: () => [] },
   mealPlans: { type: Array, default: () => [] },
   rates: { type: Array, default: () => [] },
-  market: { type: Object, default: null }
+  market: { type: Object, default: null },
+  childAgeGroups: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['update:modelValue', 'saved'])
 
 const { t, locale } = useI18n()
 const toast = useToast()
+const { formatDisplayDate } = useDate()
 
 const saving = ref(false)
 const activeTab = ref('price')
+const showPreview = ref(false)
 
 const tabs = computed(() => [
   { key: 'price', label: t('planning.pricing.pricePerNight'), icon: 'payments' },
@@ -603,13 +867,88 @@ const currentRoomId = computed(() => {
   return selectedRoomTab.value || uniqueRoomTypes.value[0]?._id
 })
 
-// Current room's pricing type
+// Get effective pricing type considering Market overrides
+const getEffectivePricingType = (roomTypeId) => {
+  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
+  if (!roomType) return 'unit'
+
+  const basePricingType = roomType.pricingType || 'unit'
+
+  // Check Market override
+  if (props.market?.pricingOverrides?.length > 0) {
+    const override = props.market.pricingOverrides.find(po => {
+      const rtId = typeof po.roomType === 'object' ? po.roomType._id : po.roomType
+      return rtId === roomTypeId && po.usePricingTypeOverride
+    })
+    if (override) {
+      return override.pricingType
+    }
+  }
+
+  return basePricingType
+}
+
+// Current room's pricing type (considering Market override)
 const currentRoomPricingType = computed(() => {
   const roomId = currentRoomId.value
   if (!roomId) return 'unit'
-  const roomType = props.roomTypes.find(rt => rt._id === roomId)
-  return roomType?.pricingType || 'unit'
+  return getEffectivePricingType(roomId)
 })
+
+// Current room type object
+const currentRoomType = computed(() => {
+  const roomId = currentRoomId.value
+  if (!roomId) return null
+  return props.roomTypes.find(r => r._id === roomId)
+})
+
+// Check if current room uses multiplier system
+// Must use effective pricing type (considering market override) AND room's useMultipliers flag
+const currentRoomUsesMultipliers = computed(() => {
+  const rt = currentRoomType.value
+  // Both conditions must be true:
+  // 1. Effective pricing type is per_person (considering market override)
+  // 2. Room has useMultipliers enabled
+  return currentRoomPricingType.value === 'per_person' && rt?.useMultipliers === true
+})
+
+// Get active combinations for multiplier OBP
+const currentRoomCombinations = computed(() => {
+  const rt = currentRoomType.value
+  const table = rt?.multiplierTemplate?.combinationTable || []
+  return table.filter(c => c.isActive !== false)
+})
+
+// Format combination key with age ranges: "1+3 (0-2, 3-6, 3-6)"
+const formatCombinationKey = (combo) => {
+  const adults = combo.adults
+  const children = combo.children || []
+
+  if (children.length === 0) {
+    return `${adults}`
+  }
+
+  // Get age ranges from childAgeGroups prop
+  const ageGroups = props.childAgeGroups || []
+
+  const getAgeRange = (ageGroupCode) => {
+    const group = ageGroups.find(g => g.code === ageGroupCode)
+    if (group) {
+      return `${group.minAge}-${group.maxAge}`
+    }
+    // Fallback if not found
+    const fallbacks = {
+      'infant': '0-2',
+      'first': '3-6',
+      'second': '7-11',
+      'third': '12-17'
+    }
+    return fallbacks[ageGroupCode] || ageGroupCode
+  }
+
+  const ageRanges = children.map(c => getAgeRange(c.ageGroup))
+  return `${adults}+${children.length} (${ageRanges.join(', ')})`
+}
 
 // Current room name for display
 const currentRoomTypeName = computed(() => {
@@ -622,12 +961,18 @@ const currentRoomTypeName = computed(() => {
 const hasRoomPrice = (roomTypeId) => {
   const prices = roomPrices[roomTypeId]
   if (!prices) return false
-  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
-  const pricingType = roomType?.pricingType || 'unit'
+  const pricingType = getEffectivePricingType(roomTypeId)
+  const roomType = props.roomTypes.find(r => r._id === roomTypeId)
+  // Use effective pricing type for multiplier check
+  const usesMultipliers = pricingType === 'per_person' && roomType?.useMultipliers === true
 
   return Object.values(prices).some(p => {
+    if (pricingType === 'per_person' && usesMultipliers) {
+      // Multiplier OBP: Check base price
+      return p?.pricePerNight > 0
+    }
     if (pricingType === 'per_person') {
-      // OBP: Check if at least 1P and 2P prices are set
+      // Standard OBP: Check if at least 1P and 2P prices are set
       return p?.occupancyPricing?.[1] > 0 || p?.occupancyPricing?.[2] > 0
     }
     return p?.pricePerNight > 0
@@ -705,11 +1050,13 @@ const copyFirstMealPlanToAll = () => {
   for (const mp of mealPlans) {
     if (mp._id !== firstMp) {
       roomPrices[currentRoom][mp._id] = {
-        pricePerNight: firstData.pricePerNight || 0,
-        extraAdult: firstData.extraAdult || 0,
-        extraInfant: firstData.extraInfant || 0,
-        singleSupplement: firstData.singleSupplement || 0,
-        childOrderPricing: [...(firstData.childOrderPricing || [])]
+        pricingType: firstData.pricingType || 'unit',
+        pricePerNight: firstData.pricePerNight || '',
+        extraAdult: firstData.extraAdult || '',
+        extraInfant: firstData.extraInfant || '',
+        singleSupplement: firstData.singleSupplement || '',
+        childOrderPricing: [...(firstData.childOrderPricing || [])],
+        occupancyPricing: { ...(firstData.occupancyPricing || {}) }
       }
     }
   }
@@ -724,14 +1071,19 @@ const copyCurrentRoomToAll = () => {
       if (!roomPrices[rt._id]) {
         roomPrices[rt._id] = {}
       }
+      // Get target room's effective pricing type
+      const targetPricingType = getEffectivePricingType(rt._id)
+
       for (const mp of uniqueMealPlans.value) {
         const srcData = roomPrices[currentRoom][mp._id]
         roomPrices[rt._id][mp._id] = {
-          pricePerNight: srcData?.pricePerNight || 0,
-          extraAdult: srcData?.extraAdult || 0,
-          extraInfant: srcData?.extraInfant || 0,
-          singleSupplement: srcData?.singleSupplement || 0,
-          childOrderPricing: [...(srcData?.childOrderPricing || [])]
+          pricingType: targetPricingType,
+          pricePerNight: srcData?.pricePerNight || '',
+          extraAdult: srcData?.extraAdult || '',
+          extraInfant: srcData?.extraInfant || '',
+          singleSupplement: srcData?.singleSupplement || '',
+          childOrderPricing: [...(srcData?.childOrderPricing || [])],
+          occupancyPricing: { ...(srcData?.occupancyPricing || {}) }
         }
       }
     }
@@ -745,10 +1097,10 @@ const initRoomPrices = () => {
     if (!roomPrices[rt._id]) {
       roomPrices[rt._id] = {}
     }
-    // Get room type settings
+    // Get room type settings with effective pricing type (considering Market override)
     const maxChildren = rt.occupancy?.maxChildren ?? 2
     const maxAdults = rt.occupancy?.maxAdults ?? 4
-    const pricingType = rt.pricingType || 'unit'
+    const pricingType = getEffectivePricingType(rt._id)
 
     for (const mp of uniqueMealPlans.value) {
       if (!roomPrices[rt._id][mp._id]) {
@@ -836,23 +1188,13 @@ const dateRangeSummary = computed(() => {
   const dates = props.selectedCells.map(c => c.date).sort()
   const first = dates[0]
   const last = dates[dates.length - 1]
-
-  const formatDate = (dateStr) => {
-    const [year, month, day] = dateStr.split('-').map(Number)
-    const date = new Date(year, month - 1, day)
-    return date.toLocaleDateString(
-      locale.value === 'tr' ? 'tr-TR' : 'en-US',
-      { day: 'numeric', month: 'short', year: 'numeric' }
-    )
-  }
-
   const dayCount = [...new Set(dates)].length
 
   if (first === last) {
-    return formatDate(first)
+    return formatDisplayDate(first)
   }
 
-  return `${formatDate(first)} - ${formatDate(last)} (${dayCount} ${locale.value === 'tr' ? 'gün' : 'days'})`
+  return `${formatDisplayDate(first)} - ${formatDisplayDate(last)} (${dayCount} ${locale.value === 'tr' ? 'gün' : 'days'})`
 })
 
 const getMealPlanColor = (code) => {
@@ -903,18 +1245,33 @@ const save = async () => {
       const roomKeys = Object.keys(roomPrices)
 
       for (const rtId of roomKeys) {
-        const roomType = props.roomTypes.find(rt => rt._id === rtId)
-        const pricingType = roomType?.pricingType || 'unit'
+        const pricingType = getEffectivePricingType(rtId)
         const mpKeys = Object.keys(roomPrices[rtId] || {})
+        const roomType = props.roomTypes.find(r => r._id === rtId)
+        // Use effective pricing type for multiplier check
+        const usesMultipliers = pricingType === 'per_person' && roomType?.useMultipliers === true
 
         for (const mpId of mpKeys) {
           const priceData = roomPrices[rtId][mpId]
 
           // Check based on pricing type
-          if (pricingType === 'per_person') {
-            // OBP: Check occupancy pricing
+          if (pricingType === 'per_person' && usesMultipliers) {
+            // Multiplier OBP: Check base price only
+            if (isValueSet(priceData?.pricePerNight)) {
+              hasAnyPrice = true
+              break
+            }
+          } else if (pricingType === 'per_person') {
+            // Standard OBP: Check occupancy pricing
             const hasOccupancyPrice = Object.values(priceData?.occupancyPricing || {}).some(p => isValueSet(p))
             if (hasOccupancyPrice) {
+              hasAnyPrice = true
+              break
+            }
+            // Child pricing for standard OBP
+            const hasExtraInfant = isValueSet(priceData?.extraInfant)
+            const hasChildPricing = priceData?.childOrderPricing?.some(p => isValueSet(p))
+            if (hasExtraInfant || hasChildPricing) {
               hasAnyPrice = true
               break
             }
@@ -927,40 +1284,47 @@ const save = async () => {
               hasAnyPrice = true
               break
             }
-          }
-
-          // Child pricing applies to both
-          const hasExtraInfant = isValueSet(priceData?.extraInfant)
-          const hasChildPricing = priceData?.childOrderPricing?.some(p => isValueSet(p))
-          if (hasExtraInfant || hasChildPricing) {
-            hasAnyPrice = true
-            break
+            // Child pricing for unit
+            const hasExtraInfant = isValueSet(priceData?.extraInfant)
+            const hasChildPricing = priceData?.childOrderPricing?.some(p => isValueSet(p))
+            if (hasExtraInfant || hasChildPricing) {
+              hasAnyPrice = true
+              break
+            }
           }
         }
         if (hasAnyPrice) break
       }
 
-      console.log('hasAnyPrice:', hasAnyPrice)
       if (hasAnyPrice) {
         // Process per room type and meal plan
         const uniqueDates = [...new Set(props.selectedCells.map(c => c.date))].sort()
         let totalUpdates = 0
 
         for (const rtId of Object.keys(roomPrices)) {
-          const roomType = props.roomTypes.find(rt => rt._id === rtId)
-          const pricingType = roomType?.pricingType || 'unit'
+          const pricingType = getEffectivePricingType(rtId)
 
           for (const mpId of Object.keys(roomPrices[rtId])) {
             const priceData = roomPrices[rtId][mpId]
 
             // Check if this room+meal plan has any values
             let hasValues = false
-            if (pricingType === 'per_person') {
+            const roomType = props.roomTypes.find(r => r._id === rtId)
+            // Use effective pricing type for multiplier check
+            const usesMultipliers = pricingType === 'per_person' && roomType?.useMultipliers === true
+
+            if (pricingType === 'per_person' && usesMultipliers) {
+              // Multiplier OBP: Check base price only
+              hasValues = isValueSet(priceData?.pricePerNight)
+            } else if (pricingType === 'per_person') {
+              // Standard OBP: Check occupancy pricing
               hasValues = Object.values(priceData?.occupancyPricing || {}).some(p => isValueSet(p))
+              hasValues = hasValues || isValueSet(priceData?.extraInfant) || priceData?.childOrderPricing?.some(p => isValueSet(p))
             } else {
+              // Unit pricing
               hasValues = isValueSet(priceData?.pricePerNight) || isValueSet(priceData?.extraAdult) || isValueSet(priceData?.singleSupplement)
+              hasValues = hasValues || isValueSet(priceData?.extraInfant) || priceData?.childOrderPricing?.some(p => isValueSet(p))
             }
-            hasValues = hasValues || isValueSet(priceData?.extraInfant) || priceData?.childOrderPricing?.some(p => isValueSet(p))
 
             if (hasValues) {
               // Build cells for this room+mealplan combination
@@ -975,8 +1339,22 @@ const save = async () => {
                 pricingType
               }
 
-              if (pricingType === 'per_person') {
-                // OBP: Save occupancy pricing
+              // Use effective pricing type for multiplier check (roomType already defined above)
+              // const usesMultipliers is already defined above in this scope
+
+              if (pricingType === 'per_person' && usesMultipliers) {
+                // OBP with Multipliers: pricePerNight is the base price
+                // All prices calculated from multipliers at runtime
+                if (isValueSet(priceData.pricePerNight)) {
+                  priceUpdateFields.pricePerNight = Number(priceData.pricePerNight)
+                }
+                priceUpdateFields.occupancyPricing = {} // Calculated from adultMultipliers
+                priceUpdateFields.childOrderPricing = [] // Calculated from childMultipliers
+                priceUpdateFields.extraInfant = 0 // Calculated from infantMultiplier
+                priceUpdateFields.extraAdult = 0
+                priceUpdateFields.singleSupplement = 0
+              } else if (pricingType === 'per_person') {
+                // OBP Standard: Save occupancy pricing
                 const occupancyPricing = {}
                 for (const [pax, price] of Object.entries(priceData.occupancyPricing || {})) {
                   if (isValueSet(price)) {
@@ -990,6 +1368,16 @@ const save = async () => {
                 priceUpdateFields.pricePerNight = 0
                 priceUpdateFields.extraAdult = 0
                 priceUpdateFields.singleSupplement = 0
+
+                // Child pricing for standard OBP
+                if (isValueSet(priceData.extraInfant)) {
+                  priceUpdateFields.extraInfant = Number(priceData.extraInfant)
+                }
+                if (priceData.childOrderPricing?.some(p => isValueSet(p))) {
+                  priceUpdateFields.childOrderPricing = priceData.childOrderPricing.map(p =>
+                    isValueSet(p) ? Number(p) : null
+                  )
+                }
               } else {
                 // Unit pricing
                 if (isValueSet(priceData.pricePerNight)) {
@@ -1001,16 +1389,16 @@ const save = async () => {
                 if (isValueSet(priceData.singleSupplement)) {
                   priceUpdateFields.singleSupplement = Number(priceData.singleSupplement)
                 }
-              }
 
-              // Child pricing - same for both types
-              if (isValueSet(priceData.extraInfant)) {
-                priceUpdateFields.extraInfant = Number(priceData.extraInfant)
-              }
-              if (priceData.childOrderPricing?.some(p => isValueSet(p))) {
-                priceUpdateFields.childOrderPricing = priceData.childOrderPricing.map(p =>
-                  isValueSet(p) ? Number(p) : null
-                )
+                // Child pricing for unit pricing
+                if (isValueSet(priceData.extraInfant)) {
+                  priceUpdateFields.extraInfant = Number(priceData.extraInfant)
+                }
+                if (priceData.childOrderPricing?.some(p => isValueSet(p))) {
+                  priceUpdateFields.childOrderPricing = priceData.childOrderPricing.map(p =>
+                    isValueSet(p) ? Number(p) : null
+                  )
+                }
               }
 
               try {
@@ -1029,7 +1417,6 @@ const save = async () => {
           }
         }
 
-        console.log('totalUpdates:', totalUpdates)
         if (totalUpdates > 0) {
           toast.success(t('planning.pricing.bulkUpdateSuccess') + ` (${totalUpdates})`)
           emit('saved')
@@ -1098,10 +1485,133 @@ const calculateAllotmentValue = (currentValue) => {
   }
 }
 
+// Preview panel functions
+const showPreviewPanel = () => {
+  showPreview.value = true
+}
+
+const isValueSet = (val) => val !== '' && val !== null && val !== undefined
+
+// Preview summary computed
+const previewSummary = computed(() => {
+  const uniqueDates = [...new Set(props.selectedCells.map(c => c.date))]
+  return {
+    totalCells: props.selectedCells.length,
+    roomTypes: uniqueRoomTypes.value.length,
+    mealPlans: uniqueMealPlans.value.length,
+    days: uniqueDates.length
+  }
+})
+
+// Allotment mode label
+const allotmentModeLabel = computed(() => {
+  const labels = {
+    set: t('planning.pricing.setTo'),
+    increase: t('planning.pricing.increaseBy'),
+    decrease: t('planning.pricing.decreaseBy')
+  }
+  return labels[form.allotmentMode] || ''
+})
+
+// Preview changes computed
+const previewChanges = computed(() => {
+  const changes = {
+    prices: [],
+    inventory: null,
+    restrictions: null
+  }
+
+  // Price changes
+  if (activeTab.value === 'price') {
+    for (const rtId of Object.keys(roomPrices)) {
+      const roomType = props.roomTypes.find(rt => rt._id === rtId)
+      const pricingType = getEffectivePricingType(rtId)
+
+      for (const mpId of Object.keys(roomPrices[rtId] || {})) {
+        const mealPlan = props.mealPlans.find(mp => mp._id === mpId)
+        const priceData = roomPrices[rtId][mpId]
+
+        // Check if has values
+        let hasValues = false
+        const change = {
+          roomCode: roomType?.code || rtId.slice(-6),
+          mealPlanCode: mealPlan?.code || mpId.slice(-6),
+          pricingType,
+          pricePerNight: null,
+          extraAdult: null,
+          singleSupplement: null,
+          occupancyPricing: {},
+          childPrices: [],
+          extraInfant: null
+        }
+
+        if (pricingType === 'per_person') {
+          for (const [pax, price] of Object.entries(priceData?.occupancyPricing || {})) {
+            if (isValueSet(price)) {
+              change.occupancyPricing[pax] = Number(price)
+              hasValues = true
+            }
+          }
+        } else {
+          if (isValueSet(priceData?.pricePerNight)) {
+            change.pricePerNight = Number(priceData.pricePerNight)
+            hasValues = true
+          }
+          if (isValueSet(priceData?.extraAdult)) {
+            change.extraAdult = Number(priceData.extraAdult)
+            hasValues = true
+          }
+          if (isValueSet(priceData?.singleSupplement)) {
+            change.singleSupplement = Number(priceData.singleSupplement)
+            hasValues = true
+          }
+        }
+
+        // Child pricing
+        if (priceData?.childOrderPricing?.some(p => isValueSet(p))) {
+          change.childPrices = priceData.childOrderPricing.filter(p => isValueSet(p)).map(p => Number(p))
+          hasValues = true
+        }
+
+        if (isValueSet(priceData?.extraInfant)) {
+          change.extraInfant = Number(priceData.extraInfant)
+          hasValues = true
+        }
+
+        if (hasValues) {
+          changes.prices.push(change)
+        }
+      }
+    }
+  }
+
+  return changes
+})
+
+// Has any changes
+const hasAnyChanges = computed(() => {
+  if (activeTab.value === 'price') {
+    return previewChanges.value.prices.length > 0
+  }
+  if (activeTab.value === 'inventory') {
+    return form.allotmentValue > 0 || form.minStay > 1 || form.releaseDays > 0
+  }
+  if (activeTab.value === 'restrictions') {
+    return form.stopSale || form.singleStop || form.closedToArrival || form.closedToDeparture
+  }
+  return false
+})
+
+// Confirm and save
+const confirmSave = async () => {
+  await save()
+}
+
 // Reset form when modal opens
 watch(() => props.modelValue, (val) => {
   if (val) {
     activeTab.value = 'price'
+    showPreview.value = false
     form.priceMode = 'set'
     form.priceValue = 0
     form.updateExtras = false
@@ -1153,5 +1663,21 @@ watch(() => props.modelValue, (val) => {
 .modal-fade-enter-from .relative,
 .modal-fade-leave-to .relative {
   transform: scale(0.95);
+}
+
+/* Preview slide up transition */
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.3s ease;
+}
+
+.slide-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
 }
 </style>

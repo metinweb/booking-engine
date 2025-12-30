@@ -140,7 +140,7 @@ const seasonSchema = new mongoose.Schema({
 
 	// ===== PRICING OVERRIDES (per room type for this season) =====
 	// Array of room-specific pricing overrides for this season
-	// Hierarchy: RoomType -> Season.pricingOverrides -> Rate
+	// Hierarchy: RoomType -> Market.pricingOverrides -> Season.pricingOverrides -> Rate
 	pricingOverrides: [{
 		// Which room type this override applies to
 		roomType: {
@@ -157,6 +157,10 @@ const seasonSchema = new mongoose.Schema({
 			enum: ['unit', 'per_person'],
 			default: 'unit'
 		},
+
+		// Minimum adults override
+		useMinAdultsOverride: { type: Boolean, default: false },
+		minAdults: { type: Number, min: 1, max: 10, default: null },
 
 		// If true, use the multiplier override below instead of room's template
 		useMultiplierOverride: { type: Boolean, default: false },

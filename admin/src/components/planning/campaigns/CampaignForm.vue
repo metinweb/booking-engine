@@ -412,6 +412,162 @@
       </div>
     </div>
 
+    <!-- Campaign Conflict Detection -->
+    <Transition name="slide">
+      <div v-if="hasConflicts" class="p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-lg border border-red-300 dark:border-red-800">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-icons text-red-500">warning</span>
+          <h4 class="font-medium text-red-700 dark:text-red-400">{{ $t('planning.campaigns.conflictDetected') }}</h4>
+          <span class="text-xs px-2 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full font-medium">
+            {{ conflictingCampaigns.length }} {{ $t('planning.campaigns.campaignConflicts') }}
+          </span>
+        </div>
+
+        <p class="text-sm text-red-600 dark:text-red-400 mb-3">
+          {{ $t('planning.campaigns.conflictWarning') }}
+        </p>
+
+        <div class="space-y-2 max-h-40 overflow-y-auto">
+          <div
+            v-for="conflict in conflictingCampaigns"
+            :key="conflict._id"
+            class="flex items-center justify-between p-2 bg-white dark:bg-slate-800 rounded-lg border border-red-200 dark:border-red-700"
+          >
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-sm text-red-500">campaign</span>
+              <div>
+                <div class="font-medium text-sm text-gray-800 dark:text-white">{{ conflict.name }}</div>
+                <div class="text-xs text-gray-500 flex items-center gap-2">
+                  <span class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded">{{ conflict.code }}</span>
+                  <span>{{ $t(`planning.campaigns.types.${conflict.type}`) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-bold" :class="conflict.discountType === 'percentage' ? 'text-green-600' : 'text-blue-600'">
+                {{ conflict.discountType === 'percentage' ? `-${conflict.discountValue}%` : `-${conflict.discountValue}€` }}
+              </div>
+              <div class="text-xs text-gray-400">
+                {{ conflict.combinable ? $t('planning.campaigns.combinableShort') : $t('planning.campaigns.notCombinable') }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
+          <span class="material-icons text-sm">info</span>
+          <span>{{ $t('planning.campaigns.conflictResolutionHint') }}</span>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Campaign Impact Preview -->
+    <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-icons text-amber-500">preview</span>
+        <h4 class="font-medium text-gray-800 dark:text-white">{{ $t('planning.campaigns.impactPreview') }}</h4>
+      </div>
+
+      <!-- Sample Price Input -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div>
+          <label class="text-xs text-gray-600 dark:text-slate-400 mb-1 block">{{ $t('planning.campaigns.samplePrice') }}</label>
+          <div class="relative">
+            <input
+              v-model.number="previewPrice"
+              type="number"
+              min="0"
+              step="0.01"
+              class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 pr-12"
+              placeholder="1000"
+            />
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">€</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-gray-600 dark:text-slate-400 mb-1 block">{{ $t('planning.campaigns.sampleNights') }}</label>
+          <input
+            v-model.number="previewNights"
+            type="number"
+            min="1"
+            max="30"
+            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800"
+            placeholder="7"
+          />
+        </div>
+
+        <div class="flex items-end">
+          <button
+            type="button"
+            @click="calculatePreview"
+            class="w-full px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <span class="material-icons text-sm">calculate</span>
+            {{ $t('planning.campaigns.calculatePreview') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Preview Results -->
+      <div v-if="previewResult" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <!-- Original Price -->
+        <div class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+          <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('planning.campaigns.originalPrice') }}</div>
+          <div class="text-lg font-bold text-gray-700 dark:text-slate-300 line-through">
+            {{ formatPrice(previewResult.originalPrice) }}
+          </div>
+        </div>
+
+        <!-- Discount Amount -->
+        <div class="p-3 bg-green-50 dark:bg-green-900/30 rounded-lg border border-green-200 dark:border-green-800">
+          <div class="text-xs text-green-600 dark:text-green-400 mb-1">{{ $t('planning.campaigns.discountAmount') }}</div>
+          <div class="text-lg font-bold text-green-600 dark:text-green-400">
+            -{{ formatPrice(previewResult.discountAmount) }}
+          </div>
+          <div class="text-xs text-green-500">{{ previewResult.discountText }}</div>
+        </div>
+
+        <!-- Final Price -->
+        <div class="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div class="text-xs text-blue-600 dark:text-blue-400 mb-1">{{ $t('planning.campaigns.finalPrice') }}</div>
+          <div class="text-lg font-bold text-blue-600 dark:text-blue-400">
+            {{ formatPrice(previewResult.finalPrice) }}
+          </div>
+        </div>
+
+        <!-- Savings Percentage -->
+        <div class="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg border border-purple-200 dark:border-purple-800">
+          <div class="text-xs text-purple-600 dark:text-purple-400 mb-1">{{ $t('planning.campaigns.savings') }}</div>
+          <div class="text-lg font-bold text-purple-600 dark:text-purple-400">
+            {{ previewResult.savingsPercent }}%
+          </div>
+          <div class="text-xs text-purple-500">{{ $t('planning.campaigns.offOriginal') }}</div>
+        </div>
+      </div>
+
+      <!-- Free Nights Preview -->
+      <div v-if="previewResult && previewResult.freeNights > 0" class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
+        <div class="flex items-center gap-2">
+          <span class="material-icons text-yellow-500">celebration</span>
+          <span class="text-sm font-medium text-yellow-700 dark:text-yellow-400">
+            {{ previewResult.freeNights }} {{ $t('planning.campaigns.freeNightsIncluded') }}
+          </span>
+        </div>
+        <div class="text-xs text-yellow-600 dark:text-yellow-500 mt-1">
+          {{ $t('planning.campaigns.payForNights', { pay: previewNights - previewResult.freeNights, stay: previewNights }) }}
+        </div>
+      </div>
+
+      <!-- No Discount Warning -->
+      <div v-if="previewResult && previewResult.discountAmount === 0" class="mt-3 p-3 bg-gray-100 dark:bg-slate-700 rounded-lg">
+        <div class="flex items-center gap-2 text-gray-600 dark:text-slate-400">
+          <span class="material-icons text-sm">info</span>
+          <span class="text-sm">{{ $t('planning.campaigns.noDiscountApplied') }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Actions -->
     <div class="flex justify-end gap-3 pt-3 border-t border-gray-200 dark:border-slate-700">
       <button type="button" @click="$emit('cancel')" class="btn-secondary">{{ $t('common.cancel') }}</button>
@@ -423,7 +579,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import DateRangePicker from '@/components/common/DateRangePicker.vue'
@@ -435,7 +591,8 @@ const props = defineProps({
   campaign: { type: Object, default: null },
   roomTypes: { type: Array, default: () => [] },
   mealPlans: { type: Array, default: () => [] },
-  markets: { type: Array, default: () => [] }
+  markets: { type: Array, default: () => [] },
+  allCampaigns: { type: Array, default: () => [] } // All campaigns for conflict detection
 })
 
 const emit = defineEmits(['saved', 'cancel'])
@@ -500,6 +657,150 @@ const form = reactive({
 // Date range models
 const stayDateRange = ref({ start: null, end: null })
 const bookingDateRange = ref({ start: null, end: null })
+
+// Preview state
+const previewPrice = ref(1000)
+const previewNights = ref(7)
+const previewResult = ref(null)
+
+// Conflict detection
+const conflictingCampaigns = computed(() => {
+  if (!stayDateRange.value.start || !stayDateRange.value.end) return []
+  if (!form.conditions.applicableMarkets.length) return []
+
+  const currentStart = new Date(stayDateRange.value.start)
+  const currentEnd = new Date(stayDateRange.value.end)
+  const currentId = props.campaign?._id
+
+  const conflicts = []
+
+  for (const campaign of props.allCampaigns) {
+    // Skip self
+    if (campaign._id === currentId) continue
+    // Skip inactive
+    if (campaign.status !== 'active') continue
+    // Skip combinable campaigns (they can overlap)
+    if (campaign.combinable && form.combinable) continue
+
+    // Check date overlap
+    const campStart = new Date(campaign.stayWindow?.startDate)
+    const campEnd = new Date(campaign.stayWindow?.endDate)
+
+    const datesOverlap = currentStart <= campEnd && currentEnd >= campStart
+
+    if (!datesOverlap) continue
+
+    // Check market overlap
+    const campMarkets = campaign.conditions?.applicableMarkets || []
+    const marketOverlap = form.conditions.applicableMarkets.some(m =>
+      campMarkets.includes(m) || campMarkets.length === 0
+    )
+
+    if (!marketOverlap) continue
+
+    // Check room type overlap (if specified)
+    const campRooms = campaign.conditions?.applicableRoomTypes || []
+    const currentRooms = form.conditions.applicableRoomTypes || []
+    let roomOverlap = true
+    if (campRooms.length > 0 && currentRooms.length > 0) {
+      roomOverlap = currentRooms.some(r => campRooms.includes(r))
+    }
+
+    if (!roomOverlap) continue
+
+    // Check meal plan overlap (if specified)
+    const campMeals = campaign.conditions?.applicableMealPlans || []
+    const currentMeals = form.conditions.applicableMealPlans || []
+    let mealOverlap = true
+    if (campMeals.length > 0 && currentMeals.length > 0) {
+      mealOverlap = currentMeals.some(m => campMeals.includes(m))
+    }
+
+    if (!mealOverlap) continue
+
+    // This is a conflict
+    conflicts.push({
+      _id: campaign._id,
+      code: campaign.code,
+      name: campaign.name?.[locale.value] || campaign.name?.tr || campaign.name?.en || campaign.code,
+      type: campaign.type,
+      combinable: campaign.combinable,
+      stayWindow: campaign.stayWindow,
+      discountValue: campaign.discount?.value,
+      discountType: campaign.discount?.type
+    })
+  }
+
+  return conflicts
+})
+
+const hasConflicts = computed(() => conflictingCampaigns.value.length > 0)
+
+// Format price helper
+const formatPrice = (value) => {
+  return new Intl.NumberFormat('tr-TR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2
+  }).format(value)
+}
+
+// Calculate preview
+const calculatePreview = () => {
+  const price = previewPrice.value || 0
+  const nights = previewNights.value || 1
+  const totalPrice = price * nights
+
+  let discountAmount = 0
+  let freeNightsCount = 0
+  let discountText = ''
+
+  // Check min nights condition
+  if (nights < form.conditions.minNights) {
+    previewResult.value = {
+      originalPrice: totalPrice,
+      discountAmount: 0,
+      finalPrice: totalPrice,
+      savingsPercent: 0,
+      freeNights: 0,
+      discountText: t('planning.campaigns.minNightsNotMet', { min: form.conditions.minNights })
+    }
+    return
+  }
+
+  if (form.freeNightsEnabled) {
+    // Free nights calculation
+    const stayReq = form.discount.freeNights.stayNights || 7
+    const freeNightsGiven = form.discount.freeNights.freeNights || 1
+
+    if (nights >= stayReq) {
+      const sets = Math.floor(nights / stayReq)
+      freeNightsCount = sets * freeNightsGiven
+      discountAmount = freeNightsCount * price
+      discountText = `${freeNightsCount} ${t('planning.campaigns.freeNightsLabel')}`
+    }
+  } else if (form.discount.type === 'percentage') {
+    // Percentage discount
+    discountAmount = totalPrice * (form.discount.value / 100)
+    discountText = `${form.discount.value}% ${t('planning.campaigns.off')}`
+  } else if (form.discount.type === 'fixed') {
+    // Fixed discount per night
+    discountAmount = form.discount.value * nights
+    discountText = `${formatPrice(form.discount.value)} ${t('planning.campaigns.perNight')}`
+  }
+
+  const finalPrice = Math.max(0, totalPrice - discountAmount)
+  const savingsPercent = totalPrice > 0 ? Math.round((discountAmount / totalPrice) * 100) : 0
+
+  previewResult.value = {
+    originalPrice: totalPrice,
+    discountAmount,
+    finalPrice,
+    savingsPercent,
+    freeNights: freeNightsCount,
+    discountText
+  }
+}
 
 // Helper functions
 const getMealPlanLabel = (mp) => mp.name?.[locale.value] || mp.name?.tr || mp.name?.en || mp.code

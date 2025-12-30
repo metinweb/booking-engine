@@ -79,6 +79,19 @@ const updateHotelStatus = async (id, status) => {
 }
 
 /**
+ * Toggle hotel featured status
+ */
+const toggleFeatured = async (id, featured) => {
+	try {
+		const response = await apiClient.put(`/hotels/${id}`, { featured })
+		return response.data
+	} catch (error) {
+		console.error('Hotel Service: Toggle featured failed', error.response?.data || error.message)
+		throw error
+	}
+}
+
+/**
  * Upload hotel image
  */
 const uploadImage = async (hotelId, file, caption = {}) => {
@@ -496,6 +509,7 @@ export default {
 	updateHotel,
 	deleteHotel,
 	updateHotelStatus,
+	toggleFeatured,
 	uploadImage,
 	deleteImage,
 	reorderImages,

@@ -37,9 +37,18 @@
             rt.isBaseRoom ? 'ring-2 ring-yellow-400 ring-offset-1' : ''
           ]"
         >
-          <div class="flex items-center gap-1.5">
-            <span v-if="rt.isBaseRoom" class="material-icons text-yellow-500 text-sm">star</span>
-            <span class="font-bold">{{ rt.code }}</span>
+          <div class="flex flex-col items-center">
+            <div class="flex items-center gap-1">
+              <span v-if="rt.isBaseRoom" class="material-icons text-yellow-500 text-sm">star</span>
+              <span class="font-bold">{{ rt.code }}</span>
+            </div>
+            <!-- Pricing Type Tag - below room code -->
+            <span
+              class="px-1 py-0 rounded text-[8px] font-medium mt-0.5"
+              :class="getPricingTypeClass(rt)"
+            >
+              {{ getPricingTypeLabel(rt) }}
+            </span>
           </div>
         </button>
       </div>
@@ -150,11 +159,15 @@
             </thead>
             <tbody>
               <!-- Base Price Row -->
-              <tr class="border-b border-gray-100 dark:border-slate-700 bg-green-50/50 dark:bg-green-900/10">
+              <tr class="border-b border-gray-100 dark:border-slate-700" :class="currentRoomUsesMultipliers ? 'bg-purple-50/50 dark:bg-purple-900/10' : 'bg-green-50/50 dark:bg-green-900/10'">
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
-                    <span class="material-icons text-green-600 text-lg">hotel</span>
-                    <span class="font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.pricing.basePrice') }}</span>
+                    <span class="material-icons text-lg" :class="currentRoomUsesMultipliers ? 'text-purple-600' : 'text-green-600'">
+                      {{ currentRoomUsesMultipliers ? 'calculate' : 'hotel' }}
+                    </span>
+                    <span class="font-medium text-gray-700 dark:text-slate-300">
+                      {{ currentRoomUsesMultipliers ? 'Baz Fiyat' : (currentRoomPricingType === 'per_person' ? 'Kişi Başı Fiyat' : $t('planning.pricing.pricePerNight')) }}
+                    </span>
                   </div>
                 </td>
                 <td
@@ -169,117 +182,164 @@
                     step="1"
                     class="w-24 text-center text-lg font-bold border-2 rounded-lg px-2 py-1.5 transition-colors"
                     :class="roomData[selectedRoomTab].prices[mp._id]?.pricePerNight > 0
-                      ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
+                      ? (currentRoomUsesMultipliers ? 'border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20' : 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20')
                       : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
                     placeholder="0"
                   />
                 </td>
               </tr>
 
-              <!-- Extra Adult Row -->
-              <tr class="border-b border-gray-100 dark:border-slate-700">
-                <td class="px-4 py-2">
-                  <div class="flex items-center gap-2">
-                    <span class="material-icons text-amber-500 text-sm">person_add</span>
-                    <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.extraAdultShort') }}</span>
-                  </div>
-                </td>
-                <td
-                  v-for="mp in mealPlans"
-                  :key="mp._id"
-                  class="px-2 py-2 text-center"
-                >
-                  <div class="flex items-center justify-center gap-1">
-                    <span class="text-xs text-gray-400">+</span>
-                    <input
-                      v-model.number="roomData[selectedRoomTab].prices[mp._id].extraAdult"
-                      type="number"
-                      min="0"
-                      class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
-                      placeholder="0"
-                    />
-                  </div>
-                </td>
-              </tr>
-
-              <!-- Child Order Pricing Rows -->
-              <tr
-                v-for="childIndex in maxChildrenForCurrentRoom"
-                :key="'child-' + childIndex"
-                class="border-b border-gray-100 dark:border-slate-700"
-              >
-                <td class="px-4 py-2">
-                  <div class="flex items-center gap-2">
-                    <span class="material-icons text-pink-500 text-sm">child_care</span>
-                    <span class="text-gray-600 dark:text-slate-400">{{ childIndex }}. {{ $t('planning.pricing.child') }}</span>
-                  </div>
-                </td>
-                <td
-                  v-for="mp in mealPlans"
-                  :key="mp._id"
-                  class="px-2 py-2 text-center"
-                >
-                  <div class="flex items-center justify-center gap-1">
-                    <span class="text-xs text-gray-400">+</span>
-                    <input
-                      v-model.number="roomData[selectedRoomTab].prices[mp._id].childOrderPricing[childIndex - 1]"
-                      type="number"
-                      min="0"
-                      class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
-                      placeholder="0"
-                    />
+              <!-- Multiplier OBP: Combination Table Preview -->
+              <tr v-if="currentRoomUsesMultipliers" class="border-b border-gray-100 dark:border-slate-700">
+                <td :colspan="mealPlans.length + 1" class="p-0">
+                  <div class="px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20">
+                    <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1">
+                      <span class="material-icons text-sm">table_chart</span>
+                      Tüm Kombinasyonlar (Çarpan × Baz Fiyat)
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 max-h-[200px] overflow-y-auto">
+                      <div
+                        v-for="combo in activeCombinations"
+                        :key="combo.key"
+                        class="flex flex-col text-xs bg-white dark:bg-slate-800 rounded px-2 py-1.5"
+                      >
+                        <!-- Line 1: Combination key -->
+                        <span class="text-indigo-600 dark:text-indigo-400 font-medium">
+                          {{ formatCombinationKey(combo) }}
+                        </span>
+                        <!-- Line 2: Multiplier and price -->
+                        <div class="flex items-center justify-between mt-0.5">
+                          <span class="text-gray-400 text-[10px]">×{{ combo.overrideMultiplier || combo.calculatedMultiplier }}</span>
+                          <span class="font-bold" :class="getFirstMealPlanPrice > 0 ? 'text-green-600' : 'text-gray-400'">
+                            {{ getFirstMealPlanPrice > 0 ? Math.round(getFirstMealPlanPrice * (combo.overrideMultiplier || combo.calculatedMultiplier)).toLocaleString() : '-' }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-[10px] text-gray-500 mt-2">
+                      * Fiyatlar ilk pansiyon ({{ mealPlans[0]?.code }}) için gösterilmektedir
+                    </div>
                   </div>
                 </td>
               </tr>
 
-              <!-- Extra Infant Row -->
-              <tr class="border-b border-gray-100 dark:border-slate-700">
-                <td class="px-4 py-2">
-                  <div class="flex items-center gap-2">
-                    <span class="material-icons text-purple-500 text-sm">baby_changing_station</span>
-                    <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.extraInfantShort') }}</span>
-                  </div>
-                </td>
-                <td
-                  v-for="mp in mealPlans"
-                  :key="mp._id"
-                  class="px-2 py-2 text-center"
-                >
-                  <div class="flex items-center justify-center gap-1">
-                    <span class="text-xs text-gray-400">+</span>
-                    <input
-                      v-model.number="roomData[selectedRoomTab].prices[mp._id].extraInfant"
-                      type="number"
-                      min="0"
-                      class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
-                      placeholder="0"
-                    />
-                  </div>
-                </td>
-              </tr>
+              <!-- Extra pricing rows (only for Unit and standard OBP, NOT for multiplier OBP) -->
+              <template v-if="!currentRoomUsesMultipliers">
+                <!-- Extra Adult Row -->
+                <tr class="border-b border-gray-100 dark:border-slate-700">
+                  <td class="px-4 py-2">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-amber-500 text-sm">person_add</span>
+                      <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.extraAdultShort') }}</span>
+                    </div>
+                  </td>
+                  <td
+                    v-for="mp in mealPlans"
+                    :key="mp._id"
+                    class="px-2 py-2 text-center"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <span class="text-xs text-gray-400">+</span>
+                      <input
+                        v-model.number="roomData[selectedRoomTab].prices[mp._id].extraAdult"
+                        type="number"
+                        min="0"
+                        class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                        placeholder="0"
+                      />
+                    </div>
+                  </td>
+                </tr>
 
-              <!-- Single Occupancy Discount Row -->
-              <tr class="bg-blue-50/50 dark:bg-blue-900/10">
-                <td class="px-4 py-2">
-                  <div class="flex items-center gap-2">
-                    <span class="material-icons text-blue-500 text-sm">person</span>
-                    <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.singleOccupancy') }}</span>
-                  </div>
-                </td>
-                <td
-                  v-for="mp in mealPlans"
-                  :key="mp._id"
-                  class="px-2 py-2 text-center"
+                <!-- Child Order Pricing Rows -->
+                <tr
+                  v-for="childIndex in maxChildrenForCurrentRoom"
+                  :key="'child-' + childIndex"
+                  class="border-b border-gray-100 dark:border-slate-700"
                 >
-                  <div class="flex items-center justify-center gap-1">
-                    <span class="text-xs text-gray-400">−</span>
-                    <input
-                      v-model.number="roomData[selectedRoomTab].prices[mp._id].singleSupplement"
-                      type="number"
-                      min="0"
-                      class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
-                      placeholder="0"
-                    />
+                  <td class="px-4 py-2">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-pink-500 text-sm">child_care</span>
+                      <span class="text-gray-600 dark:text-slate-400">{{ childIndex }}. {{ $t('planning.pricing.child') }}</span>
+                    </div>
+                  </td>
+                  <td
+                    v-for="mp in mealPlans"
+                    :key="mp._id"
+                    class="px-2 py-2 text-center"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <span class="text-xs text-gray-400">+</span>
+                      <input
+                        v-model.number="roomData[selectedRoomTab].prices[mp._id].childOrderPricing[childIndex - 1]"
+                        type="number"
+                        min="0"
+                        class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                        placeholder="0"
+                      />
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Extra Infant Row -->
+                <tr class="border-b border-gray-100 dark:border-slate-700">
+                  <td class="px-4 py-2">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-purple-500 text-sm">baby_changing_station</span>
+                      <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.extraInfantShort') }}</span>
+                    </div>
+                  </td>
+                  <td
+                    v-for="mp in mealPlans"
+                    :key="mp._id"
+                    class="px-2 py-2 text-center"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <span class="text-xs text-gray-400">+</span>
+                      <input
+                        v-model.number="roomData[selectedRoomTab].prices[mp._id].extraInfant"
+                        type="number"
+                        min="0"
+                        class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                        placeholder="0"
+                      />
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Single Occupancy Discount Row -->
+                <tr class="bg-blue-50/50 dark:bg-blue-900/10">
+                  <td class="px-4 py-2">
+                    <div class="flex items-center gap-2">
+                      <span class="material-icons text-blue-500 text-sm">person</span>
+                      <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.singleOccupancy') }}</span>
+                    </div>
+                  </td>
+                  <td
+                    v-for="mp in mealPlans"
+                    :key="mp._id"
+                    class="px-2 py-2 text-center"
+                  >
+                    <div class="flex items-center justify-center gap-1">
+                      <span class="text-xs text-gray-400">−</span>
+                      <input
+                        v-model.number="roomData[selectedRoomTab].prices[mp._id].singleSupplement"
+                        type="number"
+                        min="0"
+                        class="w-20 text-center text-sm border rounded-lg px-2 py-1 border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800"
+                        placeholder="0"
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </template>
+
+              <!-- Multiplier OBP Info Row -->
+              <tr v-if="currentRoomUsesMultipliers" class="bg-purple-50/50 dark:bg-purple-900/10">
+                <td :colspan="mealPlans.length + 1" class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2 text-purple-600 dark:text-purple-400">
+                    <span class="material-icons text-sm">info</span>
+                    <span class="text-sm">Bu oda çarpanlı kişi bazlı fiyatlandırma kullanıyor. Ek fiyatlar çarpanlardan hesaplanır.</span>
                   </div>
                 </td>
               </tr>
@@ -349,6 +409,7 @@
             v-model="roomData[selectedRoomTab].multiplierOverride"
             :occupancy="currentRoomType.occupancy"
             :child-age-groups="childAgeGroups"
+            :currency="currency"
           />
         </div>
       </div>
@@ -419,6 +480,56 @@ const currentRoomUsesMultipliers = computed(() => {
   return rt?.pricingType === 'per_person' && rt?.useMultipliers === true
 })
 
+// Get current room pricing type
+const currentRoomPricingType = computed(() => {
+  return currentRoomType.value?.pricingType || 'unit'
+})
+
+// Get active combinations for current room
+const activeCombinations = computed(() => {
+  const rt = currentRoomType.value
+  const table = rt?.multiplierTemplate?.combinationTable || []
+  return table.filter(c => c.isActive !== false)
+})
+
+// Get first meal plan price for combination preview
+const getFirstMealPlanPrice = computed(() => {
+  if (!props.mealPlans?.length || !selectedRoomTab.value) return 0
+  const firstMpId = props.mealPlans[0]?._id
+  return roomData[selectedRoomTab.value]?.prices?.[firstMpId]?.pricePerNight || 0
+})
+
+// Format combination key for display: "2+2 (0-2, 3-12)"
+const formatCombinationKey = (combo) => {
+  const adults = combo.adults
+  const children = combo.children || []
+
+  if (children.length === 0) {
+    return `${adults}`
+  }
+
+  // Get age ranges from childAgeGroups prop
+  const ageGroups = props.childAgeGroups || []
+
+  const getAgeRange = (ageGroupCode) => {
+    const group = ageGroups.find(g => g.code === ageGroupCode)
+    if (group) {
+      return `${group.minAge}-${group.maxAge}`
+    }
+    // Fallback if not found
+    const fallbacks = {
+      'infant': '0-2',
+      'first': '3-6',
+      'second': '7-11',
+      'third': '12-17'
+    }
+    return fallbacks[ageGroupCode] || ageGroupCode
+  }
+
+  const ageRanges = children.map(c => getAgeRange(c.ageGroup))
+  return `${adults}+${children.length} (${ageRanges.join(', ')})`
+}
+
 // Get current room's multiplier template for override editing
 const currentRoomMultiplierTemplate = computed(() => {
   const rt = currentRoomType.value
@@ -450,6 +561,25 @@ const getMealPlanBg = (code) => {
     'UAI': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
   }
   return colors[code] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+}
+
+// Get pricing type label for room type
+const getPricingTypeLabel = (rt) => {
+  if (rt.pricingType === 'per_person') {
+    return rt.useMultipliers ? 'OBP×' : 'OBP'
+  }
+  return 'Unit'
+}
+
+// Get pricing type CSS class for room type
+const getPricingTypeClass = (rt) => {
+  if (rt.pricingType === 'per_person') {
+    if (rt.useMultipliers) {
+      return 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300'
+    }
+    return 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300'
+  }
+  return 'bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300'
 }
 
 const formatDisplayDate = (dateStr) => {

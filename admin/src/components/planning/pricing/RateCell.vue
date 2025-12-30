@@ -46,28 +46,22 @@
       <!-- Has Rate (stop sale or not - same display, just different colors) -->
       <div v-else class="flex flex-col items-center justify-center h-full">
         <!-- OBP Badge -->
-        <div v-if="isOBP" class="text-[6px] sm:text-[7px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-0.5 sm:px-1 rounded font-semibold mb-0.5">
-          OBP
+        <div v-if="isOBP" class="text-[6px] sm:text-[7px] px-0.5 sm:px-1 rounded font-semibold mb-0.5" :class="isMultiplierOBP ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300'">
+          {{ isMultiplierOBP ? 'OBP×' : 'OBP' }}
         </div>
         <!-- Price - RED if stop sale, GREEN if normal -->
         <div class="text-xs sm:text-sm font-bold" :class="rate.stopSale ? 'text-red-500' : 'text-green-600 dark:text-green-400'">
           {{ formattedPrice }}
         </div>
 
-        <!-- Allotment Bar -->
-        <div class="w-full mt-0.5 sm:mt-1 px-0.5 sm:px-1">
-          <div class="h-0.5 sm:h-1 rounded-full bg-gray-200 dark:bg-slate-600 overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all"
-              :class="allotmentBarColor"
-              :style="{ width: `${allotmentPercentage}%` }"
-            ></div>
-          </div>
-        </div>
-
-        <!-- Allotment Count -->
-        <div class="text-[8px] sm:text-[10px] mt-0.5" :class="allotmentTextColor">
-          {{ rate.allotment ?? 0 }}
+        <!-- Allotment - Always show, color changes based on level -->
+        <div class="flex items-center gap-0.5 mt-0.5">
+          <span v-if="(rate.allotment ?? 0) <= 5" class="material-icons text-[10px]" :class="allotmentTextColor">
+            {{ (rate.allotment ?? 0) === 0 ? 'error' : 'warning' }}
+          </span>
+          <span class="text-[8px] sm:text-[10px] font-medium" :class="allotmentTextColor">
+            {{ rate.allotment ?? 0 }}
+          </span>
         </div>
 
         <!-- Restrictions Icons (NO STOP text, just CTA/CTD/MinStay/SingleStop) -->
@@ -111,9 +105,9 @@
       >
         <div class="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 text-white rounded-xl shadow-xl border border-slate-600/50 overflow-hidden min-w-[140px]">
           <!-- Header -->
-          <div class="px-3 py-1.5 border-b border-slate-600/30" :class="isOBP ? 'bg-indigo-600/20' : 'bg-green-600/20'">
-            <span class="text-[10px] font-semibold uppercase tracking-wide" :class="isOBP ? 'text-indigo-300' : 'text-green-300'">
-              {{ isOBP ? 'Kişi Bazlı Fiyat' : 'Ünite Bazlı Fiyat' }}
+          <div class="px-3 py-1.5 border-b border-slate-600/30" :class="isOBP ? (isMultiplierOBP ? 'bg-purple-600/20' : 'bg-indigo-600/20') : 'bg-green-600/20'">
+            <span class="text-[10px] font-semibold uppercase tracking-wide" :class="isOBP ? (isMultiplierOBP ? 'text-purple-300' : 'text-indigo-300') : 'text-green-300'">
+              {{ isOBP ? (isMultiplierOBP ? 'Çarpanlı Kişi Bazlı Fiyat' : 'Kişi Bazlı Fiyat') : 'Ünite Bazlı Fiyat' }}
             </span>
           </div>
 
@@ -133,6 +127,22 @@
                 <span class="text-xs font-bold text-white">
                   {{ occ.price.toLocaleString() }} {{ currency }}
                 </span>
+              </div>
+            </template>
+
+            <!-- Multiplier Combinations (for multiplier OBP) -->
+            <template v-if="isMultiplierOBP && multiplierCombosForDisplay.length > 0">
+              <div class="pt-1.5 border-t border-slate-600/30">
+                <div class="text-[9px] text-purple-300 font-semibold uppercase mb-1">Çarpanlar</div>
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="combo in multiplierCombosForDisplay"
+                    :key="combo.label"
+                    class="px-1.5 py-0.5 bg-purple-900/50 rounded text-[9px] font-medium text-purple-200"
+                  >
+                    {{ combo.label }}: {{ combo.value }}
+                  </span>
+                </div>
               </div>
             </template>
 
@@ -214,6 +224,7 @@ const props = defineProps({
   date: { type: String, required: true },
   roomTypeId: { type: String, required: true },
   mealPlanId: { type: String, required: true },
+  roomType: { type: Object, default: null }, // Full room type object for multiplier detection
   currency: { type: String, default: 'EUR' },
   isSelected: { type: Boolean, default: false },
   isPast: { type: Boolean, default: false },
@@ -305,10 +316,44 @@ const isOBP = computed(() => {
   return props.rate?.pricingType === 'per_person'
 })
 
+// Check if rate uses multiplier OBP (per_person with multipliers)
+const isMultiplierOBP = computed(() => {
+  return props.roomType?.pricingType === 'per_person' && props.roomType?.useMultipliers === true
+})
+
+// Get multiplier combinations for display in popover (first 5)
+const multiplierCombosForDisplay = computed(() => {
+  if (!isMultiplierOBP.value || !props.roomType?.multiplierTemplate) return []
+
+  const template = props.roomType.multiplierTemplate
+  const combos = []
+
+  // Get adult combinations (most important)
+  if (template.adults) {
+    const entries = Object.entries(template.adults)
+      .filter(([_, v]) => v !== null && v !== undefined)
+      .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+      .slice(0, 5) // First 5
+
+    entries.forEach(([count, multiplier]) => {
+      combos.push({ label: `${count}Y`, value: multiplier })
+    })
+  }
+
+  return combos
+})
+
 const formattedPrice = computed(() => {
   if (!props.rate) return '-'
 
-  // OBP: Show first available occupancy price (2 person is most common)
+  // Multiplier OBP (OBPx): Show base price (pricePerNight)
+  if (isMultiplierOBP.value) {
+    const basePrice = props.rate.pricePerNight
+    if (basePrice === undefined || basePrice === null) return '-'
+    return basePrice.toLocaleString()
+  }
+
+  // Standard OBP: Show first available occupancy price (2 person is most common)
   if (isOBP.value && props.rate.occupancyPricing) {
     // Find the first defined price (prioritize 2, then 1, then others)
     const priorities = [2, 1, 3, 4, 5, 6, 7, 8, 9, 10]
