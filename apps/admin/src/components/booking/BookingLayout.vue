@@ -1,0 +1,560 @@
+<template>
+	<div class="h-full flex flex-col">
+		<!-- Phase 1: Search & Room Selection -->
+		<div v-if="bookingStore.currentPhase === 1" class="flex-1 flex flex-col lg:flex-row gap-4 min-h-0 overflow-hidden">
+			<!-- Left Column: Search + Hotel List (Fixed Width, Independent Scroll) -->
+			<div class="w-full lg:w-[400px] flex-shrink-0 h-full overflow-y-auto">
+				<div class="space-y-4 pb-4">
+					<SearchPanel @search="handleSearch" />
+					<HotelList
+						v-if="bookingStore.searchResults.hotels.length > 0 || (bookingStore.searchResults.unavailableHotels?.length > 0)"
+						:hotels="bookingStore.searchResults.hotels"
+						:unavailable-hotels="bookingStore.searchResults.unavailableHotels || []"
+						:selected-hotel-id="bookingStore.searchResults.selectedHotelId"
+						:loading="bookingStore.loading.hotels"
+						@select="handleSelectHotel"
+					/>
+				</div>
+			</div>
+
+			<!-- Right Column: Cart + Rooms (Fill Remaining, Independent Scroll) -->
+			<div class="flex-1 h-full overflow-y-auto">
+				<div class="space-y-4 pb-4 min-h-full flex flex-col">
+					<!-- Cart Summary (Top - Sticky) -->
+					<CartSummary
+						v-if="bookingStore.cart.length > 0"
+						:cart="bookingStore.cart"
+						:currency="bookingStore.currency"
+						:total="bookingStore.grandTotal"
+						:nights="bookingStore.nights"
+						@proceed="handleProceedToCheckout"
+						@remove="handleRemoveFromCart"
+					/>
+
+					<RoomPanel
+						v-if="bookingStore.searchResults.selectedHotelId"
+						:hotel="bookingStore.searchResults.selectedHotel"
+						:rooms="bookingStore.searchResults.selectedHotelRooms"
+						:loading="bookingStore.loading.rooms"
+						@add-to-cart="handleAddToCart"
+						class="flex-1"
+					/>
+
+					<!-- Empty State -->
+					<div
+						v-else-if="bookingStore.searchResults.hotels.length > 0"
+						class="flex-1 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 min-h-[400px]"
+					>
+						<div class="text-center p-8">
+							<span class="material-icons text-6xl text-gray-300 dark:text-slate-600">hotel</span>
+							<p class="mt-4 text-gray-500 dark:text-slate-400">
+								{{ $t('booking.selectHotelToViewRooms') }}
+							</p>
+						</div>
+					</div>
+
+					<!-- Initial Empty State -->
+					<div
+						v-else
+						class="flex-1 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 min-h-[400px]"
+					>
+						<div class="text-center p-8">
+							<span class="material-icons text-6xl text-gray-300 dark:text-slate-600">search</span>
+							<p class="mt-4 text-gray-500 dark:text-slate-400">
+								{{ $t('booking.searchToStart') }}
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Phase 2: Guest Info & Payment -->
+		<div v-else class="flex-1">
+			<div class="flex flex-col lg:flex-row gap-4 lg:items-start">
+				<!-- Left Column: Booking Summary (Sticky on Desktop) -->
+				<div class="w-full lg:w-[400px] flex-shrink-0 lg:sticky lg:top-0">
+					<div class="space-y-4 pb-4">
+					<!-- Draft Info Banner -->
+					<div v-if="bookingStore.draftBookingNumber" class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4">
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-2">
+								<span class="material-icons text-purple-600 dark:text-purple-400">drafts</span>
+								<span class="font-medium text-purple-800 dark:text-purple-300">{{ bookingStore.draftBookingNumber }}</span>
+							</div>
+							<div class="text-xs text-purple-600 dark:text-purple-400">
+								<span v-if="bookingStore.lastSavedAt">
+									{{ $t('booking.lastSaved') }}: {{ formatTime(bookingStore.lastSavedAt) }}
+								</span>
+								<span v-else>{{ $t('booking.draft') }}</span>
+							</div>
+						</div>
+					</div>
+
+					<BookingSummary
+						:cart="bookingStore.cart"
+						:search="bookingStore.search"
+						:nights="bookingStore.nights"
+						:currency="bookingStore.currency"
+						:subtotal="bookingStore.subtotal"
+						:discount="bookingStore.totalDiscount"
+						:total="bookingStore.grandTotal"
+					/>
+				</div>
+			</div>
+
+			<!-- Right Column: Guest Forms + Invoice + Payment -->
+				<div class="flex-1">
+					<div class="space-y-4 pb-4">
+					<GuestForms
+						:cart="bookingStore.cart"
+						:lead-guest="bookingStore.guests.leadGuest"
+						:room-guests="bookingStore.guests.roomGuests"
+						:check-in-date="bookingStore.search.dateRange.start"
+						:show-validation="showValidation"
+						@update:lead-guest="handleUpdateLeadGuest"
+						@update:room-guests="handleUpdateRoomGuests"
+					/>
+
+					<!-- Invoice Details -->
+					<InvoiceDetailsForm
+						:invoice-details="bookingStore.invoiceDetails"
+						:lead-guest="bookingStore.guests.leadGuest"
+						:show-validation="showValidation"
+						@update="handleUpdateInvoiceDetails"
+					/>
+
+					<PaymentMethodSelect
+						:accepted-methods="bookingStore.payment.acceptedMethods"
+						:selected-method="bookingStore.payment.method"
+						@select="handleSetPaymentMethod"
+					/>
+
+					<!-- Terms & Create Booking -->
+					<div class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-gray-200 dark:border-slate-700">
+						<!-- Special Requests -->
+						<div class="mb-6">
+							<label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+								{{ $t('booking.specialRequests') }}
+							</label>
+							<textarea
+								v-model="bookingStore.specialRequests"
+								rows="3"
+								class="form-input w-full"
+								:placeholder="$t('booking.specialRequestsPlaceholder')"
+								@blur="triggerAutoSave"
+							></textarea>
+						</div>
+
+						<!-- Terms Checkbox -->
+						<div class="flex items-start mb-6">
+							<input
+								type="checkbox"
+								id="terms"
+								v-model="bookingStore.termsAccepted"
+								class="form-checkbox h-5 w-5 text-purple-600 rounded mt-0.5"
+								:class="{ 'border-red-500 ring-red-500': showValidation && !bookingStore.termsAccepted }"
+							>
+							<label for="terms" class="ml-3 text-sm" :class="showValidation && !bookingStore.termsAccepted ? 'text-red-500' : 'text-gray-600 dark:text-slate-400'">
+								{{ $t('booking.acceptTerms') }}
+								<span v-if="showValidation && !bookingStore.termsAccepted" class="text-red-500 font-medium">*</span>
+							</label>
+						</div>
+
+						<!-- Validation Summary -->
+						<div v-if="showValidation && validationErrors.length > 0" class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+							<div class="flex items-start">
+								<span class="material-icons text-red-500 mr-2 flex-shrink-0">error_outline</span>
+								<div>
+									<h4 class="font-medium text-red-800 dark:text-red-300 mb-2">
+										{{ $t('booking.validation.pleaseComplete') }}
+									</h4>
+									<ul class="list-disc list-inside space-y-1 text-sm text-red-600 dark:text-red-400">
+										<li v-for="(error, index) in validationErrors" :key="index">{{ error }}</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+
+						<!-- Allotment Error -->
+						<div v-if="bookingStore.allotmentError" class="mb-6 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+							<div class="flex items-start">
+								<span class="material-icons text-orange-500 mr-2 flex-shrink-0">warning</span>
+								<div>
+									<h4 class="font-medium text-orange-800 dark:text-orange-300 mb-1">
+										{{ $t('booking.allotmentError') }}
+									</h4>
+									<p class="text-sm text-orange-600 dark:text-orange-400">
+										{{ bookingStore.allotmentError }}
+									</p>
+								</div>
+							</div>
+						</div>
+
+						<!-- Action Buttons -->
+						<div class="flex items-center justify-between">
+							<button
+								@click="handleGoBack"
+								class="btn-secondary px-6 py-2.5"
+							>
+								<span class="material-icons mr-2">arrow_back</span>
+								{{ $t('common.back') }}
+							</button>
+							<button
+								@click="handleTryCreateBooking"
+								:disabled="bookingStore.loading.booking"
+								class="btn-primary px-8 py-2.5"
+							>
+								<span v-if="bookingStore.loading.booking" class="material-icons animate-spin mr-2">refresh</span>
+								<span v-else class="material-icons mr-2">check_circle</span>
+								{{ $t('booking.createBooking') }}
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			</div>
+		</div>
+
+		<!-- Error Toast -->
+		<div
+			v-if="bookingStore.error"
+			class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50"
+		>
+			<span class="material-icons mr-2">error</span>
+			{{ bookingStore.error }}
+			<button @click="bookingStore.error = null" class="ml-4">
+				<span class="material-icons">close</span>
+			</button>
+		</div>
+
+		<!-- Success Modal -->
+		<Modal v-model="showSuccessModal" :title="$t('booking.bookingCreated')">
+			<div class="text-center py-6">
+				<span class="material-icons text-6xl text-green-500">check_circle</span>
+				<h3 class="text-xl font-semibold mt-4">{{ $t('booking.bookingSuccess') }}</h3>
+				<p class="text-gray-600 dark:text-slate-400 mt-2">
+					{{ $t('booking.bookingNumber') }}: <strong>{{ bookingStore.bookingResult?.bookingNumber }}</strong>
+				</p>
+				<div class="mt-6 flex justify-center gap-4">
+					<button @click="handleNewBooking" class="btn-secondary px-6 py-2">
+						{{ $t('booking.newBooking') }}
+					</button>
+					<button @click="handleViewBooking" class="btn-primary px-6 py-2">
+						{{ $t('booking.viewBooking') }}
+					</button>
+				</div>
+			</div>
+		</Modal>
+	</div>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useBookingStore } from '@/stores/booking'
+import { savePhase1Data, clearPhase1Data } from '@/services/bookingStorageService'
+import SearchPanel from './search/SearchPanel.vue'
+import HotelList from './search/HotelList.vue'
+import RoomPanel from './rooms/RoomPanel.vue'
+import CartSummary from './cart/CartSummary.vue'
+import BookingSummary from './checkout/BookingSummary.vue'
+import GuestForms from './checkout/GuestForms.vue'
+import InvoiceDetailsForm from './checkout/InvoiceDetailsForm.vue'
+import PaymentMethodSelect from './checkout/PaymentMethodSelect.vue'
+import Modal from '@/components/common/Modal.vue'
+
+const router = useRouter()
+const bookingStore = useBookingStore()
+const { t } = useI18n()
+
+const showSuccessModal = ref(false)
+const showValidation = ref(false)
+
+// Auto-save debounce timer
+let autoSaveTimer = null
+
+// Format time for display
+const formatTime = (date) => {
+	if (!date) return ''
+	const d = new Date(date)
+	return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+}
+
+// Save Phase 1 data to localStorage
+const savePhase1ToStorage = () => {
+	if (bookingStore.currentPhase !== 1) return
+
+	const data = {
+		search: bookingStore.search,
+		cart: bookingStore.cart,
+		selectedHotel: bookingStore.searchResults.selectedHotel,
+		searchResults: {
+			hotels: bookingStore.searchResults.hotels,
+			selectedHotelRooms: bookingStore.searchResults.selectedHotelRooms
+		}
+	}
+	savePhase1Data(data)
+}
+
+// Watch Phase 1 data changes and save to localStorage
+watch(
+	() => [
+		bookingStore.search,
+		bookingStore.cart,
+		bookingStore.searchResults.selectedHotelId
+	],
+	() => {
+		if (bookingStore.currentPhase === 1) {
+			savePhase1ToStorage()
+		}
+	},
+	{ deep: true }
+)
+
+// Trigger auto-save for Phase 2
+const triggerAutoSave = () => {
+	if (bookingStore.currentPhase !== 2 || !bookingStore.draftBookingNumber) return
+
+	// Debounce auto-save
+	if (autoSaveTimer) {
+		clearTimeout(autoSaveTimer)
+	}
+	autoSaveTimer = setTimeout(async () => {
+		await bookingStore.updateDraft()
+	}, 2000)
+}
+
+// TC Number validation helper
+const isValidTcNumber = (tc) => {
+	if (!tc || tc.length !== 11) return false
+	if (!/^\d{11}$/.test(tc)) return false
+	if (tc[0] === '0') return false
+	const digits = tc.split('').map(Number)
+	const sum1 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]
+	const sum2 = digits[1] + digits[3] + digits[5] + digits[7]
+	const check1 = (sum1 * 7 - sum2) % 10
+	const check2 = (sum1 + sum2 + digits[9]) % 10
+	return digits[9] === check1 && digits[10] === check2
+}
+
+// Validation errors computed
+const validationErrors = computed(() => {
+	const errors = []
+	const lead = bookingStore.guests.leadGuest
+
+	// Lead guest validation
+	if (!lead.title?.trim()) {
+		errors.push(t('booking.validation.leadGuestTitle'))
+	}
+	if (!lead.firstName?.trim()) {
+		errors.push(t('booking.validation.leadGuestFirstName'))
+	}
+	if (!lead.lastName?.trim()) {
+		errors.push(t('booking.validation.leadGuestLastName'))
+	}
+	if (!lead.email?.trim()) {
+		errors.push(t('booking.validation.leadGuestEmail'))
+	} else if (!isValidEmail(lead.email)) {
+		errors.push(t('booking.validation.invalidEmail'))
+	}
+	if (!lead.phone?.trim()) {
+		errors.push(t('booking.validation.leadGuestPhone'))
+	}
+	if (!lead.nationality?.trim()) {
+		errors.push(t('booking.validation.leadGuestNationality'))
+	}
+	// TC number for Turkish lead guest
+	if (lead.nationality === 'TR' && !lead.tcNumber?.trim()) {
+		errors.push(t('booking.validation.leadGuestTcNumber'))
+	} else if (lead.nationality === 'TR' && lead.tcNumber && !isValidTcNumber(lead.tcNumber)) {
+		errors.push(t('booking.validation.invalidTcNumber'))
+	}
+
+	// Room guests validation
+	const roomGuests = bookingStore.guests.roomGuests || []
+	roomGuests.forEach((room, roomIndex) => {
+		room.forEach((guest, guestIndex) => {
+			// Skip first guest of first room if using lead as first guest (handled by checkbox)
+			const isFirstGuestOfFirstRoom = roomIndex === 0 && guestIndex === 0 && guest.type === 'adult'
+			if (isFirstGuestOfFirstRoom) return // Lead guest will be used
+
+			const guestLabel = guest.type === 'adult'
+				? t('booking.validation.roomGuestAdult', { room: roomIndex + 1, guest: guestIndex + 1 })
+				: t('booking.validation.roomGuestChild', { room: roomIndex + 1, guest: guestIndex + 1 })
+
+			if (!guest.title?.trim()) {
+				errors.push(`${guestLabel}: ${t('booking.validation.titleRequired')}`)
+			}
+			if (!guest.firstName?.trim()) {
+				errors.push(`${guestLabel}: ${t('booking.validation.firstNameRequired')}`)
+			}
+			if (!guest.lastName?.trim()) {
+				errors.push(`${guestLabel}: ${t('booking.validation.lastNameRequired')}`)
+			}
+			if (!guest.nationality?.trim()) {
+				errors.push(`${guestLabel}: ${t('booking.validation.nationalityRequired')}`)
+			}
+			// TC number for Turkish guests
+			if (guest.nationality === 'TR' && !guest.tcNumber?.trim()) {
+				errors.push(`${guestLabel}: ${t('booking.validation.tcNumberRequired')}`)
+			} else if (guest.nationality === 'TR' && guest.tcNumber && !isValidTcNumber(guest.tcNumber)) {
+				errors.push(`${guestLabel}: ${t('booking.validation.invalidTcNumber')}`)
+			}
+			// Birth date for children
+			if ((guest.type === 'child' || guest.type === 'infant') && !guest.birthDate) {
+				errors.push(`${guestLabel}: ${t('booking.validation.birthDateRequired')}`)
+			}
+		})
+	})
+
+	// Invoice validation
+	const invoice = bookingStore.invoiceDetails
+	if (!invoice.type) {
+		errors.push(t('booking.validation.invoiceType'))
+	} else if (invoice.type === 'individual') {
+		if (!invoice.individual?.firstName?.trim()) {
+			errors.push(t('booking.validation.invoiceFirstName'))
+		}
+		if (!invoice.individual?.lastName?.trim()) {
+			errors.push(t('booking.validation.invoiceLastName'))
+		}
+		// TC number required for Turkish citizens
+		if (lead.nationality === 'TR' && !invoice.individual?.tcNumber?.trim()) {
+			errors.push(t('booking.validation.tcNumber'))
+		}
+	} else if (invoice.type === 'corporate') {
+		if (!invoice.corporate?.companyName?.trim()) {
+			errors.push(t('booking.validation.companyName'))
+		}
+		if (!invoice.corporate?.taxNumber?.trim()) {
+			errors.push(t('booking.validation.taxNumber'))
+		}
+		if (!invoice.corporate?.taxOffice?.trim()) {
+			errors.push(t('booking.validation.taxOffice'))
+		}
+	}
+
+	// Payment validation
+	if (!bookingStore.payment.method) {
+		errors.push(t('booking.validation.paymentMethod'))
+	}
+
+	// Terms validation
+	if (!bookingStore.termsAccepted) {
+		errors.push(t('booking.validation.termsRequired'))
+	}
+
+	return errors
+})
+
+// Email validation helper
+const isValidEmail = (email) => {
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
+
+// Try to create booking with validation
+const handleTryCreateBooking = async () => {
+	showValidation.value = true
+	bookingStore.allotmentError = null
+
+	if (validationErrors.value.length > 0) {
+		// Scroll to validation summary
+		const validationBox = document.querySelector('.bg-red-50')
+		if (validationBox) {
+			validationBox.scrollIntoView({ behavior: 'smooth', block: 'center' })
+		}
+		return
+	}
+
+	// All valid, complete draft (this also checks allotment)
+	const result = await bookingStore.completeDraft()
+	if (result) {
+		// Clear localStorage on successful booking
+		clearPhase1Data()
+		showSuccessModal.value = true
+		showValidation.value = false
+	}
+}
+
+// Search handler
+const handleSearch = async () => {
+	await bookingStore.searchHotels()
+}
+
+// Select hotel
+const handleSelectHotel = async (hotelId) => {
+	await bookingStore.selectHotel(hotelId)
+}
+
+// Add room to cart
+const handleAddToCart = (roomType, mealPlan, option) => {
+	console.log('🛒 BookingLayout handleAddToCart:', { roomType, mealPlan, option })
+	bookingStore.addToCart(roomType, mealPlan, option)
+	console.log('🛒 Cart after add:', bookingStore.cart)
+}
+
+// Remove from cart
+const handleRemoveFromCart = (index) => {
+	bookingStore.removeFromCart(index)
+}
+
+// Proceed to checkout - creates draft
+const handleProceedToCheckout = async () => {
+	// Create draft in database
+	const success = await bookingStore.createDraft()
+	if (success) {
+		// Clear localStorage since data is now in database
+		clearPhase1Data()
+		// Go to Phase 2
+		bookingStore.goToCheckout()
+	}
+}
+
+// Go back to search
+const handleGoBack = () => {
+	bookingStore.goBackToSearch()
+}
+
+// Handle lead guest update with auto-save
+const handleUpdateLeadGuest = (data) => {
+	bookingStore.updateLeadGuest(data)
+	triggerAutoSave()
+}
+
+// Handle room guests update with auto-save
+const handleUpdateRoomGuests = (data) => {
+	bookingStore.updateRoomGuests(data)
+	triggerAutoSave()
+}
+
+// Handle invoice details update with auto-save
+const handleUpdateInvoiceDetails = (data) => {
+	bookingStore.updateInvoiceDetails(data)
+	triggerAutoSave()
+}
+
+// Handle payment method with auto-save
+const handleSetPaymentMethod = (method) => {
+	bookingStore.setPaymentMethod(method)
+	triggerAutoSave()
+}
+
+// New booking
+const handleNewBooking = () => {
+	showSuccessModal.value = false
+	bookingStore.resetAll()
+	router.push('/bookings/new')
+}
+
+// View booking
+const handleViewBooking = () => {
+	showSuccessModal.value = false
+	const bookingId = bookingStore.bookingResult?._id
+	bookingStore.resetAll()
+	if (bookingId) {
+		router.push(`/bookings/${bookingId}`)
+	}
+}
+</script>

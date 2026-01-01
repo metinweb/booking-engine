@@ -1,0 +1,111 @@
+---
+title: "İki Faktörlü Doğrulama"
+previewText: "Hesabınızda 2FA etkinleştirildi"
+---
+
+<x-main>
+  <!-- Shield Icon -->
+  <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" class="pb-4">
+        <div class="inline-block rounded-full bg-success-100 p-4">
+          <img src="https://cdn-icons-png.flaticon.com/512/6997/6997660.png" alt="2FA" width="48" height="48" style="display: block;">
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Heading -->
+  <h1 class="m-0 mb-2 text-center text-2xl font-bold text-slate-800">
+    {{ TITLE }}
+  </h1>
+  <p class="m-0 mb-6 text-center text-slate-600">
+    {{ SUBTITLE }}
+  </p>
+
+  <!-- Success Message -->
+  <table class="w-full rounded-lg bg-success-50" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td class="p-6 text-center">
+        <p class="m-0 text-success-700">
+          ✓ {{ SUCCESS_MESSAGE }}
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Backup Codes Section -->
+  <table class="mt-6 w-full" cellpadding="0" cellspacing="0" role="presentation" if="{{ BACKUP_CODES }}">
+    <tr>
+      <td>
+        <h3 class="m-0 mb-3 text-base font-bold text-slate-800">{{ BACKUP_CODES_TITLE }}</h3>
+        <p class="m-0 mb-4 text-sm text-slate-600">{{ BACKUP_CODES_DESC }}</p>
+
+        <!-- Backup Codes Box -->
+        <table class="w-full rounded-lg bg-slate-100" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="p-4">
+              <code class="text-sm text-slate-800" style="font-family: monospace; white-space: pre-wrap;">
+{{ BACKUP_CODES }}
+              </code>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Warning -->
+  <table class="mt-6 w-full rounded-lg bg-warning-50" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td class="p-4">
+        <p class="m-0 text-sm text-warning-700">
+          ⚠️ {{ WARNING_MESSAGE }}
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <!-- What's Next -->
+  <table class="mt-6 w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td>
+        <h3 class="m-0 mb-3 text-base font-bold text-slate-800">{{ NEXT_STEPS_TITLE }}</h3>
+        <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="pb-2 text-sm text-slate-600">1. {{ STEP_1 }}</td>
+          </tr>
+          <tr>
+            <td class="pb-2 text-sm text-slate-600">2. {{ STEP_2 }}</td>
+          </tr>
+          <tr>
+            <td class="pb-2 text-sm text-slate-600">3. {{ STEP_3 }}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- CTA Button -->
+  <table class="mt-8 w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="rounded-lg bg-primary-600" style="mso-padding-alt: 12px 32px;">
+              <a href="{{ SECURITY_URL }}" class="block px-8 py-3 text-base font-semibold text-white no-underline" style="mso-text-raise: 3px;">
+                {{ SECURITY_BUTTON }}
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Help -->
+  <p class="mt-8 text-center text-sm text-slate-500">
+    {{ HELP_TEXT }}<br>
+    <a href="mailto:{{ SUPPORT_EMAIL }}" class="text-primary-600">{{ SUPPORT_EMAIL }}</a>
+  </p>
+</x-main>

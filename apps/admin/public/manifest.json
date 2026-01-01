@@ -1,0 +1,111 @@
+{
+  "name": "PMS - Otel Yonetim Sistemi",
+  "short_name": "PMS",
+  "description": "Otel Yonetim Sistemi - Resepsiyon, Housekeeping, Kasa ve daha fazlasi",
+  "start_url": "/pms/dashboard",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#4f46e5",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Resepsiyon",
+      "short_name": "Front Desk",
+      "description": "Check-in ve Check-out islemleri",
+      "url": "/pms/front-desk",
+      "icons": [{ "src": "/icons/shortcut-frontdesk.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Housekeeping",
+      "short_name": "Temizlik",
+      "description": "Oda temizlik durumu",
+      "url": "/pms/housekeeping",
+      "icons": [{ "src": "/icons/shortcut-housekeeping.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Kasa",
+      "short_name": "Kasa",
+      "description": "Kasa islemleri",
+      "url": "/pms/cashier",
+      "icons": [{ "src": "/icons/shortcut-cashier.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "PMS Dashboard"
+    },
+    {
+      "src": "/screenshots/frontdesk.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Resepsiyon Ekrani"
+    },
+    {
+      "src": "/screenshots/mobile-housekeeping.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Housekeeping Mobil"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,113 @@
+---
+title: "Rezervasyonunuz İptal Edildi"
+previewText: "Rezervasyon No: {{ BOOKING_NUMBER }} iptal edilmiştir"
+---
+
+<x-main>
+  <!-- Cancel Icon -->
+  <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" class="pb-4">
+        <div class="inline-block rounded-full bg-danger-100 p-4">
+          <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" alt="Cancelled" width="48" height="48" style="display: block;">
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Heading -->
+  <h1 class="m-0 mb-2 text-center text-2xl font-bold text-slate-800">
+    {{ TITLE }}
+  </h1>
+  <p class="m-0 mb-6 text-center text-slate-600">
+    {{ SUBTITLE }}
+  </p>
+
+  <!-- Cancellation Info Card -->
+  <table class="w-full rounded-lg bg-danger-50" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td class="p-6">
+        <table class="w-full text-sm" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="py-2 text-slate-600" style="width: 40%;">{{ BOOKING_NUMBER_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ BOOKING_NUMBER }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-600">{{ HOTEL_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ HOTEL_NAME }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-600">{{ DATES_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ CHECKIN_DATE }} - {{ CHECKOUT_DATE }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-600">{{ CANCELLED_AT_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ CANCELLED_AT }}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Cancellation Reason -->
+  <table class="mt-6 w-full" cellpadding="0" cellspacing="0" role="presentation" if="{{ CANCELLATION_REASON }}">
+    <tr>
+      <td>
+        <h3 class="m-0 mb-2 text-base font-bold text-slate-800">{{ REASON_TITLE }}</h3>
+        <p class="m-0 text-sm text-slate-600">{{ CANCELLATION_REASON }}</p>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Refund Info -->
+  <table class="mt-6 w-full rounded-lg bg-slate-50" cellpadding="0" cellspacing="0" role="presentation" if="{{ REFUND_AMOUNT }}">
+    <tr>
+      <td class="p-6">
+        <h3 class="m-0 mb-3 text-base font-bold text-slate-800">{{ REFUND_TITLE }}</h3>
+        <table class="w-full text-sm" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="py-2 text-slate-600">{{ ORIGINAL_AMOUNT_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800" align="right">{{ ORIGINAL_AMOUNT }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-600">{{ CANCELLATION_FEE_LABEL }}</td>
+            <td class="py-2 font-semibold text-danger-600" align="right">-{{ CANCELLATION_FEE }}</td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <div class="my-2 bg-slate-200" style="height: 1px;">&nbsp;</div>
+            </td>
+          </tr>
+          <tr>
+            <td class="py-2 text-lg font-bold text-slate-800">{{ REFUND_AMOUNT_LABEL }}</td>
+            <td class="py-2 text-lg font-bold text-success-600" align="right">{{ REFUND_AMOUNT }}</td>
+          </tr>
+        </table>
+        <p class="m-0 mt-3 text-xs text-slate-500">{{ REFUND_NOTE }}</p>
+      </td>
+    </tr>
+  </table>
+
+  <!-- New Booking CTA -->
+  <table class="mt-8 w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="rounded-lg bg-primary-600" style="mso-padding-alt: 12px 32px;">
+              <a href="{{ NEW_BOOKING_URL }}" class="block px-8 py-3 text-base font-semibold text-white no-underline" style="mso-text-raise: 3px;">
+                {{ NEW_BOOKING_BUTTON }}
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Help Text -->
+  <p class="mt-8 text-center text-sm text-slate-500">
+    {{ HELP_TEXT }}<br>
+    <a href="mailto:{{ SUPPORT_EMAIL }}" class="text-primary-600">{{ SUPPORT_EMAIL }}</a>
+  </p>
+</x-main>

@@ -6,23 +6,193 @@
 
 1. **Mevcut componentleri MUTLAKA kullan**: Yeni bir ozellik eklerken once `/admin/src/components/common/` klasorunu kontrol et
 2. **Ayni isi yapan kodu tekrar yazma**: Eger bir component varsa, onu kullan. Sifirdan yazma!
-3. **Mevcut common componentler**:
-   - `MultiLangInput.vue` - Coklu dil input/textarea (ceviri butonu dahil)
-   - `FormField.vue` - Validasyonlu form alani
-   - `DatePicker.vue` - Tarih secici
-   - `DateRangePicker.vue` - Tarih araligi secici
-   - `Modal.vue` - Modal pencere
-   - `DataTable.vue` - Tablo componenti
-   - `StarSelector.vue` - Yildiz secici
-   - `HotelSelector.vue` - Otel secici
-   - `PartnerSelector.vue` - Partner secici
-   - `LanguageSelector.vue` - Dil secici
-   - `Lightbox.vue` - Resim/PDF onizleme
-
-4. **Yeni component olusturma**: Eger benzer bir ihtiyac baska yerlerde de olacaksa, `/admin/src/components/common/` altina yeni component olustur
+3. **Yeni component olusturma**: Eger benzer bir ihtiyac baska yerlerde de olacaksa, `/admin/src/components/common/` altina yeni component olustur
 
 **YANLIS**: Her formda ayni coklu dil inputunu sifirdan yazmak
 **DOGRU**: `<MultiLangInput v-model="form.name" :languages="SUPPORTED_LANGUAGES" />`
+
+---
+
+## 🎨 UI COMPONENT LIBRARY
+
+Projede kullanılabilecek tüm UI componentleri. **YENİ BİR COMPONENT YAZMADAN ÖNCE BU LİSTEYİ KONTROL ET!**
+
+**KONUMLAR:**
+```
+/admin/src/components/
+├── common/          # İş mantığı içeren genel componentler
+└── ui/              # Saf UI primitives
+    ├── buttons/     # BaseButton, IconButton, ActionMenu
+    ├── data/        # DataTable, StatusBadge
+    ├── date/        # DatePicker, DateRangePicker, BirthDatePicker
+    ├── display/     # Accordion, Avatar, Chip, Timeline, Tooltip
+    ├── feedback/    # Alert, ConfirmDialog, Progress, Skeleton, Spinner
+    ├── form/        # PhoneInput, PasswordInput, Checkbox, Radio, Toggle, Slider, etc.
+    ├── navigation/  # Tabs, TabPanel, Stepper, Breadcrumbs
+    └── overlay/     # Modal, Drawer
+```
+
+### 🔘 UI Buttons (`ui/buttons/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `BaseButton.vue` | Temel buton (primary, secondary, danger variants) |
+| `IconButton.vue` | Sadece ikon buton |
+| `ActionMenu.vue` | Dropdown aksiyon menüsü |
+
+### 📝 UI Form (`ui/form/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `PhoneInput.vue` | Telefon girişi (ülke kodu + formatlama) |
+| `PasswordInput.vue` | Şifre girişi (göster/gizle) |
+| `SearchInput.vue` | Arama inputu (debounce destekli) |
+| `Checkbox.vue` | Checkbox |
+| `Radio.vue` | Radio button |
+| `RadioGroup.vue` | Radio group |
+| `Toggle.vue` | Toggle switch |
+| `Slider.vue` | Range slider |
+| `Dropdown.vue` | Dropdown select |
+| `Rating.vue` | Yıldız puanlama |
+| `TimePicker.vue` | Saat seçici |
+
+### 📅 UI Date (`ui/date/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `DatePicker.vue` | Tekil tarih seçici |
+| `DateRangePicker.vue` | Tarih aralığı seçici |
+| `BirthDatePicker.vue` | Doğum tarihi seçici |
+
+### 📊 UI Display (`ui/display/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `Accordion.vue` | Açılır/kapanır panel grubu |
+| `AccordionItem.vue` | Tek accordion item |
+| `Avatar.vue` | Kullanıcı avatar |
+| `AvatarGroup.vue` | Avatar grubu |
+| `Chip.vue` | Etiket/chip |
+| `Timeline.vue` | Zaman çizelgesi |
+| `Tooltip.vue` | Tooltip |
+
+### 💬 UI Feedback (`ui/feedback/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `Alert.vue` | Bilgi/uyarı/hata mesajı |
+| `ConfirmDialog.vue` | Onay dialogu |
+| `Progress.vue` | Progress bar |
+| `Skeleton.vue` | Loading skeleton |
+| `Spinner.vue` | Loading spinner |
+
+### 🧭 UI Navigation (`ui/navigation/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `Tabs.vue` | Tab navigasyonu |
+| `TabPanel.vue` | Tab içeriği |
+| `Stepper.vue` | Adım adım wizard |
+| `Breadcrumbs.vue` | Breadcrumb navigasyon |
+
+### 📦 UI Overlay (`ui/overlay/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `Modal.vue` | Modal pencere |
+| `Drawer.vue` | Yan panel (slide-in) |
+
+### 📊 UI Data (`ui/data/`)
+
+| Component | Açıklama |
+|-----------|----------|
+| `DataTable.vue` | Veri tablosu |
+| `StatusBadge.vue` | Durum etiketi |
+
+### 🏢 Common Componentler (`common/`)
+
+İş mantığı içeren, projeye özel componentler:
+
+| Component | Açıklama |
+|-----------|----------|
+| `FormField.vue` | Validasyonlu form alanı wrapper |
+| `FormTabs.vue` | Form içi tab navigasyonu |
+| `MultiLangInput.vue` | Çoklu dil input/textarea + AI çeviri |
+| `RichTextEditor.vue` | Zengin metin editörü (WYSIWYG) |
+| `TagInput.vue` | Etiket girişi (autocomplete destekli) |
+| `DateRangePickerInline.vue` | Tarih aralığı seçici (inline) |
+| `CountrySelect.vue` | Ülke seçici dropdown |
+| `CascadingLocationSelect.vue` | Bağlantılı ülke/şehir seçici |
+| `HotelSelector.vue` | Otel seçici (partner bazlı) |
+| `HotelAutocomplete.vue` | Otel arama (autocomplete) |
+| `PartnerSelector.vue` | Partner seçici |
+| `StarSelector.vue` | Yıldız derecelendirme seçici |
+| `LanguageSelector.vue` | Dil seçici (header için) |
+| `GuestCountSelector.vue` | Yetişkin/çocuk sayısı + yaş/doğum tarihi |
+| `NotificationBell.vue` | Bildirim ikonu + panel |
+| `ModuleNavigation.vue` | Modül navigasyonu |
+
+**Önemli Props:**
+- `GuestCountSelector`: `childInputMode="age"` veya `"birthDate"`
+- `MultiLangInput`: `:languages="['tr','en','de']"` + AI çeviri butonu
+
+---
+
+### ⚙️ Yeni Component Ekleme Kuralları
+
+1. **Genel amaçlı olmalı** - Birden fazla yerde kullanılabilir olmalı
+2. **Props ile konfigüre edilebilir** - Hardcoded değer olmamalı
+3. **v-model desteği** - Mümkünse `v-model` veya `v-model:propName` kullan
+4. **Dark mode uyumlu** - Tailwind `dark:` class'ları kullan
+5. **i18n desteği** - Sabit metinler için translation kullan
+6. **Teleport kullan** - Dropdown'lar için `<Teleport to="body">` kullan (overflow:hidden sorunu)
+
+### Örnek Component Yapısı
+
+```vue
+<template>
+  <div class="relative">
+    <!-- Trigger -->
+    <button @click="toggle">{{ label }}</button>
+
+    <!-- Dropdown (Teleport ile body'ye taşı) -->
+    <Teleport to="body">
+      <div v-if="isOpen" :style="dropdownStyle" class="fixed z-[9999]">
+        <!-- Dropdown içeriği -->
+      </div>
+    </Teleport>
+  </div>
+</template>
+
+<script setup>
+import { ref, watch } from 'vue'
+
+const props = defineProps({
+  modelValue: { type: String, default: '' },
+  label: { type: String, default: '' }
+})
+
+const emit = defineEmits(['update:modelValue'])
+
+const isOpen = ref(false)
+const triggerRef = ref(null)
+const dropdownStyle = ref({})
+
+const updateDropdownPosition = () => {
+  if (!triggerRef.value) return
+  const rect = triggerRef.value.getBoundingClientRect()
+  dropdownStyle.value = {
+    top: `${rect.bottom + 4}px`,
+    left: `${rect.left}px`,
+    width: `${rect.width}px`
+  }
+}
+
+watch(isOpen, (open) => {
+  if (open) updateDropdownPosition()
+})
+</script>
+```
 
 ---
 
@@ -221,7 +391,65 @@ usePartnerContext({
 - `AgencyUsersView.vue`
 - Partner'a bağlı tüm diğer view'lar
 
-### 7. AI Translation Service (Gemini)
+### 7. PMS Context ve Otel Bağlamı (KRİTİK KURAL!)
+
+**ÖNEMLİ:** Platform admin bir partner seçip bir otelin PMS'ine girdiğinde, **O OTELİN KULLANICISI GİBİ** davranılmalıdır!
+
+**Temel Kural:**
+- Platform admin olsa bile, PMS modülüne girdiğinde `pmsContext.hotelId` mevcuttur
+- Bu durumda TÜM otelleri değil, SADECE o oteli kullanmalısın
+- Otel seçimi dropdown gösterme - otomatik seç ve salt-okunur göster
+
+**Composable:** `/admin/src/composables/usePmsContext.js`
+
+**Doğru Kullanım:**
+```javascript
+import { usePmsContextInjection } from '@/composables/usePmsContext'
+
+const pmsContext = usePmsContextInjection()
+
+const fetchHotels = async () => {
+  // PMS'e girilmişse (hotelId varsa) sadece o oteli kullan
+  const hotelId = pmsContext?.hotelId?.value
+  const currentHotel = pmsContext?.currentHotel?.value
+
+  if (hotelId && currentHotel) {
+    // Platform admin veya PMS user fark etmez - sadece bu otel!
+    hotels.value = [currentHotel]
+    return
+  }
+
+  // PMS dışında ise normal akış...
+}
+```
+
+**YANLIŞ:**
+```javascript
+// Platform admin mı diye kontrol edip tüm otelleri yüklemek
+if (pmsContext?.isPmsUser?.value) {
+  // Sadece PMS user için tek otel
+} else {
+  // Platform admin - tüm oteller ❌ YANLIŞ!
+}
+```
+
+**DOĞRU:**
+```javascript
+// hotelId varsa (PMS'e girilmişse) kim olursa olsun o oteli kullan
+if (pmsContext?.hotelId?.value) {
+  // Tek otel - platform admin veya PMS user fark etmez ✓
+}
+```
+
+**Return değerleri (usePmsContextInjection):**
+- `hotelId`: Aktif otel ID (PMS'e girilmişse dolu)
+- `currentHotel`: Aktif otel objesi
+- `isPmsUser`: PMS kullanıcısı mı (boolean)
+- `isAuthenticated`: Oturum açık mı
+- `userName`: Kullanıcı adı
+- `hasPermission(permission)`: Yetki kontrolü
+
+### 8. AI Translation Service (Gemini)
 
 Proje yapay zeka destekli çeviri özelliği içerir.
 
@@ -318,6 +546,28 @@ npm run dev
 cd /var/www/mini/booking-engine/admin
 npm install
 npm run dev
+```
+
+### Claude için Önemli: API Yönetimi
+
+**API'yi nodemon/watch mode ile başlat** - Dosya değişikliklerinde otomatik restart olur:
+```bash
+# API'yi background'da başlat (otomatik restart ile)
+cd /var/www/mini/booking-engine/api && npm run dev &
+
+# Eğer port kullanımdaysa önce öldür
+pkill -f "node.*booking-engine/api" && sleep 1 && cd /var/www/mini/booking-engine/api && npm run dev &
+```
+
+**ÖNEMLİ:**
+- API'yi her kod değişikliğinde manuel olarak yeniden başlatma!
+- `npm run dev` komutu `node --watch` kullanır, dosya değişikliklerini algılar
+- API bir kez başlatıldıktan sonra backend değişiklikleri otomatik uygulanır
+- Sadece yeni npm paketi eklendiyse veya ciddi bir hata varsa restart gerekir
+
+**API Durumu Kontrol:**
+```bash
+curl -s http://localhost:4000/health
 ```
 
 ### Environment Variables

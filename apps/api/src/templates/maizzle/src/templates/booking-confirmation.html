@@ -1,0 +1,130 @@
+---
+title: "Rezervasyonunuz Onaylandı"
+previewText: "Rezervasyon No: {{ BOOKING_NUMBER }} - Rezervasyonunuz başarıyla oluşturuldu"
+---
+
+<x-main>
+  <!-- Success Icon -->
+  <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" class="pb-4">
+        <div class="inline-block rounded-full bg-success-100 p-4">
+          <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" alt="Success" width="48" height="48" style="display: block;">
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Heading -->
+  <h1 class="m-0 mb-2 text-center text-2xl font-bold text-slate-800">
+    {{ GREETING_TITLE }}
+  </h1>
+  <p class="m-0 mb-6 text-center text-slate-600">
+    {{ GREETING_TEXT }}
+  </p>
+
+  <!-- Booking Card -->
+  <table class="w-full rounded-lg bg-slate-50" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td class="p-6">
+        <!-- Booking Number Header -->
+        <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td>
+              <p class="m-0 text-sm text-slate-500">{{ BOOKING_NUMBER_LABEL }}</p>
+              <p class="m-0 text-xl font-bold text-primary-600">{{ BOOKING_NUMBER }}</p>
+            </td>
+            <td align="right">
+              <span class="inline-block rounded-full bg-success-100 px-3 py-1 text-sm font-medium text-success-700">
+                {{ STATUS }}
+              </span>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Divider -->
+        <div class="my-4 bg-slate-200" style="height: 1px;">&nbsp;</div>
+
+        <!-- Hotel Info -->
+        <h3 class="m-0 mb-3 text-lg font-bold text-slate-800">{{ HOTEL_NAME }}</h3>
+        <p class="m-0 mb-4 text-sm text-slate-600">{{ HOTEL_ADDRESS }}</p>
+
+        <!-- Booking Details -->
+        <table class="w-full text-sm" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="py-2 text-slate-500" style="width: 40%;">{{ CHECKIN_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ CHECKIN_DATE }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-500">{{ CHECKOUT_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ CHECKOUT_DATE }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-500">{{ NIGHTS_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ NIGHTS }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-500">{{ ROOM_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ ROOM_TYPE }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-500">{{ GUESTS_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ GUESTS }}</td>
+          </tr>
+          <tr>
+            <td class="py-2 text-slate-500">{{ BOARD_LABEL }}</td>
+            <td class="py-2 font-semibold text-slate-800">{{ BOARD_TYPE }}</td>
+          </tr>
+        </table>
+
+        <!-- Divider -->
+        <div class="my-4 bg-slate-200" style="height: 1px;">&nbsp;</div>
+
+        <!-- Price -->
+        <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="text-lg font-bold text-slate-800">{{ TOTAL_LABEL }}</td>
+            <td align="right" class="text-2xl font-bold text-success-600">{{ TOTAL_PRICE }}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Guest Info -->
+  <table class="mt-6 w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td>
+        <h3 class="m-0 mb-3 text-lg font-bold text-slate-800">{{ GUEST_INFO_TITLE }}</h3>
+        <p class="m-0 text-sm text-slate-600">
+          {{ GUEST_NAME }}<br>
+          {{ GUEST_EMAIL }}<br>
+          {{ GUEST_PHONE }}
+        </p>
+      </td>
+    </tr>
+  </table>
+
+  <!-- CTA Button -->
+  <table class="mt-8 w-full" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center">
+        <table cellpadding="0" cellspacing="0" role="presentation">
+          <tr>
+            <td class="rounded-lg bg-primary-600" style="mso-padding-alt: 12px 32px;">
+              <a href="{{ BOOKING_URL }}" class="block px-8 py-3 text-base font-semibold text-white no-underline" style="mso-text-raise: 3px;">
+                {{ VIEW_BOOKING_BUTTON }}
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Help Text -->
+  <p class="mt-8 text-center text-sm text-slate-500">
+    {{ HELP_TEXT }}<br>
+    <a href="mailto:{{ SUPPORT_EMAIL }}" class="text-primary-600">{{ SUPPORT_EMAIL }}</a>
+  </p>
+</x-main>

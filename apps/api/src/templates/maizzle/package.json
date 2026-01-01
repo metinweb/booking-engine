@@ -1,0 +1,16 @@
+{
+  "name": "booking-email-templates",
+  "version": "1.0.0",
+  "description": "Maizzle email templates for Booking Engine",
+  "scripts": {
+    "dev": "maizzle serve",
+    "build": "maizzle build production",
+    "build:local": "maizzle build local"
+  },
+  "dependencies": {
+    "@maizzle/framework": "^4.0.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}
