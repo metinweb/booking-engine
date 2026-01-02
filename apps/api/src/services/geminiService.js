@@ -1215,7 +1215,7 @@ export const extractHotelDataFromUrl = async (url, options = {}) => {
   try {
     const firecrawl = await import('./firecrawlService.js')
 
-    if (firecrawl.isConfigured()) {
+    if (await firecrawl.isConfigured()) {
       logger.info('Using Firecrawl to crawl hotel website: ' + url)
 
       if (progress) {

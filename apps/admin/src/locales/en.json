@@ -2743,6 +2743,12 @@
       "description": "Google Gemini AI integration (translation, hotel data extraction)",
       "apiKey": "API Key",
       "apiKeyHint": "API key from Google AI Studio"
+    },
+    "firecrawl": {
+      "title": "Firecrawl Web Scraping",
+      "description": "Extract data from hotel websites (for bot-protected sites)",
+      "apiKey": "API Key",
+      "apiKeyHint": "API key from firecrawl.dev"
     }
   },
   "developers": {

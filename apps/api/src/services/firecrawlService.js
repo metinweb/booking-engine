@@ -1,7 +1,45 @@
 import FirecrawlApp from '@mendable/firecrawl-js'
 import logger from '../core/logger.js'
 
-const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY
+// Cache for API key
+let cachedApiKey = null
+let cachedApiKeyExpiry = 0
+const API_KEY_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+/**
+ * Get Firecrawl API key from database or environment
+ * Database takes priority, with fallback to environment variable
+ */
+const getFirecrawlApiKey = async () => {
+  // Check cache first
+  if (cachedApiKey && Date.now() < cachedApiKeyExpiry) {
+    return cachedApiKey
+  }
+
+  try {
+    // Try to load from database
+    const { default: PlatformSettings } = await import('../modules/platform-settings/platformSettings.model.js')
+    const settings = await PlatformSettings.getSettings()
+    const credentials = settings.getFirecrawlCredentials()
+
+    if (credentials?.apiKey) {
+      cachedApiKey = credentials.apiKey
+      cachedApiKeyExpiry = Date.now() + API_KEY_CACHE_TTL
+      return cachedApiKey
+    }
+  } catch (error) {
+    logger.warn('Failed to load Firecrawl API key from database:', error.message)
+  }
+
+  // Fall back to environment variable
+  if (process.env.FIRECRAWL_API_KEY) {
+    cachedApiKey = process.env.FIRECRAWL_API_KEY
+    cachedApiKeyExpiry = Date.now() + API_KEY_CACHE_TTL
+    return cachedApiKey
+  }
+
+  return null
+}
 
 /**
  * Extract image URLs from markdown content
@@ -156,18 +194,34 @@ const filterImageUrls = (urls, baseUrl) => {
 
 // Initialize Firecrawl client
 let firecrawl = null
-const getFirecrawl = () => {
-  if (!firecrawl && FIRECRAWL_API_KEY) {
-    firecrawl = new FirecrawlApp({ apiKey: FIRECRAWL_API_KEY })
+let firecrawlApiKeyUsed = null
+
+/**
+ * Get or create Firecrawl client (async)
+ */
+const getFirecrawl = async () => {
+  const apiKey = await getFirecrawlApiKey()
+
+  if (!apiKey) {
+    return null
   }
+
+  // Re-create client if API key changed
+  if (firecrawl && firecrawlApiKeyUsed === apiKey) {
+    return firecrawl
+  }
+
+  firecrawl = new FirecrawlApp({ apiKey })
+  firecrawlApiKeyUsed = apiKey
   return firecrawl
 }
 
 /**
- * Check if Firecrawl is configured
+ * Check if Firecrawl is configured (async)
  */
-export const isConfigured = () => {
-  return !!FIRECRAWL_API_KEY
+export const isConfigured = async () => {
+  const apiKey = await getFirecrawlApiKey()
+  return !!apiKey
 }
 
 /**
@@ -176,7 +230,7 @@ export const isConfigured = () => {
  * @returns {Promise<{success: boolean, content: string, metadata: object, images: array}>}
  */
 export const scrapePage = async (url) => {
-  const client = getFirecrawl()
+  const client = await getFirecrawl()
   if (!client) {
     throw new Error('FIRECRAWL_API_KEY is not configured')
   }
@@ -427,7 +481,7 @@ const buildScrapeActions = (pageUrl, isMainHotelPage) => {
  * @returns {Promise<{success: boolean, content: string, pages: array, allImages: array}>}
  */
 export const crawlWebsite = async (url, options = {}) => {
-  const client = getFirecrawl()
+  const client = await getFirecrawl()
   if (!client) {
     throw new Error('FIRECRAWL_API_KEY is not configured')
   }
@@ -590,7 +644,7 @@ export const crawlWebsite = async (url, options = {}) => {
  * @param {object} options - Options including maxPages and onPageScraped callback
  */
 export const smartFetch = async (url, options = {}) => {
-  const client = getFirecrawl()
+  const client = await getFirecrawl()
   if (!client) {
     // Return null to indicate Firecrawl is not available
     return null

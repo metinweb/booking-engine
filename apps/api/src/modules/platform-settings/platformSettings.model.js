@@ -114,6 +114,21 @@ const platformSettingsSchema = new mongoose.Schema({
         return isEncrypted(val) ? val : encrypt(val)
       }
     }
+  },
+
+  // Firecrawl Web Scraping Configuration
+  firecrawl: {
+    enabled: {
+      type: Boolean,
+      default: false
+    },
+    apiKey: {
+      type: String,
+      set: function(val) {
+        if (!val) return val
+        return isEncrypted(val) ? val : encrypt(val)
+      }
+    }
   }
 
 }, {
@@ -185,6 +200,17 @@ platformSettingsSchema.methods.getGeminiCredentials = function() {
   }
 }
 
+// Instance method to get decrypted Firecrawl API key
+platformSettingsSchema.methods.getFirecrawlCredentials = function() {
+  if (!this.firecrawl?.enabled) {
+    return null
+  }
+
+  return {
+    apiKey: this.firecrawl.apiKey ? decrypt(this.firecrawl.apiKey) : null
+  }
+}
+
 // Transform output - mask sensitive fields
 platformSettingsSchema.methods.toSafeJSON = function() {
   const obj = this.toObject()
@@ -213,6 +239,11 @@ platformSettingsSchema.methods.toSafeJSON = function() {
   // Mask Gemini API key
   if (obj.gemini?.apiKey) {
     obj.gemini.apiKey = '********'
+  }
+
+  // Mask Firecrawl API key
+  if (obj.firecrawl?.apiKey) {
+    obj.firecrawl.apiKey = '********'
   }
 
   return obj

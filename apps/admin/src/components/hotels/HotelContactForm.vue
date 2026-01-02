@@ -295,21 +295,30 @@ watch(() => props.hotel, (newHotel) => {
 
 // Validate all fields by calling each FormField's validate method
 const validateAll = () => {
-  let isValid = true
+  let valid = true
 
-  // Validate phone field
+  // Validate phone field (PhoneInput exposes isValid computed property)
   if (phoneFieldRef.value) {
-    const result = phoneFieldRef.value.validate()
-    if (!result.valid) isValid = false
+    // PhoneInput doesn't have validate(), it exposes isValid
+    if (typeof phoneFieldRef.value.validate === 'function') {
+      const result = phoneFieldRef.value.validate()
+      if (!result.valid) valid = false
+    } else if (phoneFieldRef.value.isValid !== undefined) {
+      // PhoneInput uses isValid property - phone is optional so only validate if there's a value
+      // If phone field has value but is invalid, mark as invalid
+      if (form.value.phone && !phoneFieldRef.value.isValid) {
+        valid = false
+      }
+    }
   }
 
-  // Validate email field
-  if (emailFieldRef.value) {
+  // Validate email field (FormField has validate method)
+  if (emailFieldRef.value && typeof emailFieldRef.value.validate === 'function') {
     const result = emailFieldRef.value.validate()
-    if (!result.valid) isValid = false
+    if (!result.valid) valid = false
   }
 
-  return isValid
+  return valid
 }
 
 // Get current form data (called by parent)

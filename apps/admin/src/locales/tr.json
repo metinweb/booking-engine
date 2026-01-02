@@ -2713,6 +2713,12 @@
       "description": "Google Gemini AI entegrasyonu (çeviri, otel verisi çekme)",
       "apiKey": "API Key",
       "apiKeyHint": "Google AI Studio'dan alınan API anahtarı"
+    },
+    "firecrawl": {
+      "title": "Firecrawl Web Scraping",
+      "description": "Otel web sitelerinden veri çekme (bot korumalı siteler için)",
+      "apiKey": "API Key",
+      "apiKeyHint": "firecrawl.dev'den alınan API anahtarı"
     }
   },
   "developers": {
