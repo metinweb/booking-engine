@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { h } from 'vue'
 
 // Empty component for tab-based routes (parent handles rendering)
@@ -45,7 +45,7 @@ const router = createRouter({
 		{
 			path: '/',
 			component: DefaultLayout,
-			meta: {requiresAuth: true},
+			meta: { requiresAuth: true },
 			children: [
 				{
 					path: '',
@@ -60,13 +60,13 @@ const router = createRouter({
 					path: 'partners',
 					name: 'partners',
 					component: PartnersView,
-					meta: {requiresPlatformAdmin: true}
+					meta: { requiresPlatformAdmin: true }
 				},
 				{
 					path: 'admin/regions',
 					name: 'region-management',
 					component: RegionManagementView,
-					meta: {requiresPlatformAdmin: true}
+					meta: { requiresPlatformAdmin: true }
 				},
 				{
 					path: 'admin/hotel-base',
@@ -122,13 +122,13 @@ const router = createRouter({
 					path: 'agencies',
 					name: 'agencies',
 					component: AgenciesView,
-					meta: {requiresPartnerOrAdmin: true}
+					meta: { requiresPartnerOrAdmin: true }
 				},
 				{
 					path: 'agencies/:id/users',
 					name: 'agency-users',
 					component: AgencyUsersView,
-					meta: {requiresPartnerOrAdmin: true}
+					meta: { requiresPartnerOrAdmin: true }
 				},
 				{
 					path: 'site-management',
@@ -296,78 +296,78 @@ const router = createRouter({
 						{
 							path: 'dashboard',
 							name: 'pms-dashboard',
-							component: () => import('../views/pms/PMSDashboardView.vue')
+							component: () => import('../modules/dashboard/views/DashboardView.vue')
 						},
 						{
 							path: 'reservations',
 							name: 'pms-reservations',
-							component: () => import('../views/pms/PMSReservationsView.vue')
+							component: () => import('../modules/reservations/views/ReservationsView.vue')
 						},
 						{
 							path: 'front-desk',
 							name: 'pms-front-desk',
-							component: () => import('../views/pms/PMSFrontDeskView.vue')
+							component: () => import('../modules/frontdesk/views/FrontDeskView.vue')
 						},
 						{
 							path: 'housekeeping',
 							name: 'pms-housekeeping',
-							component: () => import('../views/pms/PMSHousekeepingView.vue')
+							component: () => import('../modules/housekeeping/views/HousekeepingView.vue')
 						},
 						{
 							path: 'housekeeping-mobile',
 							name: 'pms-housekeeping-mobile',
-							component: () => import('../views/pms/PMSHousekeepingMobileView.vue'),
+							component: () => import('../modules/housekeeping/views/HousekeepingMobileView.vue'),
 							meta: { hideLayout: true } // Full screen mobile view
 						},
 						{
 							path: 'guests',
 							name: 'pms-guests',
-							component: () => import('../views/pms/PMSGuestsView.vue')
+							component: () => import('../modules/guests/views/GuestsView.vue')
 						},
 						{
 							path: 'billing',
 							name: 'pms-billing',
-							component: () => import('../views/pms/PMSBillingView.vue')
+							component: () => import('../modules/billing/views/BillingView.vue')
 						},
 						{
 							path: 'cashier',
 							name: 'pms-cashier',
-							component: () => import('../views/pms/PMSCashierView.vue')
+							component: () => import('../modules/billing/views/CashierView.vue')
 						},
 						{
 							path: 'reports',
 							name: 'pms-reports',
-							component: () => import('../views/pms/PMSReportsView.vue')
+							component: () => import('../modules/reports/views/ReportsView.vue')
 						},
 						{
 							path: 'settings',
 							name: 'pms-settings',
-							component: () => import('../views/pms/PMSSettingsView.vue')
+							component: () => import('../modules/settings/views/SettingsView.vue')
 						},
 						{
 							path: 'users',
 							name: 'pms-users',
-							component: () => import('../views/pms/PMSUsersView.vue')
+							component: () => import('../modules/settings/views/UsersView.vue')
 						},
 						{
 							path: 'night-audit',
 							name: 'pms-night-audit',
-							component: () => import('../views/pms/PMSNightAuditView.vue')
+							component: () => import('../modules/billing/views/NightAuditView.vue')
 						},
 						{
 							path: 'night-audit/history/:auditId',
 							name: 'pms-night-audit-detail',
-							component: () => import('../views/pms/PMSNightAuditDetailView.vue')
+							component: () => import('../modules/billing/views/NightAuditDetailView.vue')
 						},
 						{
 							path: 'kbs',
 							name: 'pms-kbs',
-							component: () => import('../views/pms/PMSKBSView.vue')
+							component: () => import('../modules/guests/views/KBSView.vue')
 						},
 						{
 							path: 'room-plan',
 							name: 'pms-room-plan',
-							component: () => import('../views/pms/PMSRoomPlanView.vue')
+							component: () => import('../modules/frontdesk/views/RoomPlanView.vue')
 						}
 					]
 				}
@@ -396,7 +396,7 @@ const router = createRouter({
 		{
 			path: '/pms/login',
 			name: 'pms-login',
-			component: () => import('../views/pms/PMSLoginView.vue'),
+			component: () => import('../modules/auth/views/LoginView.vue'),
 			meta: { public: true }
 		},
 
@@ -423,64 +423,90 @@ const router = createRouter({
 import { useAuthStore } from '@/stores/auth'
 import { usePmsAuthStore } from '@/stores/pms/pmsAuth'
 
+// Check if current domain is a PMS custom domain
+const isPmsCustomDomain = () => {
+	const hostname = window.location.hostname
+	const defaultDomains = ['localhost', '127.0.0.1', 'admin.booking-engine.com']
+	return !defaultDomains.some(d => hostname.includes(d))
+}
+
 router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore()
-  const pmsAuthStore = usePmsAuthStore()
+	const authStore = useAuthStore()
+	const pmsAuthStore = usePmsAuthStore()
 
-  // Check if this is a PMS route
-  const isPmsRoute = to.path.startsWith('/pms') || to.matched.some(record => record.path.includes('pms'))
-  const isPublicRoute = to.matched.some(record => record.meta.public)
+	// If on custom PMS domain and trying to access non-PMS routes, redirect to PMS
+	if (isPmsCustomDomain()) {
+		const isPmsRoute = to.path.startsWith('/pms') || to.matched.some(record => record.path.includes('pms'))
+		if (!isPmsRoute && to.name !== 'pms-login') {
+			// Redirect non-PMS routes to PMS login on custom domains
+			next({ name: 'pms-login' })
+			return
+		}
+	}
 
-  // Handle regular admin routes (including PMS for partners)
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const requiresPlatformAdmin = to.matched.some(record => record.meta.requiresPlatformAdmin)
-  const requiresPartnerOrAdmin = to.matched.some(record => record.meta.requiresPartnerOrAdmin)
+	// Check if this is a PMS route
+	const isPmsRoute = to.path.startsWith('/pms') || to.matched.some(record => record.path.includes('pms'))
+	const isPublicRoute = to.matched.some(record => record.meta.public)
 
-  // Check authentication on first load
-  if (authStore.token && !authStore.user) {
-    await authStore.checkAuth()
-  }
+	// Handle regular admin routes (including PMS for partners)
+	const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+	const requiresPlatformAdmin = to.matched.some(record => record.meta.requiresPlatformAdmin)
+	const requiresPartnerOrAdmin = to.matched.some(record => record.meta.requiresPartnerOrAdmin)
 
-  // For PMS routes, check PMS authentication
-  if (isPmsRoute && !isPublicRoute) {
-    // Check PMS token on first load
-    if (pmsAuthStore.token && !pmsAuthStore.user) {
-      await pmsAuthStore.checkAuth()
-    }
+	// Check authentication on first load
+	if (authStore.token && !authStore.user) {
+		await authStore.checkAuth()
+	}
 
-    // PMS routes can be accessed by PMS users OR platform admin/partner users
-    const isPmsAuthenticated = pmsAuthStore.isAuthenticated
-    const isAdminAuthenticated = authStore.isAuthenticated && (authStore.isPlatformAdmin || authStore.accountType === 'partner')
+	// For PMS routes, check PMS authentication
+	if (isPmsRoute && !isPublicRoute) {
+		// Check PMS token on first load
+		if (pmsAuthStore.token && !pmsAuthStore.user) {
+			await pmsAuthStore.checkAuth()
+		}
 
-    if (!isPmsAuthenticated && !isAdminAuthenticated) {
-      // Redirect to PMS login page
-      next({ name: 'pms-login', query: { redirect: to.fullPath } })
-      return
-    }
-  }
+		// PMS routes can be accessed by PMS users OR platform admin/partner users
+		const isPmsAuthenticated = pmsAuthStore.isAuthenticated
+		const isAdminAuthenticated = authStore.isAuthenticated && (authStore.isPlatformAdmin || authStore.accountType === 'partner')
 
-  // For non-PMS routes, use regular auth check
-  if (!isPmsRoute && requiresAuth && !authStore.isAuthenticated) {
-    // Redirect to login page if not authenticated
-    next({ name: 'login', query: { redirect: to.fullPath } })
-  } else if (requiresPlatformAdmin && !authStore.isPlatformAdmin) {
-    // Redirect to dashboard if not platform admin
-    console.warn(`Authorization failed: User is not a platform admin`)
-    next({ name: 'dashboard' })
-  } else if (!isPmsRoute && requiresPartnerOrAdmin && !authStore.isPlatformAdmin && authStore.accountType !== 'partner') {
-    // Redirect to dashboard if not partner or platform admin
-    console.warn(`Authorization failed: User is not a partner or platform admin`)
-    next({ name: 'dashboard' })
-  } else if ((to.name === 'login' || to.name === 'register') && authStore.isAuthenticated) {
-    // Redirect to dashboard if already logged in
-    next({ name: 'dashboard' })
-  } else if (to.name === 'pms-login' && pmsAuthStore.isAuthenticated) {
-    // Redirect to PMS dashboard if already logged in to PMS
-    next({ name: 'pms-dashboard' })
-  } else {
-    // Proceed to the route
-    next()
-  }
+		console.log('[Router Guard] PMS Route:', to.path, {
+			isPmsAuthenticated,
+			isAdminAuthenticated,
+			pmsToken: !!pmsAuthStore.token,
+			pmsUser: !!pmsAuthStore.user,
+			pmsCurrentHotel: !!pmsAuthStore.currentHotel
+		})
+
+		if (!isPmsAuthenticated && !isAdminAuthenticated) {
+			console.log('[Router Guard] Redirecting to pms-login')
+			// Redirect to PMS login page
+			next({ name: 'pms-login', query: { redirect: to.fullPath } })
+			return
+		}
+	}
+
+	// For non-PMS routes, use regular auth check
+	if (!isPmsRoute && requiresAuth && !authStore.isAuthenticated) {
+		// Redirect to login page if not authenticated
+		next({ name: 'login', query: { redirect: to.fullPath } })
+	} else if (requiresPlatformAdmin && !authStore.isPlatformAdmin) {
+		// Redirect to dashboard if not platform admin
+		console.warn(`Authorization failed: User is not a platform admin`)
+		next({ name: 'dashboard' })
+	} else if (!isPmsRoute && requiresPartnerOrAdmin && !authStore.isPlatformAdmin && authStore.accountType !== 'partner') {
+		// Redirect to dashboard if not partner or platform admin
+		console.warn(`Authorization failed: User is not a partner or platform admin`)
+		next({ name: 'dashboard' })
+	} else if ((to.name === 'login' || to.name === 'register') && authStore.isAuthenticated) {
+		// Redirect to dashboard if already logged in
+		next({ name: 'dashboard' })
+	} else if (to.name === 'pms-login' && pmsAuthStore.isAuthenticated) {
+		// Redirect to PMS dashboard if already logged in to PMS
+		next({ name: 'pms-dashboard' })
+	} else {
+		// Proceed to the route
+		next()
+	}
 })
 
 export default router

@@ -890,8 +890,8 @@ const getHotelImage = (hotel) => {
 const getImageUrl = (url) => {
   if (!url) return ''
   if (url.startsWith('http')) return url
-  // VITE_API_BASE_URL is like http://localhost:4000/api, we need just the base
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+  // VITE_API_BASE_URL is like https://api.minires.com/api, we need just the base
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.minires.com/api'
   const baseUrl = apiBaseUrl.replace('/api', '')
   return `${baseUrl}${url}`
 }

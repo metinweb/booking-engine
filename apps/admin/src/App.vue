@@ -28,51 +28,62 @@ const getStores = async () => {
 }
 
 // Initialize notifications when user is authenticated
+// NOTE: PMS users are handled by PmsProvider.vue, this is only for regular users
 const initNotifications = async () => {
   const { authStore, notificationStore } = await getStores()
   const { authenticate, on } = useSocket()
 
-  if (authStore.isAuthenticated && authStore.user?._id) {
-    // Determine user type
-    const userType = authStore.user.role === 'pms_admin' || authStore.user.role?.startsWith('pms_')
-      ? 'PMSUser'
-      : 'User'
-
-    // Authenticate socket for user-specific notifications
-    authenticate(authStore.user._id, userType)
-
-    // Listen for new notifications
-    on('notification:new', (data) => {
-      notificationStore.handleNewNotification(data.notification)
-    })
-
-    // Listen for notification count updates
-    on('notification:count', (data) => {
-      notificationStore.handleCountUpdate(data.count)
-    })
-
-    // Fetch initial unread count
-    await notificationStore.init()
+  // Skip if PMS user - PmsProvider handles PMS user notifications
+  const pmsToken = localStorage.getItem('pmsToken')
+  if (pmsToken) {
+    console.log('[App] PMS user detected, skipping - PmsProvider handles notifications')
+    return
   }
+
+  // Only handle regular users (Partner/Admin)
+  if (!authStore.isAuthenticated || !authStore.user?._id) {
+    return
+  }
+
+  const userId = authStore.user._id
+  console.log('[App] Authenticating socket for notifications:', { userId, userType: 'User' })
+  authenticate(userId, 'User')
+
+  // Listen for new notifications
+  on('notification:new', (data) => {
+    console.log('[App] Received notification:new event:', data)
+    notificationStore.handleNewNotification(data.notification)
+  })
+
+  // Listen for notification count updates
+  on('notification:count', (data) => {
+    notificationStore.handleCountUpdate(data.count)
+  })
+
+  // Fetch initial unread count
+  await notificationStore.init()
 }
 
 onMounted(async () => {
   const { authStore, notificationStore } = await getStores()
 
-  // Watch for auth changes
+  // Watch for auth changes (regular users only, PMS handled by PmsProvider)
   watch(() => authStore.isAuthenticated, (isAuth) => {
     if (isAuth) {
       initNotifications()
     } else {
-      // Clear notifications on logout
-      notificationStore.clearNotifications()
+      // Clear notifications on logout (only if no PMS session)
+      if (!localStorage.getItem('pmsToken')) {
+        notificationStore.clearNotifications()
+      }
     }
   })
 
   // Check if user is already authenticated on app load
   await authStore.checkAuth()
 
-  // Initialize notifications if already authenticated
+  // Initialize notifications for regular users only
+  // PMS users are handled by PmsProvider
   if (authStore.isAuthenticated) {
     await initNotifications()
   }

@@ -200,7 +200,7 @@ const methodClass = computed(() => {
 })
 
 const baseUrl = computed(() => {
-	const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+	const apiUrl = import.meta.env.VITE_API_URL || 'https://api.minires.com/api'
 	return `${apiUrl}/public`
 })
 

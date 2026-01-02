@@ -183,27 +183,36 @@ export const broadcastNotification = async ({
  */
 export const notifyHotelUsers = async (hotelId, excludeUserId, notificationData) => {
   try {
+    console.log('[notifyHotelUsers] Called with:', { hotelId, excludeUserId, type: notificationData.type })
+
     // Dynamically import to avoid circular dependencies
-    const PMSUser = (await import('../pms/pmsUser.model.js')).default
+    const PMSUser = (await import('../pms-settings/pmsUser.model.js')).default
 
     const users = await PMSUser.find({
-      hotel: hotelId,
+      'assignedHotels.hotel': hotelId,
       _id: { $ne: excludeUserId },
-      status: 'active'
-    }).select('_id')
+      isActive: true
+    }).select('_id name')
+
+    console.log('[notifyHotelUsers] Found users:', users.map(u => ({ _id: u._id, name: u.name })))
 
     if (users.length === 0) {
+      console.log('[notifyHotelUsers] No users found, returning empty')
       return []
     }
 
-    return broadcastNotification({
+    const result = await broadcastNotification({
       recipientIds: users.map(u => u._id),
       recipientModel: 'PMSUser',
       ...notificationData,
       hotel: hotelId
     })
+
+    console.log('[notifyHotelUsers] Broadcast result:', result?.length, 'notifications created')
+    return result
   } catch (error) {
     logger.error('Failed to notify hotel users', { error: error.message, hotelId })
+    console.error('[notifyHotelUsers] Error:', error)
     return []
   }
 }

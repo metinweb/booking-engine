@@ -1,12 +1,17 @@
+import axios from 'axios'
 import pmsApiClient from './pmsApi'
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 /**
  * Get partner by PMS domain (for auto-detection on login page)
+ * Uses public endpoint - no auth required
  * @param {string} domain - Domain to look up
  */
 const getPartnerByDomain = async (domain) => {
   try {
-    const response = await pmsApiClient.get('/pms/auth/partner-by-domain', {
+    // Use public endpoint (no auth required)
+    const response = await axios.get(`${API_BASE_URL}/public/resolve-domain`, {
       params: { domain }
     })
     return response.data

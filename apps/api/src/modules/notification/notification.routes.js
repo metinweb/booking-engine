@@ -1,7 +1,7 @@
 import express from 'express'
 import { asyncHandler } from '../../helpers/asyncHandler.js'
 import { protect } from '../../middleware/auth.js'
-import { pmsProtect, pmsOptionalAuth } from '../pms/pmsAuth.middleware.js'
+import { pmsProtect, pmsOptionalAuth } from '../pms-settings/pmsAuth.middleware.js'
 import { NotFoundError, BadRequestError } from '../../core/errors.js'
 import * as notificationService from './notification.service.js'
 

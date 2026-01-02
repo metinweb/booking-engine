@@ -20,6 +20,16 @@ const router = express.Router()
 // Apply global rate limiter to all public routes
 router.use(globalLimiter)
 
+// ==================== DOMAIN RESOLUTION ====================
+
+/**
+ * @route GET /public/resolve-domain
+ * @desc Resolve PMS domain to hotel or partner
+ * @query {string} domain - The domain to resolve (e.g., pms.susesi.com)
+ * @returns {object} { type: 'hotel'|'partner', data: {...} }
+ */
+router.get('/resolve-domain', publicService.resolveDomain)
+
 // ==================== HOTEL ENDPOINTS ====================
 
 /**

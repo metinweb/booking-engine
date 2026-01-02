@@ -27,9 +27,11 @@ const config = {
     refreshExpire: process.env.JWT_REFRESH_EXPIRE || '7d'
   },
 
-  // CORS
+  // CORS - Allow all origins in development, use env in production
   cors: {
-    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000']
+    origin: process.env.NODE_ENV === 'production'
+      ? process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000']
+      : true  // Allow all origins in development
   },
 
   // AWS

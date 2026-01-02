@@ -462,7 +462,7 @@ const uploading = ref(false)
 const isDragging = ref(false)
 const fileInput = ref(null)
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.minires.com'
 
 const getImageUrl = (url) => {
   if (!url) return ''

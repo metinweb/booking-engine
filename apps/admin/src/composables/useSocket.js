@@ -54,7 +54,7 @@ const SOCKET_CONFIG = {
 const getSocketInstance = () => {
   if (socketInstance) return socketInstance
 
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+  const baseUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE_URL || 'https://api.minires.com'
 
   console.log('[Socket] Creating new instance, connecting to:', baseUrl)
 

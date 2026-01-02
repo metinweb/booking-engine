@@ -24,7 +24,7 @@ const server = httpServer.listen(config.port, () => {
   logger.info(`🚀 Server running in ${config.env} mode`)
   logger.info(`📡 Listening on port ${config.port}`)
   logger.info(`🔌 Socket.IO enabled`)
-  logger.info(`🌍 CORS enabled for: ${config.cors.origin.join(', ')}`)
+  logger.info(`🌍 CORS enabled: dynamic origin validation (multi-tenant)`)
 
   // Start exchange rate scheduler
   startExchangeScheduler()

@@ -298,7 +298,7 @@ const galleryImages = ref([])
 const galleryRoomName = ref('')
 const currentImageIndex = ref(0)
 
-const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://api.minires.com'
 
 const getImageUrl = (url) => {
   if (!url) return ''

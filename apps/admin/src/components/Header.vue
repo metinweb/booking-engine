@@ -32,12 +32,6 @@
           />
         </div>
 
-        <!-- PMS User Hotel Display (read-only) -->
-        <div v-else-if="isPmsUserWithHotel" class="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
-          <span class="material-icons text-indigo-600 dark:text-indigo-400 text-lg">hotel</span>
-          <span class="text-sm font-medium text-indigo-700 dark:text-indigo-300">{{ pmsHotelName }}</span>
-        </div>
-
         <!-- Partner Selector (Platform Admin Only) -->
         <PartnerSelector />
 
@@ -160,6 +154,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useUIStore } from '@/stores/ui'
 import { useHotelStore } from '@/stores/hotel'
+import { usePmsAuthStore } from '@/stores/pms/pmsAuth'
 import PartnerSelector from '@/components/common/PartnerSelector.vue'
 import HotelSelector from '@/components/common/HotelSelector.vue'
 import NotificationBell from '@/components/common/NotificationBell.vue'
@@ -196,6 +191,10 @@ const props = defineProps({
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 const hotelStore = useHotelStore()
+const pmsAuthStore = usePmsAuthStore()
+
+// Check if PMS user
+const isPmsUser = computed(() => !!localStorage.getItem('pmsToken'))
 
 // Routes that need hotel selector
 const hotelRequiredRoutes = [
@@ -223,23 +222,6 @@ const showHotelSelector = computed(() => {
 // Check if current route is PMS
 const isPmsRoute = computed(() => {
   return route.path.startsWith('/pms')
-})
-
-// Check if PMS user with hotel assigned
-const isPmsUserWithHotel = computed(() => {
-  const pmsToken = localStorage.getItem('pmsToken')
-  const pmsHotel = localStorage.getItem('pmsCurrentHotel')
-  return pmsToken && pmsHotel && route.path.startsWith('/pms')
-})
-
-// Get PMS hotel name
-const pmsHotelName = computed(() => {
-  try {
-    const pmsHotel = JSON.parse(localStorage.getItem('pmsCurrentHotel') || 'null')
-    return pmsHotel?.name || ''
-  } catch {
-    return ''
-  }
 })
 
 // Check if current route is Planning
@@ -338,8 +320,14 @@ const goToProfile = () => {
 
 const handleLogout = async () => {
   userDropdownOpen.value = false
-  await authStore.logout()
-  router.push('/login')
+
+  // PMS user uses pmsAuthStore, others use authStore
+  if (isPmsUser.value) {
+    pmsAuthStore.logout() // This redirects to pms-login
+  } else {
+    await authStore.logout()
+    router.push('/login')
+  }
 }
 
 // Click outside handler

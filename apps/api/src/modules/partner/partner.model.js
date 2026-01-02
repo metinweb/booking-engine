@@ -254,6 +254,7 @@ partnerSchema.index({ status: 1 })
 partnerSchema.index({ email: 1 }, { unique: true })
 partnerSchema.index({ 'branding.siteDomain': 1 }, { unique: true, sparse: true })
 partnerSchema.index({ 'branding.extranetDomain': 1 }, { unique: true, sparse: true })
+partnerSchema.index({ 'branding.pmsDomain': 1 }, { unique: true, sparse: true })
 
 // Virtual - Partner'ın acenteleri
 partnerSchema.virtual('agencies', {
@@ -356,6 +357,10 @@ partnerSchema.statics.findBySiteDomain = function(domain) {
 
 partnerSchema.statics.findByExtranetDomain = function(domain) {
   return this.findOne({ 'branding.extranetDomain': domain.toLowerCase() })
+}
+
+partnerSchema.statics.findByPmsDomain = function(domain) {
+  return this.findOne({ 'branding.pmsDomain': domain.toLowerCase() })
 }
 
 partnerSchema.statics.findActive = function() {

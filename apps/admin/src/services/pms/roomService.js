@@ -159,6 +159,14 @@ export const getRoomTypes = async (hotelId) => {
 }
 
 /**
+ * Get meal plans for a hotel
+ */
+export const getMealPlans = async (hotelId) => {
+  const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/meal-plans`)
+  return response.data
+}
+
+/**
  * Get housekeeping dashboard
  */
 export const getHousekeeping = async (hotelId) => {

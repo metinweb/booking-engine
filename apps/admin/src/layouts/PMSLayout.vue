@@ -39,8 +39,8 @@
 </template>
 
 <script setup>
-import PmsProvider from '@/components/pms/PmsProvider.vue'
-import PMSNavigation from '@/components/pms/common/PMSNavigation.vue'
+import PmsProvider from '@/modules/shared/components/PmsProvider.vue'
+import PMSNavigation from '@/modules/shared/components/PMSNavigation.vue'
 
 // Quick action handlers - will be implemented later
 const handleQuickCheckin = () => {

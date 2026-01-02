@@ -764,7 +764,7 @@ const getCampaignName = (campaign) => {
 }
 
 // API base URL for images
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.minires.com/api'
 const imageBaseUrl = apiBaseUrl.replace('/api', '')
 
 const getRoomImage = (roomType) => {
