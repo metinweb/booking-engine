@@ -784,11 +784,11 @@
       "enableTracking": "Enable Tracking",
       "customScripts": "Custom Scripts",
       "headScripts": "Head Scripts",
-      "headScriptsPlaceholder": "<!-- Add scripts to be injected in <head> here -->",
-      "headScriptsHelp": "These scripts will be added to the <head> section of the page",
+      "headScriptsPlaceholder": "Enter scripts to be injected in the head section...",
+      "headScriptsHelp": "These scripts will be added to the head section of the page",
       "bodyScripts": "Body Scripts",
-      "bodyScriptsPlaceholder": "<!-- Add scripts to be injected before </body> here -->",
-      "bodyScriptsHelp": "These scripts will be added before the closing </body> tag"
+      "bodyScriptsPlaceholder": "Enter scripts to be injected before body closes...",
+      "bodyScriptsHelp": "These scripts will be added before the closing body tag"
     }
   },
   "hotels": {

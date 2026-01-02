@@ -757,11 +757,11 @@
       "enableTracking": "İzlemeyi Etkinleştir",
       "customScripts": "Özel Kodlar",
       "headScripts": "Head Kodları",
-      "headScriptsPlaceholder": "<!-- Buraya <head> içine eklenecek kodları yazın -->",
-      "headScriptsHelp": "Bu kodlar sayfanın <head> bölümüne eklenecektir",
+      "headScriptsPlaceholder": "Head bölümüne eklenecek kodları buraya yazın...",
+      "headScriptsHelp": "Bu kodlar sayfanın head bölümüne eklenecektir",
       "bodyScripts": "Body Kodları",
-      "bodyScriptsPlaceholder": "<!-- Buraya </body> öncesine eklenecek kodları yazın -->",
-      "bodyScriptsHelp": "Bu kodlar sayfanın </body> etiketi öncesine eklenecektir"
+      "bodyScriptsPlaceholder": "Body sonuna eklenecek kodları buraya yazın...",
+      "bodyScriptsHelp": "Bu kodlar sayfanın body etiketi kapanmadan önce eklenecektir"
     }
   },
   "hotels": {
