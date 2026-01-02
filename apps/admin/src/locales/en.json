@@ -678,7 +678,7 @@
         "domain": "Domain",
         "domainPlaceholder": "yourcompany.com",
         "fromEmail": "Sender Email",
-        "fromEmailPlaceholder": "noreply@yourcompany.com",
+        "fromEmailPlaceholder": "noreply{'@'}yourcompany.com",
         "fromName": "Sender Name",
         "fromNamePlaceholder": "Company Reservations",
         "createIdentity": "Create Domain",

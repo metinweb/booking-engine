@@ -651,7 +651,7 @@
         "domain": "Domain",
         "domainPlaceholder": "sirketiniz.com",
         "fromEmail": "Gönderici E-posta",
-        "fromEmailPlaceholder": "noreply@sirketiniz.com",
+        "fromEmailPlaceholder": "noreply{'@'}sirketiniz.com",
         "fromName": "Gönderici Adı",
         "fromNamePlaceholder": "Şirket Rezervasyon",
         "createIdentity": "Domain Oluştur",
