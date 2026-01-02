@@ -54,7 +54,10 @@ const SOCKET_CONFIG = {
 const getSocketInstance = () => {
   if (socketInstance) return socketInstance
 
-  const baseUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE_URL || 'https://api.minires.com'
+  // Socket URL - API URL'den /api prefix'ini çıkar
+  let baseUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE_URL || 'https://api.minires.com'
+  // Socket.IO /api prefix'siz çalışır
+  baseUrl = baseUrl.replace(/\/api\/?$/, '')
 
   console.log('[Socket] Creating new instance, connecting to:', baseUrl)
 
