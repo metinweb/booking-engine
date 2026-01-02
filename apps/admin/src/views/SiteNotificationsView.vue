@@ -711,16 +711,20 @@ const loadSettings = async () => {
         fromName: emailSettings.aws?.fromName || ''
       }
 
-      // Load domain verification data
-      if (emailSettings.domainVerification) {
+      // Load domain verification data - sadece domain varsa
+      if (emailSettings.domainVerification?.domain) {
         domainVerification.value = emailSettings.domainVerification
         // Generate DNS records from tokens
-        if (emailSettings.domainVerification.dkimTokens) {
+        if (emailSettings.domainVerification.dkimTokens?.length > 0) {
           dnsRecords.value = generateDnsRecords(
             emailSettings.domainVerification.domain,
             emailSettings.domainVerification.dkimTokens
           )
         }
+      } else {
+        // Domain yoksa null yap
+        domainVerification.value = null
+        dnsRecords.value = []
       }
     }
 

@@ -670,6 +670,7 @@
         "verified": "Doğrulandı",
         "pending": "Bekliyor",
         "failed": "Başarısız",
+        "none": "Başlanmadı",
         "notStarted": "Başlanmadı",
         "sendTestEmail": "Test E-postası Gönder",
         "testEmailAddress": "Test E-posta Adresi",

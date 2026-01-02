@@ -697,6 +697,7 @@
         "verified": "Verified",
         "pending": "Pending",
         "failed": "Failed",
+        "none": "Not Started",
         "notStarted": "Not Started",
         "sendTestEmail": "Send Test Email",
         "testEmailAddress": "Test Email Address",
