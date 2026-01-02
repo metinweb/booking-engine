@@ -77,13 +77,6 @@
             :saving="saving"
           />
         </div>
-
-        <!-- Notifications Tab -->
-        <div v-show="activeTab === 'notifications'">
-          <NotificationsTab
-            :saving="saving"
-          />
-        </div>
       </div>
     </div>
   </div>
@@ -99,7 +92,6 @@ import GeneralTab from '@/components/siteSettings/GeneralTab.vue'
 import HomepageTab from '@/components/siteSettings/HomepageTab.vue'
 import ContactTab from '@/components/siteSettings/ContactTab.vue'
 import TrackingTab from '@/components/siteSettings/TrackingTab.vue'
-import NotificationsTab from '@/components/siteSettings/NotificationsTab.vue'
 import { usePartnerContext } from '@/composables/usePartnerContext'
 
 const { t } = useI18n()
@@ -115,8 +107,7 @@ const tabs = computed(() => [
   { id: 'general', label: t('siteSettings.tabs.general'), icon: 'settings' },
   { id: 'homepage', label: t('siteSettings.tabs.homepage'), icon: 'home' },
   { id: 'contact', label: t('siteSettings.tabs.contact'), icon: 'contact_phone' },
-  { id: 'tracking', label: t('siteSettings.tabs.tracking'), icon: 'analytics' },
-  { id: 'notifications', label: t('siteSettings.tabs.notifications'), icon: 'notifications' }
+  { id: 'tracking', label: t('siteSettings.tabs.tracking'), icon: 'analytics' }
 ])
 
 const fetchSettings = async () => {
