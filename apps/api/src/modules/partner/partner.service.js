@@ -3,7 +3,8 @@ import User from '../user/user.model.js'
 import Agency from '../agency/agency.model.js'
 import { NotFoundError, ConflictError, BadRequestError } from '../../core/errors.js'
 import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { sendWelcomeEmail } from '../../helpers/mail.js'
+import { sendWelcomeEmail, sendEmail } from '../../helpers/mail.js'
+import sesIdentityService from '../../services/sesIdentityService.js'
 import crypto from 'crypto'
 import logger from '../../core/logger.js'
 import path from 'path'
@@ -405,15 +406,15 @@ export const updateEmailSettings = asyncHandler(async (req, res) => {
   })
 })
 
-// Verify domain for SES
-export const verifyDomain = asyncHandler(async (req, res) => {
+// Create domain identity in AWS SES
+export const createEmailIdentity = asyncHandler(async (req, res) => {
   const partner = await Partner.findById(req.params.id)
 
   if (!partner) {
     throw new NotFoundError('PARTNER_NOT_FOUND')
   }
 
-  const { domain } = req.body
+  const { domain, fromEmail, fromName } = req.body
 
   if (!domain) {
     throw new BadRequestError('DOMAIN_REQUIRED')
@@ -423,35 +424,50 @@ export const verifyDomain = asyncHandler(async (req, res) => {
   if (!partner.notifications) partner.notifications = {}
   if (!partner.notifications.email) partner.notifications.email = {}
 
-  // In production, this would call AWS SES to verify the domain
-  // For now, generate mock DKIM tokens
-  const dkimTokens = [
-    crypto.randomBytes(16).toString('hex'),
-    crypto.randomBytes(16).toString('hex'),
-    crypto.randomBytes(16).toString('hex')
-  ]
+  try {
+    // Create domain identity in AWS SES using platform credentials
+    const result = await sesIdentityService.createDomainIdentity(domain)
 
-  partner.notifications.email.domainVerification = {
-    domain,
-    status: 'pending',
-    dkimTokens,
-    verificationToken: crypto.randomBytes(32).toString('hex'),
-    requestedAt: new Date()
-  }
-
-  await partner.save()
-
-  res.json({
-    success: true,
-    message: req.t ? req.t('DOMAIN_VERIFICATION_STARTED') : 'Domain verification started',
-    data: {
-      domainVerification: partner.notifications.email.domainVerification
+    // Save domain verification info to partner
+    partner.notifications.email.useOwnSES = true
+    partner.notifications.email.domainVerification = {
+      domain,
+      status: result.dkimStatus || 'pending',
+      dkimTokens: result.dkimTokens,
+      verifiedAt: result.verified ? new Date() : null,
+      lastCheckedAt: new Date()
     }
-  })
+
+    // Save sender info if provided
+    if (!partner.notifications.email.aws) {
+      partner.notifications.email.aws = {}
+    }
+    if (fromEmail) partner.notifications.email.aws.fromEmail = fromEmail
+    if (fromName) partner.notifications.email.aws.fromName = fromName
+
+    await partner.save()
+
+    logger.info(`Domain identity created for partner ${partner._id}: ${domain}`)
+
+    res.json({
+      success: true,
+      message: 'Domain oluşturuldu. DNS kayıtlarını ekleyin.',
+      data: {
+        domain,
+        dkimTokens: result.dkimTokens,
+        dkimStatus: result.dkimStatus,
+        verified: result.verified,
+        dnsRecords: result.dnsRecords
+      }
+    })
+  } catch (error) {
+    logger.error(`Domain identity creation failed: ${error.message}`)
+    throw new BadRequestError(error.message || 'Domain oluşturulamadı')
+  }
 })
 
-// Get domain verification status
-export const getDomainStatus = asyncHandler(async (req, res) => {
+// Get domain verification status from AWS SES
+export const getVerificationStatus = asyncHandler(async (req, res) => {
   const partner = await Partner.findById(req.params.id)
 
   if (!partner) {
@@ -460,19 +476,75 @@ export const getDomainStatus = asyncHandler(async (req, res) => {
 
   const domainVerification = partner.notifications?.email?.domainVerification
 
-  if (!domainVerification) {
+  if (!domainVerification || !domainVerification.domain) {
     throw new NotFoundError('NO_DOMAIN_VERIFICATION')
   }
 
-  // In production, this would check AWS SES for actual status
-  // For now, just return the stored status
+  try {
+    // Check actual status from AWS SES
+    const result = await sesIdentityService.getIdentityStatus(domainVerification.domain)
 
-  res.json({
-    success: true,
-    data: {
-      domainVerification
+    // Update partner's verification status
+    partner.notifications.email.domainVerification.status = result.dkimStatus
+    partner.notifications.email.domainVerification.lastCheckedAt = new Date()
+
+    if (result.verified && !partner.notifications.email.domainVerification.verifiedAt) {
+      partner.notifications.email.domainVerification.verifiedAt = new Date()
     }
-  })
+
+    await partner.save()
+
+    res.json({
+      success: true,
+      data: {
+        domain: domainVerification.domain,
+        status: result.dkimStatus,
+        verified: result.verified,
+        dkimTokens: result.dkimTokens,
+        dnsRecords: result.dnsRecords,
+        lastCheckedAt: new Date()
+      }
+    })
+  } catch (error) {
+    logger.error(`Verification status check failed: ${error.message}`)
+    throw new BadRequestError(error.message || 'Doğrulama durumu alınamadı')
+  }
+})
+
+// Delete domain identity from AWS SES
+export const deleteEmailIdentity = asyncHandler(async (req, res) => {
+  const partner = await Partner.findById(req.params.id)
+
+  if (!partner) {
+    throw new NotFoundError('PARTNER_NOT_FOUND')
+  }
+
+  const domainVerification = partner.notifications?.email?.domainVerification
+
+  if (!domainVerification || !domainVerification.domain) {
+    throw new NotFoundError('NO_DOMAIN_VERIFICATION')
+  }
+
+  try {
+    // Delete domain from AWS SES
+    await sesIdentityService.deleteIdentity(domainVerification.domain)
+
+    // Clear partner's domain verification
+    partner.notifications.email.useOwnSES = false
+    partner.notifications.email.domainVerification = null
+
+    await partner.save()
+
+    logger.info(`Domain identity deleted for partner ${partner._id}: ${domainVerification.domain}`)
+
+    res.json({
+      success: true,
+      message: 'Domain başarıyla kaldırıldı'
+    })
+  } catch (error) {
+    logger.error(`Domain deletion failed: ${error.message}`)
+    throw new BadRequestError(error.message || 'Domain silinemedi')
+  }
 })
 
 // Test partner email configuration
@@ -495,14 +567,45 @@ export const testPartnerEmail = asyncHandler(async (req, res) => {
     throw new BadRequestError('OWN_SES_NOT_CONFIGURED')
   }
 
-  // In production, this would actually send a test email using partner's SES
-  // For now, just simulate success
-  logger.info(`Test email requested for partner ${partner._id} to ${email}`)
+  const domainVerification = emailSettings.domainVerification
+  if (!domainVerification || domainVerification.status !== 'verified') {
+    throw new BadRequestError('DOMAIN_NOT_VERIFIED')
+  }
 
-  res.json({
-    success: true,
-    message: req.t ? req.t('TEST_EMAIL_SENT') : 'Test email sent successfully'
-  })
+  try {
+    // Send test email using platform SES with partner's verified domain
+    const fromEmail = emailSettings.aws?.fromEmail || `noreply@${domainVerification.domain}`
+    const fromName = emailSettings.aws?.fromName || partner.companyName
+
+    await sendEmail({
+      to: email,
+      subject: 'Test E-postası - Domain Doğrulama Başarılı',
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
+          <h1 style="color: #4F46E5;">E-posta Yapılandırma Testi</h1>
+          <p>Bu bir test e-postasıdır.</p>
+          <p>E-posta domain'iniz <strong>${domainVerification.domain}</strong> başarıyla doğrulanmış ve aktif durumdadır.</p>
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #E5E7EB;">
+          <p style="color: #6B7280; font-size: 12px;">
+            Gönderen: ${fromEmail}<br>
+            Partner: ${partner.companyName}
+          </p>
+        </div>
+      `,
+      from: `${fromName} <${fromEmail}>`,
+      partnerId: partner._id
+    })
+
+    logger.info(`Test email sent for partner ${partner._id} to ${email}`)
+
+    res.json({
+      success: true,
+      message: 'Test e-postası gönderildi'
+    })
+  } catch (error) {
+    logger.error(`Test email failed for partner ${partner._id}: ${error.message}`)
+    throw new BadRequestError(error.message || 'Test e-postası gönderilemedi')
+  }
 })
 
 // Get partner SMS settings

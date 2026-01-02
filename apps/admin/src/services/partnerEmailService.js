@@ -20,22 +20,34 @@ export const updateEmailSettings = async (partnerId, settings) => {
 }
 
 /**
- * Verify domain for SES
+ * Create domain identity in AWS SES
  * @param {string} partnerId - Partner ID
- * @param {string} domain - Domain to verify
+ * @param {Object} data - Domain and sender info
+ * @param {string} data.domain - Domain name (e.g., sirket.com)
+ * @param {string} data.fromEmail - Sender email (e.g., noreply@sirket.com)
+ * @param {string} data.fromName - Sender name
  */
-export const verifyDomain = async (partnerId, domain) => {
-  const response = await apiClient.post(`/partners/${partnerId}/email-settings/verify-domain`, { domain })
+export const createIdentity = async (partnerId, data) => {
+  const response = await apiClient.post(`/partners/${partnerId}/email-settings/create-identity`, data)
   return response.data.data
 }
 
 /**
- * Get domain verification status
+ * Get domain verification status from AWS SES
  * @param {string} partnerId - Partner ID
  */
-export const getDomainStatus = async (partnerId) => {
-  const response = await apiClient.get(`/partners/${partnerId}/email-settings/domain-status`)
+export const getVerificationStatus = async (partnerId) => {
+  const response = await apiClient.get(`/partners/${partnerId}/email-settings/verification-status`)
   return response.data.data
+}
+
+/**
+ * Delete domain identity from AWS SES
+ * @param {string} partnerId - Partner ID
+ */
+export const deleteIdentity = async (partnerId) => {
+  const response = await apiClient.delete(`/partners/${partnerId}/email-settings/delete-identity`)
+  return response.data
 }
 
 /**
@@ -44,14 +56,15 @@ export const getDomainStatus = async (partnerId) => {
  * @param {string} email - Email address to send test to
  */
 export const testEmail = async (partnerId, email) => {
-  const response = await apiClient.post(`/partners/${partnerId}/email-settings/test`, { email })
+  const response = await apiClient.post(`/partners/${partnerId}/email-settings/test-email`, { email })
   return response.data
 }
 
 export default {
   getEmailSettings,
   updateEmailSettings,
-  verifyDomain,
-  getDomainStatus,
+  createIdentity,
+  getVerificationStatus,
+  deleteIdentity,
   testEmail
 }

@@ -37,9 +37,10 @@ router.get('/:id/documents/:documentId/file', partnerService.serveDocument)
 // Email settings
 router.get('/:id/email-settings', partnerService.getEmailSettings)
 router.put('/:id/email-settings', partnerService.updateEmailSettings)
-router.post('/:id/email-settings/verify-domain', partnerService.verifyDomain)
-router.get('/:id/email-settings/domain-status', partnerService.getDomainStatus)
-router.post('/:id/email-settings/test', partnerService.testPartnerEmail)
+router.post('/:id/email-settings/create-identity', partnerService.createEmailIdentity)
+router.get('/:id/email-settings/verification-status', partnerService.getVerificationStatus)
+router.delete('/:id/email-settings/delete-identity', partnerService.deleteEmailIdentity)
+router.post('/:id/email-settings/test-email', partnerService.testPartnerEmail)
 
 // SMS settings
 router.get('/:id/sms-settings', partnerService.getSMSSettings)

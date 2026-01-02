@@ -101,7 +101,7 @@
         </div>
       </div>
 
-      <!-- Email Settings Info -->
+      <!-- Email Settings -->
       <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center mb-4">
           <span class="material-icons text-orange-500 mr-2">email</span>
@@ -110,12 +110,13 @@
         <p class="text-sm text-gray-600 dark:text-slate-400 mb-4">
           {{ $t('siteSettings.notifications.email.description') }}
         </p>
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <p class="text-sm text-blue-700 dark:text-blue-300">
-            <span class="material-icons text-sm align-middle mr-1">info</span>
-            {{ $t('siteSettings.notifications.email.platformDefault') }}
-          </p>
-        </div>
+
+        <EmailSettingsForm
+          v-if="currentPartnerId"
+          :partner-id="currentPartnerId"
+          :email-settings="emailSettings"
+          @saved="loadEmailSettings"
+        />
       </div>
 
       <!-- Save Button -->
@@ -145,7 +146,9 @@ import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
 import { usePartnerContext } from '@/composables/usePartnerContext'
 import partnerSmsService from '@/services/partnerSmsService'
+import partnerEmailService from '@/services/partnerEmailService'
 import PhoneInput from '@/components/ui/form/PhoneInput.vue'
+import EmailSettingsForm from './EmailSettingsForm.vue'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -164,6 +167,7 @@ const balanceCurrency = ref('')
 
 const providers = ref([])
 const smsSettings = ref(null)
+const emailSettings = ref(null)
 const smsForm = ref({
   enabled: true,
   provider: 'platform',
@@ -190,19 +194,21 @@ const loadData = async () => {
 
   loading.value = true
   try {
-    // Load providers and settings in parallel
-    const [providersData, settingsData] = await Promise.all([
+    // Load providers, SMS settings and email settings in parallel
+    const [providersData, smsSettingsData, emailSettingsData] = await Promise.all([
       partnerSmsService.getSMSProviders(),
-      partnerSmsService.getSMSSettings(currentPartnerId.value)
+      partnerSmsService.getSMSSettings(currentPartnerId.value),
+      partnerEmailService.getEmailSettings(currentPartnerId.value)
     ])
 
     providers.value = providersData
-    smsSettings.value = settingsData
+    smsSettings.value = smsSettingsData
+    emailSettings.value = emailSettingsData
 
     // Set form values
     smsForm.value = {
-      enabled: settingsData?.enabled ?? true,
-      provider: settingsData?.provider || 'platform',
+      enabled: smsSettingsData?.enabled ?? true,
+      provider: smsSettingsData?.provider || 'platform',
       config: {} // Don't pre-fill encrypted values
     }
   } catch (error) {
@@ -210,6 +216,17 @@ const loadData = async () => {
     toast.error(t('common.error'))
   } finally {
     loading.value = false
+  }
+}
+
+// Load email settings separately
+const loadEmailSettings = async () => {
+  if (!currentPartnerId.value) return
+
+  try {
+    emailSettings.value = await partnerEmailService.getEmailSettings(currentPartnerId.value)
+  } catch (error) {
+    console.error('Failed to load email settings:', error)
   }
 }
 
