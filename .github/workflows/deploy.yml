@@ -60,8 +60,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SES_REGION: ${{ secrets.AWS_SES_REGION }}
-          AWS_SES_FROM_EMAIL: ${{ secrets.AWS_SES_FROM_EMAIL }}
-          AWS_SES_FROM_NAME: ${{ secrets.AWS_SES_FROM_NAME }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         with:
@@ -71,7 +69,7 @@ jobs:
           port: 22
           timeout: 120s
           command_timeout: 30m
-          envs: TURBO_TOKEN,JWT_SECRET,ENCRYPTION_KEY,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_SES_REGION,AWS_SES_FROM_EMAIL,AWS_SES_FROM_NAME,GEMINI_API_KEY,FIRECRAWL_API_KEY
+          envs: TURBO_TOKEN,JWT_SECRET,ENCRYPTION_KEY,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_SES_REGION,GEMINI_API_KEY,FIRECRAWL_API_KEY
           script: |
             export PNPM_HOME="/root/.local/share/pnpm"
             export PATH="$PNPM_HOME:$PATH"
@@ -98,12 +96,10 @@ jobs:
             # Encryption
             ENCRYPTION_KEY=${ENCRYPTION_KEY}
 
-            # AWS SES (Email)
+            # AWS SES (Email) - fromEmail/fromName are in database (PlatformSettings)
             AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
             AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
             AWS_SES_REGION=${AWS_SES_REGION}
-            AWS_SES_FROM_EMAIL=${AWS_SES_FROM_EMAIL}
-            AWS_SES_FROM_NAME=${AWS_SES_FROM_NAME}
 
             # AI Translation (Gemini)
             GEMINI_API_KEY=${GEMINI_API_KEY}

@@ -34,14 +34,12 @@ const config = {
       : true  // Allow all origins in development
   },
 
-  // AWS
+  // AWS - fromEmail/fromName are stored in database (PlatformSettings)
   aws: {
     ses: {
       region: process.env.AWS_SES_REGION || 'eu-west-1',
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      fromEmail: process.env.AWS_SES_FROM_EMAIL || 'noreply@example.com',
-      fromName: process.env.AWS_SES_FROM_NAME || 'Booking Engine'
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     }
   }
 }

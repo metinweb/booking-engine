@@ -53,16 +53,17 @@ const getEmailSettings = async (partnerId = null) => {
     logger.warn('Failed to load email settings from database, falling back to env:', error.message)
   }
 
-  // Fall back to environment variables
+  // Fall back to environment variables (fromEmail/fromName must be set in PlatformSettings)
   if (config.aws?.ses?.accessKeyId && config.aws?.ses?.secretAccessKey) {
+    logger.warn('Using AWS credentials from env but fromEmail/fromName must be configured in Platform Settings')
     return {
       enabled: true,
       source: 'env',
       region: config.aws.ses.region,
       accessKeyId: config.aws.ses.accessKeyId,
       secretAccessKey: config.aws.ses.secretAccessKey,
-      fromEmail: config.aws.ses.fromEmail,
-      fromName: config.aws.ses.fromName
+      fromEmail: 'noreply@example.com', // Placeholder - must be set in PlatformSettings
+      fromName: 'Booking Engine'
     }
   }
 
