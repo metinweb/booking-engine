@@ -24,136 +24,264 @@
 
     <!-- Email Settings Section -->
     <div v-show="activeTab === 'email'" class="space-y-6">
-      <!-- Use Own SES Toggle -->
+      <!-- Email Provider Selection -->
       <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-6">
-        <div class="flex items-start justify-between">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
-              {{ $t('emailSetup.useOwnSES') }}
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-slate-400 mt-1">
-              {{ $t('emailSetup.useOwnSESDesc') }}
-            </p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          {{ $t('siteSettings.notifications.email.title') }}
+        </h3>
+        <div class="space-y-4">
+          <!-- Platform Email Option -->
+          <label
+            class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all"
+            :class="!emailForm.useOwnSES
+              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+              : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+          >
             <input
-              type="checkbox"
+              type="radio"
               v-model="emailForm.useOwnSES"
-              class="sr-only peer"
-              @change="handleEmailToggleChange"
+              :value="false"
+              class="mt-1 text-purple-600 focus:ring-purple-500"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-purple-600"></div>
+            <div class="ml-3">
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ $t('siteSettings.notifications.email.usePlatformEmail') }}
+              </span>
+              <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
+                {{ $t('siteSettings.notifications.email.usePlatformEmailDesc') }}
+              </p>
+            </div>
+          </label>
+
+          <!-- Own Domain Option -->
+          <label
+            class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all"
+            :class="emailForm.useOwnSES
+              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+              : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+          >
+            <input
+              type="radio"
+              v-model="emailForm.useOwnSES"
+              :value="true"
+              class="mt-1 text-purple-600 focus:ring-purple-500"
+            />
+            <div class="ml-3">
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ $t('siteSettings.notifications.email.useOwnDomain') }}
+              </span>
+              <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
+                {{ $t('siteSettings.notifications.email.useOwnDomainDesc') }}
+              </p>
+            </div>
           </label>
         </div>
       </div>
 
-      <!-- AWS Credentials Section -->
+      <!-- Own Domain Configuration -->
       <transition name="fade">
         <div v-if="emailForm.useOwnSES" class="space-y-6">
-          <!-- AWS Credentials Card -->
-          <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
-            <div class="p-4 border-b border-gray-200 dark:border-slate-700">
-              <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
-                <span class="material-icons text-orange-500 mr-2">cloud</span>
-                {{ $t('emailSetup.awsCredentials') }}
-              </h3>
-            </div>
-            <div class="p-6 space-y-4">
-              <!-- Region -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  {{ $t('emailSetup.region') }}
-                </label>
-                <select
-                  v-model="emailForm.aws.region"
-                  autocomplete="off"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                >
-                  <option value="eu-west-1">EU (Ireland) - eu-west-1</option>
-                  <option value="eu-central-1">EU (Frankfurt) - eu-central-1</option>
-                  <option value="us-east-1">US East (N. Virginia) - us-east-1</option>
-                  <option value="us-west-2">US West (Oregon) - us-west-2</option>
-                  <option value="ap-southeast-1">Asia Pacific (Singapore) - ap-southeast-1</option>
-                </select>
-              </div>
+          <!-- Step 1: Domain & Sender Info (if no domain yet) -->
+          <div v-if="!domainVerification" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
+            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2">1</span>
+              {{ $t('siteSettings.notifications.email.domainAndSender') }}
+            </h4>
 
-              <!-- Access Key ID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  {{ $t('emailSetup.accessKeyId') }}
+                  {{ $t('siteSettings.notifications.email.domain') }} *
                 </label>
                 <input
+                  v-model="domainForm.domain"
                   type="text"
-                  v-model="emailForm.aws.accessKeyId"
-                  :placeholder="$t('emailSetup.accessKeyIdPlaceholder')"
-                  autocomplete="nope"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                  :placeholder="$t('siteSettings.notifications.email.domainPlaceholder')"
                 />
               </div>
-
-              <!-- Secret Access Key -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  {{ $t('emailSetup.secretAccessKey') }}
+                  {{ $t('siteSettings.notifications.email.fromEmail') }}
                 </label>
-                <div class="relative">
-                  <input
-                    :type="showSecretKey ? 'text' : 'password'"
-                    v-model="emailForm.aws.secretAccessKey"
-                    :placeholder="$t('emailSetup.secretAccessKeyPlaceholder')"
-                    autocomplete="new-password"
-                    class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                  />
-                  <button
-                    type="button"
-                    @click="showSecretKey = !showSecretKey"
-                    class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
-                  >
-                    <span class="material-icons text-xl">{{ showSecretKey ? 'visibility_off' : 'visibility' }}</span>
-                  </button>
+                <input
+                  v-model="domainForm.fromEmail"
+                  type="email"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                  :placeholder="$t('siteSettings.notifications.email.fromEmailPlaceholder')"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('siteSettings.notifications.email.fromName') }}
+                </label>
+                <input
+                  v-model="domainForm.fromName"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                  :placeholder="$t('siteSettings.notifications.email.fromNamePlaceholder')"
+                />
+              </div>
+            </div>
+
+            <div class="mt-6">
+              <button
+                @click="handleCreateIdentity"
+                :disabled="!domainForm.domain || creatingIdentity"
+                class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
+              >
+                <span v-if="creatingIdentity" class="material-icons animate-spin mr-2">refresh</span>
+                <span v-else class="material-icons mr-2">add_circle</span>
+                {{ creatingIdentity ? $t('siteSettings.notifications.email.creatingIdentity') : $t('siteSettings.notifications.email.createIdentity') }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 2: DNS Records (after domain created) -->
+          <template v-if="domainVerification">
+            <!-- Domain Info Header -->
+            <div class="flex items-center justify-between bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
+              <div class="flex items-center">
+                <span class="material-icons text-purple-500 mr-2">domain</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{ domainVerification.domain }}</span>
+                <span
+                  class="ml-3 px-2 py-1 text-xs font-medium rounded-full"
+                  :class="{
+                    'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300': domainVerification.status === 'verified',
+                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300': domainVerification.status === 'pending',
+                    'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300': domainVerification.status === 'failed',
+                    'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': !['verified', 'pending', 'failed'].includes(domainVerification.status)
+                  }"
+                >
+                  {{ $t('siteSettings.notifications.email.' + (domainVerification.status || 'pending')) }}
+                </span>
+              </div>
+              <button
+                @click="handleDeleteIdentity"
+                :disabled="deletingIdentity"
+                class="text-red-500 hover:text-red-600 flex items-center text-sm"
+              >
+                <span v-if="deletingIdentity" class="material-icons animate-spin text-sm mr-1">refresh</span>
+                <span v-else class="material-icons text-sm mr-1">delete</span>
+                {{ $t('siteSettings.notifications.email.deleteIdentity') }}
+              </button>
+            </div>
+
+            <!-- DNS Records -->
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
+              <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2">2</span>
+                {{ $t('siteSettings.notifications.email.dnsRecords') }}
+              </h4>
+              <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+                {{ $t('siteSettings.notifications.email.dnsRecordsHelp') }}
+              </p>
+
+              <!-- DNS Records Table -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead class="bg-gray-50 dark:bg-slate-700">
+                    <tr>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-slate-300">
+                        {{ $t('siteSettings.notifications.email.recordType') }}
+                      </th>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-slate-300">
+                        {{ $t('siteSettings.notifications.email.recordName') }}
+                      </th>
+                      <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-slate-300">
+                        {{ $t('siteSettings.notifications.email.recordValue') }}
+                      </th>
+                      <th class="px-3 py-2 w-20"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-100 dark:divide-slate-600">
+                    <tr v-for="(record, index) in dnsRecords" :key="index" class="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                      <td class="px-3 py-3">
+                        <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                          {{ record.type }}
+                        </span>
+                      </td>
+                      <td class="px-3 py-3 font-mono text-xs break-all max-w-xs">
+                        {{ record.name }}
+                      </td>
+                      <td class="px-3 py-3 font-mono text-xs break-all max-w-xs">
+                        {{ record.value }}
+                      </td>
+                      <td class="px-3 py-3">
+                        <button
+                          @click="copyToClipboard(record)"
+                          class="text-purple-600 hover:text-purple-700 flex items-center text-xs"
+                        >
+                          <span class="material-icons text-sm">content_copy</span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Step 3: Verification -->
+            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
+              <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2">3</span>
+                {{ $t('siteSettings.notifications.email.verificationStatus') }}
+              </h4>
+
+              <div class="flex items-center gap-4">
+                <button
+                  @click="handleCheckVerification"
+                  :disabled="checkingVerification"
+                  class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center"
+                >
+                  <span v-if="checkingVerification" class="material-icons animate-spin mr-2">refresh</span>
+                  <span v-else class="material-icons mr-2">refresh</span>
+                  {{ checkingVerification ? $t('siteSettings.notifications.email.checking') : $t('siteSettings.notifications.email.checkVerification') }}
+                </button>
+
+                <div v-if="domainVerification.status === 'verified'" class="flex items-center text-green-600">
+                  <span class="material-icons mr-1">check_circle</span>
+                  {{ $t('siteSettings.notifications.email.verified') }}
+                </div>
+                <div v-else-if="domainVerification.status === 'pending'" class="flex items-center text-yellow-600">
+                  <span class="material-icons mr-1">schedule</span>
+                  {{ $t('siteSettings.notifications.email.pending') }}
+                </div>
+                <div v-else-if="domainVerification.status === 'failed'" class="flex items-center text-red-600">
+                  <span class="material-icons mr-1">error</span>
+                  {{ $t('siteSettings.notifications.email.failed') }}
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Sender Settings Card -->
-          <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
-            <div class="p-4 border-b border-gray-200 dark:border-slate-700">
-              <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
-                <span class="material-icons text-green-500 mr-2">mail_outline</span>
-                {{ $t('emailSetup.senderSettings') }}
-              </h3>
-            </div>
-            <div class="p-6 space-y-4">
-              <!-- From Email -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  {{ $t('emailSetup.fromEmail') }}
-                </label>
-                <input
-                  type="email"
-                  v-model="emailForm.aws.fromEmail"
-                  :placeholder="$t('emailSetup.fromEmailPlaceholder')"
-                  autocomplete="off"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                />
-              </div>
+            <!-- Step 4: Test Email (only if verified) -->
+            <div v-if="domainVerification.status === 'verified'" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
+              <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <span class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 text-sm flex items-center justify-center mr-2">4</span>
+                {{ $t('siteSettings.notifications.email.sendTestEmail') }}
+              </h4>
 
-              <!-- From Name -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                  {{ $t('emailSetup.fromName') }}
-                </label>
-                <input
-                  type="text"
-                  v-model="emailForm.aws.fromName"
-                  :placeholder="$t('emailSetup.fromNamePlaceholder')"
-                  autocomplete="off"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                />
+              <div class="flex items-center gap-3">
+                <div class="flex-1">
+                  <input
+                    v-model="testEmailAddress"
+                    type="email"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
+                    :placeholder="$t('siteSettings.notifications.email.testEmailAddress')"
+                  />
+                </div>
+                <button
+                  @click="handleTestEmail"
+                  :disabled="!testEmailAddress || sendingTestEmail"
+                  class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
+                >
+                  <span v-if="sendingTestEmail" class="material-icons animate-spin mr-2">refresh</span>
+                  <span v-else class="material-icons mr-2">send</span>
+                  {{ $t('siteSettings.notifications.email.sendTestEmail') }}
+                </button>
               </div>
             </div>
-          </div>
+          </template>
         </div>
       </transition>
 
@@ -170,19 +298,6 @@
             </p>
           </div>
         </div>
-      </div>
-
-      <!-- Save Button -->
-      <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-slate-700">
-        <button
-          @click="saveEmailSettings"
-          :disabled="savingEmail"
-          class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
-        >
-          <span v-if="savingEmail" class="material-icons animate-spin mr-2">refresh</span>
-          <span v-else class="material-icons mr-2">save</span>
-          {{ $t('common.save') }}
-        </button>
       </div>
     </div>
 
@@ -506,6 +621,20 @@ const sendingTestSMS = ref(false)
 const showSecretKey = ref(false)
 const testPhone = ref('')
 
+// Domain identity states
+const creatingIdentity = ref(false)
+const deletingIdentity = ref(false)
+const checkingVerification = ref(false)
+const sendingTestEmail = ref(false)
+const testEmailAddress = ref('')
+const domainVerification = ref(null)
+const dnsRecords = ref([])
+const domainForm = reactive({
+  domain: '',
+  fromEmail: '',
+  fromName: ''
+})
+
 const tabs = computed(() => [
   { id: 'email', icon: 'email', label: t('smsSetup.tabs.email') },
   { id: 'sms', icon: 'sms', label: t('smsSetup.tabs.sms') }
@@ -581,6 +710,18 @@ const loadSettings = async () => {
         fromEmail: emailSettings.aws?.fromEmail || '',
         fromName: emailSettings.aws?.fromName || ''
       }
+
+      // Load domain verification data
+      if (emailSettings.domainVerification) {
+        domainVerification.value = emailSettings.domainVerification
+        // Generate DNS records from tokens
+        if (emailSettings.domainVerification.dkimTokens) {
+          dnsRecords.value = generateDnsRecords(
+            emailSettings.domainVerification.domain,
+            emailSettings.domainVerification.dkimTokens
+          )
+        }
+      }
     }
 
     // Load SMS settings
@@ -595,6 +736,134 @@ const loadSettings = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// Generate DNS records from DKIM tokens
+const generateDnsRecords = (domain, dkimTokens) => {
+  const records = []
+  if (dkimTokens) {
+    dkimTokens.forEach((token, i) => {
+      records.push({
+        type: 'CNAME',
+        name: `${token}._domainkey.${domain}`,
+        value: `${token}.dkim.amazonses.com`,
+        purpose: `DKIM Key ${i + 1}`
+      })
+    })
+  }
+  records.push({
+    type: 'TXT',
+    name: domain,
+    value: 'v=spf1 include:amazonses.com ~all',
+    purpose: 'SPF Record'
+  })
+  return records
+}
+
+// Create domain identity
+const handleCreateIdentity = async () => {
+  if (!domainForm.domain) return
+
+  creatingIdentity.value = true
+  try {
+    const partnerId = currentPartnerId.value || authStore.user?.partner
+    const result = await partnerEmailService.createIdentity(partnerId, {
+      domain: domainForm.domain,
+      fromEmail: domainForm.fromEmail,
+      fromName: domainForm.fromName
+    })
+
+    domainVerification.value = {
+      domain: result.domain,
+      status: result.dkimStatus || 'pending',
+      dkimTokens: result.dkimTokens
+    }
+
+    dnsRecords.value = result.dnsRecords || generateDnsRecords(result.domain, result.dkimTokens)
+
+    toast.success(t('siteSettings.notifications.email.identityCreated'))
+  } catch (error) {
+    toast.error(error.response?.data?.error || t('common.operationFailed'))
+  } finally {
+    creatingIdentity.value = false
+  }
+}
+
+// Check verification status
+const handleCheckVerification = async () => {
+  checkingVerification.value = true
+  try {
+    const partnerId = currentPartnerId.value || authStore.user?.partner
+    const result = await partnerEmailService.getVerificationStatus(partnerId)
+
+    domainVerification.value = {
+      ...domainVerification.value,
+      status: result.status,
+      verified: result.verified
+    }
+
+    if (result.dnsRecords) {
+      dnsRecords.value = result.dnsRecords
+    }
+
+    if (result.verified) {
+      toast.success(t('siteSettings.notifications.email.verified'))
+    } else {
+      toast.info(t('siteSettings.notifications.email.' + result.status))
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.error || t('common.operationFailed'))
+  } finally {
+    checkingVerification.value = false
+  }
+}
+
+// Delete domain identity
+const handleDeleteIdentity = async () => {
+  if (!confirm(t('siteSettings.notifications.email.deleteIdentityConfirm'))) return
+
+  deletingIdentity.value = true
+  try {
+    const partnerId = currentPartnerId.value || authStore.user?.partner
+    await partnerEmailService.deleteIdentity(partnerId)
+
+    domainVerification.value = null
+    dnsRecords.value = []
+    domainForm.domain = ''
+    domainForm.fromEmail = ''
+    domainForm.fromName = ''
+    emailForm.useOwnSES = false
+
+    toast.success(t('siteSettings.notifications.email.identityDeleted'))
+  } catch (error) {
+    toast.error(error.response?.data?.error || t('common.operationFailed'))
+  } finally {
+    deletingIdentity.value = false
+  }
+}
+
+// Send test email
+const handleTestEmail = async () => {
+  if (!testEmailAddress.value) return
+
+  sendingTestEmail.value = true
+  try {
+    const partnerId = currentPartnerId.value || authStore.user?.partner
+    await partnerEmailService.testEmail(partnerId, testEmailAddress.value)
+    toast.success(t('siteSettings.notifications.email.testEmailSent'))
+  } catch (error) {
+    toast.error(error.response?.data?.error || t('common.operationFailed'))
+  } finally {
+    sendingTestEmail.value = false
+  }
+}
+
+// Copy to clipboard
+const copyToClipboard = (record) => {
+  const text = `${record.name}\t${record.value}`
+  navigator.clipboard.writeText(text).then(() => {
+    toast.success(t('siteSettings.notifications.email.copied'))
+  })
 }
 
 const handleEmailToggleChange = () => {
