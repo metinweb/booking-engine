@@ -2325,10 +2325,7 @@ export const completeDraft = asyncHandler(async (req, res) => {
 	if (draft.invoiceDetails?.type === 'individual') {
 		if (!draft.invoiceDetails.individual?.firstName) errors.push('INVOICE_FIRST_NAME_REQUIRED')
 		if (!draft.invoiceDetails.individual?.lastName) errors.push('INVOICE_LAST_NAME_REQUIRED')
-		// TC number required for TR citizens
-		if (draft.leadGuest?.nationality === 'TR' && !draft.invoiceDetails.individual?.tcNumber) {
-			errors.push('TC_NUMBER_REQUIRED_FOR_TR_CITIZENS')
-		}
+		// TC number is optional
 	} else if (draft.invoiceDetails?.type === 'corporate') {
 		if (!draft.invoiceDetails.corporate?.companyName) errors.push('COMPANY_NAME_REQUIRED')
 		if (!draft.invoiceDetails.corporate?.taxNumber) errors.push('TAX_NUMBER_REQUIRED')
