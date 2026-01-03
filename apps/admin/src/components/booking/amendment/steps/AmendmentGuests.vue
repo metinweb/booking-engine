@@ -82,18 +82,16 @@
 					</select>
 				</div>
 
-				<!-- TC Number (for Turkish citizens) -->
+				<!-- TC Number (for Turkish citizens - optional) -->
 				<div>
 					<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
 						{{ $t('booking.tcNumber') }}
-						<span v-if="localLeadGuest.nationality === 'TR'" class="text-red-500">*</span>
 					</label>
 					<input
 						v-model="localLeadGuest.tcNumber"
 						type="text"
 						maxlength="11"
 						class="w-full px-4 py-2 border rounded-lg dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:ring-2 focus:ring-indigo-500"
-						:class="{ 'border-red-500': localLeadGuest.nationality === 'TR' && !localLeadGuest.tcNumber }"
 						placeholder="11 haneli TC kimlik numarası"
 					/>
 				</div>
@@ -214,8 +212,9 @@ const idValidationMessage = computed(() => {
 	const tcNumber = localLeadGuest.value.tcNumber
 	const passportNumber = localLeadGuest.value.passportNumber
 
-	if (nationality === 'TR' && !tcNumber) {
-		return t('booking.tcNumberRequired')
+	// TC number is optional - only validate format if provided
+	if (nationality === 'TR' && tcNumber && tcNumber.length !== 11) {
+		return t('booking.tcNumberInvalid')
 	}
 	if (nationality && nationality !== 'TR' && !passportNumber) {
 		return t('booking.passportRequired')

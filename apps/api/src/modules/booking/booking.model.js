@@ -381,7 +381,7 @@ const bookingSchema = new mongoose.Schema({
 		individual: {
 			firstName: { type: String, trim: true },
 			lastName: { type: String, trim: true },
-			tcNumber: { type: String, trim: true }, // Required for TR citizens
+			tcNumber: { type: String, trim: true }, // Optional for TR citizens
 			address: {
 				street: { type: String, trim: true },
 				district: { type: String, trim: true },

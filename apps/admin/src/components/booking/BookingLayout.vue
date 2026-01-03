@@ -398,10 +398,8 @@ const validationErrors = computed(() => {
 	if (!lead.nationality?.trim()) {
 		errors.push(t('booking.validation.leadGuestNationality'))
 	}
-	// TC number for Turkish lead guest
-	if (lead.nationality === 'TR' && !lead.tcNumber?.trim()) {
-		errors.push(t('booking.validation.leadGuestTcNumber'))
-	} else if (lead.nationality === 'TR' && lead.tcNumber && !isValidTcNumber(lead.tcNumber)) {
+	// TC number format validation (optional, but if provided must be valid)
+	if (lead.nationality === 'TR' && lead.tcNumber && !isValidTcNumber(lead.tcNumber)) {
 		errors.push(t('booking.validation.invalidTcNumber'))
 	}
 
@@ -429,10 +427,8 @@ const validationErrors = computed(() => {
 			if (!guest.nationality?.trim()) {
 				errors.push(`${guestLabel}: ${t('booking.validation.nationalityRequired')}`)
 			}
-			// TC number for Turkish guests
-			if (guest.nationality === 'TR' && !guest.tcNumber?.trim()) {
-				errors.push(`${guestLabel}: ${t('booking.validation.tcNumberRequired')}`)
-			} else if (guest.nationality === 'TR' && guest.tcNumber && !isValidTcNumber(guest.tcNumber)) {
+			// TC number format validation (optional, but if provided must be valid)
+			if (guest.nationality === 'TR' && guest.tcNumber && !isValidTcNumber(guest.tcNumber)) {
 				errors.push(`${guestLabel}: ${t('booking.validation.invalidTcNumber')}`)
 			}
 			// Birth date for children
@@ -453,9 +449,9 @@ const validationErrors = computed(() => {
 		if (!invoice.individual?.lastName?.trim()) {
 			errors.push(t('booking.validation.invoiceLastName'))
 		}
-		// TC number required for Turkish citizens
-		if (lead.nationality === 'TR' && !invoice.individual?.tcNumber?.trim()) {
-			errors.push(t('booking.validation.tcNumber'))
+		// TC number format validation (optional, but if provided must be valid)
+		if (lead.nationality === 'TR' && invoice.individual?.tcNumber && !isValidTcNumber(invoice.individual.tcNumber)) {
+			errors.push(t('booking.validation.invalidTcNumber'))
 		}
 	} else if (invoice.type === 'corporate') {
 		if (!invoice.corporate?.companyName?.trim()) {
