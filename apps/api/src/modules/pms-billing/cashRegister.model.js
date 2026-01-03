@@ -655,6 +655,87 @@ cashRegisterSchema.methods.initializeCurrencyBalances = function(currencies, ope
   return this
 }
 
+/**
+ * Method: Reverse a transaction (for voided/cancelled transactions)
+ * Decrements all counters that were incremented when the transaction was recorded
+ */
+cashRegisterSchema.methods.reverseTransaction = async function(transaction) {
+  const currency = transaction.currency || 'TRY'
+  const amount = transaction.amount
+
+  // Decrement transaction counts
+  this.transactionCounts.total = Math.max(0, (this.transactionCounts.total || 0) - 1)
+
+  // Find or create currency balance and totals
+  let balance = this.currentBalances.find(b => b.currency === currency)
+  let currencyTotal = this.currencyTotals.find(t => t.currency === currency)
+
+  // Reverse based on payment method
+  if (transaction.paymentMethod === 'cash') {
+    this.transactionCounts.cash = Math.max(0, (this.transactionCounts.cash || 0) - 1)
+    if (balance) balance.cash -= amount
+    if (currencyTotal) currencyTotal.cashReceived -= amount
+    // Legacy single-currency (TRY)
+    if (currency === 'TRY') {
+      this.currentBalance.cash -= amount
+      this.totals.cashReceived -= amount
+    }
+  } else if (['credit_card', 'debit_card'].includes(transaction.paymentMethod)) {
+    this.transactionCounts.card = Math.max(0, (this.transactionCounts.card || 0) - 1)
+    if (balance) balance.card -= amount
+    if (currencyTotal) currencyTotal.cardReceived -= amount
+    // Legacy single-currency (TRY)
+    if (currency === 'TRY') {
+      this.currentBalance.card -= amount
+      this.totals.cardReceived -= amount
+    }
+  } else {
+    if (balance) balance.other -= amount
+    if (currencyTotal) currencyTotal.otherReceived -= amount
+    // Legacy single-currency (TRY)
+    if (currency === 'TRY') {
+      this.currentBalance.other -= amount
+      this.totals.otherReceived -= amount
+    }
+  }
+
+  // Reverse totals based on transaction type
+  if (transaction.type === 'refund') {
+    this.transactionCounts.refunds = Math.max(0, (this.transactionCounts.refunds || 0) - 1)
+    if (currencyTotal) currencyTotal.refunds -= Math.abs(amount)
+    if (currency === 'TRY') {
+      this.totals.refunds -= Math.abs(amount)
+    }
+  } else {
+    if (currencyTotal) currencyTotal.grossSales -= amount
+    if (currency === 'TRY') {
+      this.totals.grossSales -= amount
+    }
+  }
+
+  // Recalculate net sales
+  if (currencyTotal) {
+    currencyTotal.netSales = currencyTotal.grossSales - currencyTotal.discounts - currencyTotal.refunds
+  }
+  this.totals.netSales = this.totals.grossSales - this.totals.discounts - this.totals.refunds
+
+  // Increment void count
+  this.transactionCounts.voids = (this.transactionCounts.voids || 0) + 1
+
+  // Add cash movement for reversal
+  this.cashMovements.push({
+    type: CASH_MOVEMENT_TYPES.ADJUSTMENT,
+    amount: -amount,
+    currency,
+    description: `Void: ${transaction.transactionNumber || transaction._id}`,
+    reference: transaction.transactionNumber,
+    transaction: transaction._id,
+    createdAt: new Date()
+  })
+
+  return this.save()
+}
+
 // Static: Get active shift for cashier
 cashRegisterSchema.statics.getActiveShift = function(hotelId, cashierId = null) {
   const query = {

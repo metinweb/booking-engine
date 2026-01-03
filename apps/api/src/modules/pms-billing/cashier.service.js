@@ -481,48 +481,8 @@ export const createTransaction = asyncHandler(async (req, res) => {
 
   await transaction.save()
 
-  // Record in active shift if exists (with currency support)
-  if (activeShift) {
-    await activeShift.recordTransactionWithCurrency(transaction, currency)
-  }
-
-  // If linked to stay, update stay financials
-  if (stayId) {
-    const stay = await Stay.findById(stayId)
-    if (stay) {
-      if (type === TRANSACTION_TYPES.PAYMENT) {
-        // Use amountInTRY for balance calculation (consistent reporting)
-        stay.paidAmount = (stay.paidAmount || 0) + amountInTRY
-        stay.balance = stay.totalAmount - stay.paidAmount
-        stay.payments.push({
-          amount,
-          method: paymentMethod,
-          date: new Date(),
-          reference,
-          // Multi-currency support
-          currency,
-          exchangeRate: currency !== 'TRY' ? exchangeRate : undefined,
-          amountInBaseCurrency: amountInTRY
-        })
-      } else if ([TRANSACTION_TYPES.EXTRA_CHARGE, TRANSACTION_TYPES.RESTAURANT, TRANSACTION_TYPES.BAR, TRANSACTION_TYPES.MINIBAR, TRANSACTION_TYPES.SPA, TRANSACTION_TYPES.LAUNDRY, TRANSACTION_TYPES.PARKING].includes(type)) {
-        stay.extras.push({
-          description,
-          amount,
-          quantity,
-          category: type,
-          date: new Date(),
-          // Multi-currency support
-          currency,
-          exchangeRate: currency !== 'TRY' ? exchangeRate : undefined,
-          amountInBaseCurrency: amountInTRY
-        })
-        // Use amountInTRY for total calculation (consistent reporting)
-        stay.totalAmount = (stay.totalAmount || 0) + amountInTRY
-        stay.balance = stay.totalAmount - (stay.paidAmount || 0)
-      }
-      await stay.save()
-    }
-  }
+  // NOTE: CashRegister and Stay sync is now handled automatically by Transaction post-save hooks
+  // See transaction.model.js for auto-sync implementation
 
   // Emit socket event for real-time updates
   emitTransactionUpdate(hotelId, 'created', {
@@ -625,11 +585,8 @@ export const refundTransaction = asyncHandler(async (req, res) => {
 
   const refund = await transaction.createRefund(refundAmount, reason, req.user._id)
 
-  // Record in active shift
-  const activeShift = await CashRegister.getActiveShift(hotelId)
-  if (activeShift) {
-    await activeShift.recordTransaction(refund)
-  }
+  // NOTE: CashRegister sync is now handled automatically by Transaction post-save hooks
+  // See transaction.model.js for auto-sync implementation
 
   // Emit socket event for real-time updates
   emitTransactionUpdate(hotelId, 'refunded', {

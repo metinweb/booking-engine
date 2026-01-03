@@ -460,4 +460,168 @@ transactionSchema.methods.createRefund = async function(amount, reason, userId) 
   return refund
 }
 
+// ==========================================
+// POST-SAVE HOOKS - AUTO SYNC
+// ==========================================
+
+/**
+ * Post-save: Auto-sync with CashRegister
+ * When a new transaction is created, automatically record it in the active shift
+ */
+transactionSchema.post('save', async function(doc) {
+  // Skip if not a new document or if already has cashRegister assigned and was just updating
+  if (!doc.wasNew) return
+
+  try {
+    const CashRegister = mongoose.model('CashRegister')
+
+    // If transaction doesn't have a cashRegister assigned, find the active shift
+    if (!doc.cashRegister) {
+      const activeShift = await CashRegister.getActiveShift(doc.hotel)
+      if (activeShift) {
+        // Update transaction with cashRegister reference
+        await mongoose.model('Transaction').findByIdAndUpdate(doc._id, {
+          cashRegister: activeShift._id
+        })
+        // Record in shift
+        await activeShift.recordTransactionWithCurrency(doc, doc.currency || 'TRY')
+      }
+    } else {
+      // CashRegister was assigned, record the transaction
+      const shift = await CashRegister.findById(doc.cashRegister)
+      if (shift && shift.status === 'open') {
+        await shift.recordTransactionWithCurrency(doc, doc.currency || 'TRY')
+      }
+    }
+  } catch (error) {
+    // Log error but don't fail the transaction save
+    console.error('[Transaction Post-Save] CashRegister sync error:', error.message)
+  }
+})
+
+/**
+ * Post-save: Auto-sync with Stay for payment transactions
+ * When a payment transaction is created, update Stay.payments array
+ */
+transactionSchema.post('save', async function(doc) {
+  // Only process new payment-type transactions
+  if (!doc.wasNew) return
+  if (!doc.stay) return
+
+  const paymentTypes = [
+    TRANSACTION_TYPES.PAYMENT,
+    TRANSACTION_TYPES.DEPOSIT,
+    TRANSACTION_TYPES.ADVANCE
+  ]
+
+  const chargeTypes = [
+    TRANSACTION_TYPES.EXTRA_CHARGE,
+    TRANSACTION_TYPES.RESTAURANT,
+    TRANSACTION_TYPES.BAR,
+    TRANSACTION_TYPES.MINIBAR,
+    TRANSACTION_TYPES.SPA,
+    TRANSACTION_TYPES.LAUNDRY,
+    TRANSACTION_TYPES.PARKING,
+    TRANSACTION_TYPES.PHONE,
+    TRANSACTION_TYPES.OTHER_INCOME
+  ]
+
+  try {
+    const Stay = mongoose.model('Stay')
+    const stay = await Stay.findById(doc.stay)
+    if (!stay) return
+
+    if (paymentTypes.includes(doc.type)) {
+      // Add payment to Stay using model method
+      await stay.addPayment({
+        amount: doc.amountInTRY || doc.amount,
+        method: doc.paymentMethod,
+        currency: doc.currency,
+        exchangeRate: doc.exchangeRate,
+        amountInBaseCurrency: doc.amountInTRY,
+        reference: doc.reference,
+        notes: doc.notes
+      }, doc.createdBy)
+    } else if (chargeTypes.includes(doc.type)) {
+      // Add extra charge to Stay using model method
+      await stay.addExtra({
+        description: doc.description,
+        amount: doc.amountInTRY || doc.amount,
+        quantity: doc.quantity || 1,
+        category: mapTransactionTypeToExtraCategory(doc.type),
+        currency: doc.currency,
+        exchangeRate: doc.exchangeRate,
+        amountInBaseCurrency: doc.amountInTRY
+      }, doc.createdBy)
+    }
+  } catch (error) {
+    console.error('[Transaction Post-Save] Stay sync error:', error.message)
+  }
+})
+
+/**
+ * Post-save: Handle void/cancel - reverse CashRegister counters
+ */
+transactionSchema.post('findOneAndUpdate', async function(doc) {
+  if (!doc) return
+
+  // Check if status was changed to cancelled
+  const update = this.getUpdate()
+  if (!update || !update.$set || update.$set.status !== 'cancelled') return
+
+  try {
+    if (doc.cashRegister) {
+      const CashRegister = mongoose.model('CashRegister')
+      const shift = await CashRegister.findById(doc.cashRegister)
+      if (shift) {
+        await shift.reverseTransaction(doc)
+      }
+    }
+
+    // If this was a payment transaction, also update Stay
+    const paymentTypes = [
+      TRANSACTION_TYPES.PAYMENT,
+      TRANSACTION_TYPES.DEPOSIT,
+      TRANSACTION_TYPES.ADVANCE
+    ]
+
+    if (doc.stay && paymentTypes.includes(doc.type)) {
+      const Stay = mongoose.model('Stay')
+      const stay = await Stay.findById(doc.stay)
+      if (stay) {
+        // Remove the payment from Stay.payments array
+        stay.payments = stay.payments.filter(p =>
+          Math.abs(p.amount - (doc.amountInTRY || doc.amount)) > 0.01 ||
+          p.method !== doc.paymentMethod
+        )
+        await stay.save()
+      }
+    }
+  } catch (error) {
+    console.error('[Transaction Post-Update] Void rollback error:', error.message)
+  }
+})
+
+// Helper: Map transaction type to extra category
+function mapTransactionTypeToExtraCategory(type) {
+  const mapping = {
+    [TRANSACTION_TYPES.RESTAURANT]: 'restaurant',
+    [TRANSACTION_TYPES.BAR]: 'restaurant',
+    [TRANSACTION_TYPES.MINIBAR]: 'minibar',
+    [TRANSACTION_TYPES.SPA]: 'spa',
+    [TRANSACTION_TYPES.LAUNDRY]: 'laundry',
+    [TRANSACTION_TYPES.PHONE]: 'phone',
+    [TRANSACTION_TYPES.PARKING]: 'other',
+    [TRANSACTION_TYPES.EXTRA_CHARGE]: 'other',
+    [TRANSACTION_TYPES.OTHER_INCOME]: 'other'
+  }
+  return mapping[type] || 'other'
+}
+
+// Pre-save: Mark as new for post-save hooks
+transactionSchema.pre('save', function(next) {
+  this.wasNew = this.isNew
+  next()
+})
+
 export default mongoose.model('Transaction', transactionSchema)
