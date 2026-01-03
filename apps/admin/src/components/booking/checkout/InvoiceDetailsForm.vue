@@ -301,6 +301,13 @@
 <script setup>
 import { computed, watch } from 'vue'
 import { useBookingStore } from '@/stores/booking'
+import {
+	useBookingValidation,
+	validateTcNumber,
+	formatTcNumber
+} from '@/composables/useBookingValidation'
+
+const { getFieldClass: getValidationFieldClass } = useBookingValidation()
 
 const props = defineProps({
 	invoiceDetails: {
@@ -346,56 +353,21 @@ const isTurkishCitizen = computed(() => {
 	return bookingStore.guests.leadGuest?.nationality === 'TR'
 })
 
-// Get field validation class
-const getFieldClass = (type, field) => {
-	if (!props.showValidation) return ''
+// Build root data for validation context (for showWhen conditions)
+const rootData = computed(() => ({
+	leadGuest: bookingStore.guests.leadGuest
+}))
 
+// Get field validation class using centralized validation
+const getFieldClass = (type, field) => {
+	const schemaName = type === 'individual' ? 'invoiceIndividual' : 'invoiceCorporate'
 	const data = type === 'individual' ? props.invoiceDetails.individual : props.invoiceDetails.corporate
 	const value = data?.[field]
-
-	// Required fields
-	const requiredIndividual = ['firstName', 'lastName']
-	const requiredCorporate = ['companyName', 'taxNumber', 'taxOffice']
-	// TC Number is optional - only validate format if provided
-
-	const requiredFields = type === 'individual' ? requiredIndividual : requiredCorporate
-
-	if (requiredFields.includes(field)) {
-		if (!value || value.trim() === '') {
-			return 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:border-red-500 focus:ring-red-500'
-		}
-
-		// Special validation for TC number
-		if (field === 'tcNumber' && !isValidTcNumber(value)) {
-			return 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:border-red-500 focus:ring-red-500'
-		}
-
-		return 'border-green-500 bg-green-50 dark:bg-green-900/10'
-	}
-
-	return ''
+	return getValidationFieldClass(schemaName, field, value, data || {}, props.showValidation)
 }
 
-// Validate TC number (11 digits, starts with non-zero)
-const isValidTcNumber = (tc) => {
-	if (!tc || tc.length !== 11) return false
-	if (!/^\d{11}$/.test(tc)) return false
-	if (tc[0] === '0') return false
-
-	// TC algorithm validation
-	const digits = tc.split('').map(Number)
-	const sum1 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]
-	const sum2 = digits[1] + digits[3] + digits[5] + digits[7]
-	const check1 = (sum1 * 7 - sum2) % 10
-	const check2 = (sum1 + sum2 + digits[9]) % 10
-
-	return digits[9] === check1 && digits[10] === check2
-}
-
-// Format TC number (only digits)
-const formatTcNumber = (value) => {
-	return value.replace(/\D/g, '').slice(0, 11)
-}
+// Helper alias for template
+const isValidTcNumber = validateTcNumber
 
 // Update invoice type
 const updateType = (type) => {

@@ -16,6 +16,7 @@ import Stay, { STAY_STATUS, PAYMENT_STATUS } from '../pms-frontdesk/stay.model.j
 import pricingService from '../../services/pricingService.js'
 import { BadRequestError, NotFoundError, ForbiddenError } from '../../core/errors.js'
 import { emitReservationUpdate, getGuestDisplayName } from '../pms/pmsSocket.js'
+import bookingValidation from '../../validation/bookingValidation.js'
 
 // Helper: Get partner ID from request
 const getPartnerId = (req) => {
@@ -2303,40 +2304,25 @@ export const completeDraft = asyncHandler(async (req, res) => {
 		throw new NotFoundError('DRAFT_NOT_FOUND')
 	}
 
-	// Validate required fields
-	const errors = []
+	// Validate using centralized validation schema
+	// Tüm validasyon kuralları: /validation/bookingValidation.js
+	const validationResult = bookingValidation.validateBooking({
+		hotel: draft.hotel,
+		checkIn: draft.checkIn,
+		checkOut: draft.checkOut,
+		rooms: draft.rooms,
+		leadGuest: {
+			...draft.leadGuest,
+			email: draft.contact?.email,
+			phone: draft.contact?.phone
+		},
+		roomGuests: draft.roomGuests,
+		invoiceDetails: draft.invoiceDetails,
+		payment: draft.payment
+	})
 
-	// Hotel & Dates
-	if (!draft.hotel) errors.push('HOTEL_REQUIRED')
-	if (!draft.checkIn) errors.push('CHECK_IN_REQUIRED')
-	if (!draft.checkOut) errors.push('CHECK_OUT_REQUIRED')
-	if (!draft.rooms || draft.rooms.length === 0) errors.push('ROOMS_REQUIRED')
-
-	// Lead guest
-	if (!draft.leadGuest?.firstName) errors.push('LEAD_GUEST_FIRST_NAME_REQUIRED')
-	if (!draft.leadGuest?.lastName) errors.push('LEAD_GUEST_LAST_NAME_REQUIRED')
-
-	// Contact
-	if (!draft.contact?.email) errors.push('CONTACT_EMAIL_REQUIRED')
-	if (!draft.contact?.phone) errors.push('CONTACT_PHONE_REQUIRED')
-
-	// Invoice details
-	if (!draft.invoiceDetails?.type) errors.push('INVOICE_TYPE_REQUIRED')
-	if (draft.invoiceDetails?.type === 'individual') {
-		if (!draft.invoiceDetails.individual?.firstName) errors.push('INVOICE_FIRST_NAME_REQUIRED')
-		if (!draft.invoiceDetails.individual?.lastName) errors.push('INVOICE_LAST_NAME_REQUIRED')
-		// TC number is optional
-	} else if (draft.invoiceDetails?.type === 'corporate') {
-		if (!draft.invoiceDetails.corporate?.companyName) errors.push('COMPANY_NAME_REQUIRED')
-		if (!draft.invoiceDetails.corporate?.taxNumber) errors.push('TAX_NUMBER_REQUIRED')
-		if (!draft.invoiceDetails.corporate?.taxOffice) errors.push('TAX_OFFICE_REQUIRED')
-	}
-
-	// Payment method
-	if (!draft.payment?.method) errors.push('PAYMENT_METHOD_REQUIRED')
-
-	if (errors.length > 0) {
-		throw new BadRequestError('VALIDATION_FAILED', { errors })
+	if (!validationResult.valid) {
+		throw new BadRequestError('VALIDATION_FAILED', { errors: validationResult.errors })
 	}
 
 	// Check allotment availability for all rooms/dates

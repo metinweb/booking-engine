@@ -113,6 +113,7 @@ import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
 import exchangeRoutes from './modules/exchange/exchange.routes.js'
 import notificationRoutes from './modules/notification/notification.routes.js'
 import paximumRoutes from './modules/paximum/paximum.routes.js'
+import validationRoutes from './validation/validation.routes.js'
 
 app.use('/api/auth', authRoutes)
 app.use('/api/partners', partnerRoutes)
@@ -134,6 +135,7 @@ app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/exchange', exchangeRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/paximum', paximumRoutes)
+app.use('/api/validation', validationRoutes)
 
 // 404 handler
 app.use(notFoundHandler)

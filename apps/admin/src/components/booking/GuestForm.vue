@@ -188,8 +188,15 @@ import { useI18n } from 'vue-i18n'
 import CountrySelect from '@/components/common/CountrySelect.vue'
 import BirthDatePicker from '@/components/common/BirthDatePicker.vue'
 import PhoneInput from '@/components/ui/form/PhoneInput.vue'
+import {
+	useBookingValidation,
+	validateTcNumber,
+	validateEmail,
+	formatTcNumber
+} from '@/composables/useBookingValidation'
 
 const { t } = useI18n()
+const { getFieldClass: getValidationFieldClass, isFieldRequired } = useBookingValidation()
 
 const props = defineProps({
 	modelValue: {
@@ -276,64 +283,23 @@ const hasAgeMismatch = computed(() => {
 })
 
 
-// Get field validation class
+// Determine schema type based on guest type
+const schemaName = computed(() => props.isLeadGuest ? 'leadGuest' : 'roomGuest')
+
+// Build guest data for validation context
+const guestData = computed(() => ({
+	...props.modelValue,
+	type: props.isChild ? 'child' : 'adult'
+}))
+
+// Get field validation class using centralized validation
 const getFieldClass = (field) => {
-	if (!props.showValidation) return ''
-
-	// Check if field is required and empty
-	const requiredFields = ['title', 'firstName', 'lastName', 'nationality']
-	if (props.isLeadGuest) {
-		requiredFields.push('email', 'phone')
-	}
-	if (props.isChild) {
-		requiredFields.push('birthDate')
-	}
-	// TC Number is optional - only validate format if provided
-
-	if (requiredFields.includes(field)) {
-		const value = props.modelValue[field]
-		if (!value || value.trim() === '') {
-			return 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:border-red-500 focus:ring-red-500'
-		}
-
-		// Special validations
-		if (field === 'email' && !isValidEmail(value)) {
-			return 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:border-red-500 focus:ring-red-500'
-		}
-		if (field === 'tcNumber' && !isValidTcNumber(value)) {
-			return 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:border-red-500 focus:ring-red-500'
-		}
-	}
-
-	return 'border-green-500 bg-green-50 dark:bg-green-900/10'
+	return getValidationFieldClass(schemaName.value, field, props.modelValue[field], guestData.value, props.showValidation)
 }
 
-// Validate email
-const isValidEmail = (email) => {
-	const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-	return re.test(email)
-}
-
-// Validate TC number (11 digits, starts with non-zero)
-const isValidTcNumber = (tc) => {
-	if (!tc || tc.length !== 11) return false
-	if (!/^\d{11}$/.test(tc)) return false
-	if (tc[0] === '0') return false
-
-	// TC algorithm validation
-	const digits = tc.split('').map(Number)
-	const sum1 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]
-	const sum2 = digits[1] + digits[3] + digits[5] + digits[7]
-	const check1 = (sum1 * 7 - sum2) % 10
-	const check2 = (sum1 + sum2 + digits[9]) % 10
-
-	return digits[9] === check1 && digits[10] === check2
-}
-
-// Format TC number (only digits)
-const formatTcNumber = (value) => {
-	return value.replace(/\D/g, '').slice(0, 11)
-}
+// Helper aliases for template
+const isValidTcNumber = validateTcNumber
+const isValidEmail = validateEmail
 
 // Update field
 const updateField = (field, value) => {

@@ -173,6 +173,10 @@
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import PhoneInput from '@/components/ui/form/PhoneInput.vue'
+import {
+	validateEmail,
+	validateTcNumber
+} from '@/composables/useBookingValidation'
 
 const props = defineProps({
 	booking: { type: Object, default: null },
@@ -200,11 +204,9 @@ watch(localLeadGuest, () => emitUpdate(), { deep: true })
 watch(localContact, () => emitUpdate(), { deep: true })
 watch(localSpecialRequests, () => emitUpdate())
 
-// Computed
+// Computed - using centralized validation
 const isValidEmail = computed(() => {
-	if (!localContact.value.email) return false
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-	return emailRegex.test(localContact.value.email)
+	return validateEmail(localContact.value.email)
 })
 
 const idValidationMessage = computed(() => {
@@ -213,7 +215,7 @@ const idValidationMessage = computed(() => {
 	const passportNumber = localLeadGuest.value.passportNumber
 
 	// TC number is optional - only validate format if provided
-	if (nationality === 'TR' && tcNumber && tcNumber.length !== 11) {
+	if (nationality === 'TR' && tcNumber && !validateTcNumber(tcNumber)) {
 		return t('booking.tcNumberInvalid')
 	}
 	if (nationality && nationality !== 'TR' && !passportNumber) {

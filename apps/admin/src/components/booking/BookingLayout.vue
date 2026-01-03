@@ -283,6 +283,7 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useBookingStore } from '@/stores/booking'
+import { useBookingValidation } from '@/composables/useBookingValidation'
 import { savePhase1Data, clearPhase1Data } from '@/services/bookingStorageService'
 import SearchPanel from './search/SearchPanel.vue'
 import HotelList from './search/HotelList.vue'
@@ -299,6 +300,7 @@ import Modal from '@/components/common/Modal.vue'
 const router = useRouter()
 const bookingStore = useBookingStore()
 const { t } = useI18n()
+const { validateBooking, formatErrors } = useBookingValidation()
 
 const showSuccessModal = ref(false)
 const showValidation = ref(false)
@@ -359,129 +361,25 @@ const triggerAutoSave = () => {
 	}, 2000)
 }
 
-// TC Number validation helper
-const isValidTcNumber = (tc) => {
-	if (!tc || tc.length !== 11) return false
-	if (!/^\d{11}$/.test(tc)) return false
-	if (tc[0] === '0') return false
-	const digits = tc.split('').map(Number)
-	const sum1 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]
-	const sum2 = digits[1] + digits[3] + digits[5] + digits[7]
-	const check1 = (sum1 * 7 - sum2) % 10
-	const check2 = (sum1 + sum2 + digits[9]) % 10
-	return digits[9] === check1 && digits[10] === check2
-}
-
-// Validation errors computed
+// Validation errors computed - uses centralized validation from useBookingValidation
+// Tüm kurallar: /composables/useBookingValidation.js
 const validationErrors = computed(() => {
-	const errors = []
-	const lead = bookingStore.guests.leadGuest
-
-	// Lead guest validation
-	if (!lead.title?.trim()) {
-		errors.push(t('booking.validation.leadGuestTitle'))
-	}
-	if (!lead.firstName?.trim()) {
-		errors.push(t('booking.validation.leadGuestFirstName'))
-	}
-	if (!lead.lastName?.trim()) {
-		errors.push(t('booking.validation.leadGuestLastName'))
-	}
-	if (!lead.email?.trim()) {
-		errors.push(t('booking.validation.leadGuestEmail'))
-	} else if (!isValidEmail(lead.email)) {
-		errors.push(t('booking.validation.invalidEmail'))
-	}
-	if (!lead.phone?.trim()) {
-		errors.push(t('booking.validation.leadGuestPhone'))
-	}
-	if (!lead.nationality?.trim()) {
-		errors.push(t('booking.validation.leadGuestNationality'))
-	}
-	// TC number format validation (optional, but if provided must be valid)
-	if (lead.nationality === 'TR' && lead.tcNumber && !isValidTcNumber(lead.tcNumber)) {
-		errors.push(t('booking.validation.invalidTcNumber'))
-	}
-
-	// Room guests validation
-	const roomGuests = bookingStore.guests.roomGuests || []
-	roomGuests.forEach((room, roomIndex) => {
-		room.forEach((guest, guestIndex) => {
-			// Skip first guest of first room if using lead as first guest (handled by checkbox)
-			const isFirstGuestOfFirstRoom = roomIndex === 0 && guestIndex === 0 && guest.type === 'adult'
-			if (isFirstGuestOfFirstRoom) return // Lead guest will be used
-
-			const guestLabel = guest.type === 'adult'
-				? t('booking.validation.roomGuestAdult', { room: roomIndex + 1, guest: guestIndex + 1 })
-				: t('booking.validation.roomGuestChild', { room: roomIndex + 1, guest: guestIndex + 1 })
-
-			if (!guest.title?.trim()) {
-				errors.push(`${guestLabel}: ${t('booking.validation.titleRequired')}`)
-			}
-			if (!guest.firstName?.trim()) {
-				errors.push(`${guestLabel}: ${t('booking.validation.firstNameRequired')}`)
-			}
-			if (!guest.lastName?.trim()) {
-				errors.push(`${guestLabel}: ${t('booking.validation.lastNameRequired')}`)
-			}
-			if (!guest.nationality?.trim()) {
-				errors.push(`${guestLabel}: ${t('booking.validation.nationalityRequired')}`)
-			}
-			// TC number format validation (optional, but if provided must be valid)
-			if (guest.nationality === 'TR' && guest.tcNumber && !isValidTcNumber(guest.tcNumber)) {
-				errors.push(`${guestLabel}: ${t('booking.validation.invalidTcNumber')}`)
-			}
-			// Birth date for children
-			if ((guest.type === 'child' || guest.type === 'infant') && !guest.birthDate) {
-				errors.push(`${guestLabel}: ${t('booking.validation.birthDateRequired')}`)
-			}
-		})
+	const result = validateBooking({
+		leadGuest: bookingStore.guests.leadGuest,
+		roomGuests: bookingStore.guests.roomGuests,
+		invoiceDetails: bookingStore.invoiceDetails,
+		payment: bookingStore.payment
 	})
 
-	// Invoice validation
-	const invoice = bookingStore.invoiceDetails
-	if (!invoice.type) {
-		errors.push(t('booking.validation.invoiceType'))
-	} else if (invoice.type === 'individual') {
-		if (!invoice.individual?.firstName?.trim()) {
-			errors.push(t('booking.validation.invoiceFirstName'))
-		}
-		if (!invoice.individual?.lastName?.trim()) {
-			errors.push(t('booking.validation.invoiceLastName'))
-		}
-		// TC number format validation (optional, but if provided must be valid)
-		if (lead.nationality === 'TR' && invoice.individual?.tcNumber && !isValidTcNumber(invoice.individual.tcNumber)) {
-			errors.push(t('booking.validation.invalidTcNumber'))
-		}
-	} else if (invoice.type === 'corporate') {
-		if (!invoice.corporate?.companyName?.trim()) {
-			errors.push(t('booking.validation.companyName'))
-		}
-		if (!invoice.corporate?.taxNumber?.trim()) {
-			errors.push(t('booking.validation.taxNumber'))
-		}
-		if (!invoice.corporate?.taxOffice?.trim()) {
-			errors.push(t('booking.validation.taxOffice'))
-		}
-	}
+	const errors = formatErrors(result.errors)
 
-	// Payment validation
-	if (!bookingStore.payment.method) {
-		errors.push(t('booking.validation.paymentMethod'))
-	}
-
-	// Terms validation
+	// Terms validation (UI only - not in schema)
 	if (!bookingStore.termsAccepted) {
 		errors.push(t('booking.validation.termsRequired'))
 	}
 
 	return errors
 })
-
-// Email validation helper
-const isValidEmail = (email) => {
-	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
 
 // Try to create booking with validation
 const handleTryCreateBooking = async () => {
