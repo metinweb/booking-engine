@@ -7,7 +7,7 @@ import Agency from '../agency/agency.model.js'
 import { UnauthorizedError, BadRequestError } from '../../core/errors.js'
 import { asyncHandler } from '../../helpers/asyncHandler.js'
 import { verify2FAToken } from '../../helpers/twoFactor.js'
-import { sendPasswordResetEmail } from '../../helpers/mail.js'
+import { sendPasswordResetEmail, getAdminUrl } from '../../helpers/mail.js'
 import {
   checkLoginLockout,
   recordFailedLogin,
@@ -413,9 +413,10 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   const resetToken = user.generatePasswordResetToken()
   await user.save({ validateBeforeSave: false })
 
-  // Build reset URL (frontend URL)
-  const frontendUrl = config.frontendUrl || 'http://localhost:5173'
-  const resetUrl = `${frontendUrl}/reset-password/${resetToken}`
+  // Build reset URL - use partner's custom domain if available
+  const partnerId = user.accountType === 'partner' ? user.accountId : null
+  const baseUrl = await getAdminUrl(partnerId)
+  const resetUrl = `${baseUrl}/reset-password/${resetToken}`
 
   try {
     // Send password reset email

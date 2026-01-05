@@ -227,10 +227,30 @@ export const send2FASetupEmail = async ({ to, name, qrCodeUrl, secretCode, partn
 }
 
 /**
+ * Get admin panel URL for a partner
+ * Uses partner's custom extranetDomain if set, otherwise falls back to platform default
+ */
+export const getAdminUrl = async (partnerId) => {
+  if (partnerId) {
+    try {
+      const { default: Partner } = await import('../modules/partner/partner.model.js')
+      const partner = await Partner.findById(partnerId).select('branding.extranetDomain').lean()
+      if (partner?.branding?.extranetDomain) {
+        return `https://${partner.branding.extranetDomain}`
+      }
+    } catch (error) {
+      logger.warn('Failed to get partner extranetDomain:', error.message)
+    }
+  }
+  // Fall back to platform default
+  return config.adminUrl
+}
+
+/**
  * Send account activation email (for new users to set their password)
  */
 export const sendActivationEmail = async ({ to, name, inviterName, accountName, userRole = 'Kullanıcı', token, partnerId, language = 'tr', partnerCity = '' }) => {
-  const baseUrl = process.env.ADMIN_URL || 'http://localhost:5173'
+  const baseUrl = await getAdminUrl(partnerId)
   const activationUrl = `${baseUrl}/activate/${token}`
 
   // Build company info for footer
@@ -592,5 +612,6 @@ export default {
   sendBookingCancellation,
   sendPasswordResetEmail,
   sendNightAuditReports,
-  clearEmailCache
+  clearEmailCache,
+  getAdminUrl
 }

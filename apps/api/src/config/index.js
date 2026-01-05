@@ -35,8 +35,10 @@ const config = {
         : true // Allow all origins in development
   },
 
-  // Frontend URL - Used for password reset links etc.
-  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  // Frontend/Admin URL - Used for password reset links, activation emails etc.
+  // IMPORTANT: Must be set in production!
+  frontendUrl: process.env.FRONTEND_URL || process.env.ADMIN_URL || 'http://localhost:5173',
+  adminUrl: process.env.ADMIN_URL || process.env.FRONTEND_URL || 'http://localhost:5173',
 
   // AWS - fromEmail/fromName are stored in database (PlatformSettings)
   aws: {
