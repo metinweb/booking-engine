@@ -119,6 +119,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 import planningService from '@/services/planningService'
 import FormTabs from '@/components/common/FormTabs.vue'
 import RoomTypeBasicForm from '@/components/planning/rooms/RoomTypeBasicForm.vue'
@@ -184,10 +185,12 @@ function getEmptyRoomType() {
   }
 }
 
+// Async action composables
+const { isLoading: loading, execute: executeFetch } = useAsyncAction({ showSuccessToast: false, showErrorToast: false })
+const { isLoading: saving, execute: executeSave } = useAsyncAction({ showErrorToast: false })
+
 const roomType = ref(getEmptyRoomType())
 const hotel = ref(null)
-const loading = ref(false)
-const saving = ref(false)
 const activeTab = ref('basic')
 
 // Form refs
@@ -238,43 +241,50 @@ const goBack = () => {
 }
 
 const fetchHotel = async () => {
-  try {
-    const response = await planningService.getHotel(hotelId.value)
-    if (response.success) {
-      hotel.value = response.data
+  await executeFetch(
+    () => planningService.getHotel(hotelId.value),
+    {
+      onSuccess: response => {
+        if (response.success) {
+          hotel.value = response.data
+        }
+      },
+      onError: error => {
+        console.error('Failed to fetch hotel:', error)
+      }
     }
-  } catch (error) {
-    console.error('Failed to fetch hotel:', error)
-  }
+  )
 }
 
 const fetchRoomType = async () => {
   if (isNew.value) return
 
-  loading.value = true
-  try {
-    const response = await planningService.getRoomType(hotelId.value, roomTypeId.value)
-    if (response.success) {
-      const data = response.data
-      const emptyRoomType = getEmptyRoomType()
+  await executeFetch(
+    () => planningService.getRoomType(hotelId.value, roomTypeId.value),
+    {
+      onSuccess: response => {
+        if (response.success) {
+          const data = response.data
+          const emptyRoomType = getEmptyRoomType()
 
-      roomType.value = {
-        ...emptyRoomType,
-        ...data,
-        name: { ...emptyRoomType.name, ...data.name },
-        description: { ...emptyRoomType.description, ...data.description },
-        occupancy: { ...emptyRoomType.occupancy, ...data.occupancy },
-        images: data.images || [],
-        amenities: data.amenities || [],
-        bedConfiguration: data.bedConfiguration || []
+          roomType.value = {
+            ...emptyRoomType,
+            ...data,
+            name: { ...emptyRoomType.name, ...data.name },
+            description: { ...emptyRoomType.description, ...data.description },
+            occupancy: { ...emptyRoomType.occupancy, ...data.occupancy },
+            images: data.images || [],
+            amenities: data.amenities || [],
+            bedConfiguration: data.bedConfiguration || []
+          }
+        }
+      },
+      onError: error => {
+        toast.error(error.response?.data?.message || t('common.fetchError'))
+        goBack()
       }
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.fetchError'))
-    goBack()
-  } finally {
-    loading.value = false
-  }
+  )
 }
 
 const handleSave = async () => {
@@ -295,32 +305,27 @@ const handleSave = async () => {
   const capacityData = capacityFormRef.value?.getFormData?.() || {}
   const formData = { ...basicData, ...capacityData }
 
-  saving.value = true
-  try {
-    let response
-    if (isNew.value) {
-      response = await planningService.createRoomType(hotelId.value, formData)
+  const actionFn = isNew.value
+    ? () => planningService.createRoomType(hotelId.value, formData)
+    : () => planningService.updateRoomType(hotelId.value, roomTypeId.value, formData)
+
+  await executeSave(actionFn, {
+    successMessage: isNew.value ? 'planning.roomTypes.created' : 'planning.roomTypes.updated',
+    onSuccess: response => {
       if (response.success) {
-        toast.success(t('planning.roomTypes.created'))
-        // Navigate to edit mode
-        router.replace({
-          name: 'room-type-detail',
-          params: { hotelId: hotelId.value, id: response.data._id }
-        })
+        if (isNew.value) {
+          router.replace({
+            name: 'room-type-detail',
+            params: { hotelId: hotelId.value, id: response.data._id }
+          })
+        }
         roomType.value = { ...roomType.value, ...response.data }
       }
-    } else {
-      response = await planningService.updateRoomType(hotelId.value, roomTypeId.value, formData)
-      if (response.success) {
-        roomType.value = { ...roomType.value, ...response.data }
-        toast.success(t('planning.roomTypes.updated'))
-      }
+    },
+    onError: error => {
+      toast.error(error.response?.data?.message || t('common.operationFailed'))
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.operationFailed'))
-  } finally {
-    saving.value = false
-  }
+  })
 }
 
 const handleImageUploaded = newImage => {

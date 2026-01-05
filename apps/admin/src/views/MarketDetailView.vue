@@ -145,6 +145,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 import { ADMIN_LANGUAGES } from '@/constants/languages'
 import planningService from '@/services/planningService'
 import FormTabs from '@/components/common/FormTabs.vue'
@@ -199,13 +200,15 @@ function getEmptyMarket() {
   }
 }
 
+// Async action composables
+const { isLoading: loading, execute: executeFetch } = useAsyncAction({ showSuccessToast: false, showErrorToast: false })
+const { isLoading: saving, execute: executeSave } = useAsyncAction({ showErrorToast: false })
+
 const market = ref(getEmptyMarket())
 const hotel = ref(null)
 const assignedCountries = ref({})
 const roomTypes = ref([])
 const mealPlans = ref([])
-const loading = ref(false)
-const saving = ref(false)
 const activeTab = ref('basic')
 
 // Form refs
@@ -241,74 +244,98 @@ const goBack = () => {
 const fetchMarket = async () => {
   if (isNew.value) return
 
-  loading.value = true
-  try {
-    const response = await planningService.getMarket(hotelId.value, marketId.value)
-    if (response.success) {
-      const data = response.data
-      const emptyMarket = getEmptyMarket()
+  await executeFetch(
+    () => planningService.getMarket(hotelId.value, marketId.value),
+    {
+      onSuccess: response => {
+        if (response.success) {
+          const data = response.data
+          const emptyMarket = getEmptyMarket()
 
-      market.value = {
-        ...emptyMarket,
-        ...data,
-        name: { ...emptyMarket.name, ...data.name },
-        salesChannels: { ...emptyMarket.salesChannels, ...data.salesChannels },
-        markup: { ...emptyMarket.markup, ...data.markup },
-        paymentTerms: { ...emptyMarket.paymentTerms, ...data.paymentTerms },
-        countries: data.countries || []
+          market.value = {
+            ...emptyMarket,
+            ...data,
+            name: { ...emptyMarket.name, ...data.name },
+            salesChannels: { ...emptyMarket.salesChannels, ...data.salesChannels },
+            markup: { ...emptyMarket.markup, ...data.markup },
+            paymentTerms: { ...emptyMarket.paymentTerms, ...data.paymentTerms },
+            countries: data.countries || []
+          }
+        }
+      },
+      onError: error => {
+        toast.error(error.response?.data?.message || t('common.fetchError'))
+        goBack()
       }
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.fetchError'))
-    goBack()
-  } finally {
-    loading.value = false
-  }
+  )
 }
 
 const fetchHotel = async () => {
-  try {
-    const response = await planningService.getHotel(hotelId.value)
-    if (response.success) {
-      hotel.value = response.data
+  await executeFetch(
+    () => planningService.getHotel(hotelId.value),
+    {
+      onSuccess: response => {
+        if (response.success) {
+          hotel.value = response.data
+        }
+      },
+      onError: error => {
+        console.error('Failed to fetch hotel:', error)
+      }
     }
-  } catch (error) {
-    console.error('Failed to fetch hotel:', error)
-  }
+  )
 }
 
 const fetchAssignedCountries = async () => {
-  try {
-    const excludeId = isNew.value ? null : marketId.value
-    const response = await planningService.getAssignedCountries(hotelId.value, excludeId)
-    if (response.success) {
-      assignedCountries.value = response.data
+  await executeFetch(
+    async () => {
+      const excludeId = isNew.value ? null : marketId.value
+      return planningService.getAssignedCountries(hotelId.value, excludeId)
+    },
+    {
+      onSuccess: response => {
+        if (response.success) {
+          assignedCountries.value = response.data
+        }
+      },
+      onError: error => {
+        console.error('Failed to fetch assigned countries:', error)
+      }
     }
-  } catch (error) {
-    console.error('Failed to fetch assigned countries:', error)
-  }
+  )
 }
 
 const fetchRoomTypes = async () => {
-  try {
-    const response = await planningService.getRoomTypes(hotelId.value)
-    if (response.success) {
-      roomTypes.value = response.data || []
+  await executeFetch(
+    () => planningService.getRoomTypes(hotelId.value),
+    {
+      onSuccess: response => {
+        if (response.success) {
+          roomTypes.value = response.data || []
+        }
+      },
+      onError: error => {
+        console.error('Failed to fetch room types:', error)
+      }
     }
-  } catch (error) {
-    console.error('Failed to fetch room types:', error)
-  }
+  )
 }
 
 const fetchMealPlans = async () => {
-  try {
-    const response = await planningService.getMealPlans(hotelId.value)
-    if (response.success) {
-      mealPlans.value = response.data || []
+  await executeFetch(
+    () => planningService.getMealPlans(hotelId.value),
+    {
+      onSuccess: response => {
+        if (response.success) {
+          mealPlans.value = response.data || []
+        }
+      },
+      onError: error => {
+        console.error('Failed to fetch meal plans:', error)
+      }
     }
-  } catch (error) {
-    console.error('Failed to fetch meal plans:', error)
-  }
+  )
 }
 
 const handleSave = async () => {
@@ -336,32 +363,27 @@ const handleSave = async () => {
     return
   }
 
-  saving.value = true
-  try {
-    let response
-    if (isNew.value) {
-      response = await planningService.createMarket(hotelId.value, formData)
+  const actionFn = isNew.value
+    ? () => planningService.createMarket(hotelId.value, formData)
+    : () => planningService.updateMarket(hotelId.value, marketId.value, formData)
+
+  await executeSave(actionFn, {
+    successMessage: isNew.value ? 'planning.markets.created' : 'planning.markets.updated',
+    onSuccess: response => {
       if (response.success) {
-        toast.success(t('planning.markets.created'))
-        // Navigate to edit mode
-        router.replace({
-          name: 'market-detail',
-          params: { hotelId: hotelId.value, id: response.data._id }
-        })
+        if (isNew.value) {
+          router.replace({
+            name: 'market-detail',
+            params: { hotelId: hotelId.value, id: response.data._id }
+          })
+        }
         market.value = { ...market.value, ...response.data }
       }
-    } else {
-      response = await planningService.updateMarket(hotelId.value, marketId.value, formData)
-      if (response.success) {
-        market.value = { ...market.value, ...response.data }
-        toast.success(t('planning.markets.updated'))
-      }
+    },
+    onError: error => {
+      toast.error(error.response?.data?.message || t('common.operationFailed'))
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.operationFailed'))
-  } finally {
-    saving.value = false
-  }
+  })
 }
 
 // Watch for route changes
