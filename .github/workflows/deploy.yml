@@ -93,6 +93,9 @@ jobs:
             # CORS
             CORS_ORIGIN=https://app.minires.com
 
+            # Admin Panel URL (for email links)
+            ADMIN_URL=https://app.minires.com
+
             # Encryption
             ENCRYPTION_KEY=${ENCRYPTION_KEY}
 
