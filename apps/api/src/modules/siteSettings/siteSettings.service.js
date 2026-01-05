@@ -5,17 +5,7 @@ import { asyncHandler } from '../../helpers/asyncHandler.js'
 import { getSiteFileUrl, deleteSiteFile } from '../../helpers/siteUpload.js'
 import logger from '../../core/logger.js'
 import sslService from '../../services/sslService.js'
-
-// Get partner ID from request (partner user or platform admin viewing as partner)
-const getPartnerId = req => {
-  if (req.user.accountType === 'partner') {
-    return req.user.accountId
-  }
-  if (req.partnerId) {
-    return req.partnerId
-  }
-  return null
-}
+import { getPartnerId } from '../../services/helpers.js'
 
 // Get site settings
 export const getSiteSettings = asyncHandler(async (req, res) => {

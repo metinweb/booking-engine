@@ -26,45 +26,7 @@ import {
   paymentValidationSchema,
   bookingValidationSchema
 } from '@booking-engine/validation/schemas'
-
-// Helper: Get partner ID from request
-const getPartnerId = req => {
-  // Partner user
-  if (req.user?.accountType === 'partner') {
-    return req.user.accountId
-  }
-  // Agency user - get partner from agency
-  if (req.user?.accountType === 'agency' && req.account?.partner) {
-    return req.account.partner._id || req.account.partner
-  }
-  // Platform admin viewing as partner
-  if (req.partnerId) {
-    return req.partnerId
-  }
-  return null
-}
-
-// Helper: Get source info for booking
-const getSourceInfo = req => {
-  const source = {
-    type: 'admin',
-    ipAddress: req.ip,
-    userAgent: req.headers['user-agent']
-  }
-
-  if (req.user?.accountType === 'agency') {
-    source.type = 'b2b'
-    source.agencyId = req.user.accountId
-    source.agencyName = req.account?.companyName || req.account?.name
-    source.agencyUserId = req.user._id
-  } else if (req.user?.accountType === 'partner') {
-    source.type = 'admin'
-  } else if (req.user?.accountType === 'platform') {
-    source.type = 'admin'
-  }
-
-  return source
-}
+import { getPartnerId, getSourceInfo } from '../../services/helpers.js'
 
 // Helper: Sanitize guest data before saving
 const sanitizeGuest = guest => {

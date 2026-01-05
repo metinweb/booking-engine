@@ -13,43 +13,7 @@ import { asyncHandler } from '../../helpers/asyncHandler.js'
 import logger from '../../core/logger.js'
 import { getRoomTypeFileUrl, deleteRoomTypeFile } from '../../helpers/roomTypeUpload.js'
 import { parsePricingCommand, parseHotelContract } from '../../services/geminiService.js'
-
-// Helper: Get actor from request for audit logging
-const getAuditActor = req => {
-  if (!req.user) return { role: 'system' }
-  return {
-    userId: req.user._id,
-    partnerId: req.user.accountType === 'partner' ? req.user.accountId : req.partnerId,
-    email: req.user.email,
-    name: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim(),
-    role: req.user.role,
-    ip: req.ip,
-    userAgent: req.get('User-Agent')
-  }
-}
-
-// Get partner ID from request
-const getPartnerId = req => {
-  if (req.user.accountType === 'partner') {
-    return req.user.accountId
-  }
-  if (req.partnerId) {
-    return req.partnerId
-  }
-  return null
-}
-
-// Verify hotel belongs to partner
-const verifyHotelOwnership = async (hotelId, partnerId) => {
-  const hotel = await Hotel.findById(hotelId)
-  if (!hotel) {
-    throw new NotFoundError('HOTEL_NOT_FOUND')
-  }
-  if (hotel.partner.toString() !== partnerId.toString()) {
-    throw new ForbiddenError('FORBIDDEN')
-  }
-  return hotel
-}
+import { getPartnerId, verifyHotelOwnership, getAuditActor } from '../../services/helpers.js'
 
 // ==================== ROOM TYPES ====================
 

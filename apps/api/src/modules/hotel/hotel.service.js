@@ -16,29 +16,7 @@ import { ProgressEmitter } from '../../core/socket.js'
 import logger from '../../core/logger.js'
 import fs from 'fs'
 import path from 'path'
-
-// Get partner ID from request (partner user or platform admin viewing as partner)
-const getPartnerId = req => {
-  if (req.user.accountType === 'partner') {
-    return req.user.accountId
-  }
-  if (req.partnerId) {
-    return req.partnerId
-  }
-  return null
-}
-
-// Verify hotel belongs to partner
-const verifyHotelOwnership = async (hotelId, partnerId) => {
-  const hotel = await Hotel.findById(hotelId)
-  if (!hotel) {
-    throw new NotFoundError('HOTEL_NOT_FOUND')
-  }
-  if (hotel.partner.toString() !== partnerId.toString()) {
-    throw new ForbiddenError('FORBIDDEN')
-  }
-  return hotel
-}
+import { getPartnerId, verifyHotelOwnership } from '../../services/helpers.js'
 
 /**
  * Get all hotels for partner
