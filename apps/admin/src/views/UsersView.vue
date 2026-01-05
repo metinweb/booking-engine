@@ -621,10 +621,16 @@ const fetchUsers = async () => {
     if (statusFilter.value) params.status = statusFilter.value
     if (roleFilter.value) params.role = roleFilter.value
 
-    // Platform admin viewing a specific partner - add partner filter
-    if (authStore.user?.accountType === 'platform' && partnerStore.selectedPartner) {
-      params.accountType = 'partner'
-      params.accountId = partnerStore.selectedPartner._id
+    // Platform admin - filter based on view context
+    if (authStore.user?.accountType === 'platform') {
+      if (partnerStore.selectedPartner) {
+        // Viewing a specific partner - show only that partner's users
+        params.accountType = 'partner'
+        params.accountId = partnerStore.selectedPartner._id
+      } else {
+        // Platform view - show only platform users
+        params.accountType = 'platform'
+      }
     }
 
     const response = await getUsers(params)
