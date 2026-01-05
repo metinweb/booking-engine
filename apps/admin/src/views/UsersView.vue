@@ -515,10 +515,9 @@
 
     <!-- Delete Confirmation -->
     <ConfirmDialog
-      v-if="showDeleteConfirm"
+      v-model="showDeleteConfirm"
       :title="$t('common.delete')"
       :message="$t('users.deleteConfirmation')"
-      :description="$t('users.deleteWarning')"
       type="danger"
       :confirm-text="$t('common.delete')"
       :loading="deleteLoading"
