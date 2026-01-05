@@ -499,45 +499,26 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'vue-toastification'
 import DataTable from '@/components/ui/data/DataTable.vue'
 import Modal from '@/components/common/Modal.vue'
 import hotelService from '@/services/hotelService'
 import { usePartnerContext } from '@/composables/usePartnerContext'
+import { useListView } from '@/composables/useListView'
+import { useBulkActions } from '@/composables/useBulkActions'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 import { getImageUrl } from '@/utils/imageUrl'
 
-const toast = useToast()
 const { t, locale } = useI18n()
+const toast = useToast()
 
-const hotels = ref([])
+// Additional state not covered by composables
 const cities = ref([])
-const loading = ref(false)
+const sortBy = ref('')
 const showDeleteModal = ref(false)
 const showBulkDeleteModal = ref(false)
-const deleting = ref(false)
-const bulkDeleting = ref(false)
 const selectedHotel = ref(null)
-const selectedHotels = ref([])
-const sortBy = ref('')
-const showBulkMenu = ref(false)
-
-const filters = reactive({
-  search: '',
-  status: '',
-  stars: '',
-  city: '',
-  type: '',
-  category: '',
-  featured: ''
-})
-
-const pagination = reactive({
-  page: 1,
-  limit: 20,
-  total: 0,
-  pages: 0
-})
 
 const stats = reactive({
   total: 0,
@@ -546,6 +527,72 @@ const stats = reactive({
   draft: 0,
   featured: 0
 })
+
+// Use list view composable for hotels
+const {
+  items: hotels,
+  isLoading: loading,
+  pagination,
+  filters,
+  fetch: fetchHotels,
+  debouncedFetch,
+  handlePageChange
+} = useListView(
+  params => {
+    // Add sortBy to params
+    if (sortBy.value) {
+      const [field, order] = sortBy.value.split('_')
+      params.sortBy = field
+      params.sortOrder = order
+    }
+    return hotelService.getHotels(params)
+  },
+  {
+    defaultFilters: {
+      search: '',
+      status: '',
+      stars: '',
+      city: '',
+      type: '',
+      category: '',
+      featured: ''
+    },
+    errorMessage: 'hotels.fetchError',
+    onSuccess: (items, data) => {
+      // Update stats from response
+      if (data?.stats) {
+        stats.total = data.stats.total || 0
+        stats.active = data.stats.active || 0
+        stats.inactive = data.stats.inactive || 0
+        stats.draft = data.stats.draft || 0
+        stats.featured = data.stats.featured || 0
+      } else {
+        stats.total = pagination.total
+      }
+      // Clear selection on fetch
+      clearSelection()
+    }
+  }
+)
+
+// Use bulk actions composable for selection
+const {
+  selectedItems: selectedHotels,
+  isAllSelected,
+  isPartialSelected,
+  isProcessing,
+  showBulkMenu,
+  toggleSelectAll,
+  toggleSelect,
+  clearSelection,
+  executeBulkAction
+} = useBulkActions({ items: hotels, idKey: '_id' })
+
+// Use async action for delete operations
+const { isLoading: deleting, execute: executeDelete } = useAsyncAction()
+
+// Alias for bulk delete loading state (uses useBulkActions.isProcessing)
+const bulkDeleting = computed(() => isProcessing.value)
 
 // Columns for DataTable
 const columns = computed(() => [
@@ -593,73 +640,7 @@ const activeFilterCount = computed(() => {
   return count
 })
 
-// Selection computed properties
-const isAllSelected = computed(() => {
-  return hotels.value.length > 0 && selectedHotels.value.length === hotels.value.length
-})
-
-const isPartialSelected = computed(() => {
-  return selectedHotels.value.length > 0 && selectedHotels.value.length < hotels.value.length
-})
-
-let debounceTimer = null
-
-const debouncedFetch = () => {
-  clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => {
-    pagination.page = 1
-    fetchHotels()
-  }, 300)
-}
-
-const fetchHotels = async () => {
-  loading.value = true
-  selectedHotels.value = []
-  showBulkMenu.value = false
-
-  try {
-    const params = {
-      page: pagination.page,
-      limit: pagination.limit
-    }
-    if (filters.search) params.search = filters.search
-    if (filters.status) params.status = filters.status
-    if (filters.stars) params.stars = filters.stars
-    if (filters.city) params.city = filters.city
-    if (filters.type) params.type = filters.type
-    if (filters.category) params.category = filters.category
-    if (filters.featured) params.featured = filters.featured
-    if (sortBy.value) {
-      const [field, order] = sortBy.value.split('_')
-      params.sortBy = field
-      params.sortOrder = order
-    }
-
-    const response = await hotelService.getHotels(params)
-    if (response.success) {
-      hotels.value = response.data.items || response.data.hotels || []
-      pagination.total = response.data.pagination?.total || 0
-      pagination.pages = response.data.pagination?.pages || 0
-
-      // Update stats from response if available
-      if (response.data.stats) {
-        stats.total = response.data.stats.total || 0
-        stats.active = response.data.stats.active || 0
-        stats.inactive = response.data.stats.inactive || 0
-        stats.draft = response.data.stats.draft || 0
-        stats.featured = response.data.stats.featured || 0
-      } else {
-        // Calculate from current response if no stats provided
-        stats.total = pagination.total
-      }
-    }
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('hotels.fetchError'))
-  } finally {
-    loading.value = false
-  }
-}
-
+// Fetch cities for filter dropdown
 const fetchCities = async () => {
   try {
     const response = await hotelService.getCities()
@@ -671,9 +652,9 @@ const fetchCities = async () => {
   }
 }
 
+// Fetch stats separately
 const fetchStats = async () => {
   try {
-    // Fetch all hotels stats without filters
     const response = await hotelService.getHotels({ limit: 1 })
     if (response.success && response.data.stats) {
       stats.total = response.data.stats.total || 0
@@ -741,26 +722,18 @@ const confirmDelete = hotel => {
 }
 
 const handleDelete = async () => {
-  deleting.value = true
-  try {
-    const response = await hotelService.deleteHotel(selectedHotel.value._id)
-    if (response.success) {
-      toast.success(t('hotels.deleteSuccess'))
-      await fetchHotels()
-      await fetchStats()
-      showDeleteModal.value = false
+  await executeDelete(
+    () => hotelService.deleteHotel(selectedHotel.value._id),
+    {
+      successMessage: 'hotels.deleteSuccess',
+      errorMessage: 'common.deleteFailed',
+      onSuccess: () => {
+        showDeleteModal.value = false
+        fetchHotels()
+        fetchStats()
+      }
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.deleteFailed'))
-  } finally {
-    deleting.value = false
-  }
-}
-
-const handlePageChange = ({ page, perPage }) => {
-  pagination.page = page
-  if (perPage) pagination.limit = perPage
-  fetchHotels()
+  )
 }
 
 const clearAllFilters = () => {
@@ -776,53 +749,33 @@ const clearAllFilters = () => {
   fetchHotels()
 }
 
-// Selection methods
-const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    selectedHotels.value = []
-  } else {
-    selectedHotels.value = hotels.value.map(h => h._id)
-  }
-}
-
-const toggleSelect = hotelId => {
-  const index = selectedHotels.value.indexOf(hotelId)
-  if (index > -1) {
-    selectedHotels.value.splice(index, 1)
-  } else {
-    selectedHotels.value.push(hotelId)
-  }
-}
-
 // Bulk actions
 const bulkActivate = async () => {
   showBulkMenu.value = false
-  try {
-    for (const hotelId of selectedHotels.value) {
-      await hotelService.updateHotelStatus(hotelId, 'active')
+  await executeBulkAction(
+    hotelId => hotelService.updateHotelStatus(hotelId, 'active'),
+    {
+      successMessage: 'hotels.bulkActivateSuccess',
+      errorMessage: 'common.operationFailed',
+      clearOnSuccess: true
     }
-    toast.success(t('hotels.bulkActivateSuccess', { count: selectedHotels.value.length }))
-    selectedHotels.value = []
-    await fetchHotels()
-    await fetchStats()
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.operationFailed'))
-  }
+  )
+  fetchHotels()
+  fetchStats()
 }
 
 const bulkDeactivate = async () => {
   showBulkMenu.value = false
-  try {
-    for (const hotelId of selectedHotels.value) {
-      await hotelService.updateHotelStatus(hotelId, 'inactive')
+  await executeBulkAction(
+    hotelId => hotelService.updateHotelStatus(hotelId, 'inactive'),
+    {
+      successMessage: 'hotels.bulkDeactivateSuccess',
+      errorMessage: 'common.operationFailed',
+      clearOnSuccess: true
     }
-    toast.success(t('hotels.bulkDeactivateSuccess', { count: selectedHotels.value.length }))
-    selectedHotels.value = []
-    await fetchHotels()
-    await fetchStats()
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.operationFailed'))
-  }
+  )
+  fetchHotels()
+  fetchStats()
 }
 
 const confirmBulkDelete = () => {
@@ -831,21 +784,17 @@ const confirmBulkDelete = () => {
 }
 
 const handleBulkDelete = async () => {
-  bulkDeleting.value = true
-  try {
-    for (const hotelId of selectedHotels.value) {
-      await hotelService.deleteHotel(hotelId)
+  await executeBulkAction(
+    hotelId => hotelService.deleteHotel(hotelId),
+    {
+      successMessage: 'hotels.bulkDeleteSuccess',
+      errorMessage: 'common.deleteFailed',
+      clearOnSuccess: true
     }
-    toast.success(t('hotels.bulkDeleteSuccess', { count: selectedHotels.value.length }))
-    selectedHotels.value = []
-    showBulkDeleteModal.value = false
-    await fetchHotels()
-    await fetchStats()
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.deleteFailed'))
-  } finally {
-    bulkDeleting.value = false
-  }
+  )
+  showBulkDeleteModal.value = false
+  fetchHotels()
+  fetchStats()
 }
 
 // Export to CSV

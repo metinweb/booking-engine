@@ -796,7 +796,7 @@ const applyFilters = () => {
 }
 
 // Handle DataTable page change
-const handlePageChange = ({ page, perPage: newPerPage }) => {
+const handlePageChange = ({ page }) => {
   currentPage.value = page
   fetchBookings()
   window.scrollTo({ top: 0, behavior: 'smooth' })
