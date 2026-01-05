@@ -260,26 +260,27 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useToast } from 'vue-toastification'
 import DataTable from '@/components/ui/data/DataTable.vue'
 import Modal from '@/components/common/Modal.vue'
 import DocumentUpload from '@/components/DocumentUpload.vue'
 import partnerService from '@/services/partnerService'
 import { useI18n } from 'vue-i18n'
+import { useAsyncAction } from '@/composables/useAsyncAction'
 
 const { t } = useI18n()
-const toast = useToast()
+
+// Use async action composables
+const { isLoading: loading, execute: executeFetch } = useAsyncAction({ showSuccessToast: false })
+const { isLoading: submitting, execute: executeSubmit } = useAsyncAction()
+const { isLoading: deleting, execute: executeDelete } = useAsyncAction()
+const { isLoading: approving, execute: executeApprove } = useAsyncAction()
+const { isLoading: uploading, execute: executeUpload } = useAsyncAction()
 
 const partners = ref([])
-const loading = ref(false)
 const showModal = ref(false)
 const showDeleteModal = ref(false)
 const showApproveModal = ref(false)
 const isEditing = ref(false)
-const submitting = ref(false)
-const deleting = ref(false)
-const approving = ref(false)
-const uploading = ref(false)
 const selectedPartner = ref(null)
 
 const form = ref({
@@ -308,17 +309,15 @@ const columns = [
 ]
 
 const fetchPartners = async () => {
-  loading.value = true
-  try {
-    const response = await partnerService.getPartners()
-    if (response.success) {
-      partners.value = response.data.partners || []
+  await executeFetch(
+    () => partnerService.getPartners(),
+    {
+      onSuccess: response => {
+        partners.value = response.data.partners || []
+      },
+      errorMessage: 'partners.fetchError'
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to fetch partners')
-  } finally {
-    loading.value = false
-  }
+  )
 }
 
 const openCreateModal = () => {
@@ -365,28 +364,18 @@ const openEditModal = partner => {
 }
 
 const handleSubmit = async () => {
-  submitting.value = true
-  try {
-    if (isEditing.value) {
-      const response = await partnerService.updatePartner(selectedPartner.value._id, form.value)
-      if (response.success) {
-        toast.success('Partner updated successfully')
-        await fetchPartners()
-        showModal.value = false
-      }
-    } else {
-      const response = await partnerService.createPartner(form.value)
-      if (response.success) {
-        toast.success('Partner created successfully')
-        await fetchPartners()
-        showModal.value = false
-      }
+  const actionFn = isEditing.value
+    ? () => partnerService.updatePartner(selectedPartner.value._id, form.value)
+    : () => partnerService.createPartner(form.value)
+
+  await executeSubmit(actionFn, {
+    successMessage: isEditing.value ? 'partners.updateSuccess' : 'partners.createSuccess',
+    errorMessage: 'common.operationFailed',
+    onSuccess: () => {
+      showModal.value = false
+      fetchPartners()
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Operation failed')
-  } finally {
-    submitting.value = false
-  }
+  })
 }
 
 const confirmDelete = partner => {
@@ -395,19 +384,17 @@ const confirmDelete = partner => {
 }
 
 const handleDelete = async () => {
-  deleting.value = true
-  try {
-    const response = await partnerService.deletePartner(selectedPartner.value._id)
-    if (response.success) {
-      toast.success('Partner deleted successfully')
-      await fetchPartners()
-      showDeleteModal.value = false
+  await executeDelete(
+    () => partnerService.deletePartner(selectedPartner.value._id),
+    {
+      successMessage: 'partners.deleteSuccess',
+      errorMessage: 'common.deleteFailed',
+      onSuccess: () => {
+        showDeleteModal.value = false
+        fetchPartners()
+      }
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Delete failed')
-  } finally {
-    deleting.value = false
-  }
+  )
 }
 
 const confirmApprove = partner => {
@@ -416,56 +403,51 @@ const confirmApprove = partner => {
 }
 
 const handleApprove = async () => {
-  approving.value = true
-  try {
-    const response = await partnerService.approvePartner(selectedPartner.value._id)
-    if (response.success) {
-      toast.success('Partner approved successfully')
-      await fetchPartners()
-      showApproveModal.value = false
+  await executeApprove(
+    () => partnerService.approvePartner(selectedPartner.value._id),
+    {
+      successMessage: 'partners.approveSuccess',
+      errorMessage: 'common.operationFailed',
+      onSuccess: () => {
+        showApproveModal.value = false
+        fetchPartners()
+      }
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Approve failed')
-  } finally {
-    approving.value = false
-  }
+  )
 }
 
 const uploadDocument = async file => {
   if (!file || !selectedPartner.value) return
 
-  uploading.value = true
-  try {
-    const formData = new FormData()
-    formData.append('document', file)
-    formData.append('documentType', 'license')
+  const formData = new FormData()
+  formData.append('document', file)
+  formData.append('documentType', 'license')
 
-    const response = await partnerService.uploadDocument(selectedPartner.value._id, formData)
-    if (response.success) {
-      toast.success('Document uploaded successfully')
-      // Update selected partner with new document
-      selectedPartner.value = response.data.partner
+  await executeUpload(
+    () => partnerService.uploadDocument(selectedPartner.value._id, formData),
+    {
+      successMessage: 'common.uploadSuccess',
+      errorMessage: 'common.uploadFailed',
+      onSuccess: response => {
+        selectedPartner.value = response.data.partner
+      }
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Upload failed')
-  } finally {
-    uploading.value = false
-  }
+  )
 }
 
 const confirmDeleteDocument = async documentId => {
   if (!confirm(t('common.confirm'))) return
 
-  try {
-    const response = await partnerService.deleteDocument(selectedPartner.value._id, documentId)
-    if (response.success) {
-      toast.success('Document deleted successfully')
-      // Update selected partner
-      selectedPartner.value = response.data
+  await executeDelete(
+    () => partnerService.deleteDocument(selectedPartner.value._id, documentId),
+    {
+      successMessage: 'common.deleteSuccess',
+      errorMessage: 'common.deleteFailed',
+      onSuccess: response => {
+        selectedPartner.value = response.data
+      }
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || 'Delete failed')
-  }
+  )
 }
 
 onMounted(() => {
