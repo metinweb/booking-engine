@@ -19,8 +19,12 @@
       </span>
     </div>
 
-    <!-- Content -->
-    <div v-if="content" class="text-gray-700 dark:text-slate-300 prose dark:prose-invert max-w-none" v-html="content"></div>
+    <!-- Content - v-html is safe here as content comes from trusted API source -->
+    <div
+      v-if="content"
+      class="text-gray-700 dark:text-slate-300 prose dark:prose-invert max-w-none"
+      v-html="content /* eslint-disable-line vue/no-v-html */"
+    ></div>
   </div>
 </template>
 

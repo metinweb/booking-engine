@@ -13,8 +13,8 @@
       <span class="material-icons text-5xl text-red-500">error_outline</span>
       <p class="text-red-600 dark:text-red-400 mt-4">{{ error }}</p>
       <button
-        @click="loadDashboard"
         class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+        @click="loadDashboard"
       >
         {{ $t('common.retry') }}
       </button>
@@ -83,8 +83,14 @@ const dashboardData = ref({
 })
 
 // User type checks - Platform admin viewing as partner should see partner dashboard
-const isPlatformAdmin = computed(() => authStore.isPlatformAdmin && !partnerStore.hasSelectedPartner)
-const isPartner = computed(() => authStore.accountType === 'partner' || (authStore.isPlatformAdmin && partnerStore.hasSelectedPartner))
+const isPlatformAdmin = computed(
+  () => authStore.isPlatformAdmin && !partnerStore.hasSelectedPartner
+)
+const isPartner = computed(
+  () =>
+    authStore.accountType === 'partner' ||
+    (authStore.isPlatformAdmin && partnerStore.hasSelectedPartner)
+)
 const isAgency = computed(() => authStore.accountType === 'agency')
 
 const loadDashboard = async () => {
@@ -114,9 +120,12 @@ const loadDashboard = async () => {
 }
 
 // Reload dashboard when partner selection changes
-watch(() => partnerStore.selectedPartner, () => {
-  loadDashboard()
-})
+watch(
+  () => partnerStore.selectedPartner,
+  () => {
+    loadDashboard()
+  }
+)
 
 onMounted(() => {
   loadDashboard()

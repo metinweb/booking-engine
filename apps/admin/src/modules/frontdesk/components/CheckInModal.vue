@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Rezervasyondan Check-in"
-    size="lg"
-    @close="close"
-  >
+  <Modal v-model="show" title="Rezervasyondan Check-in" size="lg" @close="close">
     <div v-if="booking" class="space-y-6">
       <!-- Reservation Info -->
       <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
@@ -37,7 +32,10 @@
         <div v-if="loadingRooms" class="text-center py-4">
           <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto"></div>
         </div>
-        <div v-else-if="availableRooms.length === 0" class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-center">
+        <div
+          v-else-if="availableRooms.length === 0"
+          class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 text-center"
+        >
           <span class="material-icons text-amber-500">warning</span>
           <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">Musait oda bulunamadi</p>
         </div>
@@ -45,7 +43,6 @@
           <button
             v-for="room in availableRooms"
             :key="room._id"
-            @click="selectedRoomId = room._id"
             class="p-3 rounded-lg border-2 text-center transition-all relative"
             :class="[
               selectedRoomId === room._id
@@ -54,12 +51,18 @@
                   ? 'border-indigo-300 dark:border-indigo-600 hover:border-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/10'
                   : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
             ]"
+            @click="selectedRoomId = room._id"
           >
-            <span v-if="!isMatchingRoomType(room)" class="absolute -top-2 -right-2 px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded">
+            <span
+              v-if="!isMatchingRoomType(room)"
+              class="absolute -top-2 -right-2 px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded"
+            >
               UP
             </span>
             <span class="block font-bold text-gray-900 dark:text-white">{{ room.roomNumber }}</span>
-            <span class="text-xs text-gray-500 dark:text-slate-400">{{ room.roomType?.code || 'Kat ' + room.floor }}</span>
+            <span class="text-xs text-gray-500 dark:text-slate-400">{{
+              room.roomType?.code || 'Kat ' + room.floor
+            }}</span>
           </button>
         </div>
       </div>
@@ -71,8 +74,8 @@
             Misafir Bilgileri
           </label>
           <button
-            @click="showGuestEdit = !showGuestEdit"
             class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+            @click="showGuestEdit = !showGuestEdit"
           >
             {{ showGuestEdit ? 'Gizle' : 'Duzenle' }}
           </button>
@@ -80,7 +83,9 @@
 
         <div v-if="!showGuestEdit" class="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
           <p class="text-gray-900 dark:text-white">{{ guestDisplayName }}</p>
-          <p class="text-sm text-gray-500 dark:text-slate-400">{{ guestPhone }} - {{ guestEmail }}</p>
+          <p class="text-sm text-gray-500 dark:text-slate-400">
+            {{ guestPhone }} - {{ guestEmail }}
+          </p>
         </div>
 
         <div v-else class="grid grid-cols-2 gap-3">
@@ -109,11 +114,7 @@
             />
           </div>
           <div>
-            <PhoneInput
-              v-model="guestForm.phone"
-              label="Telefon"
-              country="TR"
-            />
+            <PhoneInput v-model="guestForm.phone" label="Telefon" country="TR" />
           </div>
         </div>
       </div>
@@ -132,19 +133,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !selectedRoomId"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>login</span>
+        <span v-else class="material-icons text-sm">login</span>
         Check-in Yap
       </button>
     </template>
@@ -192,7 +193,7 @@ const guestForm = ref({
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 // Helper: Check if this is a Stay object (has guests array) or Booking object
@@ -268,11 +269,15 @@ const childrenCount = computed(() => {
 
 // Get the expected room type from booking
 const expectedRoomTypeId = computed(() => {
-  return props.booking?.roomType?._id || props.booking?.rooms?.[0]?.roomType?._id || props.booking?.rooms?.[0]?.roomType
+  return (
+    props.booking?.roomType?._id ||
+    props.booking?.rooms?.[0]?.roomType?._id ||
+    props.booking?.rooms?.[0]?.roomType
+  )
 })
 
 // Check if room matches the expected room type
-const isMatchingRoomType = (room) => {
+const isMatchingRoomType = room => {
   const roomTypeId = room.roomType?._id || room.roomType
   return roomTypeId === expectedRoomTypeId.value
 }
@@ -287,11 +292,13 @@ const fetchAvailableRooms = async () => {
     // Sort: matching room type first, then by floor and room number
     const rooms = response.data || []
     availableRooms.value = rooms.sort((a, b) => {
-      const aMatch = a.roomType?._id === expectedRoomTypeId.value || a.roomType === expectedRoomTypeId.value
-      const bMatch = b.roomType?._id === expectedRoomTypeId.value || b.roomType === expectedRoomTypeId.value
+      const aMatch =
+        a.roomType?._id === expectedRoomTypeId.value || a.roomType === expectedRoomTypeId.value
+      const bMatch =
+        b.roomType?._id === expectedRoomTypeId.value || b.roomType === expectedRoomTypeId.value
       if (aMatch && !bMatch) return -1
       if (!aMatch && bMatch) return 1
-      return (a.floor - b.floor) || a.roomNumber.localeCompare(b.roomNumber)
+      return a.floor - b.floor || a.roomNumber.localeCompare(b.roomNumber)
     })
   } catch (error) {
     console.error('Failed to fetch rooms:', error)
@@ -305,10 +312,15 @@ const submit = async () => {
 
   loading.value = true
   try {
-    const guests = showGuestEdit.value && guestForm.value.firstName ? [{
-      ...guestForm.value,
-      isMainGuest: true
-    }] : null
+    const guests =
+      showGuestEdit.value && guestForm.value.firstName
+        ? [
+            {
+              ...guestForm.value,
+              isMainGuest: true
+            }
+          ]
+        : null
 
     if (isStayObject.value) {
       // For pending Stay - use checkInFromStay
@@ -337,7 +349,7 @@ const submit = async () => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -354,31 +366,35 @@ const close = () => {
   guestForm.value = { firstName: '', lastName: '', idNumber: '', phone: '' }
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val && props.booking) {
-    selectedRoomId.value = ''
-    specialRequests.value = props.booking.specialRequests || ''
+watch(
+  () => props.modelValue,
+  val => {
+    if (val && props.booking) {
+      selectedRoomId.value = ''
+      specialRequests.value = props.booking.specialRequests || ''
 
-    // Handle both Booking and Stay objects
-    if (isStayObject.value) {
-      // Stay object - use guests array
-      const mainGuest = props.booking.guests?.find(g => g.isMainGuest) || props.booking.guests?.[0]
-      guestForm.value = {
-        firstName: mainGuest?.firstName || '',
-        lastName: mainGuest?.lastName || '',
-        idNumber: mainGuest?.idNumber || '',
-        phone: mainGuest?.phone || ''
+      // Handle both Booking and Stay objects
+      if (isStayObject.value) {
+        // Stay object - use guests array
+        const mainGuest =
+          props.booking.guests?.find(g => g.isMainGuest) || props.booking.guests?.[0]
+        guestForm.value = {
+          firstName: mainGuest?.firstName || '',
+          lastName: mainGuest?.lastName || '',
+          idNumber: mainGuest?.idNumber || '',
+          phone: mainGuest?.phone || ''
+        }
+      } else {
+        // Booking object - use leadGuest and contact
+        guestForm.value = {
+          firstName: props.booking.leadGuest?.firstName || '',
+          lastName: props.booking.leadGuest?.lastName || '',
+          idNumber: '',
+          phone: props.booking.contact?.phone || ''
+        }
       }
-    } else {
-      // Booking object - use leadGuest and contact
-      guestForm.value = {
-        firstName: props.booking.leadGuest?.firstName || '',
-        lastName: props.booking.leadGuest?.lastName || '',
-        idNumber: '',
-        phone: props.booking.contact?.phone || ''
-      }
+      fetchAvailableRooms()
     }
-    fetchAvailableRooms()
   }
-})
+)
 </script>

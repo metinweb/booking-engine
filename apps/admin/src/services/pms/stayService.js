@@ -148,7 +148,7 @@ export const getStay = async (hotelId, stayId) => {
 /**
  * Get front desk statistics
  */
-export const getFrontDeskStats = async (hotelId) => {
+export const getFrontDeskStats = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/stays/stats`)
   return response.data
 }
@@ -156,7 +156,7 @@ export const getFrontDeskStats = async (hotelId) => {
 /**
  * Get today's activity
  */
-export const getTodayActivity = async (hotelId) => {
+export const getTodayActivity = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/stays/today`)
   return response.data
 }
@@ -164,7 +164,7 @@ export const getTodayActivity = async (hotelId) => {
 /**
  * Get active stays
  */
-export const getActiveStays = async (hotelId) => {
+export const getActiveStays = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/stays/active`)
   return response.data
 }
@@ -173,7 +173,9 @@ export const getActiveStays = async (hotelId) => {
  * Get available rooms for check-in
  */
 export const getAvailableRooms = async (hotelId, params = {}) => {
-  const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/stays/available-rooms`, { params })
+  const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/stays/available-rooms`, {
+    params
+  })
   return response.data
 }
 
@@ -229,7 +231,10 @@ export const addPayment = async (hotelId, stayId, data) => {
  * Change room
  */
 export const changeRoom = async (hotelId, stayId, data) => {
-  const response = await pmsApiClient.post(`${BASE_URL}/${hotelId}/stays/${stayId}/change-room`, data)
+  const response = await pmsApiClient.post(
+    `${BASE_URL}/${hotelId}/stays/${stayId}/change-room`,
+    data
+  )
   return response.data
 }
 

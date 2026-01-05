@@ -19,8 +19,23 @@ import ModuleNavigation from '@/components/common/ModuleNavigation.vue'
 const { t } = useI18n()
 
 const navItems = computed(() => [
-  { name: 'settings', to: '/site-management/settings', icon: 'settings', label: t('siteManagement.tabs.settings') },
-  { name: 'pages', to: '/site-management/pages', icon: 'description', label: t('siteManagement.tabs.pages') },
-  { name: 'notifications', to: '/site-management/notifications', icon: 'notifications', label: t('siteManagement.tabs.notifications') }
+  {
+    name: 'settings',
+    to: '/site-management/settings',
+    icon: 'settings',
+    label: t('siteManagement.tabs.settings')
+  },
+  {
+    name: 'pages',
+    to: '/site-management/pages',
+    icon: 'description',
+    label: t('siteManagement.tabs.pages')
+  },
+  {
+    name: 'notifications',
+    to: '/site-management/notifications',
+    icon: 'notifications',
+    label: t('siteManagement.tabs.notifications')
+  }
 ])
 </script>

@@ -7,7 +7,6 @@
         type="button"
         role="tab"
         :aria-selected="modelValue === tab.id"
-        @click="handleTabClick(tab)"
         :disabled="tab.disabled"
         class="relative px-6 py-4 text-sm font-medium transition-colors border-b-2 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
         :class="[
@@ -16,6 +15,7 @@
             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-slate-400 dark:hover:text-slate-300',
           tab.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
         ]"
+        @click="handleTabClick(tab)"
       >
         <span class="flex items-center gap-2">
           <!-- Icon -->
@@ -41,10 +41,7 @@
           </span>
 
           <!-- Success Badge (all fields filled) -->
-          <span
-            v-else-if="isTabComplete(tab.id)"
-            class="material-icons text-green-500 text-sm"
-          >
+          <span v-else-if="isTabComplete(tab.id)" class="material-icons text-green-500 text-sm">
             check_circle
           </span>
         </span>
@@ -54,7 +51,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -64,7 +60,7 @@ const props = defineProps({
   tabs: {
     type: Array,
     required: true,
-    validator: (tabs) => tabs.every(tab => tab.id && tab.label)
+    validator: tabs => tabs.every(tab => tab.id && tab.label)
   },
   errors: {
     type: Object,
@@ -90,7 +86,7 @@ const emit = defineEmits(['update:modelValue', 'tab-change'])
 /**
  * Get error count for a specific tab
  */
-const getErrorCount = (tabId) => {
+const getErrorCount = tabId => {
   const fields = props.tabFields[tabId] || []
   return fields.filter(field => props.errors[field]).length
 }
@@ -98,7 +94,7 @@ const getErrorCount = (tabId) => {
 /**
  * Get warning count for a specific tab
  */
-const getWarningCount = (tabId) => {
+const getWarningCount = tabId => {
   const fields = props.tabFields[tabId] || []
   return fields.filter(field => props.warnings[field]).length
 }
@@ -106,14 +102,14 @@ const getWarningCount = (tabId) => {
 /**
  * Check if tab is complete (in completedTabs array)
  */
-const isTabComplete = (tabId) => {
+const isTabComplete = tabId => {
   return props.completedTabs.includes(tabId)
 }
 
 /**
  * Handle tab click
  */
-const handleTabClick = (tab) => {
+const handleTabClick = tab => {
   if (tab.disabled) return
 
   emit('update:modelValue', tab.id)
@@ -124,7 +120,8 @@ const handleTabClick = (tab) => {
 <style scoped>
 /* Smooth animation for error badge */
 @keyframes pulse-error {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

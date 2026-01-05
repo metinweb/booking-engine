@@ -1,4 +1,5 @@
 import apiClient from './api'
+import { apiLogger } from '@/utils/logger'
 
 /**
  * Get all audit logs with filtering and pagination
@@ -8,7 +9,7 @@ const getAuditLogs = async (params = {}) => {
     const response = await apiClient.get('/audit-logs', { params })
     return response.data
   } catch (error) {
-    console.error('Audit Service: Get audit logs failed', error.response?.data || error.message)
+    apiLogger.error('Audit Service: Get audit logs failed', error.response?.data || error.message)
     throw error
   }
 }
@@ -16,12 +17,12 @@ const getAuditLogs = async (params = {}) => {
 /**
  * Get single audit log by ID
  */
-const getAuditLog = async (id) => {
+const getAuditLog = async id => {
   try {
     const response = await apiClient.get(`/audit-logs/${id}`)
     return response.data
   } catch (error) {
-    console.error('Audit Service: Get audit log failed', error.response?.data || error.message)
+    apiLogger.error('Audit Service: Get audit log failed', error.response?.data || error.message)
     throw error
   }
 }
@@ -31,10 +32,15 @@ const getAuditLog = async (id) => {
  */
 const getDocumentHistory = async (collection, documentId, params = {}) => {
   try {
-    const response = await apiClient.get(`/audit-logs/history/${collection}/${documentId}`, { params })
+    const response = await apiClient.get(`/audit-logs/history/${collection}/${documentId}`, {
+      params
+    })
     return response.data
   } catch (error) {
-    console.error('Audit Service: Get document history failed', error.response?.data || error.message)
+    apiLogger.error(
+      'Audit Service: Get document history failed',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -47,7 +53,7 @@ const getUserActivity = async (userId, params = {}) => {
     const response = await apiClient.get(`/audit-logs/user/${userId}`, { params })
     return response.data
   } catch (error) {
-    console.error('Audit Service: Get user activity failed', error.response?.data || error.message)
+    apiLogger.error('Audit Service: Get user activity failed', error.response?.data || error.message)
     throw error
   }
 }
@@ -60,7 +66,10 @@ const getPartnerActivity = async (partnerId, params = {}) => {
     const response = await apiClient.get(`/audit-logs/partner/${partnerId}`, { params })
     return response.data
   } catch (error) {
-    console.error('Audit Service: Get partner activity failed', error.response?.data || error.message)
+    apiLogger.error(
+      'Audit Service: Get partner activity failed',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -73,7 +82,7 @@ const getAuditStats = async (period = 'day') => {
     const response = await apiClient.get('/audit-logs/stats', { params: { period } })
     return response.data
   } catch (error) {
-    console.error('Audit Service: Get audit stats failed', error.response?.data || error.message)
+    apiLogger.error('Audit Service: Get audit stats failed', error.response?.data || error.message)
     throw error
   }
 }
@@ -86,7 +95,10 @@ const getRecentActivity = async (limit = 10) => {
     const response = await apiClient.get('/audit-logs/recent', { params: { limit } })
     return response.data
   } catch (error) {
-    console.error('Audit Service: Get recent activity failed', error.response?.data || error.message)
+    apiLogger.error(
+      'Audit Service: Get recent activity failed',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -102,7 +114,7 @@ const exportAuditLogs = async (params = {}) => {
     })
     return response.data
   } catch (error) {
-    console.error('Audit Service: Export audit logs failed', error.response?.data || error.message)
+    apiLogger.error('Audit Service: Export audit logs failed', error.response?.data || error.message)
     throw error
   }
 }

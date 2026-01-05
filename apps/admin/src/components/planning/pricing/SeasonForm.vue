@@ -1,16 +1,21 @@
 <template>
   <div class="flex flex-col h-full">
     <!-- Tab Navigation (Sticky) - Hidden in preview mode -->
-    <div v-if="!showPreview" class="flex border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 -mx-4 px-4">
+    <div
+      v-if="!showPreview"
+      class="flex border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-10 -mx-4 px-4"
+    >
       <button
         v-for="tab in tabs"
         :key="tab.id"
         type="button"
-        @click="activeTab = tab.id"
         class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-2"
-        :class="activeTab === tab.id
-          ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-          : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 hover:border-gray-300'"
+        :class="
+          activeTab === tab.id
+            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+            : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 hover:border-gray-300'
+        "
+        @click="activeTab = tab.id"
       >
         <span class="material-icons text-lg">{{ tab.icon }}</span>
         {{ tab.label }}
@@ -27,7 +32,9 @@
       <div v-show="activeTab === 'general'">
         <!-- Code -->
         <div class="mb-4">
-          <label class="form-label">{{ $t('planning.pricing.seasonCode') }} <span class="text-red-500">*</span></label>
+          <label class="form-label"
+            >{{ $t('planning.pricing.seasonCode') }} <span class="text-red-500">*</span></label
+          >
           <input v-model="form.code" type="text" class="form-input uppercase" maxlength="10" />
         </div>
 
@@ -45,13 +52,28 @@
           <div>
             <label class="form-label">{{ $t('planning.pricing.color') }}</label>
             <div class="flex items-center gap-3">
-              <input v-model="form.color" type="color" class="w-12 h-10 rounded border border-gray-300 cursor-pointer" />
-              <input v-model="form.color" type="text" class="form-input flex-1" placeholder="#6366f1" />
+              <input
+                v-model="form.color"
+                type="color"
+                class="w-12 h-10 rounded border border-gray-300 cursor-pointer"
+              />
+              <input
+                v-model="form.color"
+                type="text"
+                class="form-input flex-1"
+                placeholder="#6366f1"
+              />
             </div>
           </div>
           <div>
             <label class="form-label">{{ $t('planning.pricing.priority') }}</label>
-            <input v-model.number="form.priority" type="number" min="0" max="100" class="form-input" />
+            <input
+              v-model.number="form.priority"
+              type="number"
+              min="0"
+              max="100"
+              class="form-input"
+            />
             <p class="text-xs text-gray-500 mt-1">{{ $t('planning.pricing.priorityHint') }}</p>
           </div>
         </div>
@@ -67,7 +89,9 @@
             >
               <div class="flex-1 grid grid-cols-2 gap-3">
                 <div>
-                  <label class="text-xs text-gray-500 dark:text-slate-400 mb-1 block">{{ $t('planning.pricing.startDate') }}</label>
+                  <label class="text-xs text-gray-500 dark:text-slate-400 mb-1 block">{{
+                    $t('planning.pricing.startDate')
+                  }}</label>
                   <DatePicker
                     v-model="range.startDate"
                     allow-past
@@ -76,7 +100,9 @@
                   />
                 </div>
                 <div>
-                  <label class="text-xs text-gray-500 dark:text-slate-400 mb-1 block">{{ $t('planning.pricing.endDate') }}</label>
+                  <label class="text-xs text-gray-500 dark:text-slate-400 mb-1 block">{{
+                    $t('planning.pricing.endDate')
+                  }}</label>
                   <DatePicker
                     v-model="range.endDate"
                     allow-past
@@ -87,17 +113,17 @@
               </div>
               <button
                 v-if="form.dateRanges.length > 1"
-                @click="removeDateRange(index)"
                 type="button"
                 class="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded self-end mb-1"
+                @click="removeDateRange(index)"
               >
                 <span class="material-icons">close</span>
               </button>
             </div>
             <button
-              @click="addDateRange"
               type="button"
               class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+              @click="addDateRange"
             >
               <span class="material-icons text-sm">add</span>
               {{ $t('planning.pricing.addDateRange') }}
@@ -106,38 +132,52 @@
         </div>
 
         <!-- Product Override Section -->
-        <div v-if="filteredRoomTypes.length || filteredMealPlans.length" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 space-y-4 mb-4">
+        <div
+          v-if="filteredRoomTypes.length || filteredMealPlans.length"
+          class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 space-y-4 mb-4"
+        >
           <div class="flex items-center gap-2">
             <span class="material-icons text-blue-500">inventory_2</span>
-            <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.seasons.productOverride') }}</label>
+            <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+              $t('planning.seasons.productOverride')
+            }}</label>
           </div>
           <p class="text-xs text-gray-500 dark:text-slate-400">
             {{ $t('planning.seasons.productOverrideHint') }}
           </p>
 
           <!-- Active Room Types Override -->
-          <div v-if="filteredRoomTypes.length" class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600">
+          <div
+            v-if="filteredRoomTypes.length"
+            class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
+          >
             <div class="flex items-center gap-2 mb-3">
               <span class="material-icons text-blue-500 text-sm">hotel</span>
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.seasons.activeRoomTypes') }}</label>
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                $t('planning.seasons.activeRoomTypes')
+              }}</label>
             </div>
             <div class="flex flex-wrap gap-2">
               <label
                 v-for="rt in filteredRoomTypes"
                 :key="rt._id"
                 class="flex items-center gap-2 px-3 py-1.5 rounded-full border cursor-pointer transition-all text-sm"
-                :class="form.activeRoomTypes.includes(rt._id)
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                :class="
+                  form.activeRoomTypes.includes(rt._id)
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                "
               >
                 <input
+                  v-model="form.activeRoomTypes"
                   type="checkbox"
                   :value="rt._id"
-                  v-model="form.activeRoomTypes"
                   class="sr-only"
                 />
                 <span class="font-medium">{{ rt.code }}</span>
-                <span class="text-xs text-gray-500 dark:text-slate-400">{{ rt.name?.[locale] || rt.name?.tr }}</span>
+                <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                  rt.name?.[locale] || rt.name?.tr
+                }}</span>
               </label>
             </div>
             <p class="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
@@ -147,28 +187,37 @@
           </div>
 
           <!-- Active Meal Plans Override -->
-          <div v-if="filteredMealPlans.length" class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600">
+          <div
+            v-if="filteredMealPlans.length"
+            class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
+          >
             <div class="flex items-center gap-2 mb-3">
               <span class="material-icons text-green-500 text-sm">restaurant</span>
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.seasons.activeMealPlans') }}</label>
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                $t('planning.seasons.activeMealPlans')
+              }}</label>
             </div>
             <div class="flex flex-wrap gap-2">
               <label
                 v-for="mp in filteredMealPlans"
                 :key="mp._id"
                 class="flex items-center gap-2 px-3 py-1.5 rounded-full border cursor-pointer transition-all text-sm"
-                :class="form.activeMealPlans.includes(mp._id)
-                  ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                :class="
+                  form.activeMealPlans.includes(mp._id)
+                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                "
               >
                 <input
+                  v-model="form.activeMealPlans"
                   type="checkbox"
                   :value="mp._id"
-                  v-model="form.activeMealPlans"
                   class="sr-only"
                 />
                 <span class="font-medium">{{ mp.code }}</span>
-                <span class="text-xs text-gray-500 dark:text-slate-400">{{ mp.name?.[locale] || mp.name?.tr }}</span>
+                <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                  mp.name?.[locale] || mp.name?.tr
+                }}</span>
               </label>
             </div>
             <p class="text-xs text-amber-600 dark:text-amber-400 mt-2 flex items-center gap-1">
@@ -179,29 +228,44 @@
         </div>
 
         <!-- Child Age Override Section -->
-        <div class="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-200 dark:border-pink-800 space-y-4 mb-4">
+        <div
+          class="p-4 bg-pink-50 dark:bg-pink-900/20 rounded-lg border border-pink-200 dark:border-pink-800 space-y-4 mb-4"
+        >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="material-icons text-pink-500">child_care</span>
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.seasons.childAgeOverride') }}</label>
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                $t('planning.seasons.childAgeOverride')
+              }}</label>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.inheritFromMarket') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                $t('planning.seasons.inheritFromMarket')
+              }}</span>
               <button
                 type="button"
-                @click="form.childAgeSettings.inheritFromMarket = !form.childAgeSettings.inheritFromMarket"
                 class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
-                :class="form.childAgeSettings.inheritFromMarket ? 'bg-pink-500' : 'bg-gray-300 dark:bg-slate-600'"
+                :class="
+                  form.childAgeSettings.inheritFromMarket
+                    ? 'bg-pink-500'
+                    : 'bg-gray-300 dark:bg-slate-600'
+                "
+                @click="form.childAgeSettings.inheritFromMarket = !form.childAgeSettings.inheritFromMarket"
               >
                 <span
                   class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
-                  :class="form.childAgeSettings.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'"
+                  :class="
+                    form.childAgeSettings.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'
+                  "
                 ></span>
               </button>
             </div>
           </div>
 
-          <div v-if="form.childAgeSettings.inheritFromMarket" class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600">
+          <div
+            v-if="form.childAgeSettings.inheritFromMarket"
+            class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600"
+          >
             <p class="text-xs text-gray-500 dark:text-slate-400 mb-2 flex items-center gap-1">
               <span class="material-icons text-xs">link</span>
               {{ $t('planning.seasons.usingMarketSettings') }}
@@ -212,8 +276,12 @@
                 :key="group.code"
                 class="px-3 py-1.5 bg-white dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-slate-600 text-sm"
               >
-                <span class="font-medium text-gray-700 dark:text-slate-300">{{ getChildGroupName(group) }}</span>
-                <span class="text-gray-500 dark:text-slate-400 ml-2">{{ group.minAge }}-{{ group.maxAge }} {{ $t('planning.markets.years') }}</span>
+                <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                  getChildGroupName(group)
+                }}</span>
+                <span class="text-gray-500 dark:text-slate-400 ml-2"
+                  >{{ group.minAge }}-{{ group.maxAge }} {{ $t('planning.markets.years') }}</span
+                >
               </div>
               <span v-if="hotelChildAgeGroups.length === 0" class="text-amber-600 text-sm">
                 {{ $t('planning.seasons.noChildAgeGroups') }}
@@ -223,7 +291,7 @@
 
           <div v-else class="space-y-3">
             <div
-              v-for="(group, index) in form.childAgeSettings.childAgeGroups"
+              v-for="group in form.childAgeSettings.childAgeGroups"
               :key="group.code"
               class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
             >
@@ -262,41 +330,78 @@
         </div>
 
         <!-- Payment Settings Override Section -->
-        <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800 space-y-4 mb-4">
+        <div
+          class="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800 space-y-4 mb-4"
+        >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="material-icons text-emerald-500">payments</span>
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.seasons.paymentSettings') }}</label>
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                $t('planning.seasons.paymentSettings')
+              }}</label>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.inheritFromMarket') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                $t('planning.seasons.inheritFromMarket')
+              }}</span>
               <button
                 type="button"
-                @click="form.paymentSettings.inheritFromMarket = !form.paymentSettings.inheritFromMarket"
                 class="relative w-12 h-6 rounded-full transition-colors duration-300"
-                :class="form.paymentSettings.inheritFromMarket ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-slate-600'"
+                :class="
+                  form.paymentSettings.inheritFromMarket
+                    ? 'bg-emerald-500'
+                    : 'bg-gray-300 dark:bg-slate-600'
+                "
+                @click="form.paymentSettings.inheritFromMarket = !form.paymentSettings.inheritFromMarket"
               >
-                <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
-                  :class="form.paymentSettings.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'"></span>
+                <span
+                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
+                  :class="
+                    form.paymentSettings.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'
+                  "
+                ></span>
               </button>
             </div>
           </div>
 
-          <div v-if="form.paymentSettings.inheritFromMarket" class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600">
+          <div
+            v-if="form.paymentSettings.inheritFromMarket"
+            class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600"
+          >
             <p class="text-xs text-gray-500 dark:text-slate-400 mb-2 flex items-center gap-1">
               <span class="material-icons text-xs">link</span>
               {{ $t('planning.seasons.usingMarketSettings') }}
             </p>
             <div class="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-slate-400">
               <span class="flex items-center gap-1">
-                <span class="material-icons text-sm" :class="market.paymentMethods?.creditCard?.enabled !== false ? 'text-green-500' : 'text-red-500'">
-                  {{ market.paymentMethods?.creditCard?.enabled !== false ? 'check_circle' : 'cancel' }}
+                <span
+                  class="material-icons text-sm"
+                  :class="
+                    market.paymentMethods?.creditCard?.enabled !== false
+                      ? 'text-green-500'
+                      : 'text-red-500'
+                  "
+                >
+                  {{
+                    market.paymentMethods?.creditCard?.enabled !== false ? 'check_circle' : 'cancel'
+                  }}
                 </span>
                 {{ $t('planning.markets.creditCard') }}
               </span>
               <span class="flex items-center gap-1">
-                <span class="material-icons text-sm" :class="market.paymentMethods?.bankTransfer?.enabled !== false ? 'text-green-500' : 'text-red-500'">
-                  {{ market.paymentMethods?.bankTransfer?.enabled !== false ? 'check_circle' : 'cancel' }}
+                <span
+                  class="material-icons text-sm"
+                  :class="
+                    market.paymentMethods?.bankTransfer?.enabled !== false
+                      ? 'text-green-500'
+                      : 'text-red-500'
+                  "
+                >
+                  {{
+                    market.paymentMethods?.bankTransfer?.enabled !== false
+                      ? 'check_circle'
+                      : 'cancel'
+                  }}
                 </span>
                 {{ $t('planning.markets.bankTransfer') }}
               </span>
@@ -304,48 +409,91 @@
           </div>
 
           <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600">
+            <div
+              class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
+            >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <span class="material-icons text-blue-500 text-sm">credit_card</span>
-                  <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.markets.creditCard') }}</label>
+                  <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                    $t('planning.markets.creditCard')
+                  }}</label>
                 </div>
                 <button
                   type="button"
-                  @click="form.paymentSettings.creditCard.enabled = !form.paymentSettings.creditCard.enabled"
                   class="relative w-10 h-5 rounded-full transition-colors duration-300"
-                  :class="form.paymentSettings.creditCard.enabled ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-slate-600'"
+                  :class="
+                    form.paymentSettings.creditCard.enabled
+                      ? 'bg-emerald-500'
+                      : 'bg-gray-300 dark:bg-slate-600'
+                  "
+                  @click="form.paymentSettings.creditCard.enabled = !form.paymentSettings.creditCard.enabled"
                 >
-                  <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300"
-                    :class="form.paymentSettings.creditCard.enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+                  <span
+                    class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300"
+                    :class="
+                      form.paymentSettings.creditCard.enabled ? 'translate-x-5' : 'translate-x-0'
+                    "
+                  ></span>
                 </button>
               </div>
             </div>
-            <div class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600">
+            <div
+              class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
+            >
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                   <span class="material-icons text-orange-500 text-sm">account_balance</span>
-                  <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.markets.bankTransfer') }}</label>
+                  <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                    $t('planning.markets.bankTransfer')
+                  }}</label>
                 </div>
                 <button
                   type="button"
-                  @click="form.paymentSettings.bankTransfer.enabled = !form.paymentSettings.bankTransfer.enabled"
                   class="relative w-10 h-5 rounded-full transition-colors duration-300"
-                  :class="form.paymentSettings.bankTransfer.enabled ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-slate-600'"
+                  :class="
+                    form.paymentSettings.bankTransfer.enabled
+                      ? 'bg-emerald-500'
+                      : 'bg-gray-300 dark:bg-slate-600'
+                  "
+                  @click="form.paymentSettings.bankTransfer.enabled = !form.paymentSettings.bankTransfer.enabled"
                 >
-                  <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300"
-                    :class="form.paymentSettings.bankTransfer.enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+                  <span
+                    class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300"
+                    :class="
+                      form.paymentSettings.bankTransfer.enabled ? 'translate-x-5' : 'translate-x-0'
+                    "
+                  ></span>
                 </button>
               </div>
-              <div v-if="form.paymentSettings.bankTransfer.enabled" class="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-700">
+              <div
+                v-if="form.paymentSettings.bankTransfer.enabled"
+                class="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-700"
+              >
                 <div class="flex items-center gap-2">
-                  <label class="text-xs text-gray-500 dark:text-slate-400 w-24">{{ $t('planning.markets.releaseDays') }}</label>
-                  <input v-model.number="form.paymentSettings.bankTransfer.releaseDays" type="number" min="0" max="60" class="form-input w-16 text-center text-sm py-1" />
+                  <label class="text-xs text-gray-500 dark:text-slate-400 w-24">{{
+                    $t('planning.markets.releaseDays')
+                  }}</label>
+                  <input
+                    v-model.number="form.paymentSettings.bankTransfer.releaseDays"
+                    type="number"
+                    min="0"
+                    max="60"
+                    class="form-input w-16 text-center text-sm py-1"
+                  />
                   <span class="text-xs text-gray-400">{{ $t('common.days') }}</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <label class="text-xs text-gray-500 dark:text-slate-400 w-24">{{ $t('planning.markets.discountRate') }}</label>
-                  <input v-model.number="form.paymentSettings.bankTransfer.discountRate" type="number" min="0" max="50" class="form-input w-16 text-center text-sm py-1" />
+                  <label class="text-xs text-gray-500 dark:text-slate-400 w-24">{{
+                    $t('planning.markets.discountRate')
+                  }}</label>
+                  <input
+                    v-model.number="form.paymentSettings.bankTransfer.discountRate"
+                    type="number"
+                    min="0"
+                    max="50"
+                    class="form-input w-16 text-center text-sm py-1"
+                  />
                   <span class="text-xs text-gray-400">%</span>
                 </div>
               </div>
@@ -354,102 +502,172 @@
         </div>
 
         <!-- Children Allowed Override Section -->
-        <div class="p-4 mb-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+        <div
+          class="p-4 mb-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800"
+        >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="material-icons text-amber-500">family_restroom</span>
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.markets.childrenAllowed') }}</label>
-                <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.childrenAllowedHint') }}</p>
+                <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                  $t('planning.markets.childrenAllowed')
+                }}</label>
+                <p class="text-xs text-gray-500 dark:text-slate-400">
+                  {{ $t('planning.seasons.childrenAllowedHint') }}
+                </p>
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.inheritFromMarket') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                $t('planning.seasons.inheritFromMarket')
+              }}</span>
               <button
                 type="button"
-                @click="form.childrenSettings.inheritFromMarket = !form.childrenSettings.inheritFromMarket"
                 class="relative w-12 h-6 rounded-full transition-colors duration-300"
-                :class="form.childrenSettings.inheritFromMarket ? 'bg-amber-500' : 'bg-gray-300 dark:bg-slate-600'"
+                :class="
+                  form.childrenSettings.inheritFromMarket
+                    ? 'bg-amber-500'
+                    : 'bg-gray-300 dark:bg-slate-600'
+                "
+                @click="form.childrenSettings.inheritFromMarket = !form.childrenSettings.inheritFromMarket"
               >
-                <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
-                  :class="form.childrenSettings.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'"></span>
+                <span
+                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
+                  :class="
+                    form.childrenSettings.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'
+                  "
+                ></span>
               </button>
             </div>
           </div>
 
-          <div v-if="form.childrenSettings.inheritFromMarket" class="mt-3 p-2 bg-white/50 dark:bg-slate-800/50 rounded border border-gray-200 dark:border-slate-600">
+          <div
+            v-if="form.childrenSettings.inheritFromMarket"
+            class="mt-3 p-2 bg-white/50 dark:bg-slate-800/50 rounded border border-gray-200 dark:border-slate-600"
+          >
             <span class="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1">
               <span class="material-icons text-xs">link</span>
               {{ $t('planning.seasons.usingMarketSettings') }}:
-              <span class="font-medium" :class="market.childrenAllowed !== false ? 'text-green-600' : 'text-red-600'">
+              <span
+                class="font-medium"
+                :class="market.childrenAllowed !== false ? 'text-green-600' : 'text-red-600'"
+              >
                 {{ market.childrenAllowed !== false ? $t('common.yes') : $t('common.no') }}
               </span>
             </span>
           </div>
 
           <div v-else class="mt-3 flex items-center gap-3">
-            <span class="text-sm text-gray-600 dark:text-slate-400">{{ $t('planning.seasons.allowChildren') }}:</span>
+            <span class="text-sm text-gray-600 dark:text-slate-400"
+              >{{ $t('planning.seasons.allowChildren') }}:</span
+            >
             <button
               type="button"
-              @click="form.childrenSettings.allowed = !form.childrenSettings.allowed"
               class="relative w-12 h-6 rounded-full transition-colors duration-300"
               :class="form.childrenSettings.allowed ? 'bg-green-500' : 'bg-red-500'"
+              @click="form.childrenSettings.allowed = !form.childrenSettings.allowed"
             >
-              <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
-                :class="form.childrenSettings.allowed ? 'translate-x-6' : 'translate-x-0'"></span>
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
+                :class="form.childrenSettings.allowed ? 'translate-x-6' : 'translate-x-0'"
+              ></span>
             </button>
-            <span class="text-sm font-medium" :class="form.childrenSettings.allowed ? 'text-green-600' : 'text-red-600'">
+            <span
+              class="text-sm font-medium"
+              :class="form.childrenSettings.allowed ? 'text-green-600' : 'text-red-600'"
+            >
               {{ form.childrenSettings.allowed ? $t('common.yes') : $t('common.no') }}
             </span>
           </div>
         </div>
 
         <!-- Sales Settings Override Section -->
-        <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800 space-y-4">
+        <div
+          class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800 space-y-4"
+        >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="material-icons text-indigo-500">storefront</span>
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.seasons.salesSettingsOverride') }}</label>
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                $t('planning.seasons.salesSettingsOverride')
+              }}</label>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.inheritFromMarket') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                $t('planning.seasons.inheritFromMarket')
+              }}</span>
               <button
                 type="button"
-                @click="form.salesSettingsOverride.inheritFromMarket = !form.salesSettingsOverride.inheritFromMarket"
                 class="relative w-12 h-6 rounded-full transition-colors duration-300"
-                :class="form.salesSettingsOverride.inheritFromMarket ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-slate-600'"
+                :class="
+                  form.salesSettingsOverride.inheritFromMarket
+                    ? 'bg-indigo-500'
+                    : 'bg-gray-300 dark:bg-slate-600'
+                "
+                @click="form.salesSettingsOverride.inheritFromMarket = !form.salesSettingsOverride.inheritFromMarket"
               >
-                <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
-                  :class="form.salesSettingsOverride.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'"></span>
+                <span
+                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
+                  :class="
+                    form.salesSettingsOverride.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'
+                  "
+                ></span>
               </button>
             </div>
           </div>
 
           <!-- Show market settings when inheriting -->
-          <div v-if="form.salesSettingsOverride.inheritFromMarket" class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600">
+          <div
+            v-if="form.salesSettingsOverride.inheritFromMarket"
+            class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600"
+          >
             <p class="text-xs text-gray-500 dark:text-slate-400 mb-2 flex items-center gap-1">
               <span class="material-icons text-xs">link</span>
               {{ $t('planning.seasons.usingMarketSettings') }}
             </p>
             <div class="flex flex-wrap gap-3 text-sm">
               <!-- Working Mode -->
-              <span class="flex items-center gap-1 px-2 py-1 rounded"
-                :class="market.workingMode === 'commission'
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'">
-                {{ market.workingMode === 'commission' ? $t('planning.markets.workingModes.commission') : $t('planning.markets.workingModes.net') }}
-                <span v-if="market.workingMode === 'commission'" class="font-bold">%{{ market.commissionRate || 10 }}</span>
+              <span
+                class="flex items-center gap-1 px-2 py-1 rounded"
+                :class="
+                  market.workingMode === 'commission'
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                "
+              >
+                {{
+                  market.workingMode === 'commission'
+                    ? $t('planning.markets.workingModes.commission')
+                    : $t('planning.markets.workingModes.net')
+                }}
+                <span v-if="market.workingMode === 'commission'" class="font-bold"
+                  >%{{ market.commissionRate || 10 }}</span
+                >
               </span>
               <!-- Markups -->
-              <span v-if="market.salesChannels?.b2c && market.markup?.b2c" class="flex items-center gap-1 px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              <span
+                v-if="market.salesChannels?.b2c && market.markup?.b2c"
+                class="flex items-center gap-1 px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              >
                 B2C +{{ market.markup.b2c }}%
               </span>
-              <span v-if="market.salesChannels?.b2b && market.markup?.b2b" class="flex items-center gap-1 px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              <span
+                v-if="market.salesChannels?.b2b && market.markup?.b2b"
+                class="flex items-center gap-1 px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+              >
                 B2B +{{ market.markup.b2b }}%
               </span>
-              <!-- Agency Commission (only for commission mode with B2B) -->
-              <span v-if="market.salesChannels?.b2b && market.workingMode === 'commission'" class="flex items-center gap-1 px-2 py-1 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                {{ $t('planning.markets.agencyCommissionShort') }} %{{ market.agencyCommission || 10 }}
+              <!-- Agency Commission (only for commission mode with B2B - calculated from margin share) -->
+              <span
+                v-if="market.salesChannels?.b2b && market.workingMode === 'commission'"
+                class="flex items-center gap-1 px-2 py-1 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+              >
+                {{ $t('planning.markets.agencyCommissionShort') }} %{{
+                  Math.round(
+                    ((market.commissionRate || 10) / (100 + (market.commissionRate || 10))) *
+                    (market.agencyMarginShare ?? 50) * 100
+                  ) / 100
+                }}
               </span>
             </div>
           </div>
@@ -457,42 +675,63 @@
           <!-- Custom settings when override enabled -->
           <div v-else class="space-y-4">
             <!-- Working Mode Selection -->
-            <div class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600">
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3 block">{{ $t('planning.markets.workingMode') }}</label>
+            <div
+              class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
+            >
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3 block">{{
+                $t('planning.markets.workingMode')
+              }}</label>
               <div class="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  @click="form.salesSettingsOverride.workingMode = 'net'"
                   class="p-3 rounded-lg border-2 transition-all text-left"
-                  :class="form.salesSettingsOverride.workingMode === 'net'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                  :class="
+                    form.salesSettingsOverride.workingMode === 'net'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                  "
+                  @click="form.salesSettingsOverride.workingMode = 'net'"
                 >
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-blue-500">account_balance</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.markets.workingModes.net') }}</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{
+                      $t('planning.markets.workingModes.net')
+                    }}</span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ $t('planning.markets.workingModes.netDesc') }}</p>
+                  <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    {{ $t('planning.markets.workingModes.netDesc') }}
+                  </p>
                 </button>
                 <button
                   type="button"
-                  @click="form.salesSettingsOverride.workingMode = 'commission'"
                   class="p-3 rounded-lg border-2 transition-all text-left"
-                  :class="form.salesSettingsOverride.workingMode === 'commission'
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
-                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                  :class="
+                    form.salesSettingsOverride.workingMode === 'commission'
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                  "
+                  @click="form.salesSettingsOverride.workingMode = 'commission'"
                 >
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-green-500">percent</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.markets.workingModes.commission') }}</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{
+                      $t('planning.markets.workingModes.commission')
+                    }}</span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ $t('planning.markets.workingModes.commissionDesc') }}</p>
+                  <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                    {{ $t('planning.markets.workingModes.commissionDesc') }}
+                  </p>
                 </button>
               </div>
 
               <!-- Commission Rate (only for commission mode) -->
-              <div v-if="form.salesSettingsOverride.workingMode === 'commission'" class="mt-3 flex items-center gap-3">
-                <label class="text-sm text-gray-600 dark:text-slate-400">{{ $t('planning.markets.commissionRate') }}:</label>
+              <div
+                v-if="form.salesSettingsOverride.workingMode === 'commission'"
+                class="mt-3 flex items-center gap-3"
+              >
+                <label class="text-sm text-gray-600 dark:text-slate-400"
+                  >{{ $t('planning.markets.commissionRate') }}:</label
+                >
                 <div class="flex items-center gap-2">
                   <input
                     v-model.number="form.salesSettingsOverride.commissionRate"
@@ -507,8 +746,12 @@
             </div>
 
             <!-- Markup Settings -->
-            <div class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600">
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3 block">{{ $t('planning.markets.markupSettings') }}</label>
+            <div
+              class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
+            >
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3 block">{{
+                $t('planning.markets.markupSettings')
+              }}</label>
               <div class="grid grid-cols-2 gap-4">
                 <!-- B2C Markup -->
                 <div v-if="market.salesChannels?.b2c" class="flex items-center gap-3">
@@ -547,63 +790,120 @@
               </div>
             </div>
 
-            <!-- Agency Commission (only for B2B and commission mode) -->
-            <div v-if="market.salesChannels?.b2b && form.salesSettingsOverride.workingMode === 'commission'" class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600">
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3 block">{{ $t('planning.markets.agencyCommission') }}</label>
-              <div class="flex items-center gap-3">
-                <span class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-1">
-                  <span class="material-icons text-sm text-purple-500">storefront</span>
-                  {{ $t('planning.markets.agencyCommissionRate') }}:
+            <!-- Agency Margin Share (only for B2B and commission mode) -->
+            <div
+              v-if="
+                market.salesChannels?.b2b && form.salesSettingsOverride.workingMode === 'commission'
+              "
+              class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 space-y-3"
+            >
+              <!-- Gross Margin Info (calculated from commission rate) -->
+              <div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                <span class="text-sm text-blue-700 dark:text-blue-300">
+                  {{ $t('planning.markets.grossMargin') }}: %{{
+                    Math.round((form.salesSettingsOverride.commissionRate / (100 + form.salesSettingsOverride.commissionRate)) * 10000) / 100
+                  }}
                 </span>
+                <span class="text-xs text-blue-500 ml-2">({{ form.salesSettingsOverride.commissionRate }}% komisyondan)</span>
+              </div>
+
+              <!-- Agency Margin Share Input -->
+              <div>
+                <label class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2 block">
+                  {{ $t('planning.markets.agencyMarginShare') }}
+                </label>
                 <div class="flex items-center gap-2">
                   <input
-                    v-model.number="form.salesSettingsOverride.agencyCommission"
+                    v-model.number="form.salesSettingsOverride.agencyMarginShare"
                     type="number"
                     min="0"
                     max="100"
+                    step="5"
                     class="form-input w-20 text-center"
                   />
                   <span class="text-gray-500">%</span>
                 </div>
+                <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                  {{ $t('planning.markets.agencyMarginShareHint') }}
+                </p>
               </div>
-              <p class="text-xs text-gray-500 dark:text-slate-400 mt-2">{{ $t('planning.markets.agencyCommissionHint') }}</p>
+
+              <!-- Calculated Commission Display -->
+              <div class="flex items-center justify-between p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <span class="text-sm text-green-700 dark:text-green-300">
+                  {{ $t('planning.markets.calculatedAgencyCommission') }}:
+                </span>
+                <span class="font-bold text-green-700 dark:text-green-300">
+                  %{{
+                    Math.round(
+                      (form.salesSettingsOverride.commissionRate / (100 + form.salesSettingsOverride.commissionRate)) *
+                      form.salesSettingsOverride.agencyMarginShare * 100
+                    ) / 100
+                  }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Non-Refundable Override Section -->
-        <div class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 space-y-4">
+        <div
+          class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 space-y-4"
+        >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="material-icons text-red-500">money_off</span>
-              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.seasons.nonRefundableOverride') }}</label>
+              <label class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                $t('planning.seasons.nonRefundableOverride')
+              }}</label>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.inheritFromMarket') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                $t('planning.seasons.inheritFromMarket')
+              }}</span>
               <button
                 type="button"
-                @click="form.nonRefundableOverride.inheritFromMarket = !form.nonRefundableOverride.inheritFromMarket"
                 class="relative w-12 h-6 rounded-full transition-colors duration-300"
-                :class="form.nonRefundableOverride.inheritFromMarket ? 'bg-red-500' : 'bg-gray-300 dark:bg-slate-600'"
+                :class="
+                  form.nonRefundableOverride.inheritFromMarket
+                    ? 'bg-red-500'
+                    : 'bg-gray-300 dark:bg-slate-600'
+                "
+                @click="form.nonRefundableOverride.inheritFromMarket = !form.nonRefundableOverride.inheritFromMarket"
               >
-                <span class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
-                  :class="form.nonRefundableOverride.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'"></span>
+                <span
+                  class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-300"
+                  :class="
+                    form.nonRefundableOverride.inheritFromMarket ? 'translate-x-6' : 'translate-x-0'
+                  "
+                ></span>
               </button>
             </div>
           </div>
 
           <!-- Show market settings when inheriting -->
-          <div v-if="form.nonRefundableOverride.inheritFromMarket" class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600">
+          <div
+            v-if="form.nonRefundableOverride.inheritFromMarket"
+            class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-600"
+          >
             <p class="text-xs text-gray-500 dark:text-slate-400 mb-2 flex items-center gap-1">
               <span class="material-icons text-xs">link</span>
               {{ $t('planning.seasons.usingMarketSettings') }}
             </p>
             <div class="flex flex-wrap gap-3 text-sm">
-              <span v-if="market.nonRefundableEnabled" class="flex items-center gap-1 px-2 py-1 rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              <span
+                v-if="market.nonRefundableEnabled"
+                class="flex items-center gap-1 px-2 py-1 rounded bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+              >
                 <span class="material-icons text-xs">block</span>
-                {{ $t('planning.markets.nonRefundable') }} -%{{ market.nonRefundableDiscount || 10 }}
+                {{ $t('planning.markets.nonRefundable') }} -%{{
+                  market.nonRefundableDiscount || 10
+                }}
               </span>
-              <span v-else class="flex items-center gap-1 px-2 py-1 rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
+              <span
+                v-else
+                class="flex items-center gap-1 px-2 py-1 rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
+              >
                 <span class="material-icons text-xs">check_circle</span>
                 {{ $t('planning.markets.refundable') }}
               </span>
@@ -615,28 +915,42 @@
             <!-- Enable/Disable Toggle -->
             <div
               class="p-4 rounded-lg border-2 transition-all cursor-pointer"
-              :class="form.nonRefundableOverride.enabled
-                ? 'border-red-400 bg-red-100 dark:bg-red-900/30'
-                : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
+              :class="
+                form.nonRefundableOverride.enabled
+                  ? 'border-red-400 bg-red-100 dark:bg-red-900/30'
+                  : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+              "
               @click="form.nonRefundableOverride.enabled = !form.nonRefundableOverride.enabled"
             >
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div
                     class="w-10 h-10 rounded-lg flex items-center justify-center"
-                    :class="form.nonRefundableOverride.enabled ? 'bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-500'"
+                    :class="
+                      form.nonRefundableOverride.enabled
+                        ? 'bg-red-500 text-white'
+                        : 'bg-gray-200 dark:bg-slate-600 text-gray-500'
+                    "
                   >
                     <span class="material-icons text-xl">block</span>
                   </div>
                   <div>
-                    <h4 class="font-semibold text-gray-800 dark:text-white text-sm">{{ $t('planning.markets.enableNonRefundable') }}</h4>
-                    <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.markets.nonRefundableHint') }}</p>
+                    <h4 class="font-semibold text-gray-800 dark:text-white text-sm">
+                      {{ $t('planning.markets.enableNonRefundable') }}
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">
+                      {{ $t('planning.markets.nonRefundableHint') }}
+                    </p>
                   </div>
                 </div>
                 <div class="relative">
                   <div
                     class="w-10 h-5 rounded-full transition-colors"
-                    :class="form.nonRefundableOverride.enabled ? 'bg-red-500' : 'bg-gray-300 dark:bg-slate-600'"
+                    :class="
+                      form.nonRefundableOverride.enabled
+                        ? 'bg-red-500'
+                        : 'bg-gray-300 dark:bg-slate-600'
+                    "
                   >
                     <div
                       class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
@@ -648,10 +962,16 @@
             </div>
 
             <!-- Discount Setting (when enabled) -->
-            <div v-if="form.nonRefundableOverride.enabled" class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600" @click.stop>
+            <div
+              v-if="form.nonRefundableOverride.enabled"
+              class="p-3 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600"
+              @click.stop
+            >
               <div class="flex flex-wrap items-center gap-4">
                 <span class="material-icons text-green-500">discount</span>
-                <label class="text-sm text-gray-700 dark:text-slate-300">{{ $t('planning.markets.nonRefundableDiscount') }}</label>
+                <label class="text-sm text-gray-700 dark:text-slate-300">{{
+                  $t('planning.markets.nonRefundableDiscount')
+                }}</label>
                 <div class="flex items-center gap-2">
                   <input
                     v-model.number="form.nonRefundableOverride.discount"
@@ -668,11 +988,13 @@
                     v-for="pct in [5, 10, 15, 20]"
                     :key="pct"
                     type="button"
-                    @click.stop="form.nonRefundableOverride.discount = pct"
                     class="px-3 py-1 text-sm rounded-lg border transition-colors"
-                    :class="form.nonRefundableOverride.discount === pct
-                      ? 'bg-green-500 border-green-500 text-white'
-                      : 'border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700'"
+                    :class="
+                      form.nonRefundableOverride.discount === pct
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700'
+                    "
+                    @click.stop="form.nonRefundableOverride.discount = pct"
                   >
                     {{ pct }}%
                   </button>
@@ -686,22 +1008,32 @@
       <!-- Pricing Overrides Tab -->
       <div v-show="activeTab === 'pricing'">
         <!-- Info Box -->
-        <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 mb-6 border border-indigo-200 dark:border-indigo-800">
+        <div
+          class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 mb-6 border border-indigo-200 dark:border-indigo-800"
+        >
           <div class="flex items-start gap-3">
             <span class="material-icons text-indigo-500 text-xl">info</span>
             <div>
-              <h4 class="font-medium text-indigo-800 dark:text-indigo-300 mb-1">{{ $t('planning.seasons.pricingOverrideInfo') }}</h4>
-              <p class="text-sm text-indigo-700 dark:text-indigo-400">{{ $t('planning.seasons.pricingOverrideDescription') }}</p>
+              <h4 class="font-medium text-indigo-800 dark:text-indigo-300 mb-1">
+                {{ $t('planning.seasons.pricingOverrideInfo') }}
+              </h4>
+              <p class="text-sm text-indigo-700 dark:text-indigo-400">
+                {{ $t('planning.seasons.pricingOverrideDescription') }}
+              </p>
             </div>
           </div>
         </div>
 
         <!-- No Rooms Warning -->
         <div v-if="pricingRoomTypes.length === 0" class="text-center py-12">
-          <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+          <div
+            class="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4"
+          >
             <span class="material-icons text-3xl text-gray-400 dark:text-slate-500">hotel</span>
           </div>
-          <h5 class="font-medium text-gray-600 dark:text-slate-400 mb-2">{{ $t('planning.seasons.noRooms') }}</h5>
+          <h5 class="font-medium text-gray-600 dark:text-slate-400 mb-2">
+            {{ $t('planning.seasons.noRooms') }}
+          </h5>
           <p class="text-sm text-gray-500 dark:text-slate-500 max-w-md mx-auto">
             {{ $t('planning.seasons.noRoomsHint') }}
           </p>
@@ -710,16 +1042,20 @@
         <!-- Room Type Tabs for Pricing Overrides -->
         <div v-else>
           <!-- Room Selection Tabs (Sticky below main tabs) -->
-          <div class="flex gap-1 flex-wrap pb-2 mb-4 border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-[5] -mx-4 px-4">
+          <div
+            class="flex gap-1 flex-wrap pb-2 mb-4 border-b border-gray-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800 z-[5] -mx-4 px-4"
+          >
             <button
               v-for="rt in pricingRoomTypes"
               :key="rt._id"
               type="button"
-              @click="selectedPricingRoom = rt._id"
               class="px-4 py-2 text-sm font-medium whitespace-nowrap transition-all border-b-2 -mb-px rounded-t-lg"
-              :class="selectedPricingRoom === rt._id
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-                : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 hover:border-gray-300'"
+              :class="
+                selectedPricingRoom === rt._id
+                  ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+                  : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 hover:border-gray-300'
+              "
+              @click="selectedPricingRoom = rt._id"
             >
               <div class="flex flex-col items-center">
                 <div class="flex items-center gap-1">
@@ -732,7 +1068,11 @@
                 <!-- Pricing type badge -->
                 <span
                   class="text-[10px] font-mono opacity-60"
-                  :class="rt.pricingType === 'per_person' ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-slate-400'"
+                  :class="
+                    rt.pricingType === 'per_person'
+                      ? 'text-purple-600 dark:text-purple-400'
+                      : 'text-gray-500 dark:text-slate-400'
+                  "
                 >
                   {{ rt.pricingType === 'per_person' ? 'obp' : 'ünite' }}
                 </span>
@@ -744,38 +1084,55 @@
           <div v-if="selectedPricingRoom && currentSelectedRoom" class="space-y-4">
             <!-- Room Info -->
             <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm">
+              <div
+                class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm"
+              >
                 {{ currentSelectedRoom.code }}
               </div>
               <div class="flex-1">
-                <div class="font-medium text-gray-800 dark:text-white text-sm">{{ currentSelectedRoom.name?.[locale] || currentSelectedRoom.name?.tr }}</div>
+                <div class="font-medium text-gray-800 dark:text-white text-sm">
+                  {{ currentSelectedRoom.name?.[locale] || currentSelectedRoom.name?.tr }}
+                </div>
                 <div class="text-xs text-gray-500 dark:text-slate-400">
-                  {{ currentSelectedRoom.pricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
+                  {{
+                    currentSelectedRoom.pricingType === 'per_person'
+                      ? 'Kişi Bazlı (OBP)'
+                      : 'Ünite Bazlı'
+                  }}
                   <template v-if="currentSelectedRoom.useMultipliers"> + Çarpan Sistemi</template>
-                  | Max: {{ currentSelectedRoom.occupancy?.maxAdults || 2 }} Yetişkin, {{ currentSelectedRoom.occupancy?.maxChildren || 0 }} Çocuk
+                  | Max: {{ currentSelectedRoom.occupancy?.maxAdults || 2 }} Yetişkin,
+                  {{ currentSelectedRoom.occupancy?.maxChildren || 0 }} Çocuk
                 </div>
               </div>
             </div>
 
             <!-- 1. Pricing Type Override -->
-            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+            <div
+              class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800"
+            >
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
                     <span class="material-icons text-white">payments</span>
                   </div>
                   <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.seasons.pricingTypeOverride') }}</h4>
-                    <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.pricingTypeOverrideHint') }}</p>
+                    <h4 class="font-semibold text-gray-900 dark:text-white">
+                      {{ $t('planning.seasons.pricingTypeOverride') }}
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">
+                      {{ $t('planning.seasons.pricingTypeOverrideHint') }}
+                    </p>
                   </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input
-                    type="checkbox"
                     v-model="currentRoomOverride.usePricingTypeOverride"
+                    type="checkbox"
                     class="sr-only peer"
                   />
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                  ></div>
                 </label>
               </div>
 
@@ -783,31 +1140,43 @@
               <div v-if="currentRoomOverride.usePricingTypeOverride" class="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  @click="currentRoomOverride.pricingType = 'unit'"
                   class="p-4 rounded-xl border-2 transition-all text-left"
-                  :class="currentRoomOverride.pricingType === 'unit'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                  :class="
+                    currentRoomOverride.pricingType === 'unit'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                  "
+                  @click="currentRoomOverride.pricingType = 'unit'"
                 >
                   <div class="flex items-center gap-2 mb-1">
                     <span class="material-icons text-blue-500">home</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.pricing.unitBased') }}</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{
+                      $t('planning.pricing.unitBased')
+                    }}</span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.unitBasedHint') }}</p>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">
+                    {{ $t('planning.pricing.unitBasedHint') }}
+                  </p>
                 </button>
                 <button
                   type="button"
-                  @click="currentRoomOverride.pricingType = 'per_person'"
                   class="p-4 rounded-xl border-2 transition-all text-left"
-                  :class="currentRoomOverride.pricingType === 'per_person'
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                  :class="
+                    currentRoomOverride.pricingType === 'per_person'
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                  "
+                  @click="currentRoomOverride.pricingType = 'per_person'"
                 >
                   <div class="flex items-center gap-2 mb-1">
                     <span class="material-icons text-purple-500">person</span>
-                    <span class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.pricing.perPerson') }}</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">{{
+                      $t('planning.pricing.perPerson')
+                    }}</span>
                   </div>
-                  <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.perPersonHint') }}</p>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">
+                    {{ $t('planning.pricing.perPersonHint') }}
+                  </p>
                 </button>
               </div>
 
@@ -816,78 +1185,118 @@
                 <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2">
                   <span class="material-icons text-sm text-blue-500">info</span>
                   {{ $t('planning.seasons.usingRoomPricingType') }}:
-                  <span class="font-semibold" :class="currentSelectedRoom.pricingType === 'per_person' ? 'text-purple-600' : 'text-blue-600'">
-                    {{ currentSelectedRoom.pricingType === 'per_person' ? $t('planning.pricing.perPerson') : $t('planning.pricing.unitBased') }}
+                  <span
+                    class="font-semibold"
+                    :class="
+                      currentSelectedRoom.pricingType === 'per_person'
+                        ? 'text-purple-600'
+                        : 'text-blue-600'
+                    "
+                  >
+                    {{
+                      currentSelectedRoom.pricingType === 'per_person'
+                        ? $t('planning.pricing.perPerson')
+                        : $t('planning.pricing.unitBased')
+                    }}
                   </span>
                 </p>
               </div>
             </div>
 
             <!-- 2. Min Adults Override -->
-            <div class="bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-xl p-4 border border-cyan-200 dark:border-cyan-800">
+            <div
+              class="bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-900/20 dark:to-teal-900/20 rounded-xl p-4 border border-cyan-200 dark:border-cyan-800"
+            >
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-lg bg-cyan-500 flex items-center justify-center">
                     <span class="material-icons text-white">person_outline</span>
                   </div>
                   <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white">Min. Yetişkin Override</h4>
-                    <p class="text-xs text-gray-500 dark:text-slate-400">Bu sezonda minimum yetişkin sayısını değiştir</p>
+                    <h4 class="font-semibold text-gray-900 dark:text-white">
+                      Min. Yetişkin Override
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">
+                      Bu sezonda minimum yetişkin sayısını değiştir
+                    </p>
                   </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input
-                    type="checkbox"
                     v-model="currentRoomOverride.useMinAdultsOverride"
+                    type="checkbox"
                     class="sr-only peer"
                   />
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 dark:peer-focus:ring-cyan-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-cyan-600"></div>
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 dark:peer-focus:ring-cyan-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-cyan-600"
+                  ></div>
                 </label>
               </div>
 
               <!-- MinAdults Input (when override enabled) -->
-              <div v-if="currentRoomOverride.useMinAdultsOverride" class="flex items-center gap-4 p-3 bg-white dark:bg-slate-800 rounded-lg">
+              <div
+                v-if="currentRoomOverride.useMinAdultsOverride"
+                class="flex items-center gap-4 p-3 bg-white dark:bg-slate-800 rounded-lg"
+              >
                 <label class="text-sm text-gray-600 dark:text-slate-400">Minimum Yetişkin:</label>
                 <div class="flex items-center gap-2">
                   <button
                     type="button"
-                    @click="adjustMinAdultsOverride(-1)"
                     :disabled="(currentRoomOverride.minAdults || 1) <= 1"
                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
-                    :class="(currentRoomOverride.minAdults || 1) <= 1
-                      ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                      : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/30'"
+                    :class="
+                      (currentRoomOverride.minAdults || 1) <= 1
+                        ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
+                        : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/30'
+                    "
+                    @click="adjustMinAdultsOverride(-1)"
                   >
                     <span class="material-icons">remove</span>
                   </button>
-                  <span class="w-10 text-center text-xl font-bold text-gray-800 dark:text-white">{{ currentRoomOverride.minAdults || 1 }}</span>
+                  <span class="w-10 text-center text-xl font-bold text-gray-800 dark:text-white">{{
+                    currentRoomOverride.minAdults || 1
+                  }}</span>
                   <button
                     type="button"
-                    @click="adjustMinAdultsOverride(1)"
-                    :disabled="(currentRoomOverride.minAdults || 1) >= (currentSelectedRoom?.occupancy?.maxAdults || 10)"
+                    :disabled="
+                      (currentRoomOverride.minAdults || 1) >=
+                      (currentSelectedRoom?.occupancy?.maxAdults || 10)
+                    "
                     class="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
-                    :class="(currentRoomOverride.minAdults || 1) >= (currentSelectedRoom?.occupancy?.maxAdults || 10)
-                      ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
-                      : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/30'"
+                    :class="
+                      (currentRoomOverride.minAdults || 1) >=
+                      (currentSelectedRoom?.occupancy?.maxAdults || 10)
+                        ? 'text-gray-300 dark:text-slate-600 cursor-not-allowed'
+                        : 'text-cyan-600 dark:text-cyan-400 hover:bg-cyan-100 dark:hover:bg-cyan-900/30'
+                    "
+                    @click="adjustMinAdultsOverride(1)"
                   >
                     <span class="material-icons">add</span>
                   </button>
                 </div>
-                <span class="text-xs text-gray-500 dark:text-slate-400">(Oda max: {{ currentSelectedRoom?.occupancy?.maxAdults || 2 }})</span>
+                <span class="text-xs text-gray-500 dark:text-slate-400"
+                  >(Oda max: {{ currentSelectedRoom?.occupancy?.maxAdults || 2 }})</span
+                >
               </div>
 
               <!-- Info when disabled -->
               <div v-else class="p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
                 <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2">
                   <span class="material-icons text-sm text-cyan-500">info</span>
-                  Oda/Market ayarı kullanılıyor: <span class="font-semibold">{{ currentSelectedRoom?.occupancy?.minAdults || 1 }} yetişkin</span>
+                  Oda/Market ayarı kullanılıyor:
+                  <span class="font-semibold"
+                    >{{ currentSelectedRoom?.occupancy?.minAdults || 1 }} yetişkin</span
+                  >
                 </p>
               </div>
             </div>
 
             <!-- 3. Multiplier Override (only for OBP with multipliers) -->
             <div
-              v-if="effectivePricingType === 'per_person' && (currentSelectedRoom.useMultipliers || currentRoomOverride.usePricingTypeOverride)"
+              v-if="
+                effectivePricingType === 'per_person' &&
+                (currentSelectedRoom.useMultipliers || currentRoomOverride.usePricingTypeOverride)
+              "
               class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 border border-indigo-200 dark:border-indigo-800"
             >
               <div class="flex items-center justify-between">
@@ -896,25 +1305,45 @@
                     <span class="material-icons text-white">calculate</span>
                   </div>
                   <div>
-                    <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.pricing.multiplierOverride') }}</h4>
-                    <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.seasons.overrideRoomMultipliers') }}</p>
+                    <h4 class="font-semibold text-gray-900 dark:text-white">
+                      {{ $t('planning.pricing.multiplierOverride') }}
+                    </h4>
+                    <p class="text-xs text-gray-500 dark:text-slate-400">
+                      {{ $t('planning.seasons.overrideRoomMultipliers') }}
+                    </p>
                   </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                   <input
-                    type="checkbox"
                     v-model="currentRoomOverride.useMultiplierOverride"
+                    type="checkbox"
                     class="sr-only peer"
                   />
-                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
-                  <span class="ms-2 text-sm font-medium" :class="currentRoomOverride.useMultiplierOverride ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-slate-400'">
-                    {{ currentRoomOverride.useMultiplierOverride ? $t('common.active') : $t('common.inactive') }}
+                  <div
+                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+                  ></div>
+                  <span
+                    class="ms-2 text-sm font-medium"
+                    :class="
+                      currentRoomOverride.useMultiplierOverride
+                        ? 'text-indigo-600 dark:text-indigo-400'
+                        : 'text-gray-500 dark:text-slate-400'
+                    "
+                  >
+                    {{
+                      currentRoomOverride.useMultiplierOverride
+                        ? $t('common.active')
+                        : $t('common.inactive')
+                    }}
                   </span>
                 </label>
               </div>
 
               <!-- Info when disabled -->
-              <div v-if="!currentRoomOverride.useMultiplierOverride" class="mt-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+              <div
+                v-if="!currentRoomOverride.useMultiplierOverride"
+                class="mt-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg"
+              >
                 <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2">
                   <span class="material-icons text-sm text-blue-500">info</span>
                   {{ $t('planning.pricing.usingRoomMultipliers') }}
@@ -923,7 +1352,11 @@
             </div>
 
             <!-- Multiplier Template (when override enabled) -->
-            <div v-if="currentRoomOverride.useMultiplierOverride && effectivePricingType === 'per_person'">
+            <div
+              v-if="
+                currentRoomOverride.useMultiplierOverride && effectivePricingType === 'per_person'
+              "
+            >
               <MultiplierTemplate
                 v-model="currentRoomOverride.multiplierOverride"
                 :occupancy="currentSelectedRoom.occupancy"
@@ -939,13 +1372,21 @@
     <!-- Preview Mode Content -->
     <div v-if="showPreview" class="flex flex-col h-full">
       <!-- Preview Header -->
-      <div class="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-slate-700 -mx-4 px-4">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+      <div
+        class="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-slate-700 -mx-4 px-4"
+      >
+        <div
+          class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"
+        >
           <span class="material-icons text-white">fact_check</span>
         </div>
         <div>
-          <h3 class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.seasons.periodPreview') }}</h3>
-          <p class="text-sm text-gray-500 dark:text-slate-400">{{ form.code }} - {{ form.name?.tr || form.name?.en }}</p>
+          <h3 class="font-semibold text-gray-900 dark:text-white">
+            {{ $t('planning.seasons.periodPreview') }}
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-slate-400">
+            {{ form.code }} - {{ form.name?.tr || form.name?.en }}
+          </p>
         </div>
       </div>
 
@@ -953,27 +1394,53 @@
       <div class="flex-1 overflow-y-auto py-4 space-y-4">
         <!-- Summary Stats -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-xl p-4 text-center">
-            <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ previewSummary.totalDays }}</div>
-            <div class="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-medium">{{ $t('planning.seasons.totalDays') }}</div>
+          <div
+            class="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30 rounded-xl p-4 text-center"
+          >
+            <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+              {{ previewSummary.totalDays }}
+            </div>
+            <div class="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-medium">
+              {{ $t('planning.seasons.totalDays') }}
+            </div>
           </div>
-          <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4 text-center">
-            <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">{{ previewSummary.dateRanges }}</div>
-            <div class="text-xs text-purple-600/70 dark:text-purple-400/70 font-medium">{{ $t('planning.seasons.dateRangeCount') }}</div>
+          <div
+            class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4 text-center"
+          >
+            <div class="text-3xl font-bold text-purple-600 dark:text-purple-400">
+              {{ previewSummary.dateRanges }}
+            </div>
+            <div class="text-xs text-purple-600/70 dark:text-purple-400/70 font-medium">
+              {{ $t('planning.seasons.dateRangeCount') }}
+            </div>
           </div>
-          <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-4 text-center">
-            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ previewSummary.roomTypes }}</div>
-            <div class="text-xs text-blue-600/70 dark:text-blue-400/70 font-medium">{{ $t('planning.pricing.roomTypes') }}</div>
+          <div
+            class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-4 text-center"
+          >
+            <div class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+              {{ previewSummary.roomTypes }}
+            </div>
+            <div class="text-xs text-blue-600/70 dark:text-blue-400/70 font-medium">
+              {{ $t('planning.pricing.roomTypes') }}
+            </div>
           </div>
-          <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4 text-center">
-            <div class="text-3xl font-bold text-green-600 dark:text-green-400">{{ previewSummary.mealPlans }}</div>
-            <div class="text-xs text-green-600/70 dark:text-green-400/70 font-medium">{{ $t('planning.pricing.mealPlans') }}</div>
+          <div
+            class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4 text-center"
+          >
+            <div class="text-3xl font-bold text-green-600 dark:text-green-400">
+              {{ previewSummary.mealPlans }}
+            </div>
+            <div class="text-xs text-green-600/70 dark:text-green-400/70 font-medium">
+              {{ $t('planning.pricing.mealPlans') }}
+            </div>
           </div>
         </div>
 
         <!-- Date Ranges Detail -->
         <div class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4">
-          <h5 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+          <h5
+            class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2"
+          >
             <span class="material-icons text-indigo-500">date_range</span>
             {{ $t('planning.pricing.dateRanges') }}
           </h5>
@@ -983,15 +1450,23 @@
               :key="idx"
               class="flex items-center gap-3 p-2 bg-white dark:bg-slate-800 rounded-lg"
             >
-              <span class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold">
+              <span
+                class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold"
+              >
                 {{ idx + 1 }}
               </span>
               <div class="flex items-center gap-2 flex-1">
-                <span class="font-medium text-gray-700 dark:text-slate-300">{{ formatDisplayDate(range.startDate) }}</span>
+                <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                  formatDisplayDate(range.startDate)
+                }}</span>
                 <span class="material-icons text-gray-400 text-sm">arrow_forward</span>
-                <span class="font-medium text-gray-700 dark:text-slate-300">{{ formatDisplayDate(range.endDate) }}</span>
+                <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                  formatDisplayDate(range.endDate)
+                }}</span>
               </div>
-              <span class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full font-medium">
+              <span
+                class="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full font-medium"
+              >
                 {{ calculateDays(range.startDate, range.endDate) }} {{ $t('common.days') }}
               </span>
             </div>
@@ -1000,32 +1475,52 @@
 
         <!-- Overrides Summary -->
         <div v-if="hasAnyOverrides" class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4">
-          <h5 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+          <h5
+            class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3 flex items-center gap-2"
+          >
             <span class="material-icons text-amber-500">tune</span>
             {{ $t('planning.seasons.activeOverrides') }}
           </h5>
           <div class="flex flex-wrap gap-2">
-            <span v-if="!form.childAgeSettings.inheritFromMarket" class="px-3 py-1.5 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 rounded-lg text-sm flex items-center gap-1.5">
+            <span
+              v-if="!form.childAgeSettings.inheritFromMarket"
+              class="px-3 py-1.5 bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-400 rounded-lg text-sm flex items-center gap-1.5"
+            >
               <span class="material-icons text-sm">child_care</span>
               {{ $t('planning.seasons.childAgeOverride') }}
             </span>
-            <span v-if="!form.paymentSettings.inheritFromMarket" class="px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm flex items-center gap-1.5">
+            <span
+              v-if="!form.paymentSettings.inheritFromMarket"
+              class="px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-sm flex items-center gap-1.5"
+            >
               <span class="material-icons text-sm">payments</span>
               {{ $t('planning.seasons.paymentSettings') }}
             </span>
-            <span v-if="!form.childrenSettings.inheritFromMarket" class="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-sm flex items-center gap-1.5">
+            <span
+              v-if="!form.childrenSettings.inheritFromMarket"
+              class="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-sm flex items-center gap-1.5"
+            >
               <span class="material-icons text-sm">family_restroom</span>
               {{ $t('planning.markets.childrenAllowed') }}
             </span>
-            <span v-if="!form.salesSettingsOverride.inheritFromMarket" class="px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm flex items-center gap-1.5">
+            <span
+              v-if="!form.salesSettingsOverride.inheritFromMarket"
+              class="px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-lg text-sm flex items-center gap-1.5"
+            >
               <span class="material-icons text-sm">storefront</span>
               {{ $t('planning.seasons.salesSettingsOverride') }}
             </span>
-            <span v-if="!form.nonRefundableOverride.inheritFromMarket" class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm flex items-center gap-1.5">
+            <span
+              v-if="!form.nonRefundableOverride.inheritFromMarket"
+              class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm flex items-center gap-1.5"
+            >
               <span class="material-icons text-sm">money_off</span>
               {{ $t('planning.seasons.nonRefundableOverride') }}
             </span>
-            <span v-if="hasPricingOverrides" class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-sm flex items-center gap-1.5">
+            <span
+              v-if="hasPricingOverrides"
+              class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-sm flex items-center gap-1.5"
+            >
               <span class="material-icons text-sm">calculate</span>
               {{ $t('planning.seasons.pricingOverrides') }}
             </span>
@@ -1034,17 +1529,19 @@
       </div>
 
       <!-- Preview Actions -->
-      <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-slate-700">
+      <div
+        class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-slate-700"
+      >
         <p class="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1">
           <span class="material-icons text-xs">info</span>
           {{ $t('planning.seasons.previewHint') }}
         </p>
         <div class="flex gap-3">
-          <button @click="showPreview = false" type="button" class="btn-secondary">
+          <button type="button" class="btn-secondary" @click="showPreview = false">
             <span class="material-icons text-sm mr-1">arrow_back</span>
             {{ $t('common.back') }}
           </button>
-          <button @click="confirmAndSave" type="button" class="btn-primary" :disabled="saving">
+          <button type="button" class="btn-primary" :disabled="saving" @click="confirmAndSave">
             <span class="material-icons text-sm mr-1">check</span>
             {{ saving ? $t('common.loading') : $t('planning.pricing.confirmAndSave') }}
           </button>
@@ -1053,9 +1550,14 @@
     </div>
 
     <!-- Actions (hide when preview is open) -->
-    <div v-if="!showPreview" class="flex justify-end gap-3 pt-4 mt-6 border-t border-gray-200 dark:border-slate-700">
-      <button type="button" @click="$emit('cancel')" class="btn-secondary">{{ $t('common.cancel') }}</button>
-      <button type="button" @click="handlePreview" class="btn-primary" :disabled="saving">
+    <div
+      v-if="!showPreview"
+      class="flex justify-end gap-3 pt-4 mt-6 border-t border-gray-200 dark:border-slate-700"
+    >
+      <button type="button" class="btn-secondary" @click="$emit('cancel')">
+        {{ $t('common.cancel') }}
+      </button>
+      <button type="button" class="btn-primary" :disabled="saving" @click="handlePreview">
         <span class="material-icons text-sm mr-1">visibility</span>
         {{ $t('planning.seasons.reviewAndSave') }}
       </button>
@@ -1099,7 +1601,9 @@ const tabs = computed(() => [
 
 // Filter room types and meal plans based on market's active selections
 const filteredRoomTypes = computed(() => {
-  const marketActiveIds = (props.market?.activeRoomTypes || []).map(id => typeof id === 'object' ? id._id : id)
+  const marketActiveIds = (props.market?.activeRoomTypes || []).map(id =>
+    typeof id === 'object' ? id._id : id
+  )
   if (marketActiveIds.length === 0) {
     return props.roomTypes
   }
@@ -1107,7 +1611,9 @@ const filteredRoomTypes = computed(() => {
 })
 
 const filteredMealPlans = computed(() => {
-  const marketActiveIds = (props.market?.activeMealPlans || []).map(id => typeof id === 'object' ? id._id : id)
+  const marketActiveIds = (props.market?.activeMealPlans || []).map(id =>
+    typeof id === 'object' ? id._id : id
+  )
   if (marketActiveIds.length === 0) {
     return props.mealPlans
   }
@@ -1132,35 +1638,47 @@ const currentSelectedRoom = computed(() => {
 // Pricing overrides storage
 const pricingOverrides = reactive({})
 
+// Default room override values
+const defaultRoomOverride = {
+  usePricingTypeOverride: false,
+  pricingType: 'unit',
+  useMinAdultsOverride: false,
+  minAdults: 1,
+  useMultiplierOverride: false,
+  multiplierOverride: null
+}
+
+// Initialize pricing override for a room
+const initializePricingOverride = roomId => {
+  if (!roomId || pricingOverrides[roomId]) return
+  const room = pricingRoomTypes.value.find(rt => rt._id === roomId)
+  pricingOverrides[roomId] = {
+    usePricingTypeOverride: false,
+    pricingType: room?.pricingType || 'unit',
+    useMinAdultsOverride: false,
+    minAdults: room?.occupancy?.minAdults || 1,
+    useMultiplierOverride: false,
+    multiplierOverride: room?.multiplierTemplate
+      ? JSON.parse(JSON.stringify(room.multiplierTemplate))
+      : null
+  }
+}
+
+// Initialize override when room selection changes
+watch(selectedPricingRoom, roomId => {
+  initializePricingOverride(roomId)
+})
+
 // Current room override data
 const currentRoomOverride = computed(() => {
   if (!selectedPricingRoom.value) {
-    return {
-      usePricingTypeOverride: false,
-      pricingType: 'unit',
-      useMinAdultsOverride: false,
-      minAdults: 1,
-      useMultiplierOverride: false,
-      multiplierOverride: null
-    }
+    return defaultRoomOverride
   }
-  if (!pricingOverrides[selectedPricingRoom.value]) {
-    // Initialize with room's settings
-    const room = currentSelectedRoom.value
-    pricingOverrides[selectedPricingRoom.value] = {
-      usePricingTypeOverride: false,
-      pricingType: room?.pricingType || 'unit',
-      useMinAdultsOverride: false,
-      minAdults: room?.occupancy?.minAdults || 1,
-      useMultiplierOverride: false,
-      multiplierOverride: room?.multiplierTemplate ? JSON.parse(JSON.stringify(room.multiplierTemplate)) : null
-    }
-  }
-  return pricingOverrides[selectedPricingRoom.value]
+  return pricingOverrides[selectedPricingRoom.value] || defaultRoomOverride
 })
 
 // Adjust minAdults override value
-const adjustMinAdultsOverride = (delta) => {
+const adjustMinAdultsOverride = delta => {
   if (!currentRoomOverride.value) return
   const current = currentRoomOverride.value.minAdults || 1
   const maxAdults = currentSelectedRoom.value?.occupancy?.maxAdults || 10
@@ -1181,15 +1699,20 @@ const effectivePricingType = computed(() => {
 
 // Check if any room has overrides
 const hasPricingOverrides = computed(() => {
-  return Object.values(pricingOverrides).some(o =>
-    o.usePricingTypeOverride || o.useMinAdultsOverride || o.useMultiplierOverride
+  return Object.values(pricingOverrides).some(
+    o => o.usePricingTypeOverride || o.useMinAdultsOverride || o.useMultiplierOverride
   )
 })
 
 // Check if specific room has override
-const hasRoomOverride = (roomId) => {
+const hasRoomOverride = roomId => {
   const override = pricingOverrides[roomId]
-  return override?.usePricingTypeOverride || override?.useMinAdultsOverride || override?.useMultiplierOverride || false
+  return (
+    override?.usePricingTypeOverride ||
+    override?.useMinAdultsOverride ||
+    override?.useMultiplierOverride ||
+    false
+  )
 }
 
 // Period Edit Preview
@@ -1210,13 +1733,11 @@ const previewSummary = computed(() => {
     return sum + calculateDays(range.startDate, range.endDate)
   }, 0)
 
-  const roomTypesCount = form.activeRoomTypes.length > 0
-    ? form.activeRoomTypes.length
-    : filteredRoomTypes.value.length
+  const roomTypesCount =
+    form.activeRoomTypes.length > 0 ? form.activeRoomTypes.length : filteredRoomTypes.value.length
 
-  const mealPlansCount = form.activeMealPlans.length > 0
-    ? form.activeMealPlans.length
-    : filteredMealPlans.value.length
+  const mealPlansCount =
+    form.activeMealPlans.length > 0 ? form.activeMealPlans.length : filteredMealPlans.value.length
 
   return {
     totalDays,
@@ -1227,15 +1748,17 @@ const previewSummary = computed(() => {
 })
 
 const hasAnyOverrides = computed(() => {
-  return !form.childAgeSettings.inheritFromMarket ||
-         !form.paymentSettings.inheritFromMarket ||
-         !form.childrenSettings.inheritFromMarket ||
-         !form.salesSettingsOverride.inheritFromMarket ||
-         !form.nonRefundableOverride.inheritFromMarket ||
-         hasPricingOverrides.value
+  return (
+    !form.childAgeSettings.inheritFromMarket ||
+    !form.paymentSettings.inheritFromMarket ||
+    !form.childrenSettings.inheritFromMarket ||
+    !form.salesSettingsOverride.inheritFromMarket ||
+    !form.nonRefundableOverride.inheritFromMarket ||
+    hasPricingOverrides.value
+  )
 })
 
-const formatDisplayDate = (dateStr) => {
+const formatDisplayDate = dateStr => {
   if (!dateStr) return '-'
   const date = new Date(dateStr)
   return date.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
@@ -1265,8 +1788,15 @@ const checkDateOverlaps = () => {
       if (existingSeason._id === currentSeasonId) continue
 
       // Check each date range of existing season
-      for (const existingRange of (existingSeason.dateRanges || [])) {
-        if (datesOverlap(range.startDate, range.endDate, existingRange.startDate, existingRange.endDate)) {
+      for (const existingRange of existingSeason.dateRanges || []) {
+        if (
+          datesOverlap(
+            range.startDate,
+            range.endDate,
+            existingRange.startDate,
+            existingRange.endDate
+          )
+        ) {
           return {
             hasOverlap: true,
             conflictingSeason: existingSeason,
@@ -1317,11 +1847,11 @@ const hotelChildAgeGroups = computed(() => {
 })
 
 // Helper functions for child age groups
-const getChildGroupName = (group) => {
+const getChildGroupName = group => {
   return group.name?.[locale.value] || group.name?.tr || group.name?.en || group.code
 }
 
-const getChildGroupLabel = (code) => {
+const getChildGroupLabel = code => {
   const labels = {
     infant: t('planning.childGroups.infant'),
     first: t('planning.childGroups.first'),
@@ -1330,12 +1860,16 @@ const getChildGroupLabel = (code) => {
   return labels[code] || code
 }
 
-const getChildGroupIcon = (code) => {
-  const icons = { infant: 'baby_changing_station', first: 'child_care', second: 'escalator_warning' }
+const getChildGroupIcon = code => {
+  const icons = {
+    infant: 'baby_changing_station',
+    first: 'child_care',
+    second: 'escalator_warning'
+  }
   return icons[code] || 'child_care'
 }
 
-const getChildGroupIconClass = (code) => {
+const getChildGroupIconClass = code => {
   const classes = { infant: 'text-purple-500', first: 'text-pink-500', second: 'text-orange-500' }
   return classes[code] || 'text-pink-500'
 }
@@ -1357,7 +1891,9 @@ const initChildAgeGroups = () => {
 
 const createMultiLangObject = () => {
   const obj = {}
-  ADMIN_LANGUAGES.forEach(lang => { obj[lang] = '' })
+  ADMIN_LANGUAGES.forEach(lang => {
+    obj[lang] = ''
+  })
   return obj
 }
 
@@ -1387,7 +1923,8 @@ const form = reactive({
     workingMode: 'net',
     commissionRate: 10,
     markup: { b2c: 0, b2b: 0 },
-    agencyCommission: 10
+    agencyCommission: 10, // NET mode
+    agencyMarginShare: 50 // COMMISSION mode
   },
   nonRefundableOverride: {
     inheritFromMarket: true,
@@ -1400,11 +1937,11 @@ const addDateRange = () => {
   form.dateRanges.push({ startDate: '', endDate: '' })
 }
 
-const removeDateRange = (index) => {
+const removeDateRange = index => {
   form.dateRanges.splice(index, 1)
 }
 
-const formatDateForInput = (date) => {
+const formatDateForInput = date => {
   if (!date) return ''
   return new Date(date).toISOString().split('T')[0]
 }
@@ -1429,7 +1966,11 @@ const handleSave = async () => {
   // Build pricing overrides array
   const pricingOverridesArray = []
   for (const [roomId, override] of Object.entries(pricingOverrides)) {
-    if (override.usePricingTypeOverride || override.useMinAdultsOverride || override.useMultiplierOverride) {
+    if (
+      override.usePricingTypeOverride ||
+      override.useMinAdultsOverride ||
+      override.useMultiplierOverride
+    ) {
       pricingOverridesArray.push({
         roomType: roomId,
         usePricingTypeOverride: override.usePricingTypeOverride || false,
@@ -1466,37 +2007,51 @@ const handleSave = async () => {
 }
 
 // Initialize first room when pricing tab is opened
-watch(activeTab, (newTab) => {
+watch(activeTab, newTab => {
   if (newTab === 'pricing' && pricingRoomTypes.value.length > 0 && !selectedPricingRoom.value) {
     selectedPricingRoom.value = pricingRoomTypes.value[0]._id
   }
 })
 
 // When active room types change, update selected room if needed
-watch(() => form.activeRoomTypes, () => {
-  // If currently selected room is no longer in the list, select first available
-  if (selectedPricingRoom.value && !pricingRoomTypes.value.find(rt => rt._id === selectedPricingRoom.value)) {
-    selectedPricingRoom.value = pricingRoomTypes.value[0]?._id || ''
-  }
-}, { deep: true })
+watch(
+  () => form.activeRoomTypes,
+  () => {
+    // If currently selected room is no longer in the list, select first available
+    if (
+      selectedPricingRoom.value &&
+      !pricingRoomTypes.value.find(rt => rt._id === selectedPricingRoom.value)
+    ) {
+      selectedPricingRoom.value = pricingRoomTypes.value[0]?._id || ''
+    }
+  },
+  { deep: true }
+)
 
 // When child age override is enabled, initialize groups from hotel if empty
-watch(() => form.childAgeSettings.inheritFromMarket, (newVal) => {
-  if (!newVal && form.childAgeSettings.childAgeGroups.length === 0) {
-    form.childAgeSettings.childAgeGroups = initChildAgeGroups()
+watch(
+  () => form.childAgeSettings.inheritFromMarket,
+  newVal => {
+    if (!newVal && form.childAgeSettings.childAgeGroups.length === 0) {
+      form.childAgeSettings.childAgeGroups = initChildAgeGroups()
+    }
   }
-})
+)
 
 // When hotel's childAgeGroups become available, initialize if needed
-watch(hotelChildAgeGroups, (newGroups) => {
-  if (newGroups.length > 0 && form.childAgeSettings.childAgeGroups.length === 0) {
-    form.childAgeSettings.childAgeGroups = initChildAgeGroups()
-  }
-}, { immediate: true })
+watch(
+  hotelChildAgeGroups,
+  newGroups => {
+    if (newGroups.length > 0 && form.childAgeSettings.childAgeGroups.length === 0) {
+      form.childAgeSettings.childAgeGroups = initChildAgeGroups()
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   if (props.season) {
-    const extractIds = (arr) => (arr || []).map(item => typeof item === 'object' ? item._id : item)
+    const extractIds = arr => (arr || []).map(item => (typeof item === 'object' ? item._id : item))
 
     form.code = props.season.code || ''
     form.name = { ...createMultiLangObject(), ...props.season.name }
@@ -1534,26 +2089,34 @@ onMounted(() => {
     // Load sales settings override
     form.salesSettingsOverride = {
       inheritFromMarket: props.season.salesSettingsOverride?.inheritFromMarket ?? true,
-      workingMode: props.season.salesSettingsOverride?.workingMode || props.market?.workingMode || 'net',
-      commissionRate: props.season.salesSettingsOverride?.commissionRate ?? props.market?.commissionRate ?? 10,
+      workingMode:
+        props.season.salesSettingsOverride?.workingMode || props.market?.workingMode || 'net',
+      commissionRate:
+        props.season.salesSettingsOverride?.commissionRate ?? props.market?.commissionRate ?? 10,
       markup: {
         b2c: props.season.salesSettingsOverride?.markup?.b2c ?? props.market?.markup?.b2c ?? 0,
         b2b: props.season.salesSettingsOverride?.markup?.b2b ?? props.market?.markup?.b2b ?? 0
       },
-      agencyCommission: props.season.salesSettingsOverride?.agencyCommission ?? props.market?.agencyCommission ?? 10
+      agencyCommission:
+        props.season.salesSettingsOverride?.agencyCommission ?? props.market?.agencyCommission ?? 10,
+      agencyMarginShare:
+        props.season.salesSettingsOverride?.agencyMarginShare ?? props.market?.agencyMarginShare ?? 50
     }
 
     // Load non-refundable override
     form.nonRefundableOverride = {
       inheritFromMarket: props.season.nonRefundableOverride?.inheritFromMarket ?? true,
-      enabled: props.season.nonRefundableOverride?.enabled ?? props.market?.nonRefundableEnabled ?? false,
-      discount: props.season.nonRefundableOverride?.discount ?? props.market?.nonRefundableDiscount ?? 10
+      enabled:
+        props.season.nonRefundableOverride?.enabled ?? props.market?.nonRefundableEnabled ?? false,
+      discount:
+        props.season.nonRefundableOverride?.discount ?? props.market?.nonRefundableDiscount ?? 10
     }
 
     // Load existing pricing overrides
     if (props.season.pricingOverrides?.length) {
       props.season.pricingOverrides.forEach(override => {
-        const roomId = typeof override.roomType === 'object' ? override.roomType._id : override.roomType
+        const roomId =
+          typeof override.roomType === 'object' ? override.roomType._id : override.roomType
         pricingOverrides[roomId] = {
           usePricingTypeOverride: override.usePricingTypeOverride || false,
           pricingType: override.pricingType || 'unit',

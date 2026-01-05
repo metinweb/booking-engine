@@ -5,17 +5,17 @@
       <div class="flex gap-2">
         <button
           v-if="selectedGuests.length > 0"
-          @click="handleDownloadXML"
           :disabled="!hasValidSelection"
           class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+          @click="handleDownloadXML"
         >
           <span class="material-icons text-lg">download</span>
           XML Indir ({{ selectedGuests.length }})
         </button>
         <button
           v-if="selectedGuests.length > 0"
-          @click="showMarkSentModal = true"
           class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+          @click="showMarkSentModal = true"
         >
           <span class="material-icons text-lg">check_circle</span>
           Gonderildi Isaretle
@@ -24,432 +24,548 @@
     </div>
 
     <!-- No Hotel Selected Warning -->
-    <div v-if="!hotelId" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center">
+    <div
+      v-if="!hotelId"
+      class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center"
+    >
       <span class="material-icons text-4xl text-amber-500 mb-2">hotel</span>
       <p class="text-amber-700 dark:text-amber-300">Lutfen ust bardaki seciciden bir otel secin.</p>
     </div>
 
     <template v-else>
-    <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-            <span class="material-icons text-amber-600 dark:text-amber-400">pending</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.pending || 0 }}</p>
-            <p class="text-xs text-gray-500 dark:text-slate-400">Bekleyen</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-            <span class="material-icons text-green-600 dark:text-green-400">send</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.sent || 0 }}</p>
-            <p class="text-xs text-gray-500 dark:text-slate-400">Gonderilmis</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-            <span class="material-icons text-emerald-600 dark:text-emerald-400">check_circle</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.valid }}</p>
-            <p class="text-xs text-gray-500 dark:text-slate-400">Bilgi Tam</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-            <span class="material-icons text-red-600 dark:text-red-400">error</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.invalid }}</p>
-            <p class="text-xs text-gray-500 dark:text-slate-400">Eksik Bilgi</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <span class="material-icons text-blue-600 dark:text-blue-400">badge</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.turkish }}</p>
-            <p class="text-xs text-gray-500 dark:text-slate-400">TC Vatandas</p>
-          </div>
-        </div>
-      </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <span class="material-icons text-purple-600 dark:text-purple-400">flight</span>
-          </div>
-          <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.foreign }}</p>
-            <p class="text-xs text-gray-500 dark:text-slate-400">Yabanci</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-      <div class="flex flex-wrap gap-4 items-end">
-        <!-- Date Range -->
-        <div class="flex-1 min-w-[200px]">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giris Tarihi</label>
-          <div class="flex gap-2">
-            <input
-              v-model="filters.startDate"
-              type="date"
-              class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-              @change="fetchPendingGuests"
-            />
-            <input
-              v-model="filters.endDate"
-              type="date"
-              class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-              @change="fetchPendingGuests"
-            />
-          </div>
-        </div>
-        <!-- Stay Status Filter -->
-        <div class="w-40">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Konaklama</label>
-          <select
-            v-model="filters.stayStatus"
-            @change="fetchPendingGuests"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">Tumu</option>
-            <option value="checked_in">Aktif</option>
-            <option value="checked_out">Cikis Yapan</option>
-          </select>
-        </div>
-        <!-- KBS Status Filter -->
-        <div class="w-40">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">KBS Durumu</label>
-          <select
-            v-model="filters.kbsStatus"
-            @change="fetchPendingGuests"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="pending">Bekleyen</option>
-            <option value="all">Tumu</option>
-            <option value="sent">Gonderilmis</option>
-          </select>
-        </div>
-        <!-- Validation Status Filter -->
-        <div class="w-40">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bilgi Durumu</label>
-          <select
-            v-model="filters.validationStatus"
-            @change="applyFilters"
-            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">Tumu</option>
-            <option value="valid">Hazir</option>
-            <option value="invalid">Eksik Bilgi</option>
-          </select>
-        </div>
-        <!-- Select All -->
-        <button
-          @click="toggleSelectAll"
-          class="px-4 py-2 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2 text-gray-700 dark:text-gray-300"
+      <!-- Statistics Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
         >
-          <span class="material-icons text-lg">{{ allSelected ? 'check_box' : 'check_box_outline_blank' }}</span>
-          {{ allSelected ? 'Secimi Kaldir' : 'Tumunu Sec' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Guest List -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
-      <!-- Loading -->
-      <div v-if="loading" class="p-8 text-center">
-        <span class="material-icons animate-spin text-4xl text-indigo-500">refresh</span>
-        <p class="mt-2 text-gray-500 dark:text-slate-400">Yukleniyor...</p>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else-if="filteredGuests.length === 0" class="p-8 text-center">
-        <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">check_circle</span>
-        <p class="mt-2 text-gray-500 dark:text-slate-400">
-          {{ guests.length === 0 ? 'Bekleyen KBS bildirimi yok' : 'Filtre kriterlerine uyan sonuc yok' }}
-        </p>
-      </div>
-
-      <!-- Table -->
-      <div v-else class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gray-50 dark:bg-slate-700">
-            <tr>
-              <th class="w-12 px-4 py-3">
-                <input
-                  type="checkbox"
-                  :checked="allSelected"
-                  @change="toggleSelectAll"
-                  class="w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-indigo-600 focus:ring-indigo-500"
-                />
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Misafir</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Kimlik</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Oda</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Giris</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Durum</th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Islem</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
-            <tr
-              v-for="guest in filteredGuests"
-              :key="guest.guestId"
-              class="hover:bg-gray-50 dark:hover:bg-slate-700/50"
-              :class="{ 'bg-red-50 dark:bg-red-900/10': !guest.isValid }"
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center"
             >
-              <td class="px-4 py-3">
-                <input
-                  type="checkbox"
-                  :checked="selectedGuests.includes(guest.guestId)"
-                  :disabled="!guest.isValid || guest.kbsStatus === 'sent'"
-                  @change="toggleGuest(guest.guestId)"
-                  class="w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50"
-                />
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center"
-                    :class="guest.isTurkish ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-purple-100 dark:bg-purple-900/30'">
-                    <span class="material-icons text-sm"
-                      :class="guest.isTurkish ? 'text-blue-600 dark:text-blue-400' : 'text-purple-600 dark:text-purple-400'">
-                      {{ guest.isTurkish ? 'badge' : 'flight' }}
-                    </span>
-                  </div>
-                  <div>
-                    <p class="font-medium text-gray-900 dark:text-white">{{ guest.firstName }} {{ guest.lastName }}</p>
-                    <p class="text-xs text-gray-500 dark:text-slate-400">{{ guest.nationality || '-' }}</p>
-                  </div>
-                </div>
-              </td>
-              <td class="px-4 py-3">
-                <p class="text-sm text-gray-900 dark:text-white font-mono">{{ guest.idNumber || '-' }}</p>
-                <p class="text-xs text-gray-500 dark:text-slate-400">{{ getIdTypeLabel(guest.idType) }}</p>
-              </td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {{ guest.roomNumber }}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <p class="text-sm text-gray-900 dark:text-white">{{ formatDate(guest.checkInDate) }}</p>
-              </td>
-              <td class="px-4 py-3">
-                <!-- KBS Status -->
-                <div v-if="guest.kbsStatus === 'sent'" class="flex items-center gap-1 text-green-600 dark:text-green-400 mb-1">
-                  <span class="material-icons text-sm">send</span>
-                  <span class="text-sm">Gonderildi</span>
-                </div>
-                <div v-else-if="guest.isValid" class="flex items-center gap-1 text-amber-600 dark:text-amber-400 mb-1">
-                  <span class="material-icons text-sm">pending</span>
-                  <span class="text-sm">Hazir</span>
-                </div>
-                <div v-else class="space-y-1">
-                  <div class="flex items-center gap-1 text-red-600 dark:text-red-400">
-                    <span class="material-icons text-sm">error</span>
-                    <span class="text-sm">Eksik</span>
-                  </div>
-                  <div class="flex flex-wrap gap-1">
-                    <span
-                      v-for="field in guest.missingFields"
-                      :key="field"
-                      class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded"
-                    >
-                      {{ getFieldLabel(field) }}
-                    </span>
-                  </div>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-right">
-                <button
-                  v-if="!guest.isValid"
-                  @click="openEditModal(guest)"
-                  class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                  title="Bilgileri Duzenle"
-                >
-                  <span class="material-icons text-gray-600 dark:text-gray-400">edit</span>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Edit Guest Modal -->
-    <div
-      v-if="showEditModal"
-      class="fixed inset-0 z-50 overflow-y-auto"
-      @click.self="showEditModal = false"
-    >
-      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
-        <div class="fixed inset-0 bg-black/50" @click="showEditModal = false"></div>
-        <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-lg p-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              KBS Bilgilerini Tamamla
-            </h3>
-            <button @click="showEditModal = false" class="text-gray-400 hover:text-gray-500">
-              <span class="material-icons">close</span>
-            </button>
-          </div>
-
-          <div v-if="editingGuest" class="space-y-4">
-            <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3 mb-4">
-              <p class="font-medium text-gray-900 dark:text-white">{{ editingGuest.firstName }} {{ editingGuest.lastName }}</p>
-              <p class="text-sm text-gray-500 dark:text-slate-400">Oda: {{ editingGuest.roomNumber }}</p>
+              <span class="material-icons text-amber-600 dark:text-amber-400">pending</span>
             </div>
-
-            <!-- Father Name (for foreigners) -->
-            <div v-if="!editingGuest.isTurkish">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Baba Adi <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="editForm.fatherName"
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <!-- Mother Name (for foreigners) -->
-            <div v-if="!editingGuest.isTurkish">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Ana Adi <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="editForm.motherName"
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <!-- Birth Place (for foreigners) -->
-            <div v-if="!editingGuest.isTurkish">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Dogum Yeri <span class="text-red-500">*</span>
-              </label>
-              <input
-                v-model="editForm.birthPlace"
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <!-- Date of Birth -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Dogum Tarihi <span class="text-red-500">*</span>
-              </label>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ summary.pending || 0 }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">Bekleyen</p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+            >
+              <span class="material-icons text-green-600 dark:text-green-400">send</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                {{ summary.sent || 0 }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">Gonderilmis</p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"
+            >
+              <span class="material-icons text-emerald-600 dark:text-emerald-400"
+                >check_circle</span
+              >
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.valid }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">Bilgi Tam</p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+            >
+              <span class="material-icons text-red-600 dark:text-red-400">error</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.invalid }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">Eksik Bilgi</p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center"
+            >
+              <span class="material-icons text-blue-600 dark:text-blue-400">badge</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.turkish }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">TC Vatandas</p>
+            </div>
+          </div>
+        </div>
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center"
+            >
+              <span class="material-icons text-purple-600 dark:text-purple-400">flight</span>
+            </div>
+            <div>
+              <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ summary.foreign }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">Yabanci</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
+        <div class="flex flex-wrap gap-4 items-end">
+          <!-- Date Range -->
+          <div class="flex-1 min-w-[200px]">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >Giris Tarihi</label
+            >
+            <div class="flex gap-2">
               <input
-                v-model="editForm.dateOfBirth"
+                v-model="filters.startDate"
                 type="date"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                @change="fetchPendingGuests"
+              />
+              <input
+                v-model="filters.endDate"
+                type="date"
+                class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                @change="fetchPendingGuests"
               />
             </div>
+          </div>
+          <!-- Stay Status Filter -->
+          <div class="w-40">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >Konaklama</label
+            >
+            <select
+              v-model="filters.stayStatus"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+              @change="fetchPendingGuests"
+            >
+              <option value="all">Tumu</option>
+              <option value="checked_in">Aktif</option>
+              <option value="checked_out">Cikis Yapan</option>
+            </select>
+          </div>
+          <!-- KBS Status Filter -->
+          <div class="w-40">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >KBS Durumu</label
+            >
+            <select
+              v-model="filters.kbsStatus"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+              @change="fetchPendingGuests"
+            >
+              <option value="pending">Bekleyen</option>
+              <option value="all">Tumu</option>
+              <option value="sent">Gonderilmis</option>
+            </select>
+          </div>
+          <!-- Validation Status Filter -->
+          <div class="w-40">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >Bilgi Durumu</label
+            >
+            <select
+              v-model="filters.validationStatus"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+              @change="applyFilters"
+            >
+              <option value="all">Tumu</option>
+              <option value="valid">Hazir</option>
+              <option value="invalid">Eksik Bilgi</option>
+            </select>
+          </div>
+          <!-- Select All -->
+          <button
+            class="px-4 py-2 border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2 text-gray-700 dark:text-gray-300"
+            @click="toggleSelectAll"
+          >
+            <span class="material-icons text-lg">{{
+              allSelected ? 'check_box' : 'check_box_outline_blank'
+            }}</span>
+            {{ allSelected ? 'Secimi Kaldir' : 'Tumunu Sec' }}
+          </button>
+        </div>
+      </div>
 
-            <!-- ID Number (if missing) -->
-            <div v-if="editingGuest.missingFields?.includes('idNumber')">
+      <!-- Guest List -->
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+      >
+        <!-- Loading -->
+        <div v-if="loading" class="p-8 text-center">
+          <span class="material-icons animate-spin text-4xl text-indigo-500">refresh</span>
+          <p class="mt-2 text-gray-500 dark:text-slate-400">Yukleniyor...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="filteredGuests.length === 0" class="p-8 text-center">
+          <span class="material-icons text-5xl text-gray-300 dark:text-slate-600"
+            >check_circle</span
+          >
+          <p class="mt-2 text-gray-500 dark:text-slate-400">
+            {{
+              guests.length === 0
+                ? 'Bekleyen KBS bildirimi yok'
+                : 'Filtre kriterlerine uyan sonuc yok'
+            }}
+          </p>
+        </div>
+
+        <!-- Table -->
+        <div v-else class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 dark:bg-slate-700">
+              <tr>
+                <th class="w-12 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    :checked="allSelected"
+                    class="w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-indigo-600 focus:ring-indigo-500"
+                    @change="toggleSelectAll"
+                  />
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+                >
+                  Misafir
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+                >
+                  Kimlik
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+                >
+                  Oda
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+                >
+                  Giris
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+                >
+                  Durum
+                </th>
+                <th
+                  class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+                >
+                  Islem
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+              <tr
+                v-for="guest in filteredGuests"
+                :key="guest.guestId"
+                class="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                :class="{ 'bg-red-50 dark:bg-red-900/10': !guest.isValid }"
+              >
+                <td class="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    :checked="selectedGuests.includes(guest.guestId)"
+                    :disabled="!guest.isValid || guest.kbsStatus === 'sent'"
+                    class="w-4 h-4 rounded border-gray-300 dark:border-slate-500 text-indigo-600 focus:ring-indigo-500 disabled:opacity-50"
+                    @change="toggleGuest(guest.guestId)"
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full flex items-center justify-center"
+                      :class="
+                        guest.isTurkish
+                          ? 'bg-blue-100 dark:bg-blue-900/30'
+                          : 'bg-purple-100 dark:bg-purple-900/30'
+                      "
+                    >
+                      <span
+                        class="material-icons text-sm"
+                        :class="
+                          guest.isTurkish
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-purple-600 dark:text-purple-400'
+                        "
+                      >
+                        {{ guest.isTurkish ? 'badge' : 'flight' }}
+                      </span>
+                    </div>
+                    <div>
+                      <p class="font-medium text-gray-900 dark:text-white">
+                        {{ guest.firstName }} {{ guest.lastName }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-slate-400">
+                        {{ guest.nationality || '-' }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <p class="text-sm text-gray-900 dark:text-white font-mono">
+                    {{ guest.idNumber || '-' }}
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">
+                    {{ getIdTypeLabel(guest.idType) }}
+                  </p>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="px-2 py-1 bg-gray-100 dark:bg-slate-700 rounded text-sm font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    {{ guest.roomNumber }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <p class="text-sm text-gray-900 dark:text-white">
+                    {{ formatDate(guest.checkInDate) }}
+                  </p>
+                </td>
+                <td class="px-4 py-3">
+                  <!-- KBS Status -->
+                  <div
+                    v-if="guest.kbsStatus === 'sent'"
+                    class="flex items-center gap-1 text-green-600 dark:text-green-400 mb-1"
+                  >
+                    <span class="material-icons text-sm">send</span>
+                    <span class="text-sm">Gonderildi</span>
+                  </div>
+                  <div
+                    v-else-if="guest.isValid"
+                    class="flex items-center gap-1 text-amber-600 dark:text-amber-400 mb-1"
+                  >
+                    <span class="material-icons text-sm">pending</span>
+                    <span class="text-sm">Hazir</span>
+                  </div>
+                  <div v-else class="space-y-1">
+                    <div class="flex items-center gap-1 text-red-600 dark:text-red-400">
+                      <span class="material-icons text-sm">error</span>
+                      <span class="text-sm">Eksik</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1">
+                      <span
+                        v-for="field in guest.missingFields"
+                        :key="field"
+                        class="px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs rounded"
+                      >
+                        {{ getFieldLabel(field) }}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button
+                    v-if="!guest.isValid"
+                    class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    title="Bilgileri Duzenle"
+                    @click="openEditModal(guest)"
+                  >
+                    <span class="material-icons text-gray-600 dark:text-gray-400">edit</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Edit Guest Modal -->
+      <div
+        v-if="showEditModal"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="showEditModal = false"
+      >
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+          <div class="fixed inset-0 bg-black/50" @click="showEditModal = false"></div>
+          <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-lg p-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                KBS Bilgilerini Tamamla
+              </h3>
+              <button class="text-gray-400 hover:text-gray-500" @click="showEditModal = false">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+
+            <div v-if="editingGuest" class="space-y-4">
+              <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3 mb-4">
+                <p class="font-medium text-gray-900 dark:text-white">
+                  {{ editingGuest.firstName }} {{ editingGuest.lastName }}
+                </p>
+                <p class="text-sm text-gray-500 dark:text-slate-400">
+                  Oda: {{ editingGuest.roomNumber }}
+                </p>
+              </div>
+
+              <!-- Father Name (for foreigners) -->
+              <div v-if="!editingGuest.isTurkish">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Baba Adi <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="editForm.fatherName"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <!-- Mother Name (for foreigners) -->
+              <div v-if="!editingGuest.isTurkish">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Ana Adi <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="editForm.motherName"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <!-- Birth Place (for foreigners) -->
+              <div v-if="!editingGuest.isTurkish">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Dogum Yeri <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="editForm.birthPlace"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <!-- Date of Birth -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Dogum Tarihi <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="editForm.dateOfBirth"
+                  type="date"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <!-- ID Number (if missing) -->
+              <div v-if="editingGuest.missingFields?.includes('idNumber')">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  {{ editingGuest.isTurkish ? 'TC Kimlik No' : 'Pasaport No' }}
+                  <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="editForm.idNumber"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div class="flex justify-end gap-3 pt-4">
+                <button
+                  class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                  @click="showEditModal = false"
+                >
+                  Iptal
+                </button>
+                <button
+                  :disabled="saving"
+                  class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                  @click="saveGuestFields"
+                >
+                  <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
+                  Kaydet
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mark as Sent Modal -->
+      <div
+        v-if="showMarkSentModal"
+        class="fixed inset-0 z-50 overflow-y-auto"
+        @click.self="showMarkSentModal = false"
+      >
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+          <div class="fixed inset-0 bg-black/50" @click="showMarkSentModal = false"></div>
+          <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md p-6">
+            <div class="text-center mb-6">
+              <div
+                class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+              >
+                <span class="material-icons text-3xl text-green-600 dark:text-green-400"
+                  >check_circle</span
+                >
+              </div>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                KBS'ye Gonderildi Olarak Isaretle
+              </h3>
+              <p class="text-gray-500 dark:text-slate-400 mt-2">
+                {{ selectedGuests.length }} misafir gonderildi olarak isaretlenecek
+              </p>
+            </div>
+
+            <div class="mb-4">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                {{ editingGuest.isTurkish ? 'TC Kimlik No' : 'Pasaport No' }} <span class="text-red-500">*</span>
+                KBS Referans No (Opsiyonel)
               </label>
               <input
-                v-model="editForm.idNumber"
+                v-model="kbsReference"
                 type="text"
+                placeholder="KBS sisteminden alinan referans"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
               />
             </div>
 
-            <div class="flex justify-end gap-3 pt-4">
+            <div class="flex justify-end gap-3">
               <button
-                @click="showEditModal = false"
                 class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                @click="showMarkSentModal = false"
               >
                 Iptal
               </button>
               <button
-                @click="saveGuestFields"
-                :disabled="saving"
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                :disabled="marking"
+                class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+                @click="handleMarkAsSent"
               >
-                <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
-                Kaydet
+                <span v-if="marking" class="material-icons animate-spin text-sm">refresh</span>
+                Onayla
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Mark as Sent Modal -->
-    <div
-      v-if="showMarkSentModal"
-      class="fixed inset-0 z-50 overflow-y-auto"
-      @click.self="showMarkSentModal = false"
-    >
-      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
-        <div class="fixed inset-0 bg-black/50" @click="showMarkSentModal = false"></div>
-        <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md p-6">
-          <div class="text-center mb-6">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <span class="material-icons text-3xl text-green-600 dark:text-green-400">check_circle</span>
-            </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              KBS'ye Gonderildi Olarak Isaretle
-            </h3>
-            <p class="text-gray-500 dark:text-slate-400 mt-2">
-              {{ selectedGuests.length }} misafir gonderildi olarak isaretlenecek
-            </p>
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              KBS Referans No (Opsiyonel)
-            </label>
-            <input
-              v-model="kbsReference"
-              type="text"
-              placeholder="KBS sisteminden alinan referans"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div class="flex justify-end gap-3">
-            <button
-              @click="showMarkSentModal = false"
-              class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              Iptal
-            </button>
-            <button
-              @click="handleMarkAsSent"
-              :disabled="marking"
-              class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-            >
-              <span v-if="marking" class="material-icons animate-spin text-sm">refresh</span>
-              Onayla
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
     </template>
   </div>
 </template>
@@ -475,10 +591,10 @@ const summary = ref({ total: 0, pending: 0, sent: 0, valid: 0, invalid: 0, turki
 const filters = ref({
   startDate: '',
   endDate: '',
-  stayStatus: 'all',      // checked_in, checked_out, all
-  kbsStatus: 'pending',   // pending, sent, all
+  stayStatus: 'all', // checked_in, checked_out, all
+  kbsStatus: 'pending', // pending, sent, all
   validationStatus: 'all', // valid, invalid, all
-  nationality: 'all'       // turkish, foreign, all
+  nationality: 'all' // turkish, foreign, all
 })
 
 // Modals
@@ -518,7 +634,10 @@ const filteredGuests = computed(() => {
 
 const allSelected = computed(() => {
   const selectableGuests = filteredGuests.value.filter(g => g.isValid && g.kbsStatus !== 'sent')
-  return selectableGuests.length > 0 && selectableGuests.every(g => selectedGuests.value.includes(g.guestId))
+  return (
+    selectableGuests.length > 0 &&
+    selectableGuests.every(g => selectedGuests.value.includes(g.guestId))
+  )
 })
 
 const hasValidSelection = computed(() => {
@@ -542,7 +661,15 @@ const fetchPendingGuests = async () => {
 
     const response = await kbsService.getPending(hotelId.value, params)
     guests.value = response.data || []
-    summary.value = response.summary || { total: 0, pending: 0, sent: 0, valid: 0, invalid: 0, turkish: 0, foreign: 0 }
+    summary.value = response.summary || {
+      total: 0,
+      pending: 0,
+      sent: 0,
+      valid: 0,
+      invalid: 0,
+      turkish: 0,
+      foreign: 0
+    }
   } catch (error) {
     console.error('Failed to fetch KBS pending:', error)
     toast.error('KBS verileri yuklenemedi')
@@ -555,7 +682,7 @@ const applyFilters = () => {
   // Filters are applied via computed property
 }
 
-const toggleGuest = (guestId) => {
+const toggleGuest = guestId => {
   const index = selectedGuests.value.indexOf(guestId)
   if (index === -1) {
     selectedGuests.value.push(guestId)
@@ -568,11 +695,13 @@ const toggleSelectAll = () => {
   if (allSelected.value) {
     selectedGuests.value = []
   } else {
-    selectedGuests.value = filteredGuests.value.filter(g => g.isValid && g.kbsStatus !== 'sent').map(g => g.guestId)
+    selectedGuests.value = filteredGuests.value
+      .filter(g => g.isValid && g.kbsStatus !== 'sent')
+      .map(g => g.guestId)
   }
 }
 
-const openEditModal = (guest) => {
+const openEditModal = guest => {
   editingGuest.value = guest
   editForm.value = {
     fatherName: guest.fatherName || '',
@@ -638,16 +767,16 @@ const handleMarkAsSent = async () => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR')
 }
 
-const getIdTypeLabel = (type) => {
+const getIdTypeLabel = type => {
   return kbsService.ID_TYPE_INFO[type]?.label || type || '-'
 }
 
-const getFieldLabel = (field) => {
+const getFieldLabel = field => {
   return kbsService.KBS_FIELD_LABELS[field] || field
 }
 
@@ -667,7 +796,7 @@ onMounted(() => {
 })
 
 // Watch for hotel changes
-watch(hotelId, (newId) => {
+watch(hotelId, newId => {
   if (newId) {
     fetchPendingGuests()
   } else {

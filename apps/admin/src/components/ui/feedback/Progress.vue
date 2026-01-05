@@ -73,13 +73,14 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
+    validator: v => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'blue', 'green', 'red', 'amber', 'purple', 'pink', 'gray'].includes(v)
+    validator: v =>
+      ['indigo', 'blue', 'green', 'red', 'amber', 'purple', 'pink', 'gray'].includes(v)
   },
   // Label
   label: {
@@ -100,7 +101,7 @@ const props = defineProps({
   valueFormat: {
     type: String,
     default: 'percent',
-    validator: (v) => ['percent', 'value', 'fraction'].includes(v)
+    validator: v => ['percent', 'value', 'fraction'].includes(v)
   },
   // Indeterminate (loading)
   indeterminate: {

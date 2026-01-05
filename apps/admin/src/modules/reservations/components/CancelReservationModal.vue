@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Rezervasyon Iptal"
-    size="md"
-    @close="close"
-  >
+  <Modal v-model="show" title="Rezervasyon Iptal" size="md" @close="close">
     <div v-if="reservation" class="space-y-6">
       <!-- Reservation Summary -->
       <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
@@ -79,19 +74,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Vazgec
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !form.reason"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>cancel</span>
+        <span v-else class="material-icons text-sm">cancel</span>
         Iptal Et
       </button>
     </template>
@@ -131,7 +126,7 @@ const form = ref({
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const submit = async () => {
@@ -150,7 +145,7 @@ const submit = async () => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -159,7 +154,7 @@ const formatDate = (date) => {
   })
 }
 
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
     currency: 'TRY'
@@ -171,9 +166,12 @@ const close = () => {
   form.value = { reason: '', refundAmount: 0 }
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    form.value = { reason: '', refundAmount: 0 }
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      form.value = { reason: '', refundAmount: 0 }
+    }
   }
-})
+)
 </script>

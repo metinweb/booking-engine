@@ -1,21 +1,24 @@
 <template>
-  <div class="date-picker" ref="pickerContainer">
+  <div ref="pickerContainer" class="date-picker">
     <!-- Input Field -->
     <div class="relative">
-      <span class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm z-10">event</span>
+      <span
+        class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm z-10"
+        >event</span
+      >
       <input
         ref="inputElement"
         type="text"
         :value="displayValue"
-        @click="toggleCalendar"
         class="form-input pl-10 pr-10 text-sm cursor-pointer"
         :placeholder="placeholder || $t('datePicker.placeholder')"
         readonly
+        @click="toggleCalendar"
       />
       <button
         v-if="selectedDate"
-        @click.stop="clearDate"
         class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+        @click.stop="clearDate"
       >
         <span class="material-icons text-sm">close</span>
       </button>
@@ -33,8 +36,8 @@
           <!-- Calendar Header -->
           <div class="flex items-center justify-between mb-3">
             <button
-              @click="previousMonth"
               class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
+              @click="previousMonth"
             >
               <span class="material-icons text-gray-600 dark:text-slate-400">chevron_left</span>
             </button>
@@ -42,8 +45,8 @@
               {{ formatMonthYear(currentMonth) }}
             </div>
             <button
-              @click="nextMonthAction"
               class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
+              @click="nextMonthAction"
             >
               <span class="material-icons text-gray-600 dark:text-slate-400">chevron_right</span>
             </button>
@@ -67,8 +70,8 @@
           <!-- Today Button -->
           <div class="mt-3 pt-3 border-t border-gray-200 dark:border-slate-600 flex justify-center">
             <button
-              @click="selectToday"
               class="text-xs px-4 py-1.5 rounded-lg font-medium bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300 transition-colors"
+              @click="selectToday"
             >
               {{ $t('datePicker.today') }}
             </button>
@@ -108,7 +111,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { t, locale } = useI18n()
+const { locale } = useI18n()
 
 const pickerContainer = ref(null)
 const inputElement = ref(null)
@@ -156,9 +159,35 @@ const weekDays = computed(() => {
 
 const months = computed(() => {
   if (locale.value === 'tr') {
-    return ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+    return [
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık'
+    ]
   }
-  return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  return [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ]
 })
 
 const displayValue = computed(() => {
@@ -211,9 +240,7 @@ function getDateClass(date) {
   dateClone.setHours(0, 0, 0, 0)
 
   // Check min date
-  const minDateValue = props.minDate
-    ? new Date(props.minDate)
-    : (props.allowPast ? null : today)
+  const minDateValue = props.minDate ? new Date(props.minDate) : props.allowPast ? null : today
 
   if (minDateValue) {
     minDateValue.setHours(0, 0, 0, 0)
@@ -262,9 +289,7 @@ function selectDate(date) {
   dateClone.setHours(0, 0, 0, 0)
 
   // Check min date
-  const minDateValue = props.minDate
-    ? new Date(props.minDate)
-    : (props.allowPast ? null : today)
+  const minDateValue = props.minDate ? new Date(props.minDate) : props.allowPast ? null : today
 
   if (minDateValue) {
     minDateValue.setHours(0, 0, 0, 0)
@@ -347,9 +372,12 @@ function handleClickOutside(event) {
 }
 
 // Sync with props
-watch(() => props.modelValue, (newVal) => {
-  selectedDate.value = newVal ? new Date(newVal) : null
-})
+watch(
+  () => props.modelValue,
+  newVal => {
+    selectedDate.value = newVal ? new Date(newVal) : null
+  }
+)
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)

@@ -11,7 +11,7 @@
     :content-class="contentClass"
     @close="handleClose"
   >
-    <slot />
+    <slot></slot>
 
     <template #footer>
       <slot name="footer">
@@ -29,16 +29,16 @@
           <div class="flex items-center gap-2">
             <button
               type="button"
-              @click="handleCancel"
               class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              @click="handleCancel"
             >
               {{ cancelText }}
             </button>
             <button
               type="button"
-              @click="handleSave"
               :disabled="saving || saveDisabled"
               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              @click="handleSave"
             >
               <span v-if="saving" class="material-icons animate-spin text-lg">refresh</span>
               {{ saving ? savingText : saveText }}
@@ -50,25 +50,21 @@
   </Modal>
 
   <!-- Unsaved Changes Confirmation -->
-  <Modal
-    v-model="showUnsavedWarning"
-    title="Kaydedilmemis Degisiklikler"
-    size="sm"
-  >
+  <Modal v-model="showUnsavedWarning" title="Kaydedilmemis Degisiklikler" size="sm">
     <p class="text-gray-600 dark:text-gray-400">
       Kaydedilmemis degisiklikleriniz var. Cikmak istediginize emin misiniz?
     </p>
     <template #footer>
       <div class="flex justify-end gap-2">
         <button
-          @click="showUnsavedWarning = false"
           class="px-4 py-2 text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+          @click="showUnsavedWarning = false"
         >
           Devam Et
         </button>
         <button
-          @click="forceClose"
           class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+          @click="forceClose"
         >
           Degisiklikleri At
         </button>
@@ -78,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Modal from '@/components/common/Modal.vue'
 
 const props = defineProps({
@@ -132,13 +128,13 @@ const emit = defineEmits(['update:modelValue', 'save', 'cancel', 'close'])
 
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const showUnsavedWarning = ref(false)
 
 // Handle Ctrl+S shortcut
-const handleKeydown = (event) => {
+const handleKeydown = event => {
   if (!props.modelValue) return
 
   if (event.ctrlKey && event.key === 's') {

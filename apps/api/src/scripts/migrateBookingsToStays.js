@@ -120,11 +120,16 @@ async function migrate() {
           checkInDate: checkIn,
           checkOutDate: checkOut,
           nights,
-          guests: guests.length > 0 ? guests : [{
-            firstName: 'Misafir',
-            lastName: '',
-            isMainGuest: true
-          }],
+          guests:
+            guests.length > 0
+              ? guests
+              : [
+                  {
+                    firstName: 'Misafir',
+                    lastName: '',
+                    isMainGuest: true
+                  }
+                ],
           adultsCount: booking.adults || 1,
           childrenCount: booking.children || 0,
           mealPlan: booking.mealPlan,
@@ -137,11 +142,12 @@ async function migrate() {
           source: 'booking',
           isWalkIn: false,
           status: STAY_STATUS.PENDING,
-          paymentStatus: booking.paidAmount >= booking.totalAmount
-            ? PAYMENT_STATUS.PAID
-            : booking.paidAmount > 0
-              ? PAYMENT_STATUS.PARTIAL
-              : PAYMENT_STATUS.PENDING
+          paymentStatus:
+            booking.paidAmount >= booking.totalAmount
+              ? PAYMENT_STATUS.PAID
+              : booking.paidAmount > 0
+                ? PAYMENT_STATUS.PARTIAL
+                : PAYMENT_STATUS.PENDING
         })
 
         console.log(`✅ Created Stay ${stay.stayNumber} for booking ${booking.bookingNumber}`)

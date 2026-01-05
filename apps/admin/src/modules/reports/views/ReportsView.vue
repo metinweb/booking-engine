@@ -5,10 +5,12 @@
       <div class="flex items-center gap-2">
         <select
           v-model="dateRangeType"
-          @change="onDateRangeChange"
           class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300"
+          @change="onDateRangeChange"
         >
-          <option v-for="opt in dateRangeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          <option v-for="opt in dateRangeOptions" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
         </select>
         <template v-if="dateRangeType === 'custom'">
           <input
@@ -23,9 +25,9 @@
           />
         </template>
         <button
-          @click="refreshReport"
           class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
           title="Yenile"
+          @click="refreshReport"
         >
           <span class="material-icons">refresh</span>
         </button>
@@ -47,7 +49,8 @@
             <span
               class="material-icons"
               :class="`text-${category.color}-600 dark:text-${category.color}-400`"
-            >{{ category.icon }}</span>
+              >{{ category.icon }}</span
+            >
           </div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ category.label }}</h3>
         </div>
@@ -55,8 +58,8 @@
           <li
             v-for="report in category.reports"
             :key="report.type"
-            @click="selectReport(report)"
             class="flex items-center gap-2 p-2 rounded-lg cursor-pointer text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            @click="selectReport(report)"
           >
             <span class="material-icons text-lg">{{ report.icon }}</span>
             <div class="flex-1">
@@ -74,19 +77,24 @@
       <!-- Back Button & Title -->
       <div class="flex items-center gap-4 mb-6">
         <button
-          @click="selectedReport = null"
           class="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+          @click="selectedReport = null"
         >
           <span class="material-icons">arrow_back</span>
         </button>
         <div>
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ selectedReport.label }}</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+            {{ selectedReport.label }}
+          </h2>
           <p class="text-sm text-gray-500 dark:text-slate-400">{{ selectedReport.description }}</p>
         </div>
       </div>
 
       <!-- Loading State -->
-      <div v-if="loading" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-12 text-center">
+      <div
+        v-if="loading"
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-12 text-center"
+      >
         <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto"></div>
         <p class="mt-4 text-gray-500 dark:text-slate-400">Rapor yukleniyor...</p>
       </div>
@@ -115,16 +123,10 @@
         />
 
         <!-- In-House Report -->
-        <InHouseReport
-          v-else-if="selectedReport.type === 'in_house'"
-          :data="reportData"
-        />
+        <InHouseReport v-else-if="selectedReport.type === 'in_house'" :data="reportData" />
 
         <!-- Housekeeping Report -->
-        <HousekeepingReport
-          v-else-if="selectedReport.type === 'housekeeping'"
-          :data="reportData"
-        />
+        <HousekeepingReport v-else-if="selectedReport.type === 'housekeeping'" :data="reportData" />
 
         <!-- Revenue Report -->
         <RevenueReport
@@ -148,10 +150,7 @@
         />
 
         <!-- VIP Guests Report -->
-        <VipGuestsReport
-          v-else-if="selectedReport.type === 'vip_guests'"
-          :data="reportData"
-        />
+        <VipGuestsReport v-else-if="selectedReport.type === 'vip_guests'" :data="reportData" />
       </div>
     </div>
   </div>
@@ -210,7 +209,7 @@ const onDateRangeChange = () => {
   }
 }
 
-const selectReport = async (report) => {
+const selectReport = async report => {
   selectedReport.value = report
   await fetchReport()
 }
@@ -233,10 +232,14 @@ const fetchReport = async () => {
         response = await reportsService.getOccupancyReport(hotelId.value, params)
         break
       case REPORT_TYPES.ARRIVALS:
-        response = await reportsService.getArrivalsReport(hotelId.value, { date: filters.value.startDate })
+        response = await reportsService.getArrivalsReport(hotelId.value, {
+          date: filters.value.startDate
+        })
         break
       case REPORT_TYPES.DEPARTURES:
-        response = await reportsService.getDeparturesReport(hotelId.value, { date: filters.value.startDate })
+        response = await reportsService.getDeparturesReport(hotelId.value, {
+          date: filters.value.startDate
+        })
         break
       case REPORT_TYPES.IN_HOUSE:
         response = await reportsService.getInHouseReport(hotelId.value)
@@ -276,17 +279,24 @@ const refreshReport = () => {
   }
 }
 
-watch(() => hotelId.value, () => {
-  if (hotelId.value && selectedReport.value) {
-    fetchReport()
+watch(
+  () => hotelId.value,
+  () => {
+    if (hotelId.value && selectedReport.value) {
+      fetchReport()
+    }
   }
-})
+)
 
-watch(() => [filters.value.startDate, filters.value.endDate], () => {
-  if (dateRangeType.value === 'custom' && selectedReport.value) {
-    fetchReport()
-  }
-}, { deep: true })
+watch(
+  () => [filters.value.startDate, filters.value.endDate],
+  () => {
+    if (dateRangeType.value === 'custom' && selectedReport.value) {
+      fetchReport()
+    }
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   initDateRange()

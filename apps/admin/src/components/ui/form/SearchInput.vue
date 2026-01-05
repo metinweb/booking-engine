@@ -13,9 +13,25 @@
       <!-- Search Icon -->
       <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <span v-if="loading" class="animate-spin">
-          <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            class="w-5 h-5 text-gray-400"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
         </span>
         <span v-else class="material-icons text-gray-400" :class="iconSizeClass">
@@ -29,14 +45,14 @@
         ref="inputRef"
         type="text"
         :value="modelValue"
+        :placeholder="placeholder"
+        :disabled="disabled"
+        :class="inputClasses"
         @input="handleInput"
         @keydown.enter="handleEnter"
         @keydown.esc="handleEscape"
         @focus="isFocused = true"
         @blur="isFocused = false"
-        :placeholder="placeholder"
-        :disabled="disabled"
-        :class="inputClasses"
       />
 
       <!-- Clear Button -->
@@ -46,7 +62,9 @@
         class="absolute inset-y-0 right-0 pr-3 flex items-center"
         @click="clear"
       >
-        <span class="material-icons text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg">
+        <span
+          class="material-icons text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-lg"
+        >
           close
         </span>
       </button>
@@ -56,7 +74,9 @@
         v-if="showShortcut && !modelValue && !isFocused"
         class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
       >
-        <kbd class="px-1.5 py-0.5 text-xs font-medium text-gray-400 bg-gray-100 dark:bg-slate-700 rounded border border-gray-300 dark:border-slate-600">
+        <kbd
+          class="px-1.5 py-0.5 text-xs font-medium text-gray-400 bg-gray-100 dark:bg-slate-700 rounded border border-gray-300 dark:border-slate-600"
+        >
           {{ shortcutKey }}
         </kbd>
       </div>
@@ -69,17 +89,18 @@
           v-if="showSuggestions && suggestions.length > 0"
           ref="suggestionsRef"
           :style="suggestionsStyle"
-          class="fixed z-50 bg-white dark:bg-slate-800 rounded-lg shadow-lg
-                 border border-gray-200 dark:border-slate-700 max-h-60 overflow-y-auto py-1"
+          class="fixed z-50 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 max-h-60 overflow-y-auto py-1"
         >
           <button
             v-for="(suggestion, index) in suggestions"
             :key="index"
             type="button"
             class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors"
-            :class="focusedIndex === index
-              ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'"
+            :class="
+              focusedIndex === index
+                ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+            "
             @click="selectSuggestion(suggestion)"
             @mouseenter="focusedIndex = index"
           >
@@ -125,7 +146,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   disabled: {
     type: Boolean,
@@ -179,7 +200,7 @@ const suggestionsPosition = ref({ top: 0, left: 0, width: 0 })
 const inputId = `search-${Math.random().toString(36).substr(2, 9)}`
 
 // Debounced search
-const debouncedSearch = useDebounce((value) => {
+const debouncedSearch = useDebounce(value => {
   emit('search', value)
 }, props.debounce)
 
@@ -239,7 +260,7 @@ const calculateSuggestionsPosition = async () => {
 }
 
 // Handle input
-const handleInput = (event) => {
+const handleInput = event => {
   const value = event.target.value
   emit('update:modelValue', value)
   focusedIndex.value = -1
@@ -273,7 +294,7 @@ const clear = () => {
 }
 
 // Select suggestion
-const selectSuggestion = (suggestion) => {
+const selectSuggestion = suggestion => {
   const value = typeof suggestion === 'string' ? suggestion : suggestion.value || suggestion.label
   emit('update:modelValue', value)
   emit('select', suggestion)
@@ -281,7 +302,7 @@ const selectSuggestion = (suggestion) => {
 }
 
 // Navigate suggestions
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (!showSuggestions.value) return
 
   if (e.key === 'ArrowDown') {
@@ -294,10 +315,11 @@ const handleKeydown = (e) => {
 }
 
 // Global keyboard shortcut
-const handleGlobalKeydown = (e) => {
+const handleGlobalKeydown = e => {
   if (props.showShortcut && e.key === props.shortcutKey && !e.ctrlKey && !e.metaKey) {
     const activeElement = document.activeElement
-    const isInputFocused = activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA'
+    const isInputFocused =
+      activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA'
 
     if (!isInputFocused) {
       e.preventDefault()
@@ -307,7 +329,7 @@ const handleGlobalKeydown = (e) => {
 }
 
 // Watch for focus changes
-watch(isFocused, (focused) => {
+watch(isFocused, focused => {
   if (focused) {
     calculateSuggestionsPosition()
   } else {
@@ -340,7 +362,9 @@ defineExpose({
 <style scoped>
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .dropdown-enter-from,

@@ -69,7 +69,7 @@ export const getServerIP = async () => {
  * @param {string} domain - Doğrulanacak domain
  * @returns {Promise<{success: boolean, serverIP: string, domainIP: string|null, message: string}>}
  */
-export const verifyDNS = async (domain) => {
+export const verifyDNS = async domain => {
   try {
     // Sunucu IP'sini al
     const serverIP = await getServerIP()
@@ -100,7 +100,9 @@ export const verifyDNS = async (domain) => {
         message: 'DNS_VERIFIED'
       }
     } else {
-      logger.warn(`[SSL] DNS mismatch for ${domain}: expected ${serverIP}, got ${domainIPs.join(', ')}`)
+      logger.warn(
+        `[SSL] DNS mismatch for ${domain}: expected ${serverIP}, got ${domainIPs.join(', ')}`
+      )
       return {
         success: false,
         serverIP,
@@ -119,15 +121,16 @@ export const verifyDNS = async (domain) => {
  * @param {string} domain - Sertifika alınacak domain
  * @returns {Promise<{success: boolean, certPath: string|null, expiresAt: Date|null, message: string}>}
  */
-export const requestCertificate = async (domain) => {
+export const requestCertificate = async domain => {
   try {
     logger.info(`[SSL] Requesting certificate for ${domain}`)
 
     // Certbot komutu - webroot modu veya standalone
     // Production'da webroot tercih edilir
-    const certbotCmd = process.env.NODE_ENV === 'production'
-      ? `certbot certonly --webroot -w ${CONFIG.certbotWebroot} -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive`
-      : `certbot certonly --standalone -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive --dry-run`
+    const certbotCmd =
+      process.env.NODE_ENV === 'production'
+        ? `certbot certonly --webroot -w ${CONFIG.certbotWebroot} -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive`
+        : `certbot certonly --standalone -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive --dry-run`
 
     const { stdout, stderr } = await execAsync(certbotCmd, { timeout: 120000 })
 
@@ -354,7 +357,7 @@ export const installNginxConfig = async (domain, configContent) => {
 
     // Nginx'i yeniden yükle
     await execAsync('nginx -s reload')
-    logger.info(`[SSL] Nginx reloaded successfully`)
+    logger.info('[SSL] Nginx reloaded successfully')
 
     return {
       success: true,
@@ -383,7 +386,7 @@ export const installNginxConfig = async (domain, configContent) => {
  * @param {string} domain - Domain adı
  * @returns {Promise<{success: boolean, message: string}>}
  */
-export const removeNginxConfig = async (domain) => {
+export const removeNginxConfig = async domain => {
   const configFilename = `${domain}.conf`
   const availablePath = path.join(CONFIG.nginxSitesAvailable, configFilename)
   const enabledPath = path.join(CONFIG.nginxSitesEnabled, configFilename)
@@ -425,16 +428,14 @@ export const removeNginxConfig = async (domain) => {
  * @param {string} domain - Domain adı
  * @returns {Promise<{exists: boolean, expiresAt: Date|null, daysRemaining: number|null}>}
  */
-export const checkCertificate = async (domain) => {
+export const checkCertificate = async domain => {
   const certPath = path.join(CONFIG.certDir, domain, 'fullchain.pem')
 
   try {
     await fs.access(certPath)
 
     // Sertifika bitiş tarihini al
-    const { stdout } = await execAsync(
-      `openssl x509 -enddate -noout -in ${certPath}`
-    )
+    const { stdout } = await execAsync(`openssl x509 -enddate -noout -in ${certPath}`)
 
     // "notAfter=Dec 31 23:59:59 2024 GMT" formatından parse et
     const match = stdout.match(/notAfter=(.+)/)
@@ -461,7 +462,7 @@ export const checkCertificate = async (domain) => {
  * @param {string} domain - Domain adı
  * @returns {Promise<{success: boolean, expiresAt: Date|null, message: string}>}
  */
-export const renewCertificate = async (domain) => {
+export const renewCertificate = async domain => {
   try {
     logger.info(`[SSL] Renewing certificate for ${domain}`)
 

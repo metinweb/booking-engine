@@ -2,7 +2,10 @@
   <div>
     <!-- Header with back button -->
     <div class="mb-6">
-      <button @click="goBack" class="inline-flex items-center text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400">
+      <button
+        class="inline-flex items-center text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400"
+        @click="goBack"
+      >
         <span class="material-icons mr-1">arrow_back</span>
         {{ $t('common.back') }}
       </button>
@@ -19,12 +22,7 @@
       </div>
 
       <!-- Tabs -->
-      <FormTabs
-        v-model="activeTab"
-        :tabs="tabs"
-        :errors="{}"
-        :tab-fields="{}"
-      />
+      <FormTabs v-model="activeTab" :tabs="tabs" :errors="{}" :tab-fields="{}" />
 
       <!-- Loading State -->
       <div v-if="loading" class="p-12 text-center">
@@ -33,14 +31,25 @@
       </div>
 
       <!-- Tab Content -->
-      <form v-else @submit.prevent="handleSave" class="p-6">
+      <form v-else class="p-6" @submit.prevent="handleSave">
         <!-- Save Button (Top) -->
         <div class="flex justify-end mb-6">
           <button type="submit" class="btn-primary" :disabled="saving">
             <span v-if="saving" class="flex items-center">
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
               {{ $t('common.loading') }}
             </span>
@@ -73,20 +82,12 @@
 
         <!-- Sales Channels Tab -->
         <div v-show="activeTab === 'channels'">
-          <MarketChannelsForm
-            ref="channelsFormRef"
-            :market="market"
-            :saving="saving"
-          />
+          <MarketChannelsForm ref="channelsFormRef" :market="market" :saving="saving" />
         </div>
 
         <!-- Payment Terms Tab -->
         <div v-show="activeTab === 'payment'">
-          <MarketPaymentForm
-            ref="paymentFormRef"
-            :market="market"
-            :saving="saving"
-          />
+          <MarketPaymentForm ref="paymentFormRef" :market="market" :saving="saving" />
         </div>
 
         <!-- Policies Tab -->
@@ -115,8 +116,19 @@
           <button type="submit" class="btn-primary" :disabled="saving">
             <span v-if="saving" class="flex items-center">
               <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
               {{ $t('common.loading') }}
             </span>
@@ -151,7 +163,9 @@ const { t, locale } = useI18n()
 // Helper to create empty multilingual object (admin: TR, EN only)
 const createMultiLangObject = () => {
   const obj = {}
-  ADMIN_LANGUAGES.forEach(lang => { obj[lang] = '' })
+  ADMIN_LANGUAGES.forEach(lang => {
+    obj[lang] = ''
+  })
   return obj
 }
 
@@ -216,7 +230,7 @@ const tabs = computed(() => [
   { id: 'pricing', label: t('planning.markets.pricingTab'), icon: 'tune' }
 ])
 
-const getMarketName = (market) => {
+const getMarketName = market => {
   return market?.name?.[locale.value] || market?.name?.tr || market?.name?.en || market?.code || ''
 }
 
@@ -351,16 +365,20 @@ const handleSave = async () => {
 }
 
 // Watch for route changes
-watch(() => route.params.id, (newId) => {
-  if (newId) {
-    fetchMarket()
-    fetchAssignedCountries()
-  } else {
-    market.value = getEmptyMarket()
-    activeTab.value = 'basic'
-    fetchAssignedCountries()
-  }
-}, { immediate: true })
+watch(
+  () => route.params.id,
+  newId => {
+    if (newId) {
+      fetchMarket()
+      fetchAssignedCountries()
+    } else {
+      market.value = getEmptyMarket()
+      activeTab.value = 'basic'
+      fetchAssignedCountries()
+    }
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   fetchHotel()

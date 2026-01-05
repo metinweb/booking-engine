@@ -1,24 +1,45 @@
 <template>
-  <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700">
+  <header
+    class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700"
+  >
     <div class="px-3 md:px-6 py-3 md:py-4 flex justify-between items-center">
       <!-- Left side: Hamburger + Title -->
       <div class="flex items-center gap-3">
         <!-- Hamburger Menu (Mobile Only) -->
         <button
           v-if="uiStore.isMobile"
-          @click="uiStore.toggleSidebar"
           class="p-2 text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          @click="uiStore.toggleSidebar"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path v-if="!uiStore.sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <path
+              v-if="!uiStore.sidebarOpen"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+            <path
+              v-else
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
 
         <!-- Page Title and Description -->
         <div>
-          <h1 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-white">{{ displayTitle }}</h1>
-          <p v-if="displayDescription && !uiStore.isMobile" class="text-sm text-gray-500 dark:text-slate-400 mt-1">{{ displayDescription }}</p>
+          <h1 class="text-lg md:text-xl font-semibold text-gray-800 dark:text-white">
+            {{ displayTitle }}
+          </h1>
+          <p
+            v-if="displayDescription && !uiStore.isMobile"
+            class="text-sm text-gray-500 dark:text-slate-400 mt-1"
+          >
+            {{ displayDescription }}
+          </p>
         </div>
       </div>
 
@@ -39,23 +60,41 @@
         <NotificationBell />
 
         <!-- User Dropdown -->
-        <div class="relative border-l border-gray-200 dark:border-slate-700 pl-3" ref="userDropdownRef">
+        <div
+          ref="userDropdownRef"
+          class="relative border-l border-gray-200 dark:border-slate-700 pl-3"
+        >
           <button
-            @click="toggleUserDropdown"
             class="flex items-center gap-2 p-2 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="toggleUserDropdown"
           >
             <!-- User Avatar -->
-            <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+            <div
+              class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium"
+            >
               {{ getInitials(authStore.user?.name) }}
             </div>
             <!-- User Name (Desktop) -->
             <div v-if="!uiStore.isMobile" class="text-left">
-              <p class="text-sm font-medium text-gray-800 dark:text-white">{{ authStore.user?.name || 'User' }}</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white">
+                {{ authStore.user?.name || 'User' }}
+              </p>
               <p class="text-xs text-gray-500 dark:text-slate-400">{{ getRoleName() }}</p>
             </div>
             <!-- Dropdown Arrow -->
-            <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-180': userDropdownOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            <svg
+              class="w-4 h-4 transition-transform"
+              :class="{ 'rotate-180': userDropdownOpen }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
 
@@ -74,7 +113,9 @@
             >
               <!-- User Info -->
               <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700">
-                <p class="text-sm font-medium text-gray-800 dark:text-white">{{ authStore.user?.name }}</p>
+                <p class="text-sm font-medium text-gray-800 dark:text-white">
+                  {{ authStore.user?.name }}
+                </p>
                 <p class="text-xs text-gray-500 dark:text-slate-400">{{ authStore.user?.email }}</p>
               </div>
 
@@ -82,26 +123,53 @@
               <div class="py-1">
                 <!-- Profile -->
                 <button
-                  @click="goToProfile"
                   class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-3"
+                  @click="goToProfile"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                   {{ $t('user.profile') }}
                 </button>
 
                 <!-- Dark Mode Toggle -->
                 <button
-                  @click="uiStore.toggleDarkMode"
                   class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-between"
+                  @click="uiStore.toggleDarkMode"
                 >
                   <span class="flex items-center gap-3">
-                    <svg v-if="uiStore.darkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    <svg
+                      v-if="uiStore.darkMode"
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
                     </svg>
-                    <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    <svg
+                      v-else
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      />
                     </svg>
                     {{ uiStore.darkMode ? $t('common.lightMode') : $t('common.darkMode') }}
                   </span>
@@ -110,16 +178,21 @@
 
                 <!-- Language Selector -->
                 <div class="px-4 py-2">
-                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2 block">{{ $t('user.language') }}</label>
+                  <label
+                    class="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2 block"
+                    >{{ $t('user.language') }}</label
+                  >
                   <div class="flex gap-2">
                     <button
                       v-for="lang in languages"
                       :key="lang.code"
-                      @click="changeLanguage(lang.code)"
                       class="flex-1 px-3 py-1.5 text-sm rounded-lg transition-colors"
-                      :class="currentLocale === lang.code
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'"
+                      :class="
+                        currentLocale === lang.code
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                      "
+                      @click="changeLanguage(lang.code)"
                     >
                       {{ lang.name }}
                     </button>
@@ -130,11 +203,16 @@
               <!-- Logout -->
               <div class="py-1 border-t border-gray-200 dark:border-slate-700">
                 <button
-                  @click="handleLogout"
                   class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-3"
+                  @click="handleLogout"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
                   </svg>
                   {{ $t('auth.logout') }}
                 </button>
@@ -171,7 +249,7 @@ const languages = [
 
 const currentLocale = computed(() => locale.value)
 
-const changeLanguage = (lang) => {
+const changeLanguage = lang => {
   locale.value = lang
   localStorage.setItem('language', lang)
 }
@@ -198,12 +276,30 @@ const isPmsUser = computed(() => !!localStorage.getItem('pmsToken'))
 
 // Routes that need hotel selector
 const hotelRequiredRoutes = [
-  'planning-settings', 'planning-rooms', 'planning-markets', 'planning-campaigns', 'planning-pricing',
-  'room-type-new', 'room-type-detail', 'market-new', 'market-detail',
+  'planning-settings',
+  'planning-rooms',
+  'planning-markets',
+  'planning-campaigns',
+  'planning-pricing',
+  'room-type-new',
+  'room-type-detail',
+  'market-new',
+  'market-detail',
   // PMS routes
-  'pms-dashboard', 'pms-reservations', 'pms-front-desk', 'pms-housekeeping',
-  'pms-guests', 'pms-billing', 'pms-cashier', 'pms-reports', 'pms-settings',
-  'pms-night-audit', 'pms-night-audit-detail', 'pms-users', 'pms-room-plan', 'pms-kbs'
+  'pms-dashboard',
+  'pms-reservations',
+  'pms-front-desk',
+  'pms-housekeeping',
+  'pms-guests',
+  'pms-billing',
+  'pms-cashier',
+  'pms-reports',
+  'pms-settings',
+  'pms-night-audit',
+  'pms-night-audit-detail',
+  'pms-users',
+  'pms-room-plan',
+  'pms-kbs'
 ]
 const showHotelSelector = computed(() => {
   // Don't show hotel selector for PMS users (they have a hotel assigned via PMS login)
@@ -293,7 +389,7 @@ const toggleUserDropdown = () => {
   userDropdownOpen.value = !userDropdownOpen.value
 }
 
-const getInitials = (name) => {
+const getInitials = name => {
   if (!name) return 'U'
   const parts = name.split(' ')
   if (parts.length >= 2) {
@@ -331,7 +427,7 @@ const handleLogout = async () => {
 }
 
 // Click outside handler
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   if (userDropdownRef.value && !userDropdownRef.value.contains(event.target)) {
     userDropdownOpen.value = false
   }

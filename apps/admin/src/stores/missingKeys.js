@@ -14,10 +14,14 @@ export const useMissingKeysStore = defineStore('missingKeys', () => {
 
   // Computed
   const count = computed(() => missingKeys.value.size)
-  const keys = computed(() => Array.from(missingKeys.value.entries()).map(([key, data]) => ({
-    key,
-    ...data
-  })).sort((a, b) => b.count - a.count))
+  const keys = computed(() =>
+    Array.from(missingKeys.value.entries())
+      .map(([key, data]) => ({
+        key,
+        ...data
+      }))
+      .sort((a, b) => b.count - a.count)
+  )
 
   // Add missing key
   const addMissingKey = (locale, key) => {

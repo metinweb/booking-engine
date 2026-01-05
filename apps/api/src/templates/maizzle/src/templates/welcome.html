@@ -17,29 +17,29 @@ previewText: "Hesabınız başarıyla oluşturuldu"
 
   <!-- Heading -->
   <h1 class="m-0 mb-2 text-center text-2xl font-bold text-slate-800">
-    {{ GREETING }}, {{ USER_NAME }}!
+    %% GREETING %%, %% USER_NAME %%!
   </h1>
   <p class="m-0 mb-6 text-center text-slate-600">
-    {{ WELCOME_TEXT }}
+    %% WELCOME_TEXT %%
   </p>
 
   <!-- Account Info -->
   <table class="w-full rounded-lg bg-slate-50" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td class="p-6">
-        <h3 class="m-0 mb-4 text-base font-bold text-slate-800">{{ ACCOUNT_INFO_TITLE }}</h3>
+        <h3 class="m-0 mb-4 text-base font-bold text-slate-800">%% ACCOUNT_INFO_TITLE %%</h3>
         <table class="w-full text-sm" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
-            <td class="py-2 text-slate-500" style="width: 35%;">{{ EMAIL_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800">{{ USER_EMAIL }}</td>
+            <td class="py-2 text-slate-500" style="width: 35%;">%% EMAIL_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800">%% USER_EMAIL %%</td>
           </tr>
           <tr>
-            <td class="py-2 text-slate-500">{{ ACCOUNT_TYPE_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800">{{ ACCOUNT_TYPE }}</td>
+            <td class="py-2 text-slate-500">%% ACCOUNT_TYPE_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800">%% ACCOUNT_TYPE %%</td>
           </tr>
-          <tr if="{{ COMPANY_NAME }}">
-            <td class="py-2 text-slate-500">{{ COMPANY_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800">{{ COMPANY_NAME }}</td>
+          <tr if="%% COMPANY_NAME %%">
+            <td class="py-2 text-slate-500">%% COMPANY_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800">%% COMPANY_NAME %%</td>
           </tr>
         </table>
       </td>
@@ -50,7 +50,7 @@ previewText: "Hesabınız başarıyla oluşturuldu"
   <table class="mt-6 w-full" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td>
-        <h3 class="m-0 mb-4 text-base font-bold text-slate-800">{{ FEATURES_TITLE }}</h3>
+        <h3 class="m-0 mb-4 text-base font-bold text-slate-800">%% FEATURES_TITLE %%</h3>
       </td>
     </tr>
     <tr>
@@ -60,25 +60,25 @@ previewText: "Hesabınız başarıyla oluşturuldu"
             <td class="pb-3" style="width: 24px; vertical-align: top;">
               <span class="text-success-500">✓</span>
             </td>
-            <td class="pb-3 pl-2 text-sm text-slate-600">{{ FEATURE_1 }}</td>
+            <td class="pb-3 pl-2 text-sm text-slate-600">%% FEATURE_1 %%</td>
           </tr>
           <tr>
             <td class="pb-3" style="width: 24px; vertical-align: top;">
               <span class="text-success-500">✓</span>
             </td>
-            <td class="pb-3 pl-2 text-sm text-slate-600">{{ FEATURE_2 }}</td>
+            <td class="pb-3 pl-2 text-sm text-slate-600">%% FEATURE_2 %%</td>
           </tr>
           <tr>
             <td class="pb-3" style="width: 24px; vertical-align: top;">
               <span class="text-success-500">✓</span>
             </td>
-            <td class="pb-3 pl-2 text-sm text-slate-600">{{ FEATURE_3 }}</td>
+            <td class="pb-3 pl-2 text-sm text-slate-600">%% FEATURE_3 %%</td>
           </tr>
           <tr>
             <td class="pb-3" style="width: 24px; vertical-align: top;">
               <span class="text-success-500">✓</span>
             </td>
-            <td class="pb-3 pl-2 text-sm text-slate-600">{{ FEATURE_4 }}</td>
+            <td class="pb-3 pl-2 text-sm text-slate-600">%% FEATURE_4 %%</td>
           </tr>
         </table>
       </td>
@@ -92,8 +92,8 @@ previewText: "Hesabınız başarıyla oluşturuldu"
         <table cellpadding="0" cellspacing="0" role="presentation">
           <tr>
             <td class="rounded-lg bg-primary-600" style="mso-padding-alt: 12px 32px;">
-              <a href="{{ DASHBOARD_URL }}" class="block px-8 py-3 text-base font-semibold text-white no-underline" style="mso-text-raise: 3px;">
-                {{ GET_STARTED_BUTTON }}
+              <a href="%% DASHBOARD_URL %%" class="block px-8 py-3 text-base font-semibold text-white no-underline" style="mso-text-raise: 3px;">
+                %% GET_STARTED_BUTTON %%
               </a>
             </td>
           </tr>
@@ -106,10 +106,10 @@ previewText: "Hesabınız başarıyla oluşturuldu"
   <table class="mt-8 w-full rounded-lg bg-primary-50" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td class="p-6 text-center">
-        <p class="m-0 mb-2 text-base font-bold text-slate-800">{{ HELP_TITLE }}</p>
-        <p class="m-0 text-sm text-slate-600">{{ HELP_TEXT }}</p>
+        <p class="m-0 mb-2 text-base font-bold text-slate-800">%% HELP_TITLE %%</p>
+        <p class="m-0 text-sm text-slate-600">%% HELP_TEXT %%</p>
         <p class="m-0 mt-3">
-          <a href="mailto:{{ SUPPORT_EMAIL }}" class="text-primary-600 font-semibold">{{ SUPPORT_EMAIL }}</a>
+          <a href="mailto:%% SUPPORT_EMAIL %%" class="text-primary-600 font-semibold">%% SUPPORT_EMAIL %%</a>
         </p>
       </td>
     </tr>

@@ -2,7 +2,9 @@
   <div class="space-y-6">
     <div>
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Vergi Ayarlari</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400">KDV ve diger vergi oranlarini yapilandir</p>
+      <p class="text-sm text-gray-500 dark:text-slate-400">
+        KDV ve diger vergi oranlarini yapilandir
+      </p>
     </div>
 
     <!-- General Tax Settings -->
@@ -12,16 +14,20 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-medium text-gray-900 dark:text-white">Fiyatlar Vergi Dahil</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">Fiyatlar vergi dahil olarak gosterilir</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              Fiyatlar vergi dahil olarak gosterilir
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="localSettings.pricesIncludeTax"
-              @change="emitChange"
+              type="checkbox"
               class="sr-only peer"
+              @change="emitChange"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
           </label>
         </div>
 
@@ -32,12 +38,12 @@
             </label>
             <div class="flex items-center gap-2">
               <input
-                type="number"
                 v-model.number="localSettings.accommodationTaxRate"
-                @input="emitChange"
+                type="number"
                 min="0"
                 max="100"
                 class="w-24 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                @input="emitChange"
               />
               <span class="text-gray-500 dark:text-slate-400">%</span>
             </div>
@@ -48,12 +54,12 @@
             </label>
             <div class="flex items-center gap-2">
               <input
-                type="number"
                 v-model.number="localSettings.foodBeverageTaxRate"
-                @input="emitChange"
+                type="number"
                 min="0"
                 max="100"
                 class="w-24 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                @input="emitChange"
               />
               <span class="text-gray-500 dark:text-slate-400">%</span>
             </div>
@@ -67,8 +73,8 @@
       <div class="flex items-center justify-between mb-4">
         <h4 class="font-medium text-gray-900 dark:text-white">Vergi Turleri</h4>
         <button
-          @click="addTaxType"
           class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1"
+          @click="addTaxType"
         >
           <span class="material-icons text-sm">add</span>
           Yeni Vergi
@@ -84,42 +90,46 @@
           <div class="flex items-start justify-between gap-4">
             <div class="flex-1 grid md:grid-cols-4 gap-3">
               <div>
-                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Vergi Adi</label>
+                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1"
+                  >Vergi Adi</label
+                >
                 <input
-                  type="text"
                   v-model="tax.name"
-                  @input="emitChange"
+                  type="text"
                   placeholder="KDV"
                   class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                  @input="emitChange"
                 />
               </div>
               <div>
                 <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Kod</label>
                 <input
-                  type="text"
                   v-model="tax.code"
-                  @input="emitChange"
+                  type="text"
                   placeholder="KDV"
                   class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white uppercase"
+                  @input="emitChange"
                 />
               </div>
               <div>
                 <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Oran (%)</label>
                 <input
-                  type="number"
                   v-model.number="tax.rate"
-                  @input="emitChange"
+                  type="number"
                   min="0"
                   max="100"
                   class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                  @input="emitChange"
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Uygulanacak</label>
+                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1"
+                  >Uygulanacak</label
+                >
                 <select
                   v-model="tax.applyTo"
-                  @change="emitChange"
                   class="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                  @change="emitChange"
                 >
                   <option value="all">Tum Islemler</option>
                   <option value="accommodation">Konaklama</option>
@@ -131,16 +141,18 @@
             <div class="flex items-center gap-2">
               <label class="relative inline-flex items-center cursor-pointer">
                 <input
-                  type="checkbox"
                   v-model="tax.isActive"
-                  @change="emitChange"
+                  type="checkbox"
                   class="sr-only peer"
+                  @change="emitChange"
                 />
-                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                <div
+                  class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+                ></div>
               </label>
               <button
-                @click="removeTaxType(index)"
                 class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                @click="removeTaxType(index)"
               >
                 <span class="material-icons text-sm">delete</span>
               </button>
@@ -148,7 +160,10 @@
           </div>
         </div>
 
-        <div v-if="!localSettings.taxTypes?.length" class="text-center py-4 text-gray-500 dark:text-slate-400">
+        <div
+          v-if="!localSettings.taxTypes?.length"
+          class="text-center py-4 text-gray-500 dark:text-slate-400"
+        >
           Henuz vergi turu tanimlanmamis
         </div>
       </div>
@@ -176,9 +191,13 @@ const localSettings = ref({
   ...props.modelValue
 })
 
-watch(() => props.modelValue, (newVal) => {
-  localSettings.value = { ...localSettings.value, ...newVal }
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  newVal => {
+    localSettings.value = { ...localSettings.value, ...newVal }
+  },
+  { deep: true }
+)
 
 const emitChange = () => {
   emit('update:modelValue', localSettings.value)
@@ -199,7 +218,7 @@ const addTaxType = () => {
   emitChange()
 }
 
-const removeTaxType = (index) => {
+const removeTaxType = index => {
   localSettings.value.taxTypes.splice(index, 1)
   emitChange()
 }

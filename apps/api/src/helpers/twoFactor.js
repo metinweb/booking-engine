@@ -26,7 +26,7 @@ export const generate2FASecret = (email, issuer = 'Booking Engine') => {
  * @param {string} otpauthUrl - OTP Auth URL
  * @returns {Promise<string>} QR code data URL
  */
-export const generateQRCode = async (otpauthUrl) => {
+export const generateQRCode = async otpauthUrl => {
   try {
     return await QRCode.toDataURL(otpauthUrl)
   } catch (error) {

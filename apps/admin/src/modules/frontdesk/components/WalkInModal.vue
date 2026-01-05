@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Walk-in Check-in"
-    size="xl"
-    @close="close"
-  >
+  <Modal v-model="show" title="Walk-in Check-in" size="xl" @close="close">
     <div class="space-y-6">
       <!-- Room Selection -->
       <div>
@@ -117,11 +112,7 @@
             />
           </div>
           <div>
-            <PhoneInput
-              v-model="form.guests[0].phone"
-              label="Telefon"
-              country="TR"
-            />
+            <PhoneInput v-model="form.guests[0].phone" label="Telefon" country="TR" />
           </div>
           <div>
             <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">E-posta</label>
@@ -166,7 +157,9 @@
         <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Ucretlendirme</h4>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Toplam Ucret *</label>
+            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+              >Toplam Ucret *</label
+            >
             <input
               v-model.number="form.roomRate"
               type="number"
@@ -187,21 +180,23 @@
             />
           </div>
         </div>
-        <div class="mt-3" v-if="form.paymentAmount > 0">
+        <div v-if="form.paymentAmount > 0" class="mt-3">
           <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Odeme Yontemi</label>
           <div class="flex flex-wrap gap-2">
             <label
               v-for="method in paymentMethods"
               :key="method.value"
               class="flex items-center gap-2 px-3 py-1.5 border rounded-lg cursor-pointer"
-              :class="form.paymentMethod === method.value
-                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                : 'border-gray-200 dark:border-slate-600'"
+              :class="
+                form.paymentMethod === method.value
+                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                  : 'border-gray-200 dark:border-slate-600'
+              "
             >
               <input
+                v-model="form.paymentMethod"
                 type="radio"
                 :value="method.value"
-                v-model="form.paymentMethod"
                 class="hidden"
               />
               <span class="text-sm text-gray-700 dark:text-gray-300">{{ method.label }}</span>
@@ -224,19 +219,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !isValid"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>login</span>
+        <span v-else class="material-icons text-sm">login</span>
         Check-in Yap
       </button>
     </template>
@@ -271,7 +266,7 @@ const availableRooms = ref([])
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const paymentMethods = PAYMENT_METHODS
@@ -281,15 +276,17 @@ const defaultForm = () => ({
   roomTypeId: '',
   checkInDate: new Date().toISOString().split('T')[0],
   checkOutDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-  guests: [{
-    firstName: '',
-    lastName: '',
-    idType: 'tc_kimlik',
-    idNumber: '',
-    phone: '',
-    email: '',
-    isMainGuest: true
-  }],
+  guests: [
+    {
+      firstName: '',
+      lastName: '',
+      idType: 'tc_kimlik',
+      idNumber: '',
+      phone: '',
+      email: '',
+      isMainGuest: true
+    }
+  ],
   adultsCount: 1,
   childrenCount: 0,
   roomRate: 0,
@@ -313,13 +310,15 @@ const filteredRooms = computed(() => {
 })
 
 const isValid = computed(() => {
-  return form.value.roomId &&
-         form.value.checkInDate &&
-         form.value.checkOutDate &&
-         nights.value > 0 &&
-         form.value.guests[0].firstName &&
-         form.value.guests[0].lastName &&
-         form.value.roomRate > 0
+  return (
+    form.value.roomId &&
+    form.value.checkInDate &&
+    form.value.checkOutDate &&
+    nights.value > 0 &&
+    form.value.guests[0].firstName &&
+    form.value.guests[0].lastName &&
+    form.value.roomRate > 0
+  )
 })
 
 const filterRooms = () => {
@@ -375,10 +374,13 @@ const close = () => {
   form.value = defaultForm()
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    form.value = defaultForm()
-    fetchData()
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      form.value = defaultForm()
+      fetchData()
+    }
   }
-})
+)
 </script>

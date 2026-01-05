@@ -11,7 +11,7 @@ const router = express.Router()
  * Helper to get user info from request
  * Supports both regular users and PMS users
  */
-const getUserInfo = (req) => {
+const getUserInfo = req => {
   if (req.pmsUser) {
     return {
       userId: req.pmsUser._id,
@@ -58,139 +58,160 @@ const flexibleAuth = async (req, res, next) => {
  * @desc    Get notifications for current user
  * @access  Private (both User and PMSUser)
  */
-router.get('/', flexibleAuth, asyncHandler(async (req, res) => {
-  const userInfo = getUserInfo(req)
-  if (!userInfo) {
-    throw new BadRequestError('User not authenticated')
-  }
-
-  const { page = 1, limit = 20, unreadOnly = false } = req.query
-
-  const result = await notificationService.getNotifications(
-    userInfo.userId,
-    userInfo.recipientModel,
-    {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      unreadOnly: unreadOnly === 'true'
+router.get(
+  '/',
+  flexibleAuth,
+  asyncHandler(async (req, res) => {
+    const userInfo = getUserInfo(req)
+    if (!userInfo) {
+      throw new BadRequestError('User not authenticated')
     }
-  )
 
-  res.json({
-    success: true,
-    data: result.notifications,
-    pagination: result.pagination
+    const { page = 1, limit = 20, unreadOnly = false } = req.query
+
+    const result = await notificationService.getNotifications(
+      userInfo.userId,
+      userInfo.recipientModel,
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        unreadOnly: unreadOnly === 'true'
+      }
+    )
+
+    res.json({
+      success: true,
+      data: result.notifications,
+      pagination: result.pagination
+    })
   })
-}))
+)
 
 /**
  * @route   GET /api/notifications/unread-count
  * @desc    Get unread notification count for current user
  * @access  Private
  */
-router.get('/unread-count', flexibleAuth, asyncHandler(async (req, res) => {
-  const userInfo = getUserInfo(req)
-  if (!userInfo) {
-    throw new BadRequestError('User not authenticated')
-  }
+router.get(
+  '/unread-count',
+  flexibleAuth,
+  asyncHandler(async (req, res) => {
+    const userInfo = getUserInfo(req)
+    if (!userInfo) {
+      throw new BadRequestError('User not authenticated')
+    }
 
-  const count = await notificationService.getUnreadCount(
-    userInfo.userId,
-    userInfo.recipientModel
-  )
+    const count = await notificationService.getUnreadCount(userInfo.userId, userInfo.recipientModel)
 
-  res.json({
-    success: true,
-    data: { count }
+    res.json({
+      success: true,
+      data: { count }
+    })
   })
-}))
+)
 
 /**
  * @route   POST /api/notifications/:id/read
  * @desc    Mark a notification as read
  * @access  Private
  */
-router.post('/:id/read', flexibleAuth, asyncHandler(async (req, res) => {
-  const userInfo = getUserInfo(req)
-  if (!userInfo) {
-    throw new BadRequestError('User not authenticated')
-  }
+router.post(
+  '/:id/read',
+  flexibleAuth,
+  asyncHandler(async (req, res) => {
+    const userInfo = getUserInfo(req)
+    if (!userInfo) {
+      throw new BadRequestError('User not authenticated')
+    }
 
-  await notificationService.markAsRead([req.params.id], userInfo.userId)
+    await notificationService.markAsRead([req.params.id], userInfo.userId)
 
-  res.json({
-    success: true,
-    message: 'Notification marked as read'
+    res.json({
+      success: true,
+      message: 'Notification marked as read'
+    })
   })
-}))
+)
 
 /**
  * @route   POST /api/notifications/read-all
  * @desc    Mark all notifications as read
  * @access  Private
  */
-router.post('/read-all', flexibleAuth, asyncHandler(async (req, res) => {
-  const userInfo = getUserInfo(req)
-  if (!userInfo) {
-    throw new BadRequestError('User not authenticated')
-  }
+router.post(
+  '/read-all',
+  flexibleAuth,
+  asyncHandler(async (req, res) => {
+    const userInfo = getUserInfo(req)
+    if (!userInfo) {
+      throw new BadRequestError('User not authenticated')
+    }
 
-  await notificationService.markAllAsRead(userInfo.userId, userInfo.recipientModel)
+    await notificationService.markAllAsRead(userInfo.userId, userInfo.recipientModel)
 
-  res.json({
-    success: true,
-    message: 'All notifications marked as read'
+    res.json({
+      success: true,
+      message: 'All notifications marked as read'
+    })
   })
-}))
+)
 
 /**
  * @route   POST /api/notifications/read-multiple
  * @desc    Mark multiple notifications as read
  * @access  Private
  */
-router.post('/read-multiple', flexibleAuth, asyncHandler(async (req, res) => {
-  const userInfo = getUserInfo(req)
-  if (!userInfo) {
-    throw new BadRequestError('User not authenticated')
-  }
+router.post(
+  '/read-multiple',
+  flexibleAuth,
+  asyncHandler(async (req, res) => {
+    const userInfo = getUserInfo(req)
+    if (!userInfo) {
+      throw new BadRequestError('User not authenticated')
+    }
 
-  const { ids } = req.body
-  if (!ids || !Array.isArray(ids) || ids.length === 0) {
-    throw new BadRequestError('ids array is required')
-  }
+    const { ids } = req.body
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw new BadRequestError('ids array is required')
+    }
 
-  await notificationService.markAsRead(ids, userInfo.userId)
+    await notificationService.markAsRead(ids, userInfo.userId)
 
-  res.json({
-    success: true,
-    message: 'Notifications marked as read'
+    res.json({
+      success: true,
+      message: 'Notifications marked as read'
+    })
   })
-}))
+)
 
 /**
  * @route   DELETE /api/notifications/:id
  * @desc    Delete a notification
  * @access  Private
  */
-router.delete('/:id', flexibleAuth, asyncHandler(async (req, res) => {
-  const userInfo = getUserInfo(req)
-  if (!userInfo) {
-    throw new BadRequestError('User not authenticated')
-  }
+router.delete(
+  '/:id',
+  flexibleAuth,
+  asyncHandler(async (req, res) => {
+    const userInfo = getUserInfo(req)
+    if (!userInfo) {
+      throw new BadRequestError('User not authenticated')
+    }
 
-  const notification = await notificationService.deleteNotification(
-    req.params.id,
-    userInfo.userId
-  )
+    const notification = await notificationService.deleteNotification(
+      req.params.id,
+      userInfo.userId
+    )
 
-  if (!notification) {
-    throw new NotFoundError('Notification not found')
-  }
+    if (!notification) {
+      throw new NotFoundError('Notification not found')
+    }
 
-  res.json({
-    success: true,
-    message: 'Notification deleted'
+    res.json({
+      success: true,
+      message: 'Notification deleted'
+    })
   })
-}))
+)
 
 export default router

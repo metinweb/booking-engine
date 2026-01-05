@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Yeni Islem"
-    size="lg"
-    @close="close"
-  >
+  <Modal v-model="show" title="Yeni Islem" size="lg" @close="close">
     <div class="space-y-6">
       <!-- Quick Charge Buttons -->
       <div>
@@ -13,11 +8,16 @@
           <button
             v-for="item in quickChargeItems"
             :key="item.description"
-            @click="selectQuickCharge(item)"
             class="p-3 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50 text-center transition-colors"
-            :class="{ 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20': form.type === item.type && form.description === item.description }"
+            :class="{
+              'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/20':
+                form.type === item.type && form.description === item.description
+            }"
+            @click="selectQuickCharge(item)"
           >
-            <span class="material-icons text-gray-600 dark:text-gray-400 block mb-1">{{ item.icon }}</span>
+            <span class="material-icons text-gray-600 dark:text-gray-400 block mb-1">{{
+              item.icon
+            }}</span>
             <span class="text-xs text-gray-700 dark:text-gray-300">{{ item.description }}</span>
           </button>
         </div>
@@ -58,7 +58,9 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Odeme Yontemi *</label>
+          <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+            >Odeme Yontemi *</label
+          >
           <select
             v-model="form.paymentMethod"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
@@ -112,7 +114,9 @@
         <div>
           <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Birim Fiyat *</label>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{{ getCurrencySymbol(form.currency) }}</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">{{
+              getCurrencySymbol(form.currency)
+            }}</span>
             <input
               v-model.number="form.unitPrice"
               type="number"
@@ -126,13 +130,18 @@
         <div>
           <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Toplam Tutar</label>
           <div class="px-4 py-2 bg-gray-100 dark:bg-slate-700 rounded-lg">
-            <p class="text-lg font-bold text-gray-900 dark:text-white">{{ getCurrencySymbol(form.currency) }}{{ formatAmount(totalAmount) }}</p>
+            <p class="text-lg font-bold text-gray-900 dark:text-white">
+              {{ getCurrencySymbol(form.currency) }}{{ formatAmount(totalAmount) }}
+            </p>
           </div>
         </div>
       </div>
 
       <!-- TRY Equivalent (for foreign currencies) -->
-      <div v-if="form.currency !== 'TRY' && exchangeRates[form.currency]" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+      <div
+        v-if="form.currency !== 'TRY' && exchangeRates[form.currency]"
+        class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3"
+      >
         <div class="flex items-center justify-between">
           <span class="text-sm text-blue-700 dark:text-blue-300">
             <span class="material-icons text-sm align-middle mr-1">currency_exchange</span>
@@ -169,19 +178,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !isValid"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>add_card</span>
+        <span v-else class="material-icons text-sm">add_card</span>
         Islem Kaydet
       </button>
     </template>
@@ -189,10 +198,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import Modal from '@/components/common/Modal.vue'
-import cashierService, { formatCurrency, QUICK_CHARGE_ITEMS } from '@/services/pms/cashierService'
+import cashierService, { QUICK_CHARGE_ITEMS } from '@/services/pms/cashierService'
 
 const props = defineProps({
   modelValue: {
@@ -229,9 +238,9 @@ const currencySymbols = {
   CNY: '¥'
 }
 
-const getCurrencySymbol = (currency) => currencySymbols[currency] || currency
+const getCurrencySymbol = currency => currencySymbols[currency] || currency
 
-const formatAmount = (amount) => {
+const formatAmount = amount => {
   return new Intl.NumberFormat('tr-TR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -254,7 +263,7 @@ const fetchCurrencies = async () => {
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const defaultForm = () => ({
@@ -278,7 +287,7 @@ const isValid = computed(() => {
   return form.value.type && form.value.description && form.value.unitPrice > 0
 })
 
-const selectQuickCharge = (item) => {
+const selectQuickCharge = item => {
   form.value.type = item.type
   form.value.description = item.description
   if (item.amount > 0) {
@@ -318,15 +327,18 @@ const close = () => {
   form.value = defaultForm()
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    form.value = defaultForm()
-    fetchCurrencies()
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      form.value = defaultForm()
+      fetchCurrencies()
+    }
   }
-})
+)
 
 // Set default currency to first available
-watch(availableCurrencies, (currencies) => {
+watch(availableCurrencies, currencies => {
   if (currencies.length > 0 && !currencies.includes(form.value.currency)) {
     form.value.currency = currencies[0]
   }

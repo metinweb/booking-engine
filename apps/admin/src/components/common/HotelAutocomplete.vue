@@ -12,8 +12,8 @@
         {{ hotel.name }}
         <button
           type="button"
-          @click="removeHotel(hotel._id)"
           class="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+          @click="removeHotel(hotel._id)"
         >
           <span class="material-icons text-sm">close</span>
         </button>
@@ -21,9 +21,11 @@
     </div>
 
     <!-- Search Input -->
-    <div class="relative" ref="containerRef">
+    <div ref="containerRef" class="relative">
       <div class="relative">
-        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
+          >search</span
+        >
         <input
           ref="inputRef"
           v-model="searchQuery"
@@ -42,8 +44,8 @@
         <button
           v-else-if="searchQuery"
           type="button"
-          @click="clearSearch"
           class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          @click="clearSearch"
         >
           <span class="material-icons text-sm">close</span>
         </button>
@@ -64,7 +66,9 @@
         >
           <!-- Loading State -->
           <div v-if="loading" class="px-4 py-6 text-center text-gray-500 dark:text-slate-400">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto mb-2"></div>
+            <div
+              class="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto mb-2"
+            ></div>
             <span class="text-sm">{{ $t('common.searching') }}</span>
           </div>
 
@@ -74,27 +78,35 @@
               v-for="hotel in searchResults"
               :key="hotel._id"
               type="button"
-              @click="addHotel(hotel)"
               class="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-3 border-b border-gray-100 dark:border-slate-700 last:border-b-0 transition-colors"
               :class="{
                 'opacity-50 cursor-not-allowed': isSelected(hotel._id),
                 'bg-green-50 dark:bg-green-900/10': isSelected(hotel._id)
               }"
               :disabled="isSelected(hotel._id)"
+              @click="addHotel(hotel)"
             >
               <!-- Hotel Thumbnail -->
-              <div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-slate-600 flex-shrink-0 overflow-hidden">
+              <div
+                class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-slate-600 flex-shrink-0 overflow-hidden"
+              >
                 <img
                   v-if="getHotelImage(hotel)"
                   :src="getImageUrl(getHotelImage(hotel))"
                   :alt="hotel.name"
                   class="w-full h-full object-cover"
                 />
-                <span v-else class="material-icons text-2xl text-gray-400 dark:text-slate-500 flex items-center justify-center w-full h-full">hotel</span>
+                <span
+                  v-else
+                  class="material-icons text-2xl text-gray-400 dark:text-slate-500 flex items-center justify-center w-full h-full"
+                  >hotel</span
+                >
               </div>
 
               <div class="flex-1 min-w-0">
-                <div class="font-medium text-gray-900 dark:text-white truncate">{{ hotel.name }}</div>
+                <div class="font-medium text-gray-900 dark:text-white truncate">
+                  {{ hotel.name }}
+                </div>
                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-slate-400">
                   <span class="flex items-center">
                     <span class="material-icons text-yellow-400 text-xs mr-0.5">star</span>
@@ -104,13 +116,20 @@
                 </div>
               </div>
 
-              <span v-if="isSelected(hotel._id)" class="material-icons text-green-600 dark:text-green-400">check_circle</span>
+              <span
+                v-if="isSelected(hotel._id)"
+                class="material-icons text-green-600 dark:text-green-400"
+                >check_circle</span
+              >
               <span v-else class="material-icons text-gray-400">add_circle_outline</span>
             </button>
           </template>
 
           <!-- No Results -->
-          <div v-else-if="searchQuery && !loading" class="px-4 py-6 text-center text-gray-500 dark:text-slate-400 text-sm">
+          <div
+            v-else-if="searchQuery && !loading"
+            class="px-4 py-6 text-center text-gray-500 dark:text-slate-400 text-sm"
+          >
             <span class="material-icons text-3xl mb-2 block">search_off</span>
             {{ $t('common.noResults') }}
           </div>
@@ -121,8 +140,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import hotelService from '@/services/hotelService'
 import { getImageUrl } from '@/utils/imageUrl'
 
@@ -138,7 +156,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'green', // 'green' for allowed, 'red' for blocked
-    validator: (value) => ['green', 'red', 'blue', 'purple'].includes(value)
+    validator: value => ['green', 'red', 'blue', 'purple'].includes(value)
   },
   hotels: {
     type: Array,
@@ -148,7 +166,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { t } = useI18n()
 
 const containerRef = ref(null)
 const inputRef = ref(null)
@@ -180,11 +197,11 @@ const selectedHotels = computed(() => {
   })
 })
 
-const isSelected = (hotelId) => props.modelValue.includes(hotelId)
+const isSelected = hotelId => props.modelValue.includes(hotelId)
 
 // getImageUrl imported from @/utils/imageUrl
 
-const getHotelImage = (hotel) => {
+const getHotelImage = hotel => {
   const mainImage = hotel.images?.find(img => img.isMain)
   return mainImage?.url || hotel.images?.[0]?.url || hotel.logo || null
 }
@@ -222,7 +239,7 @@ const clearSearch = () => {
   inputRef.value?.focus()
 }
 
-const addHotel = (hotel) => {
+const addHotel = hotel => {
   if (!isSelected(hotel._id)) {
     emit('update:modelValue', [...props.modelValue, hotel._id])
   }
@@ -231,12 +248,15 @@ const addHotel = (hotel) => {
   showDropdown.value = false
 }
 
-const removeHotel = (hotelId) => {
-  emit('update:modelValue', props.modelValue.filter(id => id !== hotelId))
+const removeHotel = hotelId => {
+  emit(
+    'update:modelValue',
+    props.modelValue.filter(id => id !== hotelId)
+  )
 }
 
 // Click outside to close dropdown
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   if (containerRef.value && !containerRef.value.contains(event.target)) {
     showDropdown.value = false
   }

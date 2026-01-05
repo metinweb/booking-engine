@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -18,7 +15,7 @@ export default {
           600: '#7c3aed',
           700: '#6d28d9',
           800: '#5b21b6',
-          900: '#4c1d95',
+          900: '#4c1d95'
         },
         // Dark mode specific colors
         dark: {
@@ -26,13 +23,23 @@ export default {
           card: '#1e293b',
           border: '#334155',
           text: '#e2e8f0',
-          muted: '#94a3b8',
+          muted: '#94a3b8'
         }
       },
       fontFamily: {
-        'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'sans-serif'],
+        sans: [
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          '"Segoe UI"',
+          'Roboto',
+          '"Helvetica Neue"',
+          'Arial',
+          'sans-serif'
+        ]
       }
-    },
+    }
   },
-  plugins: [],
+  plugins: []
 }

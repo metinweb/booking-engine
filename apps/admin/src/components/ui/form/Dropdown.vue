@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-dropdown" ref="containerRef">
+  <div ref="containerRef" class="ui-dropdown">
     <!-- Label -->
     <label
       v-if="label"
@@ -12,9 +12,9 @@
 
     <!-- Trigger -->
     <button
-      type="button"
       :id="inputId"
       ref="triggerRef"
+      type="button"
       :disabled="disabled"
       :class="triggerClasses"
       @click="toggle"
@@ -47,7 +47,10 @@
       </button>
 
       <!-- Dropdown Arrow -->
-      <span class="material-icons text-gray-400 transition-transform" :class="{ 'rotate-180': isOpen }">
+      <span
+        class="material-icons text-gray-400 transition-transform"
+        :class="{ 'rotate-180': isOpen }"
+      >
         expand_more
       </span>
     </button>
@@ -59,8 +62,7 @@
           v-if="isOpen"
           ref="menuRef"
           :style="menuStyle"
-          class="fixed z-50 bg-white dark:bg-slate-800 rounded-lg shadow-lg
-                 border border-gray-200 dark:border-slate-700 overflow-hidden"
+          class="fixed z-50 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 overflow-hidden"
         >
           <!-- Search -->
           <div v-if="searchable" class="p-2 border-b border-gray-200 dark:border-slate-700">
@@ -69,9 +71,7 @@
               v-model="searchQuery"
               type="text"
               :placeholder="searchPlaceholder"
-              class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg
-                     bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               @keydown.down.prevent="focusNext"
               @keydown.up.prevent="focusPrev"
               @keydown.enter.prevent="selectFocused"
@@ -94,7 +94,10 @@
               >
                 <span v-if="option.icon" class="material-icons text-lg">{{ option.icon }}</span>
                 <span class="flex-1 text-left">{{ option.label }}</span>
-                <span v-if="isSelected(option)" class="material-icons text-indigo-600 dark:text-indigo-400 text-lg">
+                <span
+                  v-if="isSelected(option)"
+                  class="material-icons text-indigo-600 dark:text-indigo-400 text-lg"
+                >
                   check
                 </span>
               </button>
@@ -110,11 +113,7 @@
     </Teleport>
 
     <!-- Backdrop -->
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-40"
-      @click="close"
-    ></div>
+    <div v-if="isOpen" class="fixed inset-0 z-40" @click="close"></div>
 
     <!-- Error Message -->
     <p v-if="error" class="mt-1 text-sm text-red-500 flex items-center gap-1">
@@ -130,7 +129,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -185,7 +184,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   }
 })
 
@@ -216,9 +215,7 @@ const filteredOptions = computed(() => {
   if (!searchQuery.value) return props.options
 
   const query = searchQuery.value.toLowerCase()
-  return props.options.filter(opt =>
-    opt.label.toLowerCase().includes(query)
-  )
+  return props.options.filter(opt => opt.label.toLowerCase().includes(query))
 })
 
 // Trigger classes
@@ -283,7 +280,7 @@ const calculatePosition = async () => {
 }
 
 // Is option selected
-const isSelected = (option) => option.value === props.modelValue
+const isSelected = option => option.value === props.modelValue
 
 // Toggle dropdown
 const toggle = () => {
@@ -359,7 +356,7 @@ const selectFocused = () => {
 }
 
 // Select option
-const select = (option) => {
+const select = option => {
   if (option.disabled) return
 
   emit('update:modelValue', option.value)
@@ -374,7 +371,7 @@ const clear = () => {
 }
 
 // Handle escape key
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (e.key === 'Escape' && isOpen.value) {
     close()
     triggerRef.value?.focus()
@@ -405,7 +402,9 @@ defineExpose({ open, close, toggle })
 <style scoped>
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .dropdown-enter-from,

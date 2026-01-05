@@ -14,7 +14,8 @@ const sesClients = new Map()
 const getEmailSettings = async (partnerId = null) => {
   try {
     // Dynamic import to avoid circular dependencies
-    const { default: PlatformSettings } = await import('../modules/platform-settings/platformSettings.model.js')
+    const { default: PlatformSettings } =
+      await import('../modules/platform-settings/platformSettings.model.js')
 
     // If partner ID provided, check for partner-specific settings
     if (partnerId) {
@@ -55,7 +56,9 @@ const getEmailSettings = async (partnerId = null) => {
 
   // Fall back to environment variables (fromEmail/fromName must be set in PlatformSettings)
   if (config.aws?.ses?.accessKeyId && config.aws?.ses?.secretAccessKey) {
-    logger.warn('Using AWS credentials from env but fromEmail/fromName must be configured in Platform Settings')
+    logger.warn(
+      'Using AWS credentials from env but fromEmail/fromName must be configured in Platform Settings'
+    )
     return {
       enabled: true,
       source: 'env',
@@ -117,7 +120,12 @@ export const sendEmail = async ({ to, subject, html, text, from, partnerId }) =>
     if (!settings.enabled) {
       if (config.isDev) {
         logger.warn('AWS SES not configured, logging email to console:')
-        logger.info({ to, subject, from: from || 'noreply@example.com', html: html?.substring(0, 200) + '...' })
+        logger.info({
+          to,
+          subject,
+          from: from || 'noreply@example.com',
+          html: html?.substring(0, 200) + '...'
+        })
         return { success: true, messageId: 'dev-mode-no-email-sent' }
       } else {
         throw new Error('AWS SES is not configured')
@@ -159,7 +167,9 @@ export const sendEmail = async ({ to, subject, html, text, from, partnerId }) =>
     const command = new SendEmailCommand(params)
     const response = await client.send(command)
 
-    logger.info(`Email sent successfully to ${to} (source: ${settings.source}). MessageId: ${response.MessageId}`)
+    logger.info(
+      `Email sent successfully to ${to} (source: ${settings.source}). MessageId: ${response.MessageId}`
+    )
 
     return {
       success: true,
@@ -175,7 +185,15 @@ export const sendEmail = async ({ to, subject, html, text, from, partnerId }) =>
 /**
  * Send welcome email with credentials
  */
-export const sendWelcomeEmail = async ({ to, name, email, password, accountType, loginUrl, partnerId }) => {
+export const sendWelcomeEmail = async ({
+  to,
+  name,
+  email,
+  password,
+  accountType,
+  loginUrl,
+  partnerId
+}) => {
   const subject = 'Welcome to Booking Engine'
 
   const html = await renderEmailTemplate('welcome', {
@@ -209,9 +227,77 @@ export const send2FASetupEmail = async ({ to, name, qrCodeUrl, secretCode, partn
 }
 
 /**
+ * Send account activation email (for new users to set their password)
+ */
+export const sendActivationEmail = async ({ to, name, inviterName, accountName, userRole = 'Kullanıcı', token, partnerId, language = 'tr', partnerCity = '' }) => {
+  const baseUrl = process.env.ADMIN_URL || 'http://localhost:5173'
+  const activationUrl = `${baseUrl}/activate/${token}`
+
+  // Build company info for footer
+  const companyName = accountName || 'Booking Engine'
+  const companyAddress = partnerCity || 'İstanbul, Türkiye'
+
+  try {
+    // Use Maizzle template
+    const html = await renderEmailTemplate('activation', {
+      // Content variables
+      USER_NAME: name,
+      USER_EMAIL: to,
+      INVITER_NAME: inviterName,
+      ACCOUNT_NAME: accountName,
+      USER_ROLE: userRole,
+      ACTIVATION_URL: activationUrl,
+      // Layout variables
+      TITLE: language === 'tr' ? 'Hesap Aktivasyonu' : 'Account Activation',
+      PREVIEW_TEXT: language === 'tr' ? 'Hesabınızı aktifleştirmek için tıklayın' : 'Click to activate your account',
+      LOGO_URL: 'https://booking-engine.com/logo.png',
+      SITE_URL: baseUrl,
+      COMPANY_NAME: companyName,
+      COMPANY_ADDRESS: companyAddress
+    }, language)
+
+    const text = htmlToText(html)
+    const subject = language === 'tr' ? 'Hesabınızı Aktifleştirin - Booking Engine' : 'Activate Your Account - Booking Engine'
+
+    return sendEmail({ to, subject, html, text, partnerId })
+  } catch (error) {
+    // Fallback to simple HTML if template fails
+    logger.warn('Failed to render activation template, using fallback:', error.message)
+
+    const subject = 'Hesabınızı Aktifleştirin - Booking Engine'
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #4F46E5;">Hoş Geldiniz!</h1>
+        <p>Merhaba ${name},</p>
+        <p><strong>${inviterName}</strong> sizi <strong>${accountName}</strong> hesabına kullanıcı olarak ekledi.</p>
+        <p style="text-align: center; margin: 30px 0;">
+          <a href="${activationUrl}" style="background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            Hesabı Aktifleştir
+          </a>
+        </p>
+        <p style="color: #f59e0b; font-size: 14px;">Bu link 7 gün içinde geçerliliğini yitirecektir.</p>
+        <p style="font-size: 12px; color: #6b7280;">Link: ${activationUrl}</p>
+      </div>
+    `
+    const text = `Merhaba ${name},\n\n${inviterName} sizi ${accountName} hesabına kullanıcı olarak ekledi.\n\nHesabınızı aktifleştirmek için: ${activationUrl}\n\nBu link 7 gün içinde geçerliliğini yitirecektir.`
+
+    return sendEmail({ to, subject, html, text, partnerId })
+  }
+}
+
+/**
  * Send booking confirmation email
  */
-export const sendBookingConfirmation = async ({ to, bookingNumber, hotelName, checkIn, checkOut, totalPrice, bookingUrl, partnerId }) => {
+export const sendBookingConfirmation = async ({
+  to,
+  bookingNumber,
+  hotelName,
+  checkIn,
+  checkOut,
+  totalPrice,
+  bookingUrl,
+  partnerId
+}) => {
   const subject = `Booking Confirmation - ${bookingNumber}`
 
   const html = await renderEmailTemplate('booking-confirmation', {
@@ -231,7 +317,15 @@ export const sendBookingConfirmation = async ({ to, bookingNumber, hotelName, ch
 /**
  * Send booking cancellation email
  */
-export const sendBookingCancellation = async ({ to, bookingNumber, hotelName, checkIn, checkOut, reason, partnerId }) => {
+export const sendBookingCancellation = async ({
+  to,
+  bookingNumber,
+  hotelName,
+  checkIn,
+  checkOut,
+  reason,
+  partnerId
+}) => {
   const subject = `Booking Cancelled - ${bookingNumber}`
 
   const html = await renderEmailTemplate('booking-cancelled', {
@@ -281,7 +375,14 @@ export const clearEmailCache = () => {
  * @param {Array} options.attachments - Array of attachments [{filename, content, contentType}]
  * @param {string} options.partnerId - Partner ID for partner-specific settings (optional)
  */
-export const sendEmailWithAttachments = async ({ to, subject, html, text, attachments = [], partnerId }) => {
+export const sendEmailWithAttachments = async ({
+  to,
+  subject,
+  html,
+  text,
+  attachments = [],
+  partnerId
+}) => {
   try {
     const settings = await getEmailSettings(partnerId)
 
@@ -379,7 +480,14 @@ export const sendEmailWithAttachments = async ({ to, subject, html, text, attach
  * @param {Array} options.reports - PDF report buffers [{type, buffer}]
  * @param {string} options.partnerId - Partner ID
  */
-export const sendNightAuditReports = async ({ to, hotelName, auditDate, summary, reports, partnerId }) => {
+export const sendNightAuditReports = async ({
+  to,
+  hotelName,
+  auditDate,
+  summary,
+  reports,
+  partnerId
+}) => {
   const dateStr = new Date(auditDate).toLocaleDateString('tr-TR', {
     year: 'numeric',
     month: 'long',
@@ -479,6 +587,7 @@ export default {
   sendEmailWithAttachments,
   sendWelcomeEmail,
   send2FASetupEmail,
+  sendActivationEmail,
   sendBookingConfirmation,
   sendBookingCancellation,
   sendPasswordResetEmail,

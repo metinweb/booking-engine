@@ -8,18 +8,19 @@
     <!-- Main Planning View with Navigation -->
     <template v-else>
       <!-- Navigation -->
-      <ModuleNavigation
-        :items="navItems"
-        color="indigo"
-      />
+      <ModuleNavigation :items="navItems" color="indigo" />
 
       <!-- No Hotel Selected State -->
       <div v-if="!selectedHotel">
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow">
           <div class="p-12 text-center">
             <span class="material-icons text-6xl text-gray-300 dark:text-slate-600">hotel</span>
-            <h3 class="mt-4 text-lg font-medium text-gray-800 dark:text-white">{{ $t('planning.selectHotelPrompt') }}</h3>
-            <p class="mt-2 text-gray-500 dark:text-slate-400">{{ $t('planning.selectHotelPromptDescription') }}</p>
+            <h3 class="mt-4 text-lg font-medium text-gray-800 dark:text-white">
+              {{ $t('planning.selectHotelPrompt') }}
+            </h3>
+            <p class="mt-2 text-gray-500 dark:text-slate-400">
+              {{ $t('planning.selectHotelPromptDescription') }}
+            </p>
           </div>
         </div>
       </div>
@@ -38,29 +39,17 @@
 
           <!-- Rooms & Meal Plans Tab -->
           <div v-show="activeTab === 'rooms'">
-            <RoomsTab
-              v-if="selectedHotel"
-              :hotel="selectedHotel"
-              @refresh="handleRefresh"
-            />
+            <RoomsTab v-if="selectedHotel" :hotel="selectedHotel" @refresh="handleRefresh" />
           </div>
 
           <!-- Markets Tab -->
           <div v-show="activeTab === 'markets'">
-            <MarketsTab
-              v-if="selectedHotel"
-              :hotel="selectedHotel"
-              @refresh="handleRefresh"
-            />
+            <MarketsTab v-if="selectedHotel" :hotel="selectedHotel" @refresh="handleRefresh" />
           </div>
 
           <!-- Campaigns Tab -->
           <div v-show="activeTab === 'campaigns'">
-            <CampaignsTab
-              v-if="selectedHotel"
-              :hotel="selectedHotel"
-              @refresh="handleRefresh"
-            />
+            <CampaignsTab v-if="selectedHotel" :hotel="selectedHotel" @refresh="handleRefresh" />
           </div>
 
           <!-- Pricing Tab -->
@@ -82,7 +71,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useHotelStore } from '@/stores/hotel'
 import { useUIStore } from '@/stores/ui'
 import HotelSettingsTab from '@/components/planning/settings/HotelSettingsTab.vue'
@@ -94,7 +83,6 @@ import ModuleNavigation from '@/components/common/ModuleNavigation.vue'
 
 const { t } = useI18n()
 const route = useRoute()
-const router = useRouter()
 const hotelStore = useHotelStore()
 const uiStore = useUIStore()
 
@@ -141,13 +129,17 @@ const navItems = computed(() => [
 const selectedHotel = computed(() => hotelStore.selectedHotel)
 
 // Update page title suffix when hotel changes
-watch(selectedHotel, (hotel) => {
-  if (hotel) {
-    uiStore.setPageTitleSuffix(hotel.name)
-  } else {
-    uiStore.clearPageTitle()
-  }
-}, { immediate: true })
+watch(
+  selectedHotel,
+  hotel => {
+    if (hotel) {
+      uiStore.setPageTitleSuffix(hotel.name)
+    } else {
+      uiStore.clearPageTitle()
+    }
+  },
+  { immediate: true }
+)
 
 // Clear title suffix when leaving page
 onUnmounted(() => {

@@ -3,12 +3,14 @@
     <div class="flex items-center justify-between">
       <div>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Doviz Kurlari</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">TCMB guncel kurlar ve manuel kur ayarlari</p>
+        <p class="text-sm text-gray-500 dark:text-slate-400">
+          TCMB guncel kurlar ve manuel kur ayarlari
+        </p>
       </div>
       <button
-        @click="refreshRates"
         :disabled="refreshing"
         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+        @click="refreshRates"
       >
         <span class="material-icons text-sm" :class="{ 'animate-spin': refreshing }">refresh</span>
         Kurlari Guncelle
@@ -18,10 +20,16 @@
     <!-- Scheduler Status -->
     <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4">
       <div class="flex items-center justify-between mb-3">
-        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Otomatik Kur Guncelleme</h4>
+        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Otomatik Kur Guncelleme
+        </h4>
         <span
           class="px-2 py-1 text-xs rounded-full"
-          :class="schedulerStatus?.isRunning ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'"
+          :class="
+            schedulerStatus?.isRunning
+              ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+              : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+          "
         >
           {{ schedulerStatus?.isRunning ? 'Aktif' : 'Pasif' }}
         </span>
@@ -29,29 +37,46 @@
       <div class="grid sm:grid-cols-3 gap-4 text-sm">
         <div>
           <span class="text-gray-500 dark:text-slate-400">Aralık:</span>
-          <span class="ml-2 text-gray-900 dark:text-white">{{ schedulerStatus?.checkInterval }} dakika</span>
+          <span class="ml-2 text-gray-900 dark:text-white"
+            >{{ schedulerStatus?.checkInterval }} dakika</span
+          >
         </div>
         <div>
           <span class="text-gray-500 dark:text-slate-400">Calisma Saatleri:</span>
           <span class="ml-2 text-gray-900 dark:text-white">
-            {{ schedulerStatus?.workingHours?.start }}:00 - {{ schedulerStatus?.workingHours?.end }}:00
+            {{ schedulerStatus?.workingHours?.start }}:00 -
+            {{ schedulerStatus?.workingHours?.end }}:00
           </span>
         </div>
         <div>
           <span class="text-gray-500 dark:text-slate-400">Turkiye Saati:</span>
-          <span class="ml-2 text-gray-900 dark:text-white">{{ schedulerStatus?.currentTurkeyHour }}:00</span>
+          <span class="ml-2 text-gray-900 dark:text-white"
+            >{{ schedulerStatus?.currentTurkeyHour }}:00</span
+          >
         </div>
       </div>
     </div>
 
     <!-- Rate Info -->
-    <div v-if="rateInfo" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+    <div
+      v-if="rateInfo"
+      class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+    >
       <div class="flex items-start gap-3">
         <span class="material-icons text-blue-600 dark:text-blue-400">info</span>
         <div>
           <p class="text-sm text-blue-800 dark:text-blue-300">
-            <strong>Kaynak:</strong> {{ rateInfo.source === 'tcmb' ? 'TCMB' : (rateInfo.source === 'manual' ? 'Manuel' : 'Yedek') }}
-            <span v-if="rateInfo.bulletin" class="ml-2">| <strong>Bulten:</strong> {{ rateInfo.bulletin }}</span>
+            <strong>Kaynak:</strong>
+            {{
+              rateInfo.source === 'tcmb'
+                ? 'TCMB'
+                : rateInfo.source === 'manual'
+                  ? 'Manuel'
+                  : 'Yedek'
+            }}
+            <span v-if="rateInfo.bulletin" class="ml-2"
+              >| <strong>Bulten:</strong> {{ rateInfo.bulletin }}</span
+            >
           </p>
           <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
             Son guncelleme: {{ formatDate(rateInfo.lastUpdated) }}
@@ -70,10 +95,18 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-gray-200 dark:border-slate-600">
-            <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Para Birimi</th>
-            <th class="text-right py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Kur (TRY)</th>
-            <th class="text-right py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Manuel Kur</th>
-            <th class="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">Islem</th>
+            <th class="text-left py-3 px-4 font-medium text-gray-700 dark:text-gray-300">
+              Para Birimi
+            </th>
+            <th class="text-right py-3 px-4 font-medium text-gray-700 dark:text-gray-300">
+              Kur (TRY)
+            </th>
+            <th class="text-right py-3 px-4 font-medium text-gray-700 dark:text-gray-300">
+              Manuel Kur
+            </th>
+            <th class="text-center py-3 px-4 font-medium text-gray-700 dark:text-gray-300">
+              Islem
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -84,7 +117,9 @@
           >
             <td class="py-3 px-4">
               <div class="flex items-center gap-2">
-                <span class="text-lg font-medium text-gray-600 dark:text-gray-400">{{ getCurrencySymbol(currency) }}</span>
+                <span class="text-lg font-medium text-gray-600 dark:text-gray-400">{{
+                  getCurrencySymbol(currency)
+                }}</span>
                 <span class="text-gray-900 dark:text-white font-medium">{{ currency }}</span>
               </div>
             </td>
@@ -102,7 +137,10 @@
                 @keyup.enter="saveManualRate(currency)"
                 @keyup.escape="cancelEdit"
               />
-              <span v-else-if="manualRates[currency]" class="text-indigo-600 dark:text-indigo-400 font-mono">
+              <span
+                v-else-if="manualRates[currency]"
+                class="text-indigo-600 dark:text-indigo-400 font-mono"
+              >
                 {{ formatRate(manualRates[currency]) }}
               </span>
               <span v-else class="text-gray-400">-</span>
@@ -111,24 +149,24 @@
               <div class="flex items-center justify-center gap-2">
                 <template v-if="editingCurrency === currency">
                   <button
-                    @click="saveManualRate(currency)"
                     :disabled="saving"
                     class="p-1 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 rounded"
+                    @click="saveManualRate(currency)"
                   >
                     <span class="material-icons text-sm">check</span>
                   </button>
                   <button
-                    @click="cancelEdit"
                     class="p-1 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                    @click="cancelEdit"
                   >
                     <span class="material-icons text-sm">close</span>
                   </button>
                 </template>
                 <template v-else>
                   <button
-                    @click="startEdit(currency, rate)"
                     class="p-1 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded"
                     title="Manuel Kur Gir"
+                    @click="startEdit(currency, rate)"
                   >
                     <span class="material-icons text-sm">edit</span>
                   </button>
@@ -174,7 +212,9 @@
         </div>
         <div>
           <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">Sonuc</label>
-          <div class="px-3 py-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-800 dark:text-indigo-300 font-medium">
+          <div
+            class="px-3 py-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-indigo-800 dark:text-indigo-300 font-medium"
+          >
             {{ formatCurrencyResult(convertedResult, convertTo) }}
           </div>
         </div>
@@ -184,7 +224,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import * as exchangeService from '@/services/exchangeService'
 
@@ -240,7 +280,7 @@ const refreshRates = async () => {
   try {
     const response = await exchangeService.refreshRates()
     if (response.success) {
-      toast.success('Kurlar TCMB\'den guncellendi')
+      toast.success("Kurlar TCMB'den guncellendi")
       await loadRates()
     }
   } catch (error) {
@@ -261,7 +301,7 @@ const cancelEdit = () => {
   editValue.value = 0
 }
 
-const saveManualRate = async (currency) => {
+const saveManualRate = async currency => {
   if (!editValue.value || editValue.value <= 0) {
     toast.error('Gecerli bir kur degeri girin')
     return
@@ -284,11 +324,11 @@ const saveManualRate = async (currency) => {
   }
 }
 
-const getCurrencySymbol = (currency) => {
+const getCurrencySymbol = currency => {
   return exchangeService.getCurrencySymbol(currency)
 }
 
-const formatRate = (rate) => {
+const formatRate = rate => {
   if (!rate) return '-'
   return rate.toLocaleString('tr-TR', {
     minimumFractionDigits: 4,
@@ -296,7 +336,7 @@ const formatRate = (rate) => {
   })
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('tr-TR')
 }

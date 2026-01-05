@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    :model-value="show"
-    :title="$t('hotels.aiImport.title')"
-    size="xl"
-    @close="$emit('close')"
-  >
+  <Modal :model-value="show" :title="$t('hotels.aiImport.title')" size="xl" @close="$emit('close')">
     <!-- Step 1: Input Source -->
     <div v-if="step === 'input'" class="space-y-6">
       <!-- Input Type Tabs -->
@@ -13,11 +8,13 @@
           v-for="tab in inputTabs"
           :key="tab.id"
           type="button"
-          @click="inputType = tab.id"
           class="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors"
-          :class="inputType === tab.id
-            ? 'border-purple-500 text-purple-600 dark:text-purple-400'
-            : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300'"
+          :class="
+            inputType === tab.id
+              ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300'
+          "
+          @click="inputType = tab.id"
         >
           <span class="material-icons text-lg mr-2 align-middle">{{ tab.icon }}</span>
           {{ tab.label }}
@@ -64,14 +61,16 @@
           {{ $t('hotels.aiImport.pdfDesc') }}
         </p>
         <div
+          class="border-2 border-dashed rounded-xl p-8 text-center transition-colors"
+          :class="
+            isDragging
+              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+              : 'border-gray-300 dark:border-slate-600 hover:border-purple-400'
+          "
           @drop.prevent="handleFileDrop"
           @dragover.prevent
           @dragenter.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
-          class="border-2 border-dashed rounded-xl p-8 text-center transition-colors"
-          :class="isDragging
-            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-            : 'border-gray-300 dark:border-slate-600 hover:border-purple-400'"
         >
           <input
             ref="fileInput"
@@ -86,11 +85,7 @@
             <p class="text-gray-600 dark:text-slate-400">
               {{ $t('hotels.aiImport.dropPdf') }}
             </p>
-            <button
-              type="button"
-              @click="$refs.fileInput.click()"
-              class="btn-secondary"
-            >
+            <button type="button" class="btn-secondary" @click="$refs.fileInput.click()">
               {{ $t('hotels.aiImport.selectFile') }}
             </button>
           </div>
@@ -100,8 +95,8 @@
             <span class="text-gray-700 dark:text-slate-300">{{ pdfFile.name }}</span>
             <button
               type="button"
-              @click="pdfFile = null"
               class="p-1 text-gray-400 hover:text-red-500"
+              @click="pdfFile = null"
             >
               <span class="material-icons text-lg">close</span>
             </button>
@@ -115,7 +110,9 @@
       <!-- Progress Header -->
       <div class="text-center mb-8">
         <div class="relative inline-block">
-          <div class="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto"></div>
+          <div
+            class="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto"
+          ></div>
           <!-- Elapsed Time in Center -->
           <div class="absolute inset-0 flex items-center justify-center">
             <span class="text-sm font-mono font-semibold text-purple-600 dark:text-purple-400">
@@ -134,29 +131,34 @@
       <!-- Progress Steps -->
       <div v-if="progress.steps.length" class="max-w-md mx-auto space-y-3">
         <div
-          v-for="(step, idx) in progress.steps"
-          :key="step.id"
+          v-for="(progressStep, idx) in progress.steps"
+          :key="progressStep.id"
           class="flex items-center gap-3 p-3 rounded-lg transition-all"
           :class="{
-            'bg-green-50 dark:bg-green-900/20': step.status === 'completed',
-            'bg-purple-50 dark:bg-purple-900/20': step.status === 'in_progress',
-            'bg-gray-50 dark:bg-slate-700/30': step.status === 'pending',
-            'bg-red-50 dark:bg-red-900/20': step.status === 'failed'
+            'bg-green-50 dark:bg-green-900/20': progressStep.status === 'completed',
+            'bg-purple-50 dark:bg-purple-900/20': progressStep.status === 'in_progress',
+            'bg-gray-50 dark:bg-slate-700/30': progressStep.status === 'pending',
+            'bg-red-50 dark:bg-red-900/20': progressStep.status === 'failed'
           }"
         >
           <!-- Step Icon -->
           <div
             class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
             :class="{
-              'bg-green-500 text-white': step.status === 'completed',
-              'bg-purple-500 text-white': step.status === 'in_progress',
-              'bg-gray-300 dark:bg-slate-600 text-gray-500 dark:text-slate-400': step.status === 'pending',
-              'bg-red-500 text-white': step.status === 'failed'
+              'bg-green-500 text-white': progressStep.status === 'completed',
+              'bg-purple-500 text-white': progressStep.status === 'in_progress',
+              'bg-gray-300 dark:bg-slate-600 text-gray-500 dark:text-slate-400':
+                progressStep.status === 'pending',
+              'bg-red-500 text-white': progressStep.status === 'failed'
             }"
           >
-            <span v-if="step.status === 'completed'" class="material-icons text-sm">check</span>
-            <span v-else-if="step.status === 'in_progress'" class="material-icons text-sm animate-spin">sync</span>
-            <span v-else-if="step.status === 'failed'" class="material-icons text-sm">close</span>
+            <span v-if="progressStep.status === 'completed'" class="material-icons text-sm">check</span>
+            <span
+              v-else-if="progressStep.status === 'in_progress'"
+              class="material-icons text-sm animate-spin"
+              >sync</span
+            >
+            <span v-else-if="progressStep.status === 'failed'" class="material-icons text-sm">close</span>
             <span v-else class="text-xs font-medium">{{ idx + 1 }}</span>
           </div>
 
@@ -165,37 +167,49 @@
             <p
               class="text-sm font-medium"
               :class="{
-                'text-green-700 dark:text-green-300': step.status === 'completed',
-                'text-purple-700 dark:text-purple-300': step.status === 'in_progress',
-                'text-gray-500 dark:text-slate-400': step.status === 'pending',
-                'text-red-700 dark:text-red-300': step.status === 'failed'
+                'text-green-700 dark:text-green-300': progressStep.status === 'completed',
+                'text-purple-700 dark:text-purple-300': progressStep.status === 'in_progress',
+                'text-gray-500 dark:text-slate-400': progressStep.status === 'pending',
+                'text-red-700 dark:text-red-300': progressStep.status === 'failed'
               }"
             >
-              {{ step.label?.tr || step.label?.en || step.id }}
+              {{ progressStep.label?.tr || progressStep.label?.en || progressStep.id }}
             </p>
 
             <!-- Step Details -->
-            <p v-if="step.data && step.status !== 'pending'" class="text-xs text-gray-500 dark:text-slate-400 truncate">
-              <template v-if="step.id === 'crawl'">
-                <span v-if="step.data.pagesScraped">{{ step.data.pagesScraped }} sayfa tarandı</span>
-                <span v-if="step.data.totalChars"> • {{ formatNumber(step.data.totalChars) }} karakter</span>
-                <span v-if="step.data.uniqueImages"> • {{ step.data.uniqueImages }} görsel</span>
+            <p
+              v-if="progressStep.data && progressStep.status !== 'pending'"
+              class="text-xs text-gray-500 dark:text-slate-400 truncate"
+            >
+              <template v-if="progressStep.id === 'crawl'">
+                <span v-if="progressStep.data.pagesScraped"
+                  >{{ progressStep.data.pagesScraped }} sayfa tarandı</span
+                >
+                <span v-if="progressStep.data.totalChars">
+                  • {{ formatNumber(progressStep.data.totalChars) }} karakter</span
+                >
+                <span v-if="progressStep.data.uniqueImages"> • {{ progressStep.data.uniqueImages }} görsel</span>
               </template>
-              <template v-else-if="step.id === 'preprocess'">
-                <span v-if="step.data.roomsFound">{{ step.data.roomsFound }} oda tespit edildi</span>
-                <span v-if="step.data.imagesFound"> • {{ step.data.imagesFound }} görsel</span>
+              <template v-else-if="progressStep.id === 'preprocess'">
+                <span v-if="progressStep.data.roomsFound"
+                  >{{ progressStep.data.roomsFound }} oda tespit edildi</span
+                >
+                <span v-if="progressStep.data.imagesFound"> • {{ progressStep.data.imagesFound }} görsel</span>
               </template>
-              <template v-else-if="step.id === 'extract'">
-                <span v-if="step.data.roomTemplates">{{ step.data.roomTemplates }} oda şablonu çıkarıldı</span>
+              <template v-else-if="progressStep.id === 'extract'">
+                <span v-if="progressStep.data.roomTemplates"
+                  >{{ progressStep.data.roomTemplates }} oda şablonu çıkarıldı</span
+                >
               </template>
-              <template v-else-if="step.id === 'validate' && step.data.roomCodes">
-                Odalar: {{ step.data.roomCodes.slice(0, 5).join(', ') }}{{ step.data.roomCodes.length > 5 ? '...' : '' }}
+              <template v-else-if="progressStep.id === 'validate' && progressStep.data.roomCodes">
+                Odalar: {{ progressStep.data.roomCodes.slice(0, 5).join(', ')
+                }}{{ progressStep.data.roomCodes.length > 5 ? '...' : '' }}
               </template>
             </p>
 
             <!-- Duration -->
-            <p v-if="step.duration" class="text-xs text-gray-400 dark:text-slate-500">
-              {{ (step.duration / 1000).toFixed(1) }}s
+            <p v-if="progressStep.duration" class="text-xs text-gray-400 dark:text-slate-500">
+              {{ (progressStep.duration / 1000).toFixed(1) }}s
             </p>
           </div>
         </div>
@@ -210,10 +224,15 @@
 
       <!-- Elapsed Time Footer -->
       <div class="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700 text-center">
-        <div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700/50 rounded-full">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700/50 rounded-full"
+        >
           <span class="material-icons text-sm text-gray-500 dark:text-slate-400">schedule</span>
           <span class="text-sm font-medium text-gray-600 dark:text-slate-300">
-            Geçen süre: <span class="font-mono text-purple-600 dark:text-purple-400">{{ formatElapsedTime(elapsedTime) }}</span>
+            Geçen süre:
+            <span class="font-mono text-purple-600 dark:text-purple-400">{{
+              formatElapsedTime(elapsedTime)
+            }}</span>
           </span>
         </div>
       </div>
@@ -244,11 +263,7 @@
             </label>
             <ConfidenceBadge :score="extractedData?.confidence?.name" />
           </div>
-          <input
-            v-model="extractedData.name"
-            type="text"
-            class="form-input w-full"
-          />
+          <input v-model="extractedData.name" type="text" class="form-input w-full" />
         </div>
 
         <!-- Stars & Category -->
@@ -363,7 +378,10 @@
         </div>
 
         <!-- Coordinates -->
-        <div v-if="extractedData.address?.coordinates?.lat" class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+        <div
+          v-if="extractedData.address?.coordinates?.lat"
+          class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl"
+        >
           <div class="flex items-center justify-between mb-2">
             <label class="text-sm font-medium text-gray-700 dark:text-slate-300">
               {{ $t('hotels.address.coordinates') }}
@@ -372,11 +390,21 @@
           <div class="grid grid-cols-2 gap-3">
             <div class="flex items-center gap-2">
               <span class="text-xs text-gray-500">Lat:</span>
-              <input v-model="extractedData.address.coordinates.lat" type="number" step="any" class="form-input flex-1" />
+              <input
+                v-model="extractedData.address.coordinates.lat"
+                type="number"
+                step="any"
+                class="form-input flex-1"
+              />
             </div>
             <div class="flex items-center gap-2">
               <span class="text-xs text-gray-500">Lng:</span>
-              <input v-model="extractedData.address.coordinates.lng" type="number" step="any" class="form-input flex-1" />
+              <input
+                v-model="extractedData.address.coordinates.lng"
+                type="number"
+                step="any"
+                class="form-input flex-1"
+              />
             </div>
           </div>
         </div>
@@ -391,15 +419,27 @@
           <div class="grid grid-cols-3 gap-3">
             <div>
               <label class="text-xs text-gray-500">{{ $t('hotels.basic.totalRooms') }}</label>
-              <input v-model="extractedData.roomConfig.totalRooms" type="number" class="form-input w-full" />
+              <input
+                v-model="extractedData.roomConfig.totalRooms"
+                type="number"
+                class="form-input w-full"
+              />
             </div>
             <div>
               <label class="text-xs text-gray-500">{{ $t('hotels.basic.floors') }}</label>
-              <input v-model="extractedData.roomConfig.floors" type="number" class="form-input w-full" />
+              <input
+                v-model="extractedData.roomConfig.floors"
+                type="number"
+                class="form-input w-full"
+              />
             </div>
             <div class="flex items-end">
               <label class="flex items-center cursor-pointer">
-                <input type="checkbox" v-model="extractedData.roomConfig.hasElevator" class="mr-2" />
+                <input
+                  v-model="extractedData.roomConfig.hasElevator"
+                  type="checkbox"
+                  class="mr-2"
+                />
                 <span class="text-sm">{{ $t('hotels.basic.hasElevator') }}</span>
               </label>
             </div>
@@ -429,7 +469,10 @@
         </div>
 
         <!-- Extracted Images -->
-        <div v-if="extractedData.images?.length || extractedData.logo" class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
+        <div
+          v-if="extractedData.images?.length || extractedData.logo"
+          class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl"
+        >
           <div class="flex items-center justify-between mb-3">
             <label class="text-sm font-medium text-gray-700 dark:text-slate-300">
               {{ $t('hotels.aiImport.extractedImages') }} ({{ extractedData.images?.length || 0 }})
@@ -448,7 +491,7 @@
                 @error="handleImageError($event, 'logo')"
               />
               <label class="flex items-center gap-2 text-sm cursor-pointer">
-                <input type="checkbox" v-model="importLogo" class="rounded" />
+                <input v-model="importLogo" type="checkbox" class="rounded" />
                 <span>{{ $t('hotels.aiImport.importLogo') }}</span>
               </label>
             </div>
@@ -467,15 +510,17 @@
                 class="w-full h-full object-cover"
                 @error="handleImageError($event, idx)"
               />
-              <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <div
+                class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              >
                 <span class="text-white text-xs px-2 py-1 bg-black/50 rounded">
                   {{ img.category || 'other' }}
                 </span>
               </div>
               <button
                 type="button"
-                @click="removeImage(idx)"
                 class="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                @click="removeImage(idx)"
               >
                 <span class="material-icons text-xs">close</span>
               </button>
@@ -487,16 +532,25 @@
 
           <!-- Import Images Checkbox -->
           <label class="flex items-center gap-2 mt-3 text-sm cursor-pointer">
-            <input type="checkbox" v-model="importImages" class="rounded" />
-            <span>{{ $t('hotels.aiImport.importImages') }} ({{ extractedData.images?.length || 0 }})</span>
+            <input v-model="importImages" type="checkbox" class="rounded" />
+            <span
+              >{{ $t('hotels.aiImport.importImages') }} ({{
+                extractedData.images?.length || 0
+              }})</span
+            >
           </label>
         </div>
 
         <!-- Room Templates -->
-        <div v-if="extractedData.roomTemplates?.length" class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl">
+        <div
+          v-if="extractedData.roomTemplates?.length"
+          class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl"
+        >
           <div class="flex items-center justify-between mb-3">
             <label class="text-sm font-medium text-indigo-700 dark:text-indigo-300">
-              {{ $t('hotels.aiImport.roomTemplates') }} ({{ extractedData.roomTemplates?.length || 0 }})
+              {{ $t('hotels.aiImport.roomTemplates') }} ({{
+                extractedData.roomTemplates?.length || 0
+              }})
             </label>
             <ConfidenceBadge :score="extractedData?.confidence?.roomTemplates" />
           </div>
@@ -508,7 +562,9 @@
               class="flex items-center gap-3 p-3 bg-white dark:bg-slate-700 rounded-lg"
             >
               <!-- Room Image Thumbnail -->
-              <div class="w-16 h-12 flex-shrink-0 rounded overflow-hidden bg-gray-100 dark:bg-slate-600">
+              <div
+                class="w-16 h-12 flex-shrink-0 rounded overflow-hidden bg-gray-100 dark:bg-slate-600"
+              >
                 <img
                   v-if="room.images?.[0]?.url"
                   :src="room.images[0].url"
@@ -517,14 +573,18 @@
                   @error="$event.target.style.display = 'none'"
                 />
                 <div v-else class="w-full h-full flex items-center justify-center">
-                  <span class="material-icons text-gray-400 dark:text-slate-500">bedroom_parent</span>
+                  <span class="material-icons text-gray-400 dark:text-slate-500"
+                    >bedroom_parent</span
+                  >
                 </div>
               </div>
 
               <!-- Room Info -->
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/30 px-1.5 py-0.5 rounded">
+                  <span
+                    class="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-800/30 px-1.5 py-0.5 rounded"
+                  >
                     {{ room.code }}
                   </span>
                   <h5 class="font-medium text-sm text-gray-800 dark:text-white truncate">
@@ -535,14 +595,20 @@
                   <span v-if="room.size">{{ room.size }}m²</span>
                   <span v-if="room.size && room.occupancy"> • </span>
                   <span v-if="room.occupancy">
-                    {{ room.occupancy.maxAdults }}+{{ room.occupancy.maxChildren }} {{ $t('hotels.roomTemplates.guests') }}
+                    {{ room.occupancy.maxAdults }}+{{ room.occupancy.maxChildren }}
+                    {{ $t('hotels.roomTemplates.guests') }}
                   </span>
-                  <span v-if="room.amenities?.length"> • {{ room.amenities.length }} {{ $t('hotels.roomTemplates.amenities') }}</span>
+                  <span v-if="room.amenities?.length">
+                    • {{ room.amenities.length }} {{ $t('hotels.roomTemplates.amenities') }}</span
+                  >
                 </p>
               </div>
 
               <!-- Room Images Count -->
-              <div v-if="room.images?.length" class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400">
+              <div
+                v-if="room.images?.length"
+                class="flex items-center gap-1 text-xs text-gray-500 dark:text-slate-400"
+              >
                 <span class="material-icons text-sm">photo_library</span>
                 {{ room.images.length }}
               </div>
@@ -551,8 +617,12 @@
 
           <!-- Import Room Templates Checkbox -->
           <label class="flex items-center gap-2 mt-3 text-sm cursor-pointer">
-            <input type="checkbox" v-model="importRoomTemplates" class="rounded" />
-            <span>{{ $t('hotels.aiImport.importRoomTemplates') }} ({{ extractedData.roomTemplates?.length || 0 }})</span>
+            <input v-model="importRoomTemplates" type="checkbox" class="rounded" />
+            <span
+              >{{ $t('hotels.aiImport.importRoomTemplates') }} ({{
+                extractedData.roomTemplates?.length || 0
+              }})</span
+            >
           </label>
         </div>
 
@@ -565,29 +635,67 @@
             <ConfidenceBadge :score="extractedData?.confidence?.profile" />
           </div>
           <div class="flex flex-wrap gap-2">
-            <span v-if="extractedData.profile?.overview?.content?.tr" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
+            <span
+              v-if="extractedData.profile?.overview?.content?.tr"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
               {{ $t('hotels.profile.sections.overview') }}
             </span>
-            <span v-if="extractedData.profile?.facilities?.features?.length" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
-              {{ $t('hotels.profile.sections.facilities') }} ({{ extractedData.profile.facilities.features.length }})
+            <span
+              v-if="extractedData.profile?.facilities?.features?.length"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
+              {{ $t('hotels.profile.sections.facilities') }} ({{
+                extractedData.profile.facilities.features.length
+              }})
             </span>
-            <span v-if="extractedData.profile?.dining?.features?.length" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
-              {{ $t('hotels.profile.sections.dining') }} ({{ extractedData.profile.dining.features.length }})
+            <span
+              v-if="extractedData.profile?.dining?.features?.length"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
+              {{ $t('hotels.profile.sections.dining') }} ({{
+                extractedData.profile.dining.features.length
+              }})
             </span>
-            <span v-if="extractedData.profile?.spaWellness?.features?.length" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
-              {{ $t('hotels.profile.sections.spaWellness') }} ({{ extractedData.profile.spaWellness.features.length }})
+            <span
+              v-if="extractedData.profile?.spaWellness?.features?.length"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
+              {{ $t('hotels.profile.sections.spaWellness') }} ({{
+                extractedData.profile.spaWellness.features.length
+              }})
             </span>
-            <span v-if="extractedData.profile?.beachPool?.features?.length" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
-              {{ $t('hotels.profile.sections.beachPool') }} ({{ extractedData.profile.beachPool.features.length }})
+            <span
+              v-if="extractedData.profile?.beachPool?.features?.length"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
+              {{ $t('hotels.profile.sections.beachPool') }} ({{
+                extractedData.profile.beachPool.features.length
+              }})
             </span>
-            <span v-if="extractedData.profile?.familyKids?.features?.length" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
-              {{ $t('hotels.profile.sections.familyKids') }} ({{ extractedData.profile.familyKids.features.length }})
+            <span
+              v-if="extractedData.profile?.familyKids?.features?.length"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
+              {{ $t('hotels.profile.sections.familyKids') }} ({{
+                extractedData.profile.familyKids.features.length
+              }})
             </span>
-            <span v-if="extractedData.profile?.sportsEntertainment?.features?.length" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
-              {{ $t('hotels.profile.sections.sportsEntertainment') }} ({{ extractedData.profile.sportsEntertainment.features.length }})
+            <span
+              v-if="extractedData.profile?.sportsEntertainment?.features?.length"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
+              {{ $t('hotels.profile.sections.sportsEntertainment') }} ({{
+                extractedData.profile.sportsEntertainment.features.length
+              }})
             </span>
-            <span v-if="extractedData.profile?.location?.distances?.length" class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs">
-              {{ $t('hotels.profile.sections.location') }} ({{ extractedData.profile.location.distances.length }})
+            <span
+              v-if="extractedData.profile?.location?.distances?.length"
+              class="px-2 py-1 bg-blue-100 dark:bg-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-xs"
+            >
+              {{ $t('hotels.profile.sections.location') }} ({{
+                extractedData.profile.location.distances.length
+              }})
             </span>
           </div>
           <p class="text-xs text-blue-600 dark:text-blue-400 mt-2">
@@ -606,11 +714,7 @@
       <p class="text-gray-500 dark:text-slate-400 mb-4">
         {{ errorMessage }}
       </p>
-      <button
-        type="button"
-        @click="resetToInput"
-        class="btn-secondary"
-      >
+      <button type="button" class="btn-secondary" @click="resetToInput">
         {{ $t('common.tryAgain') }}
       </button>
     </div>
@@ -619,8 +723,8 @@
       <div class="flex justify-end gap-3">
         <button
           type="button"
-          @click="$emit('close')"
           class="px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white transition-colors"
+          @click="$emit('close')"
         >
           {{ $t('common.cancel') }}
         </button>
@@ -630,8 +734,8 @@
           v-if="step === 'input'"
           type="button"
           :disabled="!canExtract"
-          @click="extractData"
           class="btn-primary flex items-center gap-2"
+          @click="extractData"
         >
           <span class="material-icons text-lg">auto_awesome</span>
           {{ $t('hotels.aiImport.extract') }}
@@ -642,8 +746,8 @@
           v-if="step === 'preview'"
           type="button"
           :disabled="saving"
-          @click="saveHotel"
           class="btn-primary flex items-center gap-2"
+          @click="saveHotel"
         >
           <span v-if="saving" class="animate-spin material-icons text-lg">refresh</span>
           <span v-else class="material-icons text-lg">save</span>
@@ -655,29 +759,32 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onUnmounted } from 'vue'
+import { ref, reactive, computed, onUnmounted, h } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/common/Modal.vue'
-import { h } from 'vue'
 import hotelService from '@/services/hotelService'
 import { useSocket } from '@/composables/useSocket'
+import { createLogger } from '@/utils/logger'
+
+const logger = createLogger('HotelAIImporter')
 
 // Confidence Badge Component (using render function)
 const ConfidenceBadge = {
   props: { score: { type: Number, default: 0 } },
   render() {
     if (!this.score) return null
-    const colorClass = this.score >= 80
-      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      : this.score >= 50
-        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    const colorClass =
+      this.score >= 80
+        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+        : this.score >= 50
+          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     return h('span', { class: `text-xs px-2 py-0.5 rounded-full ${colorClass}` }, `${this.score}%`)
   }
 }
 
-const props = defineProps({
+defineProps({
   show: {
     type: Boolean,
     default: false
@@ -688,7 +795,7 @@ const emit = defineEmits(['close', 'imported'])
 
 const toast = useToast()
 const { t } = useI18n()
-const { socket, join, leave, on, off, isConnected } = useSocket()
+const { join, leave, on, off, isConnected } = useSocket()
 
 // State
 const step = ref('input') // input, loading, preview, error
@@ -734,7 +841,7 @@ const stopElapsedTimer = () => {
   }
 }
 
-const formatElapsedTime = (seconds) => {
+const formatElapsedTime = seconds => {
   const mins = Math.floor(seconds / 60)
   const secs = seconds % 60
   if (mins > 0) {
@@ -744,7 +851,7 @@ const formatElapsedTime = (seconds) => {
 }
 
 // Format number helper
-const formatNumber = (num) => {
+const formatNumber = num => {
   if (num >= 1000) {
     return (num / 1000).toFixed(1) + 'K'
   }
@@ -752,17 +859,17 @@ const formatNumber = (num) => {
 }
 
 // Socket event handlers
-const setupSocketListeners = (opId) => {
+const setupSocketListeners = opId => {
   const eventPrefix = 'hotel-extract:'
 
   // Init - receive steps list
-  on(`${eventPrefix}init`, (data) => {
+  on(`${eventPrefix}init`, data => {
     if (data.operationId !== opId) return
     progress.steps = data.steps.map(s => ({ ...s, status: 'pending', data: null }))
   })
 
   // Step started
-  on(`${eventPrefix}step:start`, (data) => {
+  on(`${eventPrefix}step:start`, data => {
     if (data.operationId !== opId) return
     progress.currentStep = data.stepId
     progress.currentStepLabel = data.label?.tr || data.label?.en || data.stepId
@@ -773,7 +880,7 @@ const setupSocketListeners = (opId) => {
   })
 
   // Step progress update
-  on(`${eventPrefix}step:update`, (data) => {
+  on(`${eventPrefix}step:update`, data => {
     if (data.operationId !== opId) return
     if (progress.steps[data.stepIndex]) {
       progress.steps[data.stepIndex].data = { ...progress.steps[data.stepIndex].data, ...data.data }
@@ -789,7 +896,7 @@ const setupSocketListeners = (opId) => {
   })
 
   // Step completed
-  on(`${eventPrefix}step:complete`, (data) => {
+  on(`${eventPrefix}step:complete`, data => {
     if (data.operationId !== opId) return
     if (progress.steps[data.stepIndex]) {
       progress.steps[data.stepIndex].status = 'completed'
@@ -800,7 +907,7 @@ const setupSocketListeners = (opId) => {
   })
 
   // Step failed
-  on(`${eventPrefix}step:fail`, (data) => {
+  on(`${eventPrefix}step:fail`, data => {
     if (data.operationId !== opId) return
     if (progress.steps[data.stepIndex]) {
       progress.steps[data.stepIndex].status = 'failed'
@@ -809,7 +916,7 @@ const setupSocketListeners = (opId) => {
   })
 
   // Complete
-  on(`${eventPrefix}complete`, async (data) => {
+  on(`${eventPrefix}complete`, async data => {
     if (data.operationId !== opId) return
     // Fetch the final result
     stopElapsedTimer()
@@ -821,7 +928,7 @@ const setupSocketListeners = (opId) => {
       } else {
         throw new Error('No extraction data')
       }
-    } catch (e) {
+    } catch {
       errorMessage.value = t('hotels.aiImport.fetchResultFailed')
       step.value = 'error'
     }
@@ -829,7 +936,7 @@ const setupSocketListeners = (opId) => {
   })
 
   // Fail
-  on(`${eventPrefix}fail`, (data) => {
+  on(`${eventPrefix}fail`, data => {
     if (data.operationId !== opId) return
     stopElapsedTimer()
     errorMessage.value = data.error || t('hotels.aiImport.extractionFailed')
@@ -840,7 +947,15 @@ const setupSocketListeners = (opId) => {
 
 const cleanupSocketListeners = () => {
   const eventPrefix = 'hotel-extract:'
-  const events = ['init', 'step:start', 'step:update', 'step:complete', 'step:fail', 'complete', 'fail']
+  const events = [
+    'init',
+    'step:start',
+    'step:update',
+    'step:complete',
+    'step:fail',
+    'complete',
+    'fail'
+  ]
   events.forEach(event => off(`${eventPrefix}${event}`))
   if (operationId.value) {
     leave(operationId.value)
@@ -868,7 +983,7 @@ const canExtract = computed(() => {
 })
 
 // File handling
-const handleFileDrop = (e) => {
+const handleFileDrop = e => {
   isDragging.value = false
   const file = e.dataTransfer.files[0]
   if (file && file.type === 'application/pdf') {
@@ -878,7 +993,7 @@ const handleFileDrop = (e) => {
   }
 }
 
-const handleFileSelect = (e) => {
+const handleFileSelect = e => {
   const file = e.target.files[0]
   if (file) {
     pdfFile.value = file
@@ -921,7 +1036,7 @@ const extractData = async () => {
         // Wait for socket events - the listeners will handle step changes
         // If socket is not connected, fall back to polling
         if (!isConnected.value) {
-          console.warn('Socket not connected, falling back to polling')
+          logger.warn('Socket not connected, falling back to polling')
           await pollForResult(startResponse.operationId)
         }
         // Otherwise, socket listeners will handle the rest
@@ -951,14 +1066,15 @@ const extractData = async () => {
     }
   } catch (error) {
     stopElapsedTimer()
-    console.error('AI extraction error:', error)
-    errorMessage.value = error.response?.data?.message || error.message || t('common.operationFailed')
+    logger.error('AI extraction error:', error)
+    errorMessage.value =
+      error.response?.data?.message || error.message || t('common.operationFailed')
     step.value = 'error'
   }
 }
 
 // Fallback polling for when socket is not available
-const pollForResult = async (opId) => {
+const pollForResult = async opId => {
   const maxAttempts = 120 // 2 minutes with 1s intervals
   let attempts = 0
 
@@ -992,17 +1108,17 @@ const pollForResult = async (opId) => {
 }
 
 // Read file as text
-const readFileAsText = (file) => {
+const readFileAsText = file => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = (e) => resolve(e.target.result)
-    reader.onerror = (e) => reject(e)
+    reader.onload = e => resolve(e.target.result)
+    reader.onerror = e => reject(e)
     reader.readAsText(file)
   })
 }
 
 // Initialize extracted data - keep all AI extracted data intact
-const initializeExtractedData = (data) => {
+const initializeExtractedData = data => {
   // Create empty multilang object
   const emptyMultiLang = () => ({ tr: '', en: '' })
 
@@ -1123,7 +1239,6 @@ const initializeExtractedData = (data) => {
 
     // Images extracted from website
     images: (data.images || []).filter(img => img.url && img.url.startsWith('http')),
-    logo: data.logo && data.logo.startsWith('http') ? data.logo : null,
 
     // Room templates extracted from website
     roomTemplates: (data.roomTemplates || []).map(room => ({
@@ -1196,10 +1311,12 @@ const saveHotel = async () => {
         bedConfiguration: room.bedConfiguration,
         occupancy: room.occupancy,
         // Include external images for backend to download
-        externalImages: (room.images || []).filter(img => img.url).map(img => ({
-          url: img.url,
-          caption: img.caption || {}
-        }))
+        externalImages: (room.images || [])
+          .filter(img => img.url)
+          .map(img => ({
+            url: img.url,
+            caption: img.caption || {}
+          }))
       }))
     } else {
       delete hotelData.roomTemplates
@@ -1213,7 +1330,7 @@ const saveHotel = async () => {
       emit('close')
     }
   } catch (error) {
-    console.error('Save hotel error:', error)
+    logger.error('Save hotel error:', error)
     toast.error(error.response?.data?.message || t('common.operationFailed'))
   } finally {
     saving.value = false
@@ -1240,7 +1357,7 @@ const handleImageError = (event, index) => {
 }
 
 // Remove image from list
-const removeImage = (index) => {
+const removeImage = index => {
   if (extractedData.value?.images) {
     extractedData.value.images.splice(index, 1)
   }

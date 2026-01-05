@@ -1,16 +1,22 @@
 <template>
   <div class="date-range-picker-inline">
     <!-- Selected Range Summary -->
-    <div class="flex items-center justify-between mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl">
+    <div
+      class="flex items-center justify-between mb-4 p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl"
+    >
       <div class="flex items-center gap-4">
         <!-- Start Date -->
         <div class="text-center">
-          <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('common.startDate') }}</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+            {{ $t('common.startDate') }}
+          </div>
           <div
             class="px-4 py-2 rounded-lg font-semibold transition-colors"
-            :class="startDate
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white dark:bg-slate-700 text-gray-400 dark:text-slate-500 border-2 border-dashed border-gray-300 dark:border-slate-600'"
+            :class="
+              startDate
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white dark:bg-slate-700 text-gray-400 dark:text-slate-500 border-2 border-dashed border-gray-300 dark:border-slate-600'
+            "
           >
             {{ startDate ? formatDisplayDate(startDate) : '--' }}
           </div>
@@ -23,12 +29,16 @@
 
         <!-- End Date -->
         <div class="text-center">
-          <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('common.endDate') }}</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+            {{ $t('common.endDate') }}
+          </div>
           <div
             class="px-4 py-2 rounded-lg font-semibold transition-colors"
-            :class="endDate
-              ? 'bg-purple-600 text-white'
-              : 'bg-white dark:bg-slate-700 text-gray-400 dark:text-slate-500 border-2 border-dashed border-gray-300 dark:border-slate-600'"
+            :class="
+              endDate
+                ? 'bg-purple-600 text-white'
+                : 'bg-white dark:bg-slate-700 text-gray-400 dark:text-slate-500 border-2 border-dashed border-gray-300 dark:border-slate-600'
+            "
           >
             {{ endDate ? formatDisplayDate(endDate) : '--' }}
           </div>
@@ -36,35 +46,44 @@
       </div>
 
       <!-- Day Count Badge -->
-      <div v-if="dayCount > 0" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm">
+      <div
+        v-if="dayCount > 0"
+        class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm"
+      >
         <span class="material-icons text-indigo-600 dark:text-indigo-400">nights_stay</span>
         <div>
           <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ dayCount }}</div>
-          <div class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.nights') }}</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400">
+            {{ $t('planning.pricing.nights') }}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Quick Select Buttons -->
     <div class="flex items-center gap-2 mb-4">
-      <span class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.quickFill') }}:</span>
+      <span class="text-sm text-gray-500 dark:text-slate-400"
+        >{{ $t('planning.pricing.quickFill') }}:</span
+      >
       <button
         v-for="option in quickOptions"
         :key="option.days"
         type="button"
-        @click="selectQuickRange(option.days)"
         class="px-3 py-1.5 text-sm rounded-lg font-medium transition-all"
-        :class="isQuickOptionActive(option.days)
-          ? 'bg-indigo-600 text-white'
-          : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300'"
+        :class="
+          isQuickOptionActive(option.days)
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300'
+        "
+        @click="selectQuickRange(option.days)"
       >
         {{ option.label }}
       </button>
       <button
         v-if="startDate || endDate"
         type="button"
-        @click="clearDates"
         class="ml-auto text-sm text-red-500 hover:text-red-700 flex items-center gap-1"
+        @click="clearDates"
       >
         <span class="material-icons text-sm">close</span>
         {{ $t('common.clear') }}
@@ -74,12 +93,14 @@
     <!-- Calendars -->
     <div class="flex gap-4">
       <!-- Left Calendar -->
-      <div class="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-gray-200 dark:border-slate-700">
+      <div
+        class="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-gray-200 dark:border-slate-700"
+      >
         <div class="flex items-center justify-between mb-3">
           <button
             type="button"
-            @click="previousMonth"
             class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="previousMonth"
           >
             <span class="material-icons text-gray-600 dark:text-slate-400">chevron_left</span>
           </button>
@@ -106,7 +127,9 @@
       </div>
 
       <!-- Right Calendar -->
-      <div class="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-gray-200 dark:border-slate-700">
+      <div
+        class="flex-1 bg-white dark:bg-slate-800 rounded-xl p-4 border border-gray-200 dark:border-slate-700"
+      >
         <div class="flex items-center justify-between mb-3">
           <div class="w-9"></div>
           <div class="font-semibold text-gray-800 dark:text-white">
@@ -114,8 +137,8 @@
           </div>
           <button
             type="button"
-            @click="nextMonthAction"
             class="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="nextMonthAction"
           >
             <span class="material-icons text-gray-600 dark:text-slate-400">chevron_right</span>
           </button>
@@ -208,9 +231,35 @@ const weekDays = computed(() => {
 
 const months = computed(() => {
   if (locale.value === 'tr') {
-    return ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+    return [
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık'
+    ]
   }
-  return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  return [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ]
 })
 
 const quickOptions = computed(() => [
@@ -322,7 +371,10 @@ function getDateClass(date) {
     } else if (dateClone > start && dateClone < end) {
       classes.push('calendar-day-in-range')
     }
-  } else if (startDate.value && dateClone.getTime() === new Date(startDate.value).setHours(0,0,0,0)) {
+  } else if (
+    startDate.value &&
+    dateClone.getTime() === new Date(startDate.value).setHours(0, 0, 0, 0)
+  ) {
     classes.push('calendar-day-start')
   }
 
@@ -407,7 +459,7 @@ function isQuickOptionActive(days) {
 
 function emitValue() {
   if (startDate.value && endDate.value) {
-    const toLocalIsoDate = (date) => {
+    const toLocalIsoDate = date => {
       const year = date.getFullYear()
       const month = String(date.getMonth() + 1).padStart(2, '0')
       const day = String(date.getDate()).padStart(2, '0')
@@ -440,43 +492,50 @@ function nextMonthAction() {
 }
 
 // Watch for external changes
-watch(() => props.modelValue, (newVal) => {
-  if (newVal?.start) {
-    const [y, m, d] = newVal.start.split('-').map(Number)
-    const newStart = new Date(y, m - 1, d)
-    if (!startDate.value || startDate.value.getTime() !== newStart.getTime()) {
-      startDate.value = newStart
-      // Navigate calendar to show the start date's month
-      currentMonth.value = new Date(y, m - 1, 1)
+watch(
+  () => props.modelValue,
+  newVal => {
+    if (newVal?.start) {
+      const [y, m, d] = newVal.start.split('-').map(Number)
+      const newStart = new Date(y, m - 1, d)
+      if (!startDate.value || startDate.value.getTime() !== newStart.getTime()) {
+        startDate.value = newStart
+        // Navigate calendar to show the start date's month
+        currentMonth.value = new Date(y, m - 1, 1)
+      }
     }
-  }
-  if (newVal?.end) {
-    const [y, m, d] = newVal.end.split('-').map(Number)
-    const newEnd = new Date(y, m - 1, d)
-    if (!endDate.value || endDate.value.getTime() !== newEnd.getTime()) {
-      endDate.value = newEnd
+    if (newVal?.end) {
+      const [y, m, d] = newVal.end.split('-').map(Number)
+      const newEnd = new Date(y, m - 1, d)
+      if (!endDate.value || endDate.value.getTime() !== newEnd.getTime()) {
+        endDate.value = newEnd
+      }
     }
-  }
-}, { deep: true })
+  },
+  { deep: true }
+)
 
 // Watch for minDate changes - navigate calendar to minDate's month
-watch(() => props.minDate, (newMinDate) => {
-  if (newMinDate) {
-    const minDate = new Date(newMinDate)
-    currentMonth.value = new Date(minDate.getFullYear(), minDate.getMonth(), 1)
-    // Clear existing selection if it's outside new bounds
-    if (startDate.value) {
-      const start = new Date(startDate.value)
-      start.setHours(0, 0, 0, 0)
-      minDate.setHours(0, 0, 0, 0)
-      if (start < minDate) {
-        startDate.value = null
-        endDate.value = null
-        emitValue()
+watch(
+  () => props.minDate,
+  newMinDate => {
+    if (newMinDate) {
+      const minDate = new Date(newMinDate)
+      currentMonth.value = new Date(minDate.getFullYear(), minDate.getMonth(), 1)
+      // Clear existing selection if it's outside new bounds
+      if (startDate.value) {
+        const start = new Date(startDate.value)
+        start.setHours(0, 0, 0, 0)
+        minDate.setHours(0, 0, 0, 0)
+        if (start < minDate) {
+          startDate.value = null
+          endDate.value = null
+          emitValue()
+        }
       }
     }
   }
-})
+)
 </script>
 
 <style scoped>

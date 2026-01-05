@@ -45,7 +45,9 @@
 
       <!-- No Results -->
       <div v-else-if="hotels.length === 0" class="text-center py-12">
-        <span class="material-icons text-4xl text-gray-300 dark:text-slate-600 mb-2">domain_disabled</span>
+        <span class="material-icons text-4xl text-gray-300 dark:text-slate-600 mb-2"
+          >domain_disabled</span
+        >
         <p class="text-gray-500 dark:text-slate-400">{{ $t('hotels.hotelBase.noBaseHotels') }}</p>
       </div>
 
@@ -55,13 +57,15 @@
           v-for="hotel in hotels"
           :key="hotel._id"
           type="button"
-          @click="selectHotel(hotel)"
           class="w-full p-4 border border-gray-200 dark:border-slate-700 rounded-xl hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-all text-left group"
           :class="{ 'ring-2 ring-purple-500 border-purple-500': selectedHotel?._id === hotel._id }"
+          @click="selectHotel(hotel)"
         >
           <div class="flex items-center gap-4">
             <!-- Hotel Image -->
-            <div class="w-20 h-16 bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              class="w-20 h-16 bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden flex-shrink-0"
+            >
               <img
                 v-if="getMainImage(hotel)"
                 :src="getImageUrl(getMainImage(hotel))"
@@ -82,7 +86,8 @@
                     v-for="i in hotel.stars"
                     :key="i"
                     class="material-icons text-sm text-yellow-400"
-                  >star</span>
+                    >star</span
+                  >
                 </div>
                 <!-- Category Badge -->
                 <span
@@ -125,8 +130,8 @@
         <button
           type="button"
           :disabled="pagination.page <= 1"
-          @click="changePage(pagination.page - 1)"
           class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="changePage(pagination.page - 1)"
         >
           <span class="material-icons">chevron_left</span>
         </button>
@@ -136,8 +141,8 @@
         <button
           type="button"
           :disabled="pagination.page >= pagination.pages"
-          @click="changePage(pagination.page + 1)"
           class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="changePage(pagination.page + 1)"
         >
           <span class="material-icons">chevron_right</span>
         </button>
@@ -148,16 +153,16 @@
       <div class="flex justify-end gap-3">
         <button
           type="button"
-          @click="$emit('close')"
           class="px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white transition-colors"
+          @click="$emit('close')"
         >
           {{ $t('common.cancel') }}
         </button>
         <button
           type="button"
           :disabled="!selectedHotel || linking"
-          @click="linkHotel"
           class="btn-primary flex items-center gap-2"
+          @click="linkHotel"
         >
           <span v-if="linking" class="animate-spin material-icons text-lg">refresh</span>
           <span>{{ $t('common.select') }}</span>
@@ -231,7 +236,7 @@ const fetchHotels = async () => {
       pagination.total = response.data.pagination.total
       pagination.pages = response.data.pagination.pages
     }
-  } catch (error) {
+  } catch {
     toast.error(t('common.fetchError'))
   } finally {
     loading.value = false
@@ -239,13 +244,13 @@ const fetchHotels = async () => {
 }
 
 // Change page
-const changePage = (page) => {
+const changePage = page => {
   pagination.page = page
   fetchHotels()
 }
 
 // Select hotel
-const selectHotel = (hotel) => {
+const selectHotel = hotel => {
   selectedHotel.value = hotel
 }
 
@@ -273,7 +278,7 @@ const linkHotel = async () => {
 }
 
 // Get main image from hotel
-const getMainImage = (hotel) => {
+const getMainImage = hotel => {
   if (!hotel.images || hotel.images.length === 0) return null
   const mainImage = hotel.images.find(img => img.isMain)
   return mainImage?.url || hotel.images[0]?.url
@@ -282,15 +287,18 @@ const getMainImage = (hotel) => {
 // getImageUrl imported from @/utils/imageUrl
 
 // Watch for modal open
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    selectedHotel.value = null
-    pagination.page = 1
-    searchQuery.value = ''
-    filters.stars = ''
-    fetchHotels()
+watch(
+  () => props.show,
+  newVal => {
+    if (newVal) {
+      selectedHotel.value = null
+      pagination.page = 1
+      searchQuery.value = ''
+      filters.stars = ''
+      fetchHotels()
+    }
   }
-})
+)
 
 onMounted(() => {
   if (props.show) {

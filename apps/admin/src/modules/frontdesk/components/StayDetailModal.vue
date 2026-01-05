@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    :title="`Konaklama - ${stay?.stayNumber || ''}`"
-    size="xl"
-    @close="close"
-  >
+  <Modal v-model="show" :title="`Konaklama - ${stay?.stayNumber || ''}`" size="xl" @close="close">
     <div v-if="stay" class="space-y-6">
       <!-- Tabs -->
       <div class="border-b border-gray-200 dark:border-slate-700">
@@ -12,11 +7,13 @@
           <button
             v-for="tab in tabs"
             :key="tab.key"
-            @click="activeTab = tab.key"
             class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
-            :class="activeTab === tab.key
-              ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-              : 'border-transparent text-gray-500 dark:text-gray-400'"
+            :class="
+              activeTab === tab.key
+                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400'
+            "
+            @click="activeTab = tab.key"
           >
             {{ tab.label }}
           </button>
@@ -28,7 +25,9 @@
         <!-- Guest & Room Info -->
         <div class="grid grid-cols-2 gap-4">
           <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
-            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">Misafir</h4>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">
+              Misafir
+            </h4>
             <p class="font-medium text-gray-900 dark:text-white">
               {{ stay.guests?.[0]?.firstName }} {{ stay.guests?.[0]?.lastName }}
             </p>
@@ -36,9 +35,13 @@
             <p class="text-sm text-gray-500 dark:text-slate-400">{{ stay.guests?.[0]?.email }}</p>
           </div>
           <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
-            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">Oda</h4>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">
+              Oda
+            </h4>
             <p class="font-medium text-gray-900 dark:text-white">Oda {{ stay.room?.roomNumber }}</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ stay.roomType?.name?.tr || stay.roomType?.code }}</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ stay.roomType?.name?.tr || stay.roomType?.code }}
+            </p>
             <p class="text-sm text-gray-500 dark:text-slate-400">Kat {{ stay.room?.floor }}</p>
           </div>
         </div>
@@ -47,11 +50,15 @@
         <div class="grid grid-cols-3 gap-4">
           <div class="text-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-slate-400">Giris</p>
-            <p class="font-medium text-gray-900 dark:text-white">{{ formatDate(stay.checkInDate) }}</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ formatDate(stay.checkInDate) }}
+            </p>
           </div>
           <div class="text-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-slate-400">Cikis</p>
-            <p class="font-medium text-gray-900 dark:text-white">{{ formatDate(stay.checkOutDate) }}</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ formatDate(stay.checkOutDate) }}
+            </p>
           </div>
           <div class="text-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-slate-400">Gece</p>
@@ -65,7 +72,9 @@
           <div class="grid grid-cols-4 gap-4 text-center">
             <div>
               <p class="text-xs text-gray-500 dark:text-slate-400">Toplam</p>
-              <p class="font-bold text-gray-900 dark:text-white">{{ formatCurrency(stay.totalAmount) }}</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                {{ formatCurrency(stay.totalAmount) }}
+              </p>
             </div>
             <div>
               <p class="text-xs text-gray-500 dark:text-slate-400">Odenen</p>
@@ -92,7 +101,10 @@
         <!-- Notes -->
         <div v-if="stay.specialRequests || stay.internalNotes">
           <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notlar</h4>
-          <div v-if="stay.specialRequests" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-2">
+          <div
+            v-if="stay.specialRequests"
+            class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 mb-2"
+          >
             <p class="text-xs text-blue-600 dark:text-blue-400 mb-1">Misafir Istekleri</p>
             <p class="text-sm text-blue-700 dark:text-blue-300">{{ stay.specialRequests }}</p>
           </div>
@@ -129,9 +141,9 @@
             </div>
             <div>
               <button
-                @click="addExtra"
                 :disabled="!extraForm.description || !extraForm.amount"
                 class="w-full px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm"
+                @click="addExtra"
               >
                 Ekle
               </button>
@@ -199,9 +211,9 @@
             </div>
             <div>
               <button
-                @click="addPayment"
                 :disabled="!paymentForm.amount"
                 class="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
+                @click="addPayment"
               >
                 Odeme Al
               </button>
@@ -210,7 +222,10 @@
         </div>
 
         <!-- Payments List -->
-        <div v-if="stay.payments?.length > 0" class="divide-y divide-gray-200 dark:divide-slate-700">
+        <div
+          v-if="stay.payments?.length > 0"
+          class="divide-y divide-gray-200 dark:divide-slate-700"
+        >
           <div
             v-for="(payment, index) in stay.payments"
             :key="index"
@@ -230,16 +245,14 @@
             </span>
           </div>
         </div>
-        <div v-else class="text-center py-8 text-gray-500 dark:text-slate-400">
-          Henuz odeme yok
-        </div>
+        <div v-else class="text-center py-8 text-gray-500 dark:text-slate-400">Henuz odeme yok</div>
       </div>
     </div>
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+        @click="close"
       >
         Kapat
       </button>
@@ -289,7 +302,7 @@ const paymentForm = ref({
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const tabs = [
@@ -329,7 +342,7 @@ const addPayment = async () => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -338,7 +351,7 @@ const formatDate = (date) => {
   })
 }
 
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('tr-TR', {
     day: '2-digit',
@@ -348,7 +361,7 @@ const formatDateTime = (date) => {
   })
 }
 
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
     currency: 'TRY'
@@ -360,11 +373,14 @@ const close = () => {
   activeTab.value = 'overview'
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    activeTab.value = 'overview'
-    extraForm.value = { description: '', amount: null, category: 'other' }
-    paymentForm.value = { amount: null, method: 'cash', reference: '' }
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      activeTab.value = 'overview'
+      extraForm.value = { description: '', amount: null, category: 'other' }
+      paymentForm.value = { amount: null, method: 'cash', reference: '' }
+    }
   }
-})
+)
 </script>

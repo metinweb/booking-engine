@@ -1,21 +1,24 @@
 <template>
-  <div class="date-range-picker" ref="pickerContainer">
+  <div ref="pickerContainer" class="date-range-picker">
     <!-- Input Field -->
     <div class="relative">
-      <span class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm z-10">event</span>
+      <span
+        class="material-icons absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm z-10"
+        >event</span
+      >
       <input
         ref="inputElement"
         type="text"
         :value="displayValue"
-        @click="toggleCalendar"
         class="form-input pl-10 pr-10 text-sm cursor-pointer"
         :placeholder="placeholder || $t('dateRangePicker.placeholder')"
         readonly
+        @click="toggleCalendar"
       />
       <button
         v-if="startDate && endDate"
-        @click.stop="clearDates"
         class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 z-10"
+        @click.stop="clearDates"
       >
         <span class="material-icons text-sm">close</span>
       </button>
@@ -30,87 +33,93 @@
           class="fixed z-[9999] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-600 p-4"
           :style="popupStyle"
         >
-        <div class="flex space-x-4">
-          <!-- Left Calendar -->
-          <div class="flex-1">
-            <div class="flex items-center justify-between mb-3">
-              <button
-                @click="previousMonth"
-                class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
-              >
-                <span class="material-icons text-gray-600 dark:text-slate-400">chevron_left</span>
-              </button>
-              <div class="font-semibold text-gray-800 dark:text-white">
-                {{ formatMonthYear(currentMonth) }}
+          <div class="flex space-x-4">
+            <!-- Left Calendar -->
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-3">
+                <button
+                  class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
+                  @click="previousMonth"
+                >
+                  <span class="material-icons text-gray-600 dark:text-slate-400">chevron_left</span>
+                </button>
+                <div class="font-semibold text-gray-800 dark:text-white">
+                  {{ formatMonthYear(currentMonth) }}
+                </div>
+                <div class="w-8"></div>
               </div>
-              <div class="w-8"></div>
+              <div class="calendar-grid">
+                <div v-for="day in weekDays" :key="day" class="calendar-header">
+                  {{ day }}
+                </div>
+                <div
+                  v-for="(date, index) in getMonthDates(currentMonth)"
+                  :key="`left-${index}`"
+                  :class="getDateClass(date)"
+                  @click="selectDate(date)"
+                  @mouseenter="hoverDate = date"
+                >
+                  <span v-if="date">{{ date.getDate() }}</span>
+                </div>
+              </div>
             </div>
-            <div class="calendar-grid">
-              <div v-for="day in weekDays" :key="day" class="calendar-header">
-                {{ day }}
+
+            <!-- Right Calendar -->
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-8"></div>
+                <div class="font-semibold text-gray-800 dark:text-white">
+                  {{ formatMonthYear(nextMonth) }}
+                </div>
+                <button
+                  class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
+                  @click="nextMonthAction"
+                >
+                  <span class="material-icons text-gray-600 dark:text-slate-400"
+                    >chevron_right</span
+                  >
+                </button>
               </div>
-              <div
-                v-for="(date, index) in getMonthDates(currentMonth)"
-                :key="`left-${index}`"
-                :class="getDateClass(date)"
-                @click="selectDate(date)"
-                @mouseenter="hoverDate = date"
-              >
-                <span v-if="date">{{ date.getDate() }}</span>
+              <div class="calendar-grid">
+                <div v-for="day in weekDays" :key="day" class="calendar-header">
+                  {{ day }}
+                </div>
+                <div
+                  v-for="(date, index) in getMonthDates(nextMonth)"
+                  :key="`right-${index}`"
+                  :class="getDateClass(date)"
+                  @click="selectDate(date)"
+                  @mouseenter="hoverDate = date"
+                >
+                  <span v-if="date">{{ date.getDate() }}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Right Calendar -->
-          <div class="flex-1">
-            <div class="flex items-center justify-between mb-3">
-              <div class="w-8"></div>
-              <div class="font-semibold text-gray-800 dark:text-white">
-                {{ formatMonthYear(nextMonth) }}
-              </div>
+          <!-- Quick Select Buttons -->
+          <div
+            class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-slate-600"
+          >
+            <div class="flex items-center space-x-2">
               <button
-                @click="nextMonthAction"
-                class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded transition-colors"
+                v-for="option in quickOptions"
+                :key="option.days"
+                class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
+                :class="
+                  option.highlight
+                    ? 'bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                    : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300'
+                "
+                @click="selectQuickRange(option.days)"
               >
-                <span class="material-icons text-gray-600 dark:text-slate-400">chevron_right</span>
+                {{ option.label }}
               </button>
             </div>
-            <div class="calendar-grid">
-              <div v-for="day in weekDays" :key="day" class="calendar-header">
-                {{ day }}
-              </div>
-              <div
-                v-for="(date, index) in getMonthDates(nextMonth)"
-                :key="`right-${index}`"
-                :class="getDateClass(date)"
-                @click="selectDate(date)"
-                @mouseenter="hoverDate = date"
-              >
-                <span v-if="date">{{ date.getDate() }}</span>
-              </div>
+            <div v-if="startDate && endDate" class="text-sm text-gray-600 dark:text-slate-400">
+              {{ $t('dateRangePicker.daysSelected', { count: dayCount }) }}
             </div>
           </div>
-        </div>
-
-        <!-- Quick Select Buttons -->
-        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-slate-600">
-          <div class="flex items-center space-x-2">
-            <button
-              v-for="option in quickOptions"
-              :key="option.days"
-              @click="selectQuickRange(option.days)"
-              class="text-xs px-3 py-1.5 rounded-lg font-medium transition-colors"
-              :class="option.highlight
-                ? 'bg-purple-100 hover:bg-purple-200 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                : 'bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-300'"
-            >
-              {{ option.label }}
-            </button>
-          </div>
-          <div v-if="startDate && endDate" class="text-sm text-gray-600 dark:text-slate-400">
-            {{ $t('dateRangePicker.daysSelected', { count: dayCount }) }}
-          </div>
-        </div>
         </div>
       </transition>
     </Teleport>
@@ -194,9 +203,35 @@ const weekDays = computed(() => {
 
 const months = computed(() => {
   if (locale.value === 'tr') {
-    return ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+    return [
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık'
+    ]
   }
-  return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  return [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ]
 })
 
 const quickOptions = computed(() => [
@@ -361,7 +396,7 @@ function selectQuickRange(days) {
 
 function emitValue() {
   if (startDate.value && endDate.value) {
-    const toLocalIsoDate = (date) => {
+    const toLocalIsoDate = date => {
       const year = date.getFullYear()
       const month = String(date.getMonth() + 1).padStart(2, '0')
       const day = String(date.getDate()).padStart(2, '0')
@@ -410,10 +445,14 @@ function handleClickOutside(event) {
 }
 
 // Sync with props
-watch(() => props.modelValue, (newVal) => {
-  startDate.value = newVal?.start ? new Date(newVal.start) : null
-  endDate.value = newVal?.end ? new Date(newVal.end) : null
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  newVal => {
+    startDate.value = newVal?.start ? new Date(newVal.start) : null
+    endDate.value = newVal?.end ? new Date(newVal.end) : null
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)

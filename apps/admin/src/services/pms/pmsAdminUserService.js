@@ -19,7 +19,7 @@ const getAll = async (params = {}) => {
  * Get single PMS user
  * @param {string} id - User ID
  */
-const getOne = async (id) => {
+const getOne = async id => {
   const response = await apiClient.get(`/pms/admin/users/${id}`)
   return response.data
 }
@@ -28,7 +28,7 @@ const getOne = async (id) => {
  * Create PMS user
  * @param {Object} data - User data
  */
-const create = async (data) => {
+const create = async data => {
   const response = await apiClient.post('/pms/admin/users', data)
   return response.data
 }
@@ -47,7 +47,7 @@ const update = async (id, data) => {
  * Delete PMS user
  * @param {string} id - User ID
  */
-const remove = async (id) => {
+const remove = async id => {
   const response = await apiClient.delete(`/pms/admin/users/${id}`)
   return response.data
 }
@@ -89,7 +89,10 @@ const removeHotel = async (userId, hotelId) => {
  * @param {Object} data - { role, permissions }
  */
 const updatePermissions = async (userId, hotelId, data) => {
-  const response = await apiClient.put(`/pms/admin/users/${userId}/hotels/${hotelId}/permissions`, data)
+  const response = await apiClient.put(
+    `/pms/admin/users/${userId}/hotels/${hotelId}/permissions`,
+    data
+  )
   return response.data
 }
 
@@ -99,12 +102,28 @@ const updatePermissions = async (userId, hotelId, data) => {
 const getRoles = () => {
   return [
     { value: 'pms_admin', label: 'PMS Admin', description: 'Tum yetkilere sahip' },
-    { value: 'front_desk_manager', label: 'On Bufe Muduru', description: 'On bufe ve rezervasyon yonetimi' },
-    { value: 'receptionist', label: 'Resepsiyonist', description: 'Check-in/out ve misafir islemleri' },
+    {
+      value: 'front_desk_manager',
+      label: 'On Bufe Muduru',
+      description: 'On bufe ve rezervasyon yonetimi'
+    },
+    {
+      value: 'receptionist',
+      label: 'Resepsiyonist',
+      description: 'Check-in/out ve misafir islemleri'
+    },
     { value: 'night_auditor', label: 'Gece Denetcisi', description: 'Gece islemleri ve raporlar' },
-    { value: 'housekeeping_supervisor', label: 'Kat Hizmetleri Muduru', description: 'Temizlik ekibi yonetimi' },
+    {
+      value: 'housekeeping_supervisor',
+      label: 'Kat Hizmetleri Muduru',
+      description: 'Temizlik ekibi yonetimi'
+    },
     { value: 'housekeeper', label: 'Kat Gorevlisi', description: 'Oda temizlik islemleri' },
-    { value: 'revenue_manager', label: 'Gelir Yoneticisi', description: 'Fiyatlandirma ve raporlar' },
+    {
+      value: 'revenue_manager',
+      label: 'Gelir Yoneticisi',
+      description: 'Fiyatlandirma ve raporlar'
+    },
     { value: 'guest_relations', label: 'Misafir Iliskileri', description: 'Misafir memnuniyeti' }
   ]
 }
@@ -126,49 +145,79 @@ const getDepartments = () => {
 /**
  * Get default permissions for a role
  */
-const getDefaultPermissions = (role) => {
+const getDefaultPermissions = role => {
   const permissionsByRole = {
     pms_admin: ['*'],
     front_desk_manager: [
       'dashboard.view',
-      'reservations.view', 'reservations.create', 'reservations.edit', 'reservations.cancel',
-      'frontdesk.checkin', 'frontdesk.checkout', 'frontdesk.walkin', 'frontdesk.roomMove',
-      'housekeeping.view', 'housekeeping.assign',
-      'guests.view', 'guests.edit',
-      'billing.view', 'billing.addCharge', 'billing.payment', 'billing.invoice', 'billing.discount',
-      'reports.operational', 'reports.financial'
+      'reservations.view',
+      'reservations.create',
+      'reservations.edit',
+      'reservations.cancel',
+      'frontdesk.checkin',
+      'frontdesk.checkout',
+      'frontdesk.walkin',
+      'frontdesk.roomMove',
+      'housekeeping.view',
+      'housekeeping.assign',
+      'guests.view',
+      'guests.edit',
+      'billing.view',
+      'billing.addCharge',
+      'billing.payment',
+      'billing.invoice',
+      'billing.discount',
+      'reports.operational',
+      'reports.financial'
     ],
     receptionist: [
       'dashboard.view',
-      'reservations.view', 'reservations.create', 'reservations.edit',
-      'frontdesk.checkin', 'frontdesk.checkout', 'frontdesk.walkin',
-      'guests.view', 'guests.edit',
-      'billing.view', 'billing.addCharge', 'billing.payment'
+      'reservations.view',
+      'reservations.create',
+      'reservations.edit',
+      'frontdesk.checkin',
+      'frontdesk.checkout',
+      'frontdesk.walkin',
+      'guests.view',
+      'guests.edit',
+      'billing.view',
+      'billing.addCharge',
+      'billing.payment'
     ],
     night_auditor: [
       'dashboard.view',
       'reservations.view',
-      'frontdesk.checkin', 'frontdesk.checkout',
-      'billing.view', 'billing.addCharge', 'billing.payment', 'billing.invoice',
-      'reports.operational', 'reports.financial', 'reports.export'
+      'frontdesk.checkin',
+      'frontdesk.checkout',
+      'billing.view',
+      'billing.addCharge',
+      'billing.payment',
+      'billing.invoice',
+      'reports.operational',
+      'reports.financial',
+      'reports.export'
     ],
     housekeeping_supervisor: [
       'dashboard.view',
-      'housekeeping.view', 'housekeeping.assign', 'housekeeping.updateStatus', 'housekeeping.maintenance',
+      'housekeeping.view',
+      'housekeeping.assign',
+      'housekeeping.updateStatus',
+      'housekeeping.maintenance',
       'reports.operational'
     ],
-    housekeeper: [
-      'housekeeping.view', 'housekeeping.updateStatus'
-    ],
+    housekeeper: ['housekeeping.view', 'housekeeping.updateStatus'],
     revenue_manager: [
       'dashboard.view',
       'reservations.view',
-      'reports.operational', 'reports.financial', 'reports.export'
+      'reports.operational',
+      'reports.financial',
+      'reports.export'
     ],
     guest_relations: [
       'dashboard.view',
       'reservations.view',
-      'guests.view', 'guests.edit',
+      'guests.view',
+      'guests.edit',
       'billing.view'
     ]
   }

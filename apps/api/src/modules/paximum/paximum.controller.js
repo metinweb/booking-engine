@@ -75,17 +75,20 @@ export const searchHotels = asyncHandler(async (req, res) => {
     throw new BadRequestError('Oda kriterleri gereklidir')
   }
 
-  const markup = markupPercent ?? await paximumService.getDefaultMarkup()
+  const markup = markupPercent ?? (await paximumService.getDefaultMarkup())
 
-  const result = await paximumService.searchHotels({
-    arrivalLocations,
-    checkIn,
-    nights,
-    roomCriteria,
-    nationality,
-    currency,
-    culture
-  }, markup)
+  const result = await paximumService.searchHotels(
+    {
+      arrivalLocations,
+      checkIn,
+      nights,
+      roomCriteria,
+      nationality,
+      currency,
+      culture
+    },
+    markup
+  )
 
   const { hotels, searchId } = result
 
@@ -156,18 +159,21 @@ export const getOffers = asyncHandler(async (req, res) => {
     throw new BadRequestError('Otel ID gereklidir')
   }
 
-  const markup = markupPercent ?? await paximumService.getDefaultMarkup()
+  const markup = markupPercent ?? (await paximumService.getDefaultMarkup())
 
-  const offers = await paximumService.getOffers({
-    searchId,
-    hotelId,
-    checkIn,
-    nights,
-    roomCriteria,
-    nationality,
-    currency,
-    culture
-  }, markup)
+  const offers = await paximumService.getOffers(
+    {
+      searchId,
+      hotelId,
+      checkIn,
+      nights,
+      roomCriteria,
+      nationality,
+      currency,
+      culture
+    },
+    markup
+  )
 
   res.json({
     success: true,

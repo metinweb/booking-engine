@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { apiLogger } from '@/utils/logger'
 // Import auth store to get token
 // Import dynamically ONLY inside the interceptor to avoid circular dependencies during app initialization
 // import { useAuthStore } from '@/stores/auth';
@@ -8,44 +9,44 @@ import axios from 'axios'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const apiClient = axios.create({
-	baseURL: API_BASE_URL,
-	headers: {
-		'Content-Type': 'application/json'
-	}
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 })
 
 // Add a request interceptor to include the auth token and partner header in requests
 apiClient.interceptors.request.use(
-	async config => {
-		// Dynamically import stores inside interceptor
-		const {useAuthStore} = await import('@/stores/auth')
-		const {usePartnerStore} = await import('@/stores/partner')
-		const authStore = useAuthStore()
-		const partnerStore = usePartnerStore()
+  async config => {
+    // Dynamically import stores inside interceptor
+    const { useAuthStore } = await import('@/stores/auth')
+    const { usePartnerStore } = await import('@/stores/partner')
+    const authStore = useAuthStore()
+    const partnerStore = usePartnerStore()
 
-		const token = authStore.token // Get token from Pinia store
+    const token = authStore.token // Get token from Pinia store
 
-		if (token) {
-			config.headers['Authorization'] = `Bearer ${token}`
-		}
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
 
-		// Add selected partner ID to header if platform admin has selected a partner
-		if (partnerStore.hasSelectedPartner && partnerStore.selectedPartner?._id) {
-			config.headers['X-Partner-Id'] = partnerStore.selectedPartner._id
-		}
+    // Add selected partner ID to header if platform admin has selected a partner
+    if (partnerStore.hasSelectedPartner && partnerStore.selectedPartner?._id) {
+      config.headers['X-Partner-Id'] = partnerStore.selectedPartner._id
+    }
 
-		return config
-	},
-	error => {
-		console.error('Interceptor Error:', error)
-		return Promise.reject(error)
-	}
+    return config
+  },
+  error => {
+    apiLogger.error('Interceptor Error:', error)
+    return Promise.reject(error)
+  }
 )
 
 // Response interceptor to handle 401 errors and auto-refresh token
 apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config
 
     // If error is 401 and we haven't already tried to refresh
@@ -72,8 +73,10 @@ apiClient.interceptors.response.use(
         const authStore = useAuthStore()
 
         // Skip refresh for login and refresh-token endpoints
-        if (originalRequest.url?.includes('/auth/login') ||
-            originalRequest.url?.includes('/auth/refresh-token')) {
+        if (
+          originalRequest.url?.includes('/auth/login') ||
+          originalRequest.url?.includes('/auth/refresh-token')
+        ) {
           return Promise.reject(error)
         }
 
@@ -86,7 +89,7 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest)
         }
       } catch (refreshError) {
-        console.error('Token refresh failed in interceptor:', refreshError)
+        apiLogger.error('Token refresh failed in interceptor:', refreshError)
         // Logout will be handled by refreshAccessToken
       }
     }

@@ -5,7 +5,7 @@ import apiClient from './api'
  * @param {string} partnerId - Partner ID
  * @returns {Promise<Object>} SMS settings
  */
-export const getSMSSettings = async (partnerId) => {
+export const getSMSSettings = async partnerId => {
   const response = await apiClient.get(`/partners/${partnerId}/sms-settings`)
   return response.data.data
 }
@@ -37,7 +37,7 @@ export const testSMS = async (partnerId, phone) => {
  * @param {string} partnerId - Partner ID
  * @returns {Promise<Object>} Balance info
  */
-export const getSMSBalance = async (partnerId) => {
+export const getSMSBalance = async partnerId => {
   const response = await apiClient.get(`/partners/${partnerId}/sms-settings/balance`)
   return response.data.data
 }

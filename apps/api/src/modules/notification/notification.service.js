@@ -79,12 +79,12 @@ const TYPE_COLORS = {
 /**
  * Get icon for notification type
  */
-const getIconForType = (type) => TYPE_ICONS[type] || 'notifications'
+const getIconForType = type => TYPE_ICONS[type] || 'notifications'
 
 /**
  * Get color for notification type
  */
-const getColorForType = (type) => TYPE_COLORS[type] || 'blue'
+const getColorForType = type => TYPE_COLORS[type] || 'blue'
 
 /**
  * Create and send a notification to a single user
@@ -242,7 +242,7 @@ export const notifyPartnerAdmins = async (partnerId, notificationData) => {
 /**
  * Send notification to platform admins
  */
-export const notifyPlatformAdmins = async (notificationData) => {
+export const notifyPlatformAdmins = async notificationData => {
   try {
     const User = (await import('../user/user.model.js')).default
 

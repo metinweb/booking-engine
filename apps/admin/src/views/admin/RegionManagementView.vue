@@ -1,28 +1,44 @@
 <template>
   <div class="p-6">
     <!-- Country Filter -->
-    <div class="mb-6 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4">
+    <div
+      class="mb-6 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-4"
+    >
       <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
         {{ $t('locations.selectCountry') }}
       </label>
-      <div class="relative w-full md:w-80" ref="countryDropdownRef">
+      <div ref="countryDropdownRef" class="relative w-full md:w-80">
         <button
           type="button"
-          @click="toggleCountryDropdown"
           class="form-input w-full pl-10 pr-10 text-left cursor-pointer flex items-center gap-2"
-          :class="selectedCountryCode ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20' : ''"
+          :class="
+            selectedCountryCode
+              ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20'
+              : ''
+          "
+          @click="toggleCountryDropdown"
         >
           <template v-if="selectedCountry">
-            <img :src="`/flags/${selectedCountry.code.toLowerCase()}.svg`" :alt="selectedCountry.code" class="w-5 h-4 object-contain" />
+            <img
+              :src="`/flags/${selectedCountry.code.toLowerCase()}.svg`"
+              :alt="selectedCountry.code"
+              class="w-5 h-4 object-contain"
+            />
             <span class="truncate">{{ getCountryName(selectedCountry) }}</span>
           </template>
-          <span v-else class="text-gray-400 dark:text-slate-500">-- {{ $t('locations.selectCountry') }} --</span>
+          <span v-else class="text-gray-400 dark:text-slate-500"
+            >-- {{ $t('locations.selectCountry') }} --</span
+          >
         </button>
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
           <span class="material-icons text-lg">public</span>
         </span>
         <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-          <span class="material-icons text-lg transition-transform" :class="showCountryDropdown ? 'rotate-180' : ''">expand_more</span>
+          <span
+            class="material-icons text-lg transition-transform"
+            :class="showCountryDropdown ? 'rotate-180' : ''"
+            >expand_more</span
+          >
         </span>
 
         <!-- Country Dropdown -->
@@ -53,14 +69,25 @@
               v-for="country in filteredCountries"
               :key="country.code"
               type="button"
-              @click="selectCountry(country)"
               class="w-full px-3 py-2 text-left text-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex items-center gap-2 transition-colors"
-              :class="country.code === selectedCountryCode ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-slate-300'"
+              :class="
+                country.code === selectedCountryCode
+                  ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                  : 'text-gray-700 dark:text-slate-300'
+              "
+              @click="selectCountry(country)"
             >
-              <img :src="`/flags/${country.code.toLowerCase()}.svg`" :alt="country.code" class="w-5 h-4 object-contain" />
+              <img
+                :src="`/flags/${country.code.toLowerCase()}.svg`"
+                :alt="country.code"
+                class="w-5 h-4 object-contain"
+              />
               <span class="truncate">{{ getCountryName(country) }}</span>
             </button>
-            <div v-if="filteredCountries.length === 0" class="px-3 py-4 text-center text-sm text-gray-500 dark:text-slate-400">
+            <div
+              v-if="filteredCountries.length === 0"
+              class="px-3 py-4 text-center text-sm text-gray-500 dark:text-slate-400"
+            >
               {{ $t('common.noData') }}
             </div>
           </div>
@@ -72,17 +99,17 @@
     <div v-if="selectedCountryCode" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <!-- Cities Panel (Left) -->
       <div class="lg:col-span-4">
-        <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-          <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-700/50">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-700/50"
+          >
             <h2 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
               <span class="material-icons text-purple-500">location_city</span>
               {{ $t('locations.cities') }}
             </h2>
-            <button
-              type="button"
-              @click="openCityModal()"
-              class="btn btn-sm btn-primary"
-            >
+            <button type="button" class="btn btn-sm btn-primary" @click="openCityModal()">
               <span class="material-icons text-sm">add</span>
               {{ $t('locations.addCity') }}
             </button>
@@ -94,7 +121,10 @@
               <p class="mt-2">{{ $t('common.loading') }}</p>
             </div>
 
-            <div v-else-if="cities.length === 0" class="p-8 text-center text-gray-400 dark:text-slate-500">
+            <div
+              v-else-if="cities.length === 0"
+              class="p-8 text-center text-gray-400 dark:text-slate-500"
+            >
               <span class="material-icons text-4xl mb-2">location_city</span>
               <p>{{ $t('locations.noCities') }}</p>
             </div>
@@ -103,38 +133,51 @@
               <div
                 v-for="city in cities"
                 :key="city._id"
-                @click="selectCity(city)"
                 class="px-4 py-3 cursor-pointer flex items-center justify-between border-b border-gray-100 dark:border-slate-700 last:border-b-0 transition-colors"
-                :class="selectedCity?._id === city._id
-                  ? 'bg-purple-50 dark:bg-purple-900/30 border-l-4 border-l-purple-500'
-                  : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'"
+                :class="
+                  selectedCity?._id === city._id
+                    ? 'bg-purple-50 dark:bg-purple-900/30 border-l-4 border-l-purple-500'
+                    : 'hover:bg-gray-50 dark:hover:bg-slate-700/50'
+                "
+                @click="selectCity(city)"
               >
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <span class="material-icons text-sm" :class="city.coordinates?.lat ? 'text-green-500' : 'text-orange-400'">
+                    <span
+                      class="material-icons text-sm"
+                      :class="city.coordinates?.lat ? 'text-green-500' : 'text-orange-400'"
+                    >
                       {{ city.coordinates?.lat ? 'check_circle' : 'warning' }}
                     </span>
-                    <span class="font-medium text-gray-800 dark:text-slate-200 truncate">{{ getCityName(city) }}</span>
+                    <span class="font-medium text-gray-800 dark:text-slate-200 truncate">{{
+                      getCityName(city)
+                    }}</span>
                   </div>
-                  <div v-if="city.coordinates?.lat" class="text-xs text-gray-400 font-mono mt-0.5 ml-6">
-                    {{ city.coordinates.lat.toFixed(4) }}, {{ city.coordinates.lng.toFixed(4) }} (z:{{ city.zoom || 10 }})
+                  <div
+                    v-if="city.coordinates?.lat"
+                    class="text-xs text-gray-400 font-mono mt-0.5 ml-6"
+                  >
+                    {{ city.coordinates.lat.toFixed(4) }},
+                    {{ city.coordinates.lng.toFixed(4) }} (z:{{ city.zoom || 10 }})
                   </div>
                 </div>
                 <div class="flex items-center gap-1 ml-2">
-                  <span class="text-xs text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                  <span
+                    class="text-xs text-gray-400 bg-gray-100 dark:bg-slate-700 px-2 py-0.5 rounded-full"
+                  >
                     {{ city.regionCount || 0 }}
                   </span>
                   <button
                     type="button"
-                    @click.stop="openCityModal(city)"
                     class="p-1 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 rounded"
+                    @click.stop="openCityModal(city)"
                   >
                     <span class="material-icons text-sm">edit</span>
                   </button>
                   <button
                     type="button"
-                    @click.stop="confirmDeleteCity(city)"
                     class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"
+                    @click.stop="confirmDeleteCity(city)"
                   >
                     <span class="material-icons text-sm">delete</span>
                   </button>
@@ -148,24 +191,33 @@
       <!-- Right Panel: Map + Regions -->
       <div class="lg:col-span-8 space-y-6">
         <!-- Map Section (Always visible when city selected) -->
-        <div v-if="selectedCity" class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-          <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-700/50">
+        <div
+          v-if="selectedCity"
+          class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-700/50"
+          >
             <h2 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
               <span class="material-icons text-blue-500">map</span>
               {{ getCityName(selectedCity) }} - {{ $t('locations.mapView') }}
             </h2>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-gray-500 dark:text-slate-400">{{ $t('locations.clickToSetCoordinates') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400">{{
+                $t('locations.clickToSetCoordinates')
+              }}</span>
             </div>
           </div>
 
           <!-- Main Map -->
           <div class="relative">
-            <div class="h-80" ref="mainMapContainer">
+            <div ref="mainMapContainer" class="h-80">
               <div id="region-main-map" class="w-full h-full"></div>
             </div>
             <!-- Map Legend -->
-            <div class="absolute bottom-2 left-2 bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded shadow text-xs space-y-1">
+            <div
+              class="absolute bottom-2 left-2 bg-white/90 dark:bg-slate-800/90 px-3 py-2 rounded shadow text-xs space-y-1"
+            >
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-purple-500"></span>
                 <span>{{ $t('locations.city') }}</span>
@@ -179,8 +231,12 @@
         </div>
 
         <!-- Regions Panel -->
-        <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-          <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-700/50">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden"
+        >
+          <div
+            class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between bg-gray-50 dark:bg-slate-700/50"
+          >
             <h2 class="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
               <span class="material-icons text-green-500">place</span>
               <template v-if="selectedCity">
@@ -193,8 +249,8 @@
             <button
               v-if="selectedCity"
               type="button"
-              @click="openRegionModal()"
               class="btn btn-sm btn-primary"
+              @click="openRegionModal()"
             >
               <span class="material-icons text-sm">add</span>
               {{ $t('locations.addRegion') }}
@@ -203,7 +259,9 @@
 
           <!-- No city selected state -->
           <div v-if="!selectedCity" class="p-12 text-center text-gray-400 dark:text-slate-500">
-            <span class="material-icons text-6xl mb-4 text-gray-300 dark:text-slate-600">touch_app</span>
+            <span class="material-icons text-6xl mb-4 text-gray-300 dark:text-slate-600"
+              >touch_app</span
+            >
             <p class="text-lg">{{ $t('locations.selectCityFirst') }}</p>
             <p class="text-sm mt-1">{{ $t('locations.selectCityToViewRegions') }}</p>
           </div>
@@ -214,7 +272,10 @@
               <span class="material-icons text-3xl animate-spin">sync</span>
             </div>
 
-            <div v-else-if="regions.length === 0" class="p-8 text-center text-gray-400 dark:text-slate-500">
+            <div
+              v-else-if="regions.length === 0"
+              class="p-8 text-center text-gray-400 dark:text-slate-500"
+            >
               <span class="material-icons text-4xl mb-2">place</span>
               <p>{{ $t('locations.noRegions') }}</p>
             </div>
@@ -226,13 +287,22 @@
                 class="px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-slate-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-slate-700/30"
               >
                 <div class="flex items-center gap-3 flex-1 min-w-0">
-                  <span class="material-icons" :class="region.coordinates?.lat ? 'text-green-500' : 'text-orange-400'">
+                  <span
+                    class="material-icons"
+                    :class="region.coordinates?.lat ? 'text-green-500' : 'text-orange-400'"
+                  >
                     {{ region.coordinates?.lat ? 'place' : 'location_off' }}
                   </span>
                   <div class="min-w-0">
-                    <span class="font-medium text-gray-800 dark:text-slate-200 truncate block">{{ getRegionName(region) }}</span>
-                    <div v-if="region.coordinates?.lat" class="text-xs text-gray-400 font-mono mt-0.5">
-                      {{ region.coordinates.lat.toFixed(5) }}, {{ region.coordinates.lng.toFixed(5) }} (z:{{ region.zoom || 14 }})
+                    <span class="font-medium text-gray-800 dark:text-slate-200 truncate block">{{
+                      getRegionName(region)
+                    }}</span>
+                    <div
+                      v-if="region.coordinates?.lat"
+                      class="text-xs text-gray-400 font-mono mt-0.5"
+                    >
+                      {{ region.coordinates.lat.toFixed(5) }},
+                      {{ region.coordinates.lng.toFixed(5) }} (z:{{ region.zoom || 14 }})
                     </div>
                     <div v-else class="text-xs text-orange-500 mt-0.5">
                       {{ $t('locations.noCoordinates') }}
@@ -242,24 +312,24 @@
                 <div class="flex items-center gap-1">
                   <button
                     type="button"
-                    @click="focusOnMap(region)"
                     :disabled="!region.coordinates?.lat"
                     class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded disabled:opacity-30"
                     :title="$t('locations.showOnMap')"
+                    @click="focusOnMap(region)"
                   >
                     <span class="material-icons text-lg">my_location</span>
                   </button>
                   <button
                     type="button"
-                    @click="openRegionModal(region)"
                     class="p-2 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 rounded"
+                    @click="openRegionModal(region)"
                   >
                     <span class="material-icons text-lg">edit</span>
                   </button>
                   <button
                     type="button"
-                    @click="confirmDeleteRegion(region)"
                     class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"
+                    @click="confirmDeleteRegion(region)"
                   >
                     <span class="material-icons text-lg">delete</span>
                   </button>
@@ -272,10 +342,17 @@
     </div>
 
     <!-- Empty state when no country selected -->
-    <div v-else class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-12 text-center">
+    <div
+      v-else
+      class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 p-12 text-center"
+    >
       <span class="material-icons text-6xl text-gray-300 dark:text-slate-600 mb-4">public</span>
-      <h3 class="text-lg font-medium text-gray-600 dark:text-slate-400">{{ $t('locations.selectCountryPrompt') }}</h3>
-      <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">{{ $t('locations.selectCountryPromptDesc') }}</p>
+      <h3 class="text-lg font-medium text-gray-600 dark:text-slate-400">
+        {{ $t('locations.selectCountryPrompt') }}
+      </h3>
+      <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">
+        {{ $t('locations.selectCountryPromptDesc') }}
+      </p>
     </div>
 
     <!-- City Modal -->
@@ -307,7 +384,9 @@
 
           <div class="grid grid-cols-3 gap-4 mb-3">
             <div>
-              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('locations.latitude') }}</label>
+              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                $t('locations.latitude')
+              }}</label>
               <input
                 v-model.number="cityForm.coordinates.lat"
                 type="number"
@@ -317,7 +396,9 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('locations.longitude') }}</label>
+              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                $t('locations.longitude')
+              }}</label>
               <input
                 v-model.number="cityForm.coordinates.lng"
                 type="number"
@@ -327,7 +408,9 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('locations.zoomLevel') }}</label>
+              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                $t('locations.zoomLevel')
+              }}</label>
               <input
                 v-model.number="cityForm.zoom"
                 type="number"
@@ -341,10 +424,12 @@
 
           <!-- Map for coordinate selection -->
           <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden">
-            <div class="h-64 relative" style="z-index: 1;">
+            <div class="h-64 relative" style="z-index: 1">
               <div id="city-modal-map" class="w-full h-full"></div>
             </div>
-            <div class="bg-gray-50 dark:bg-slate-700/50 px-3 py-2 text-xs text-gray-500 dark:text-slate-400 text-center flex items-center justify-center gap-2">
+            <div
+              class="bg-gray-50 dark:bg-slate-700/50 px-3 py-2 text-xs text-gray-500 dark:text-slate-400 text-center flex items-center justify-center gap-2"
+            >
               <span class="material-icons text-sm">touch_app</span>
               {{ $t('locations.clickMapToSelect') }}
             </div>
@@ -353,14 +438,14 @@
       </div>
 
       <template #footer>
-        <button type="button" @click="showCityModal = false" class="btn btn-secondary">
+        <button type="button" class="btn btn-secondary" @click="showCityModal = false">
           {{ $t('common.cancel') }}
         </button>
         <button
           type="button"
-          @click="saveCity"
           class="btn btn-primary"
           :disabled="savingCity || !cityForm.name"
+          @click="saveCity"
         >
           <span v-if="savingCity" class="material-icons text-sm animate-spin mr-1">sync</span>
           {{ $t('common.save') }}
@@ -397,7 +482,9 @@
 
           <div class="grid grid-cols-3 gap-4 mb-3">
             <div>
-              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('locations.latitude') }}</label>
+              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                $t('locations.latitude')
+              }}</label>
               <input
                 v-model.number="regionForm.coordinates.lat"
                 type="number"
@@ -407,7 +494,9 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('locations.longitude') }}</label>
+              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                $t('locations.longitude')
+              }}</label>
               <input
                 v-model.number="regionForm.coordinates.lng"
                 type="number"
@@ -417,7 +506,9 @@
               />
             </div>
             <div>
-              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('locations.zoomLevel') }}</label>
+              <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                $t('locations.zoomLevel')
+              }}</label>
               <input
                 v-model.number="regionForm.zoom"
                 type="number"
@@ -431,10 +522,12 @@
 
           <!-- Map for coordinate selection -->
           <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden">
-            <div class="h-64 relative" style="z-index: 1;">
+            <div class="h-64 relative" style="z-index: 1">
               <div id="region-modal-map" class="w-full h-full"></div>
             </div>
-            <div class="bg-gray-50 dark:bg-slate-700/50 px-3 py-2 text-xs text-gray-500 dark:text-slate-400 text-center flex items-center justify-center gap-2">
+            <div
+              class="bg-gray-50 dark:bg-slate-700/50 px-3 py-2 text-xs text-gray-500 dark:text-slate-400 text-center flex items-center justify-center gap-2"
+            >
               <span class="material-icons text-sm">touch_app</span>
               {{ $t('locations.clickMapToSelect') }}
             </div>
@@ -443,14 +536,14 @@
       </div>
 
       <template #footer>
-        <button type="button" @click="showRegionModal = false" class="btn btn-secondary">
+        <button type="button" class="btn btn-secondary" @click="showRegionModal = false">
           {{ $t('common.cancel') }}
         </button>
         <button
           type="button"
-          @click="saveRegion"
           class="btn btn-primary"
           :disabled="savingRegion || !regionForm.name"
+          @click="saveRegion"
         >
           <span v-if="savingRegion" class="material-icons text-sm animate-spin mr-1">sync</span>
           {{ $t('common.save') }}
@@ -531,7 +624,7 @@ const countryDropdownRef = ref(null)
 const countrySearchInput = ref(null)
 
 // Watch country change and save to localStorage
-watch(selectedCountryCode, (newVal) => {
+watch(selectedCountryCode, newVal => {
   if (newVal) {
     localStorage.setItem(STORAGE_KEY, newVal)
   } else {
@@ -606,7 +699,7 @@ const toggleCountryDropdown = () => {
 }
 
 // Select country from dropdown
-const selectCountry = (country) => {
+const selectCountry = country => {
   selectedCountryCode.value = country.code
   showCountryDropdown.value = false
   countrySearch.value = ''
@@ -621,24 +714,24 @@ const selectFirstCountry = () => {
 }
 
 // Handle click outside to close dropdown
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   if (countryDropdownRef.value && !countryDropdownRef.value.contains(event.target)) {
     showCountryDropdown.value = false
   }
 }
 
 // Helpers
-const getCountryName = (country) => {
+const getCountryName = country => {
   return country.name[locale.value] || country.name.tr || country.name.en || country.code
 }
 
 // City and region names are now simple strings (not multilingual)
-const getCityName = (city) => {
+const getCityName = city => {
   if (!city) return ''
   return city.name || ''
 }
 
-const getRegionName = (region) => {
+const getRegionName = region => {
   if (!region) return ''
   return region.name || ''
 }
@@ -677,7 +770,7 @@ const loadCities = async () => {
 }
 
 // Select a city
-const selectCity = async (city) => {
+const selectCity = async city => {
   // Ensure coordinates object exists
   selectedCity.value = {
     ...city,
@@ -688,7 +781,7 @@ const selectCity = async (city) => {
 }
 
 // Load regions for a city
-const loadRegionsForCity = async (cityId) => {
+const loadRegionsForCity = async cityId => {
   loadingRegions.value = true
   try {
     const result = await getRegions(cityId)
@@ -768,7 +861,7 @@ const saveCity = async () => {
   }
 }
 
-const confirmDeleteCity = async (city) => {
+const confirmDeleteCity = async city => {
   if (!confirm(t('locations.deleteCityConfirm'))) return
 
   try {
@@ -847,7 +940,7 @@ const saveRegion = async () => {
   }
 }
 
-const confirmDeleteRegion = async (region) => {
+const confirmDeleteRegion = async region => {
   if (!confirm(t('locations.deleteRegionConfirm'))) return
 
   try {
@@ -916,7 +1009,9 @@ const updateMainMapMarkers = () => {
       { icon: cityIcon }
     )
       .addTo(mainMap)
-      .bindPopup(`<strong>${getCityName(selectedCity.value)}</strong><br><small>Şehir Merkezi</small>`)
+      .bindPopup(
+        `<strong>${getCityName(selectedCity.value)}</strong><br><small>Şehir Merkezi</small>`
+      )
 
     bounds.push([selectedCity.value.coordinates.lat, selectedCity.value.coordinates.lng])
   }
@@ -924,12 +1019,13 @@ const updateMainMapMarkers = () => {
   // Add region markers
   regions.value.forEach(region => {
     if (region.coordinates?.lat && region.coordinates?.lng) {
-      const marker = L.marker(
-        [region.coordinates.lat, region.coordinates.lng],
-        { icon: regionIcon }
-      )
+      const marker = L.marker([region.coordinates.lat, region.coordinates.lng], {
+        icon: regionIcon
+      })
         .addTo(mainMap)
-        .bindPopup(`<strong>${getRegionName(region)}</strong><br><small>${region.coordinates.lat.toFixed(5)}, ${region.coordinates.lng.toFixed(5)}</small>`)
+        .bindPopup(
+          `<strong>${getRegionName(region)}</strong><br><small>${region.coordinates.lat.toFixed(5)}, ${region.coordinates.lng.toFixed(5)}</small>`
+        )
 
       mainMapMarkers.push(marker)
       bounds.push([region.coordinates.lat, region.coordinates.lng])
@@ -947,14 +1043,16 @@ const updateMainMapMarkers = () => {
   }
 }
 
-const focusOnMap = (region) => {
+const focusOnMap = region => {
   if (!mainMap || !region.coordinates?.lat) return
   mainMap.setView([region.coordinates.lat, region.coordinates.lng], region.zoom || 14)
 
   const marker = mainMapMarkers.find(m => {
     const latlng = m.getLatLng()
-    return Math.abs(latlng.lat - region.coordinates.lat) < 0.0001 &&
-           Math.abs(latlng.lng - region.coordinates.lng) < 0.0001
+    return (
+      Math.abs(latlng.lat - region.coordinates.lat) < 0.0001 &&
+      Math.abs(latlng.lng - region.coordinates.lng) < 0.0001
+    )
   })
   if (marker) marker.openPopup()
 }
@@ -977,7 +1075,7 @@ const initCityModalMap = () => {
 
   cityModalMap = L.map('city-modal-map', {
     center: center,
-    zoom: hasCoords ? (cityForm.value.zoom || 10) : 6,
+    zoom: hasCoords ? cityForm.value.zoom || 10 : 6,
     zoomControl: true
   })
 
@@ -990,7 +1088,7 @@ const initCityModalMap = () => {
     cityModalMarker = L.marker(center, { icon: cityIcon }).addTo(cityModalMap)
   }
 
-  cityModalMap.on('click', (e) => {
+  cityModalMap.on('click', e => {
     const { lat, lng } = e.latlng
     cityForm.value.coordinates.lat = parseFloat(lat.toFixed(6))
     cityForm.value.coordinates.lng = parseFloat(lng.toFixed(6))
@@ -1026,7 +1124,7 @@ const initRegionModalMap = () => {
 
   regionModalMap = L.map('region-modal-map', {
     center: center,
-    zoom: hasCoords ? (regionForm.value.zoom || 14) : (selectedCity.value?.zoom || 10),
+    zoom: hasCoords ? regionForm.value.zoom || 14 : selectedCity.value?.zoom || 10,
     zoomControl: true
   })
 
@@ -1039,7 +1137,7 @@ const initRegionModalMap = () => {
     regionModalMarker = L.marker(center, { icon: regionIcon }).addTo(regionModalMap)
   }
 
-  regionModalMap.on('click', (e) => {
+  regionModalMap.on('click', e => {
     const { lat, lng } = e.latlng
     regionForm.value.coordinates.lat = parseFloat(lat.toFixed(6))
     regionForm.value.coordinates.lng = parseFloat(lng.toFixed(6))
@@ -1061,7 +1159,7 @@ const initRegionModalMap = () => {
 }
 
 // Watch for modal close to cleanup
-watch(showCityModal, (val) => {
+watch(showCityModal, val => {
   if (!val && cityModalMap) {
     cityModalMap.remove()
     cityModalMap = null
@@ -1069,7 +1167,7 @@ watch(showCityModal, (val) => {
   }
 })
 
-watch(showRegionModal, (val) => {
+watch(showRegionModal, val => {
   if (!val && regionModalMap) {
     regionModalMap.remove()
     regionModalMap = null

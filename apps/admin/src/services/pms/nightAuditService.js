@@ -30,11 +30,36 @@ export const STEP_NAMES = {
 }
 
 export const STEP_INFO = {
-  1: { name: 'preAuditCheck', label: 'On Kontrol', icon: 'checklist', activeLabel: 'Sistem kontrol ediliyor...' },
-  2: { name: 'noShowProcessing', label: 'Gelmeyenler', icon: 'person_off', activeLabel: 'No-show isleniyor...' },
-  3: { name: 'roomChargePosting', label: 'Oda Ucretleri', icon: 'payments', activeLabel: 'Ucretler yansitiliyor...' },
-  4: { name: 'cashierReconciliation', label: 'Kasa Kapanisi', icon: 'point_of_sale', activeLabel: 'Kasa kapatiliyor...' },
-  5: { name: 'reportsAndClose', label: 'Raporlar', icon: 'summarize', activeLabel: 'Raporlar hazirlaniyor...' }
+  1: {
+    name: 'preAuditCheck',
+    label: 'On Kontrol',
+    icon: 'checklist',
+    activeLabel: 'Sistem kontrol ediliyor...'
+  },
+  2: {
+    name: 'noShowProcessing',
+    label: 'Gelmeyenler',
+    icon: 'person_off',
+    activeLabel: 'No-show isleniyor...'
+  },
+  3: {
+    name: 'roomChargePosting',
+    label: 'Oda Ucretleri',
+    icon: 'payments',
+    activeLabel: 'Ucretler yansitiliyor...'
+  },
+  4: {
+    name: 'cashierReconciliation',
+    label: 'Kasa Kapanisi',
+    icon: 'point_of_sale',
+    activeLabel: 'Kasa kapatiliyor...'
+  },
+  5: {
+    name: 'reportsAndClose',
+    label: 'Raporlar',
+    icon: 'summarize',
+    activeLabel: 'Raporlar hazirlaniyor...'
+  }
 }
 
 export const ISSUE_SEVERITY = {
@@ -94,7 +119,7 @@ export const startAudit = async (hotelId, auditDate = null) => {
 /**
  * Get current in-progress audit
  */
-export const getCurrentAudit = async (hotelId) => {
+export const getCurrentAudit = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/night-audit/current`)
   return response.data
 }
@@ -114,7 +139,7 @@ export const getAuditById = async (hotelId, auditId) => {
 /**
  * Run pre-audit checks
  */
-export const getPreAuditChecks = async (hotelId) => {
+export const getPreAuditChecks = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/night-audit/pre-check`)
   return response.data
 }
@@ -123,7 +148,10 @@ export const getPreAuditChecks = async (hotelId) => {
  * Complete pre-audit check step
  */
 export const completePreAuditCheck = async (hotelId, data) => {
-  const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/night-audit/pre-check/complete`, data)
+  const response = await pmsApiClient.post(
+    `/pms/hotels/${hotelId}/night-audit/pre-check/complete`,
+    data
+  )
   return response.data
 }
 
@@ -134,7 +162,7 @@ export const completePreAuditCheck = async (hotelId, data) => {
 /**
  * Get pending no-shows
  */
-export const getNoShows = async (hotelId) => {
+export const getNoShows = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/night-audit/no-shows`)
   return response.data
 }
@@ -156,7 +184,7 @@ export const processNoShows = async (hotelId, actions) => {
 /**
  * Get room charges to post
  */
-export const getRoomCharges = async (hotelId) => {
+export const getRoomCharges = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/night-audit/room-charges`)
   return response.data
 }
@@ -178,7 +206,7 @@ export const postRoomCharges = async (hotelId, charges) => {
 /**
  * Get cashier data for reconciliation
  */
-export const getCashierData = async (hotelId) => {
+export const getCashierData = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/night-audit/cashier`)
   return response.data
 }
@@ -200,7 +228,7 @@ export const closeCashierShifts = async (hotelId, shifts) => {
 /**
  * Get audit summary for day close
  */
-export const getAuditSummary = async (hotelId) => {
+export const getAuditSummary = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/night-audit/summary`)
   return response.data
 }
@@ -294,14 +322,14 @@ export const formatCurrency = (amount, currency = 'TRY') => {
 /**
  * Format percentage
  */
-export const formatPercentage = (value) => {
+export const formatPercentage = value => {
   return `%${Math.round(value || 0)}`
 }
 
 /**
  * Calculate progress percentage
  */
-export const calculateProgress = (audit) => {
+export const calculateProgress = audit => {
   if (!audit) return 0
   let completed = 0
   if (audit.preAuditCheck?.completed) completed++
@@ -329,7 +357,7 @@ export const getStepStatus = (audit, stepNumber) => {
 /**
  * Get all steps with status
  */
-export const getStepsWithStatus = (audit) => {
+export const getStepsWithStatus = audit => {
   return Object.entries(STEP_INFO).map(([num, info]) => ({
     number: parseInt(num),
     ...info,

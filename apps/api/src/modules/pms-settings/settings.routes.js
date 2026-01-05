@@ -3,12 +3,12 @@ import * as pmsAuthService from './pmsAuth.service.js'
 import * as pmsUserService from './pmsUser.service.js'
 import * as settingsService from './settings.service.js'
 import {
-    pmsProtect,
-    pmsRequirePermission,
-    pmsRequireRole,
-    pmsDualAuth,
-    pmsDualRequirePartnerOrAdmin,
-    pmsSetPartnerFromHotel
+  pmsProtect,
+  pmsRequirePermission,
+  pmsRequireRole,
+  pmsDualAuth,
+  pmsDualRequirePartnerOrAdmin,
+  pmsSetPartnerFromHotel
 } from './pmsAuth.middleware.js'
 import { protect, requirePartnerOrAdmin } from '../../middleware/auth.js'
 
@@ -51,67 +51,52 @@ router.post('/auth/change-password', pmsProtect, pmsAuthService.changePassword)
 // ===========================================
 
 // PMS User CRUD - For PMS admins
-router.get('/users',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.getAll
-)
+router.get('/users', pmsProtect, pmsRequireRole('pms_admin'), pmsUserService.getAll)
 
-router.get('/users/:id',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.getOne
-)
+router.get('/users/:id', pmsProtect, pmsRequireRole('pms_admin'), pmsUserService.getOne)
 
-router.post('/users',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.create
-)
+router.post('/users', pmsProtect, pmsRequireRole('pms_admin'), pmsUserService.create)
 
-router.put('/users/:id',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.update
-)
+router.put('/users/:id', pmsProtect, pmsRequireRole('pms_admin'), pmsUserService.update)
 
-router.delete('/users/:id',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.remove
-)
+router.delete('/users/:id', pmsProtect, pmsRequireRole('pms_admin'), pmsUserService.remove)
 
 // Reset user password (admin only)
-router.post('/users/:id/reset-password',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.resetPassword
+router.post(
+  '/users/:id/reset-password',
+  pmsProtect,
+  pmsRequireRole('pms_admin'),
+  pmsUserService.resetPassword
 )
 
 // Hotel assignment management
-router.post('/users/:id/assign-hotel',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.assignHotel
+router.post(
+  '/users/:id/assign-hotel',
+  pmsProtect,
+  pmsRequireRole('pms_admin'),
+  pmsUserService.assignHotel
 )
 
-router.delete('/users/:id/hotels/:hotelId',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.removeHotel
+router.delete(
+  '/users/:id/hotels/:hotelId',
+  pmsProtect,
+  pmsRequireRole('pms_admin'),
+  pmsUserService.removeHotel
 )
 
-router.put('/users/:id/hotels/:hotelId/permissions',
-    pmsProtect,
-    pmsRequireRole('pms_admin'),
-    pmsUserService.updatePermissions
+router.put(
+  '/users/:id/hotels/:hotelId/permissions',
+  pmsProtect,
+  pmsRequireRole('pms_admin'),
+  pmsUserService.updatePermissions
 )
 
 // Get users by hotel
-router.get('/hotels/:hotelId/users',
-    pmsProtect,
-    pmsRequirePermission('settings.users'),
-    pmsUserService.getByHotel
+router.get(
+  '/hotels/:hotelId/users',
+  pmsProtect,
+  pmsRequirePermission('settings.users'),
+  pmsUserService.getByHotel
 )
 
 // ===========================================
@@ -122,65 +107,49 @@ router.get('/hotels/:hotelId/users',
 // These routes allow partner admins to manage PMS users
 // without needing to log into PMS
 
-router.get('/admin/users',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.getAll
+router.get('/admin/users', protect, requirePartnerOrAdmin, pmsUserService.getAll)
+
+router.get('/admin/users/:id', protect, requirePartnerOrAdmin, pmsUserService.getOne)
+
+router.post('/admin/users', protect, requirePartnerOrAdmin, pmsUserService.create)
+
+router.put('/admin/users/:id', protect, requirePartnerOrAdmin, pmsUserService.update)
+
+router.delete('/admin/users/:id', protect, requirePartnerOrAdmin, pmsUserService.remove)
+
+router.post(
+  '/admin/users/:id/reset-password',
+  protect,
+  requirePartnerOrAdmin,
+  pmsUserService.resetPassword
 )
 
-router.get('/admin/users/:id',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.getOne
+router.post(
+  '/admin/users/:id/assign-hotel',
+  protect,
+  requirePartnerOrAdmin,
+  pmsUserService.assignHotel
 )
 
-router.post('/admin/users',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.create
+router.delete(
+  '/admin/users/:id/hotels/:hotelId',
+  protect,
+  requirePartnerOrAdmin,
+  pmsUserService.removeHotel
 )
 
-router.put('/admin/users/:id',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.update
-)
-
-router.delete('/admin/users/:id',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.remove
-)
-
-router.post('/admin/users/:id/reset-password',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.resetPassword
-)
-
-router.post('/admin/users/:id/assign-hotel',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.assignHotel
-)
-
-router.delete('/admin/users/:id/hotels/:hotelId',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.removeHotel
-)
-
-router.put('/admin/users/:id/hotels/:hotelId/permissions',
-    protect,
-    requirePartnerOrAdmin,
-    pmsUserService.updatePermissions
+router.put(
+  '/admin/users/:id/hotels/:hotelId/permissions',
+  protect,
+  requirePartnerOrAdmin,
+  pmsUserService.updatePermissions
 )
 
 // ===========================================
 // SETTINGS ROUTES
 // ===========================================
 
-const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel];
+const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel]
 
 // Utility endpoints (static data) - these need their own middleware as they're not under /hotels/:hotelId
 router.get('/settings/timezones', protect, requirePartnerOrAdmin, settingsService.getTimezones)
@@ -196,20 +165,56 @@ router.put('/hotels/:hotelId/settings', hotelMiddleware, settingsService.updateA
 router.post('/hotels/:hotelId/settings/reset', hotelMiddleware, settingsService.resetSettings)
 
 // Section-specific updates
-router.put('/hotels/:hotelId/settings/general', hotelMiddleware, settingsService.updateGeneralSettings)
-router.put('/hotels/:hotelId/settings/front-desk', hotelMiddleware, settingsService.updateFrontDeskSettings)
+router.put(
+  '/hotels/:hotelId/settings/general',
+  hotelMiddleware,
+  settingsService.updateGeneralSettings
+)
+router.put(
+  '/hotels/:hotelId/settings/front-desk',
+  hotelMiddleware,
+  settingsService.updateFrontDeskSettings
+)
 router.put('/hotels/:hotelId/settings/taxes', hotelMiddleware, settingsService.updateTaxSettings)
-router.put('/hotels/:hotelId/settings/invoicing', hotelMiddleware, settingsService.updateInvoicingSettings)
-router.put('/hotels/:hotelId/settings/housekeeping', hotelMiddleware, settingsService.updateHousekeepingSettings)
-router.put('/hotels/:hotelId/settings/cashier', hotelMiddleware, settingsService.updateCashierSettings)
+router.put(
+  '/hotels/:hotelId/settings/invoicing',
+  hotelMiddleware,
+  settingsService.updateInvoicingSettings
+)
+router.put(
+  '/hotels/:hotelId/settings/housekeeping',
+  hotelMiddleware,
+  settingsService.updateHousekeepingSettings
+)
+router.put(
+  '/hotels/:hotelId/settings/cashier',
+  hotelMiddleware,
+  settingsService.updateCashierSettings
+)
 
-router.put('/hotels/:hotelId/settings/notifications', hotelMiddleware, settingsService.updateNotificationSettings)
-router.put('/hotels/:hotelId/settings/reservations', hotelMiddleware, settingsService.updateReservationSettings)
+router.put(
+  '/hotels/:hotelId/settings/notifications',
+  hotelMiddleware,
+  settingsService.updateNotificationSettings
+)
+router.put(
+  '/hotels/:hotelId/settings/reservations',
+  hotelMiddleware,
+  settingsService.updateReservationSettings
+)
 router.put('/hotels/:hotelId/settings/guests', hotelMiddleware, settingsService.updateGuestSettings)
 router.put('/hotels/:hotelId/settings/kbs', hotelMiddleware, settingsService.updateKbsSettings)
 
 // Utility: Generate invoice/receipt numbers
-router.post('/hotels/:hotelId/settings/invoice-number', hotelMiddleware, settingsService.getNextInvoiceNumber)
-router.post('/hotels/:hotelId/settings/receipt-number', hotelMiddleware, settingsService.getNextReceiptNumber)
+router.post(
+  '/hotels/:hotelId/settings/invoice-number',
+  hotelMiddleware,
+  settingsService.getNextInvoiceNumber
+)
+router.post(
+  '/hotels/:hotelId/settings/receipt-number',
+  hotelMiddleware,
+  settingsService.getNextReceiptNumber
+)
 
 export default router

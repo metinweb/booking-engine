@@ -7,13 +7,13 @@
           <button
             v-for="tab in tabs"
             :key="tab.id"
-            @click="activeTab = tab.id"
             :class="[
               activeTab === tab.id
                 ? 'border-purple-500 text-purple-600 dark:text-purple-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300',
               'flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors'
             ]"
+            @click="activeTab = tab.id"
           >
             <span class="material-icons mr-2 text-lg">{{ tab.icon }}</span>
             {{ tab.label }}
@@ -33,13 +33,15 @@
           <!-- Platform Email Option -->
           <label
             class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all"
-            :class="!emailForm.useOwnSES
-              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-              : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+            :class="
+              !emailForm.useOwnSES
+                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+            "
           >
             <input
-              type="radio"
               v-model="emailForm.useOwnSES"
+              type="radio"
               :value="false"
               class="mt-1 text-purple-600 focus:ring-purple-500"
             />
@@ -56,13 +58,15 @@
           <!-- Own Domain Option -->
           <label
             class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all"
-            :class="emailForm.useOwnSES
-              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-              : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+            :class="
+              emailForm.useOwnSES
+                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+            "
           >
             <input
-              type="radio"
               v-model="emailForm.useOwnSES"
+              type="radio"
               :value="true"
               class="mt-1 text-purple-600 focus:ring-purple-500"
             />
@@ -82,9 +86,17 @@
       <transition name="fade">
         <div v-if="emailForm.useOwnSES" class="space-y-6">
           <!-- Step 1: Domain & Sender Info (if no domain yet) -->
-          <div v-if="!domainVerification" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
-            <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-              <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2">1</span>
+          <div
+            v-if="!domainVerification"
+            class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6"
+          >
+            <h4
+              class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center"
+            >
+              <span
+                class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2"
+                >1</span
+              >
               {{ $t('siteSettings.notifications.email.domainAndSender') }}
             </h4>
 
@@ -126,13 +138,19 @@
 
             <div class="mt-6">
               <button
-                @click="handleCreateIdentity"
                 :disabled="!domainForm.domain || creatingIdentity"
                 class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
+                @click="handleCreateIdentity"
               >
-                <span v-if="creatingIdentity" class="material-icons animate-spin mr-2">refresh</span>
+                <span v-if="creatingIdentity" class="material-icons animate-spin mr-2"
+                  >refresh</span
+                >
                 <span v-else class="material-icons mr-2">add_circle</span>
-                {{ creatingIdentity ? $t('siteSettings.notifications.email.creatingIdentity') : $t('siteSettings.notifications.email.createIdentity') }}
+                {{
+                  creatingIdentity
+                    ? $t('siteSettings.notifications.email.creatingIdentity')
+                    : $t('siteSettings.notifications.email.createIdentity')
+                }}
               </button>
             </div>
           </div>
@@ -140,37 +158,61 @@
           <!-- Step 2: DNS Records (after domain created) -->
           <template v-if="domainVerification">
             <!-- Domain Info Header -->
-            <div class="flex items-center justify-between bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
+            <div
+              class="flex items-center justify-between bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4"
+            >
               <div class="flex items-center">
                 <span class="material-icons text-purple-500 mr-2">domain</span>
-                <span class="font-medium text-gray-900 dark:text-white">{{ domainVerification.domain }}</span>
+                <span class="font-medium text-gray-900 dark:text-white">{{
+                  domainVerification.domain
+                }}</span>
                 <span
                   class="ml-3 px-2 py-1 text-xs font-medium rounded-full"
                   :class="{
-                    'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300': domainVerification.status === 'verified',
-                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300': domainVerification.status === 'pending',
-                    'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300': domainVerification.status === 'failed',
-                    'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': !['verified', 'pending', 'failed'].includes(domainVerification.status)
+                    'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300':
+                      domainVerification.status === 'verified',
+                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300':
+                      domainVerification.status === 'pending',
+                    'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300':
+                      domainVerification.status === 'failed',
+                    'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300': ![
+                      'verified',
+                      'pending',
+                      'failed'
+                    ].includes(domainVerification.status)
                   }"
                 >
-                  {{ $t('siteSettings.notifications.email.' + (domainVerification.status || 'pending')) }}
+                  {{
+                    $t(
+                      'siteSettings.notifications.email.' + (domainVerification.status || 'pending')
+                    )
+                  }}
                 </span>
               </div>
               <button
-                @click="handleDeleteIdentity"
                 :disabled="deletingIdentity"
                 class="text-red-500 hover:text-red-600 flex items-center text-sm"
+                @click="handleDeleteIdentity"
               >
-                <span v-if="deletingIdentity" class="material-icons animate-spin text-sm mr-1">refresh</span>
+                <span v-if="deletingIdentity" class="material-icons animate-spin text-sm mr-1"
+                  >refresh</span
+                >
                 <span v-else class="material-icons text-sm mr-1">delete</span>
                 {{ $t('siteSettings.notifications.email.deleteIdentity') }}
               </button>
             </div>
 
             <!-- DNS Records -->
-            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
-              <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
-                <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2">2</span>
+            <div
+              class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6"
+            >
+              <h4
+                class="text-base font-semibold text-gray-900 dark:text-white mb-2 flex items-center"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2"
+                  >2</span
+                >
                 {{ $t('siteSettings.notifications.email.dnsRecords') }}
               </h4>
               <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
@@ -195,9 +237,15 @@
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-100 dark:divide-slate-600">
-                    <tr v-for="(record, index) in dnsRecords" :key="index" class="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                    <tr
+                      v-for="(record, index) in dnsRecords"
+                      :key="index"
+                      class="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+                    >
                       <td class="px-3 py-3">
-                        <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+                        <span
+                          class="px-2 py-1 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                        >
                           {{ record.type }}
                         </span>
                       </td>
@@ -209,8 +257,8 @@
                       </td>
                       <td class="px-3 py-3">
                         <button
-                          @click="copyToClipboard(record)"
                           class="text-purple-600 hover:text-purple-700 flex items-center text-xs"
+                          @click="copyToClipboard(record)"
                         >
                           <span class="material-icons text-sm">content_copy</span>
                         </button>
@@ -222,32 +270,54 @@
             </div>
 
             <!-- Step 3: Verification -->
-            <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
-              <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2">3</span>
+            <div
+              class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6"
+            >
+              <h4
+                class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 text-sm flex items-center justify-center mr-2"
+                  >3</span
+                >
                 {{ $t('siteSettings.notifications.email.verificationStatus') }}
               </h4>
 
               <div class="flex items-center gap-4">
                 <button
-                  @click="handleCheckVerification"
                   :disabled="checkingVerification"
                   class="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center"
+                  @click="handleCheckVerification"
                 >
-                  <span v-if="checkingVerification" class="material-icons animate-spin mr-2">refresh</span>
+                  <span v-if="checkingVerification" class="material-icons animate-spin mr-2"
+                    >refresh</span
+                  >
                   <span v-else class="material-icons mr-2">refresh</span>
-                  {{ checkingVerification ? $t('siteSettings.notifications.email.checking') : $t('siteSettings.notifications.email.checkVerification') }}
+                  {{
+                    checkingVerification
+                      ? $t('siteSettings.notifications.email.checking')
+                      : $t('siteSettings.notifications.email.checkVerification')
+                  }}
                 </button>
 
-                <div v-if="domainVerification.status === 'verified'" class="flex items-center text-green-600">
+                <div
+                  v-if="domainVerification.status === 'verified'"
+                  class="flex items-center text-green-600"
+                >
                   <span class="material-icons mr-1">check_circle</span>
                   {{ $t('siteSettings.notifications.email.verified') }}
                 </div>
-                <div v-else-if="domainVerification.status === 'pending'" class="flex items-center text-yellow-600">
+                <div
+                  v-else-if="domainVerification.status === 'pending'"
+                  class="flex items-center text-yellow-600"
+                >
                   <span class="material-icons mr-1">schedule</span>
                   {{ $t('siteSettings.notifications.email.pending') }}
                 </div>
-                <div v-else-if="domainVerification.status === 'failed'" class="flex items-center text-red-600">
+                <div
+                  v-else-if="domainVerification.status === 'failed'"
+                  class="flex items-center text-red-600"
+                >
                   <span class="material-icons mr-1">error</span>
                   {{ $t('siteSettings.notifications.email.failed') }}
                 </div>
@@ -255,9 +325,17 @@
             </div>
 
             <!-- Step 4: Test Email (only if verified) -->
-            <div v-if="domainVerification.status === 'verified'" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6">
-              <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <span class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 text-sm flex items-center justify-center mr-2">4</span>
+            <div
+              v-if="domainVerification.status === 'verified'"
+              class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6"
+            >
+              <h4
+                class="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center"
+              >
+                <span
+                  class="w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 text-sm flex items-center justify-center mr-2"
+                  >4</span
+                >
                 {{ $t('siteSettings.notifications.email.sendTestEmail') }}
               </h4>
 
@@ -271,11 +349,13 @@
                   />
                 </div>
                 <button
-                  @click="handleTestEmail"
                   :disabled="!testEmailAddress || sendingTestEmail"
                   class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
+                  @click="handleTestEmail"
                 >
-                  <span v-if="sendingTestEmail" class="material-icons animate-spin mr-2">refresh</span>
+                  <span v-if="sendingTestEmail" class="material-icons animate-spin mr-2"
+                    >refresh</span
+                  >
                   <span v-else class="material-icons mr-2">send</span>
                   {{ $t('siteSettings.notifications.email.sendTestEmail') }}
                 </button>
@@ -286,7 +366,10 @@
       </transition>
 
       <!-- Platform Default Info -->
-      <div v-if="!emailForm.useOwnSES" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+      <div
+        v-if="!emailForm.useOwnSES"
+        class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6"
+      >
         <div class="flex items-start">
           <span class="material-icons text-blue-500 mr-3">info</span>
           <div>
@@ -315,12 +398,10 @@
             </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              v-model="smsForm.enabled"
-              class="sr-only peer"
-            />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-purple-600"></div>
+            <input v-model="smsForm.enabled" type="checkbox" class="sr-only peer" />
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-purple-600"
+            ></div>
           </label>
         </div>
       </div>
@@ -328,7 +409,9 @@
       <transition name="fade">
         <div v-if="smsForm.enabled" class="space-y-6">
           <!-- Provider Selection -->
-          <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+          <div
+            class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
+          >
             <div class="p-4 border-b border-gray-200 dark:border-slate-700">
               <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
                 <span class="material-icons text-green-500 mr-2">sms</span>
@@ -340,18 +423,30 @@
                 <button
                   v-for="provider in smsProviders"
                   :key="provider.value"
-                  @click="smsForm.provider = provider.value"
                   :class="[
                     'p-4 rounded-lg border-2 transition-all text-center',
                     smsForm.provider === provider.value
                       ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                       : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
                   ]"
+                  @click="smsForm.provider = provider.value"
                 >
-                  <span class="material-icons text-2xl mb-1" :class="smsForm.provider === provider.value ? 'text-purple-600' : 'text-gray-400'">
+                  <span
+                    class="material-icons text-2xl mb-1"
+                    :class="
+                      smsForm.provider === provider.value ? 'text-purple-600' : 'text-gray-400'
+                    "
+                  >
                     {{ provider.icon }}
                   </span>
-                  <p class="text-sm font-medium" :class="smsForm.provider === provider.value ? 'text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-slate-400'">
+                  <p
+                    class="text-sm font-medium"
+                    :class="
+                      smsForm.provider === provider.value
+                        ? 'text-purple-700 dark:text-purple-300'
+                        : 'text-gray-600 dark:text-slate-400'
+                    "
+                  >
                     {{ provider.label }}
                   </p>
                 </button>
@@ -360,7 +455,10 @@
           </div>
 
           <!-- Provider Config -->
-          <div v-if="smsForm.provider !== 'platform'" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+          <div
+            v-if="smsForm.provider !== 'platform'"
+            class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
+          >
             <div class="p-4 border-b border-gray-200 dark:border-slate-700">
               <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
                 <span class="material-icons text-orange-500 mr-2">settings</span>
@@ -375,8 +473,8 @@
                     {{ $t('smsSetup.netgsm.usercode') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.usercode"
+                    type="text"
                     autocomplete="nope"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -386,8 +484,8 @@
                     {{ $t('smsSetup.netgsm.password') }}
                   </label>
                   <input
-                    type="password"
                     v-model="smsForm.config.password"
+                    type="password"
                     autocomplete="new-password"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -397,8 +495,8 @@
                     {{ $t('smsSetup.netgsm.msgheader') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.msgheader"
+                    type="text"
                     autocomplete="off"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -412,8 +510,8 @@
                     {{ $t('smsSetup.iletimerkezi.apiKey') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.apiKey"
+                    type="text"
                     autocomplete="nope"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -423,8 +521,8 @@
                     {{ $t('smsSetup.iletimerkezi.apiHash') }}
                   </label>
                   <input
-                    type="password"
                     v-model="smsForm.config.apiHash"
+                    type="password"
                     autocomplete="new-password"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -434,8 +532,8 @@
                     {{ $t('smsSetup.iletimerkezi.sender') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.sender"
+                    type="text"
                     autocomplete="off"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -449,8 +547,8 @@
                     {{ $t('smsSetup.twilio.accountSid') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.accountSid"
+                    type="text"
                     autocomplete="nope"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -460,8 +558,8 @@
                     {{ $t('smsSetup.twilio.authToken') }}
                   </label>
                   <input
-                    type="password"
                     v-model="smsForm.config.authToken"
+                    type="password"
                     autocomplete="new-password"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -471,8 +569,8 @@
                     {{ $t('smsSetup.twilio.fromNumber') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.fromNumber"
+                    type="text"
                     placeholder="+1234567890"
                     autocomplete="off"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
@@ -487,8 +585,8 @@
                     {{ $t('smsSetup.vonage.apiKey') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.apiKey"
+                    type="text"
                     autocomplete="nope"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -498,8 +596,8 @@
                     {{ $t('smsSetup.vonage.apiSecret') }}
                   </label>
                   <input
-                    type="password"
                     v-model="smsForm.config.apiSecret"
+                    type="password"
                     autocomplete="new-password"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -509,8 +607,8 @@
                     {{ $t('smsSetup.vonage.fromNumber') }}
                   </label>
                   <input
-                    type="text"
                     v-model="smsForm.config.fromNumber"
+                    type="text"
                     autocomplete="off"
                     class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                   />
@@ -520,7 +618,10 @@
           </div>
 
           <!-- Test SMS Section -->
-          <div v-if="smsForm.provider !== 'platform'" class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+          <div
+            v-if="smsForm.provider !== 'platform'"
+            class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
+          >
             <div class="p-4 border-b border-gray-200 dark:border-slate-700">
               <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
                 <span class="material-icons text-purple-500 mr-2">send</span>
@@ -530,18 +631,20 @@
             <div class="p-6">
               <div class="flex space-x-2">
                 <input
-                  type="tel"
                   v-model="testPhone"
+                  type="tel"
                   :placeholder="$t('smsSetup.testPhonePlaceholder')"
                   autocomplete="off"
                   class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                 />
                 <button
-                  @click="sendTestSMS"
                   :disabled="!testPhone || sendingTestSMS"
                   class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  @click="sendTestSMS"
                 >
-                  <span v-if="sendingTestSMS" class="material-icons animate-spin mr-2">refresh</span>
+                  <span v-if="sendingTestSMS" class="material-icons animate-spin mr-2"
+                    >refresh</span
+                  >
                   <span v-else class="material-icons mr-2">send</span>
                   {{ $t('smsSetup.sendTest') }}
                 </button>
@@ -553,7 +656,10 @@
           </div>
 
           <!-- Platform Default Info for SMS -->
-          <div v-if="smsForm.provider === 'platform'" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+          <div
+            v-if="smsForm.provider === 'platform'"
+            class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6"
+          >
             <div class="flex items-start">
               <span class="material-icons text-blue-500 mr-3">info</span>
               <div>
@@ -570,7 +676,10 @@
       </transition>
 
       <!-- SMS Disabled Info -->
-      <div v-if="!smsForm.enabled" class="bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-lg p-6">
+      <div
+        v-if="!smsForm.enabled"
+        class="bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-lg p-6"
+      >
         <div class="flex items-start">
           <span class="material-icons text-gray-400 mr-3">sms_failed</span>
           <div>
@@ -587,9 +696,9 @@
       <!-- Save Button -->
       <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-slate-700">
         <button
-          @click="saveSMSSettings"
           :disabled="savingSMS"
           class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
+          @click="saveSMSSettings"
         >
           <span v-if="savingSMS" class="material-icons animate-spin mr-2">refresh</span>
           <span v-else class="material-icons mr-2">save</span>
@@ -615,10 +724,8 @@ const authStore = useAuthStore()
 
 const activeTab = ref('email')
 const loading = ref(true)
-const savingEmail = ref(false)
 const savingSMS = ref(false)
 const sendingTestSMS = ref(false)
-const showSecretKey = ref(false)
 const testPhone = ref('')
 
 // Domain identity states
@@ -685,7 +792,7 @@ const smsForm = reactive({
 
 // Get partner context
 const { currentPartnerId } = usePartnerContext({
-  onPartnerChange: (partner) => {
+  onPartnerChange: partner => {
     if (partner) {
       loadSettings()
     }
@@ -871,43 +978,14 @@ const handleTestEmail = async () => {
 }
 
 // Copy to clipboard
-const copyToClipboard = (record) => {
+const copyToClipboard = record => {
   const text = `${record.name}\t${record.value}`
   navigator.clipboard.writeText(text).then(() => {
     toast.success(t('siteSettings.notifications.email.copied'))
   })
 }
 
-const handleEmailToggleChange = () => {
-  if (!emailForm.useOwnSES) {
-    emailForm.aws = {
-      region: 'eu-west-1',
-      accessKeyId: '',
-      secretAccessKey: '',
-      fromEmail: '',
-      fromName: ''
-    }
-  }
-}
 
-const saveEmailSettings = async () => {
-  try {
-    savingEmail.value = true
-    const partnerId = currentPartnerId.value || authStore.user?.partner
-
-    await partnerEmailService.updateEmailSettings(partnerId, {
-      useOwnSES: emailForm.useOwnSES,
-      aws: emailForm.useOwnSES ? emailForm.aws : null
-    })
-
-    toast.success(t('emailSetup.settingsSaved'))
-  } catch (error) {
-    console.error('Save failed:', error)
-    toast.error(error.response?.data?.message || t('emailSetup.saveError'))
-  } finally {
-    savingEmail.value = false
-  }
-}
 
 const saveSMSSettings = async () => {
   try {

@@ -56,7 +56,10 @@ export const getRoomsWithOccupancy = async (hotelId, params = {}) => {
  * @param {object} data - { newCheckIn, newCheckOut, reason }
  */
 export const changeStayDates = async (hotelId, stayId, data) => {
-  const response = await pmsApiClient.put(`/pms/hotels/${hotelId}/room-plan/stays/${stayId}/dates`, data)
+  const response = await pmsApiClient.put(
+    `/pms/hotels/${hotelId}/room-plan/stays/${stayId}/dates`,
+    data
+  )
   return response.data
 }
 
@@ -67,7 +70,10 @@ export const changeStayDates = async (hotelId, stayId, data) => {
  * @param {object} data - { newRoomId, newCheckIn?, newCheckOut?, reason }
  */
 export const moveStayToRoom = async (hotelId, stayId, data) => {
-  const response = await pmsApiClient.put(`/pms/hotels/${hotelId}/room-plan/stays/${stayId}/room`, data)
+  const response = await pmsApiClient.put(
+    `/pms/hotels/${hotelId}/room-plan/stays/${stayId}/room`,
+    data
+  )
   return response.data
 }
 
@@ -168,11 +174,13 @@ export const generateDateArray = (startDate, daysCount) => {
  * Check if date is today
  * @param {Date} date - Date to check
  */
-export const isToday = (date) => {
+export const isToday = date => {
   const today = new Date()
-  return date.getDate() === today.getDate() &&
+  return (
+    date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear()
+  )
 }
 
 /**
@@ -198,7 +206,7 @@ export const formatDate = (date, format = 'short') => {
  * Get day name
  * @param {number} dayOfWeek - Day index (0-6)
  */
-export const getDayName = (dayOfWeek) => {
+export const getDayName = dayOfWeek => {
   const days = ['Paz', 'Pzt', 'Sal', 'Car', 'Per', 'Cum', 'Cmt']
   return days[dayOfWeek]
 }
@@ -207,9 +215,21 @@ export const getDayName = (dayOfWeek) => {
  * Get month name
  * @param {number} month - Month index (0-11)
  */
-export const getMonthName = (month) => {
-  const months = ['Ocak', 'Subat', 'Mart', 'Nisan', 'Mayis', 'Haziran',
-    'Temmuz', 'Agustos', 'Eylul', 'Ekim', 'Kasim', 'Aralik']
+export const getMonthName = month => {
+  const months = [
+    'Ocak',
+    'Subat',
+    'Mart',
+    'Nisan',
+    'Mayis',
+    'Haziran',
+    'Temmuz',
+    'Agustos',
+    'Eylul',
+    'Ekim',
+    'Kasim',
+    'Aralik'
+  ]
   return months[month]
 }
 
@@ -217,7 +237,7 @@ export const getMonthName = (month) => {
  * Get status color class for stay/reservation bar
  * @param {object} item - Stay or reservation object
  */
-export const getBarColorClass = (item) => {
+export const getBarColorClass = item => {
   if (item.isVip) {
     return 'bg-amber-500 dark:bg-amber-600'
   }

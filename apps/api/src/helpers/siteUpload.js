@@ -27,7 +27,7 @@ const siteStorage = multer.diskStorage({
   filename: (req, file, cb) => {
     // Use type from body or generate unique name
     const type = req.body?.type || 'image'
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9)
     const ext = path.extname(file.originalname)
 
     // For logo/favicon, use fixed names so they're replaced
@@ -43,7 +43,9 @@ const siteStorage = multer.diskStorage({
 const imageFilter = (req, file, cb) => {
   const allowedTypes = /jpeg|jpg|png|gif|webp|svg|ico/
   const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase())
-  const mimetype = /image\/(jpeg|jpg|png|gif|webp|svg\+xml|x-icon|vnd.microsoft.icon)/.test(file.mimetype)
+  const mimetype = /image\/(jpeg|jpg|png|gif|webp|svg\+xml|x-icon|vnd.microsoft.icon)/.test(
+    file.mimetype
+  )
 
   if (extname || mimetype) {
     return cb(null, true)

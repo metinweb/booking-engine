@@ -11,7 +11,14 @@ import Hotel from '../hotel/hotel.model.js'
 // Get all guests with search and filters
 export const getGuests = asyncHandler(async (req, res) => {
   const { hotelId } = req.params
-  const { search, vipLevel, isBlacklisted, page = 1, limit = 20, sort = '-statistics.lastStayDate' } = req.query
+  const {
+    search,
+    vipLevel,
+    isBlacklisted,
+    page = 1,
+    limit = 20,
+    sort = '-statistics.lastStayDate'
+  } = req.query
 
   const query = { hotel: hotelId, isActive: true }
 
@@ -41,11 +48,7 @@ export const getGuests = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit
 
   const [guests, total] = await Promise.all([
-    Guest.find(query)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .lean(),
+    Guest.find(query).sort(sort).skip(skip).limit(parseInt(limit)).lean(),
     Guest.countDocuments(query)
   ])
 
@@ -193,11 +196,27 @@ export const updateGuest = asyncHandler(async (req, res) => {
 
   // Fields that can be updated
   const allowedUpdates = [
-    'title', 'firstName', 'lastName', 'gender', 'dateOfBirth', 'nationality',
-    'idType', 'idNumber', 'idExpiry', 'idIssuingCountry',
-    'email', 'phone', 'alternatePhone', 'whatsapp',
-    'address', 'company', 'preferences', 'contactPreferences',
-    'loyaltyNumber', 'tags', 'photoUrl'
+    'title',
+    'firstName',
+    'lastName',
+    'gender',
+    'dateOfBirth',
+    'nationality',
+    'idType',
+    'idNumber',
+    'idExpiry',
+    'idIssuingCountry',
+    'email',
+    'phone',
+    'alternatePhone',
+    'whatsapp',
+    'address',
+    'company',
+    'preferences',
+    'contactPreferences',
+    'loyaltyNumber',
+    'tags',
+    'photoUrl'
   ]
 
   allowedUpdates.forEach(field => {
@@ -505,7 +524,8 @@ export const mergeGuests = asyncHandler(async (req, res) => {
     primary.statistics.lastStayDate = secondary.statistics.lastStayDate
   }
 
-  primary.statistics.averageStayLength = primary.statistics.totalNights / primary.statistics.totalStays
+  primary.statistics.averageStayLength =
+    primary.statistics.totalNights / primary.statistics.totalStays
 
   // Merge recent stays
   primary.recentStays = [...primary.recentStays, ...secondary.recentStays]
@@ -513,8 +533,9 @@ export const mergeGuests = asyncHandler(async (req, res) => {
     .slice(0, 10)
 
   // Merge notes
-  primary.notes = [...primary.notes, ...secondary.notes]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  primary.notes = [...primary.notes, ...secondary.notes].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  )
 
   // Merge tags
   primary.tags = [...new Set([...primary.tags, ...secondary.tags])]

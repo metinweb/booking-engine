@@ -5,13 +5,17 @@
       <div class="bg-gradient-to-r from-purple-600 to-purple-800 px-6 py-8">
         <div class="flex items-center gap-4">
           <!-- Avatar -->
-          <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+          <div
+            class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center text-white text-2xl font-bold"
+          >
             {{ getInitials(authStore.user?.name) }}
           </div>
           <div class="text-white">
             <h1 class="text-2xl font-bold">{{ authStore.user?.name || '-' }}</h1>
             <p class="text-purple-200">{{ authStore.user?.email }}</p>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 mt-2">
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 mt-2"
+            >
               {{ getRoleName() }}
             </span>
           </div>
@@ -33,7 +37,9 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('profile.fullName') }}
             </label>
-            <p class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg">
+            <p
+              class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg"
+            >
               {{ authStore.user?.name || '-' }}
             </p>
           </div>
@@ -41,7 +47,9 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('profile.email') }}
             </label>
-            <p class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg">
+            <p
+              class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg"
+            >
               {{ authStore.user?.email || '-' }}
             </p>
           </div>
@@ -49,7 +57,9 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('profile.role') }}
             </label>
-            <p class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg">
+            <p
+              class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg"
+            >
               {{ getRoleName() }}
             </p>
           </div>
@@ -57,7 +67,9 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('profile.accountType') }}
             </label>
-            <p class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg capitalize">
+            <p
+              class="text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 px-4 py-2.5 rounded-lg capitalize"
+            >
               {{ authStore.user?.accountType || '-' }}
             </p>
           </div>
@@ -83,15 +95,19 @@
             <button
               v-for="lang in languages"
               :key="lang.code"
-              @click="changeLanguage(lang.code)"
               class="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all"
-              :class="currentLocale === lang.code
-                ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
-                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 text-gray-700 dark:text-slate-300'"
+              :class="
+                currentLocale === lang.code
+                  ? 'border-purple-600 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
+                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 text-gray-700 dark:text-slate-300'
+              "
+              @click="changeLanguage(lang.code)"
             >
               <span class="text-lg">{{ lang.flag }}</span>
               <span class="font-medium">{{ lang.name }}</span>
-              <span class="material-icons text-sm" v-if="currentLocale === lang.code">check_circle</span>
+              <span v-if="currentLocale === lang.code" class="material-icons text-sm"
+                >check_circle</span
+              >
             </button>
           </div>
         </div>
@@ -103,21 +119,25 @@
           </label>
           <div class="flex gap-3">
             <button
-              @click="uiStore.setDarkMode(false)"
               class="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all"
-              :class="!uiStore.darkMode
-                ? 'border-purple-600 bg-purple-50 text-purple-700'
-                : 'border-gray-200 hover:border-gray-300 text-gray-700'"
+              :class="
+                !uiStore.darkMode
+                  ? 'border-purple-600 bg-purple-50 text-purple-700'
+                  : 'border-gray-200 hover:border-gray-300 text-gray-700'
+              "
+              @click="uiStore.setDarkMode(false)"
             >
               <span class="material-icons">light_mode</span>
               <span class="font-medium">{{ $t('common.lightMode') }}</span>
             </button>
             <button
-              @click="uiStore.setDarkMode(true)"
               class="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all"
-              :class="uiStore.darkMode
-                ? 'border-purple-600 bg-purple-900/20 text-purple-300'
-                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 text-gray-700 dark:text-slate-300'"
+              :class="
+                uiStore.darkMode
+                  ? 'border-purple-600 bg-purple-900/20 text-purple-300'
+                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 text-gray-700 dark:text-slate-300'
+              "
+              @click="uiStore.setDarkMode(true)"
             >
               <span class="material-icons">dark_mode</span>
               <span class="font-medium">{{ $t('common.darkMode') }}</span>
@@ -141,26 +161,36 @@
       <div class="p-6 space-y-6">
         <!-- Email Notifications -->
         <div>
-          <h3 class="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+          <h3
+            class="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-4"
+          >
             <span class="material-icons text-lg text-blue-500">email</span>
             {{ $t('profile.notifications.email') }}
           </h3>
           <div class="space-y-3 pl-7">
-            <label v-for="(value, key) in notificationPreferences.email" :key="'email-' + key" class="flex items-center justify-between">
-              <span class="text-sm text-gray-700 dark:text-slate-300">{{ $t('profile.notifications.types.' + key) }}</span>
+            <label
+              v-for="(value, key) in notificationPreferences.email"
+              :key="'email-' + key"
+              class="flex items-center justify-between"
+            >
+              <span class="text-sm text-gray-700 dark:text-slate-300">{{
+                $t('profile.notifications.types.' + key)
+              }}</span>
               <button
-                @click="toggleNotification('email', key)"
                 :class="[
                   'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                  notificationPreferences.email[key] ? 'bg-purple-600' : 'bg-gray-300 dark:bg-slate-600'
+                  notificationPreferences.email[key]
+                    ? 'bg-purple-600'
+                    : 'bg-gray-300 dark:bg-slate-600'
                 ]"
+                @click="toggleNotification('email', key)"
               >
                 <span
                   :class="[
                     'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
                     notificationPreferences.email[key] ? 'translate-x-6' : 'translate-x-1'
                   ]"
-                />
+                ></span>
               </button>
             </label>
           </div>
@@ -168,26 +198,36 @@
 
         <!-- SMS Notifications -->
         <div>
-          <h3 class="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+          <h3
+            class="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-4"
+          >
             <span class="material-icons text-lg text-green-500">sms</span>
             {{ $t('profile.notifications.sms') }}
           </h3>
           <div class="space-y-3 pl-7">
-            <label v-for="(value, key) in notificationPreferences.sms" :key="'sms-' + key" class="flex items-center justify-between">
-              <span class="text-sm text-gray-700 dark:text-slate-300">{{ $t('profile.notifications.types.' + key) }}</span>
+            <label
+              v-for="(value, key) in notificationPreferences.sms"
+              :key="'sms-' + key"
+              class="flex items-center justify-between"
+            >
+              <span class="text-sm text-gray-700 dark:text-slate-300">{{
+                $t('profile.notifications.types.' + key)
+              }}</span>
               <button
-                @click="toggleNotification('sms', key)"
                 :class="[
                   'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                  notificationPreferences.sms[key] ? 'bg-purple-600' : 'bg-gray-300 dark:bg-slate-600'
+                  notificationPreferences.sms[key]
+                    ? 'bg-purple-600'
+                    : 'bg-gray-300 dark:bg-slate-600'
                 ]"
+                @click="toggleNotification('sms', key)"
               >
                 <span
                   :class="[
                     'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
                     notificationPreferences.sms[key] ? 'translate-x-6' : 'translate-x-1'
                   ]"
-                />
+                ></span>
               </button>
             </label>
           </div>
@@ -195,26 +235,36 @@
 
         <!-- Push Notifications -->
         <div>
-          <h3 class="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-4">
+          <h3
+            class="text-sm font-semibold text-gray-800 dark:text-white flex items-center gap-2 mb-4"
+          >
             <span class="material-icons text-lg text-orange-500">notifications_active</span>
             {{ $t('profile.notifications.push') }}
           </h3>
           <div class="space-y-3 pl-7">
-            <label v-for="(value, key) in notificationPreferences.push" :key="'push-' + key" class="flex items-center justify-between">
-              <span class="text-sm text-gray-700 dark:text-slate-300">{{ $t('profile.notifications.types.' + key) }}</span>
+            <label
+              v-for="(value, key) in notificationPreferences.push"
+              :key="'push-' + key"
+              class="flex items-center justify-between"
+            >
+              <span class="text-sm text-gray-700 dark:text-slate-300">{{
+                $t('profile.notifications.types.' + key)
+              }}</span>
               <button
-                @click="toggleNotification('push', key)"
                 :class="[
                   'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                  notificationPreferences.push[key] ? 'bg-purple-600' : 'bg-gray-300 dark:bg-slate-600'
+                  notificationPreferences.push[key]
+                    ? 'bg-purple-600'
+                    : 'bg-gray-300 dark:bg-slate-600'
                 ]"
+                @click="toggleNotification('push', key)"
               >
                 <span
                   :class="[
                     'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
                     notificationPreferences.push[key] ? 'translate-x-6' : 'translate-x-1'
                   ]"
-                />
+                ></span>
               </button>
             </label>
           </div>
@@ -223,11 +273,13 @@
         <!-- Save Button -->
         <div class="pt-4 border-t border-gray-200 dark:border-slate-700 flex justify-end">
           <button
-            @click="saveNotificationPreferences"
             :disabled="savingNotifications"
             class="btn-primary flex items-center gap-2"
+            @click="saveNotificationPreferences"
           >
-            <span v-if="savingNotifications" class="animate-spin material-icons text-lg">refresh</span>
+            <span v-if="savingNotifications" class="animate-spin material-icons text-lg"
+              >refresh</span
+            >
             <span v-else class="material-icons">save</span>
             {{ $t('common.save') }}
           </button>
@@ -244,10 +296,7 @@
         </h2>
       </div>
       <div class="p-6">
-        <button
-          @click="showPasswordModal = true"
-          class="btn-secondary flex items-center gap-2"
-        >
+        <button class="btn-secondary flex items-center gap-2" @click="showPasswordModal = true">
           <span class="material-icons">lock</span>
           {{ $t('profile.changePassword') }}
         </button>
@@ -261,7 +310,7 @@
       size="sm"
       @close="closePasswordModal"
     >
-      <form @submit.prevent="handlePasswordChange" class="space-y-4">
+      <form class="space-y-4" @submit.prevent="handlePasswordChange">
         <div>
           <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
             {{ $t('profile.currentPassword') }}
@@ -301,18 +350,14 @@
 
       <template #footer>
         <div class="flex justify-end gap-3">
-          <button
-            type="button"
-            @click="closePasswordModal"
-            class="btn-secondary"
-          >
+          <button type="button" class="btn-secondary" @click="closePasswordModal">
             {{ $t('common.cancel') }}
           </button>
           <button
             type="button"
-            @click="handlePasswordChange"
             :disabled="savingPassword"
             class="btn-primary flex items-center gap-2"
+            @click="handlePasswordChange"
           >
             <span v-if="savingPassword" class="animate-spin material-icons text-lg">refresh</span>
             {{ $t('common.save') }}
@@ -345,7 +390,7 @@ const languages = [
 
 const currentLocale = computed(() => locale.value)
 
-const changeLanguage = (lang) => {
+const changeLanguage = lang => {
   locale.value = lang
   localStorage.setItem('language', lang)
   toast.success(t('profile.languageChanged'))
@@ -405,7 +450,7 @@ const saveNotificationPreferences = async () => {
       push: notificationPreferences.push
     })
     toast.success(t('profile.notifications.saved'))
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   } finally {
     savingNotifications.value = false
@@ -417,7 +462,7 @@ onMounted(() => {
 })
 
 // Helpers
-const getInitials = (name) => {
+const getInitials = name => {
   if (!name) return 'U'
   const parts = name.split(' ')
   if (parts.length >= 2) {
@@ -471,10 +516,7 @@ const handlePasswordChange = async () => {
 
   savingPassword.value = true
   try {
-    await authService.changePassword(
-      passwordForm.currentPassword,
-      passwordForm.newPassword
-    )
+    await authService.changePassword(passwordForm.currentPassword, passwordForm.newPassword)
     toast.success(t('profile.passwordChanged'))
     closePasswordModal()
   } catch (error) {

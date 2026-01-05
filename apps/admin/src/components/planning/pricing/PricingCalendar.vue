@@ -7,10 +7,15 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!matrix.rows.length" class="py-12 text-center bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+    <div
+      v-else-if="!matrix.rows.length"
+      class="py-12 text-center bg-gray-50 dark:bg-slate-700/50 rounded-lg"
+    >
       <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">calendar_today</span>
       <p class="mt-3 text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.noRates') }}</p>
-      <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">{{ $t('planning.pricing.noRatesHint') }}</p>
+      <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">
+        {{ $t('planning.pricing.noRatesHint') }}
+      </p>
     </div>
 
     <!-- Calendar Grid -->
@@ -48,7 +53,9 @@
                 :key="`${roomType._id}-${mealPlan._id}`"
                 class="px-2 py-2 text-center text-xs font-medium text-gray-600 dark:text-slate-400 border-l border-gray-200 dark:border-slate-600"
               >
-                <span class="px-2 py-1 rounded bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-slate-300">
+                <span
+                  class="px-2 py-1 rounded bg-gray-100 dark:bg-slate-600 text-gray-700 dark:text-slate-300"
+                >
                   {{ mealPlan.code }}
                 </span>
               </th>
@@ -65,8 +72,10 @@
             :class="{ 'bg-amber-50 dark:bg-amber-900/10': row.isWeekend }"
           >
             <!-- Date Cell -->
-            <td class="sticky left-0 z-10 bg-white dark:bg-slate-800 px-4 py-2 text-sm border-r border-gray-100 dark:border-slate-700 align-middle"
-                :class="{ 'bg-amber-50 dark:bg-amber-900/10': row.isWeekend }">
+            <td
+              class="sticky left-0 z-10 bg-white dark:bg-slate-800 px-4 py-2 text-sm border-r border-gray-100 dark:border-slate-700 align-middle"
+              :class="{ 'bg-amber-50 dark:bg-amber-900/10': row.isWeekend }"
+            >
               <div class="font-medium text-gray-800 dark:text-white">{{ row.dateFormatted }}</div>
               <div class="text-xs text-gray-500 dark:text-slate-500">{{ row.weekday }}</div>
               <div v-if="row.season" class="mt-1">
@@ -80,7 +89,10 @@
             </td>
 
             <!-- Rate Cells -->
-            <template v-for="roomType in matrix.roomTypes" :key="`row-${row.dateKey}-${roomType._id}`">
+            <template
+              v-for="roomType in matrix.roomTypes"
+              :key="`row-${row.dateKey}-${roomType._id}`"
+            >
               <td
                 v-for="mealPlan in matrix.mealPlans"
                 :key="`${row.dateKey}-${roomType._id}-${mealPlan._id}`"
@@ -122,7 +134,7 @@
 </template>
 
 <script setup>
-import { computed, h } from 'vue'
+import { h } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
@@ -138,7 +150,7 @@ const props = defineProps({
   displayMode: {
     type: String,
     default: 'price', // price, allotment, stopSale
-    validator: (v) => ['price', 'allotment', 'stopSale'].includes(v)
+    validator: v => ['price', 'allotment', 'stopSale'].includes(v)
   },
   currency: {
     type: String,
@@ -154,11 +166,11 @@ const emit = defineEmits(['cell-click'])
 
 const { locale } = useI18n()
 
-const getRoomTypeName = (roomType) => {
+const getRoomTypeName = roomType => {
   return roomType.name?.[locale.value] || roomType.name?.tr || roomType.name?.en || roomType.code
 }
 
-const getSeasonName = (season) => {
+const getSeasonName = season => {
   return season.name?.[locale.value] || season.name?.tr || season.name?.en || season.code
 }
 
@@ -193,12 +205,14 @@ const PriceCell = {
       }
 
       switch (props.mode) {
-        case 'allotment':
+        case 'allotment': {
           const allotment = props.cell.allotment ?? 0
           return {
             text: allotment.toString(),
-            class: allotment < 3 ? 'text-amber-600 font-semibold' : 'text-gray-700 dark:text-slate-300'
+            class:
+              allotment < 3 ? 'text-amber-600 font-semibold' : 'text-gray-700 dark:text-slate-300'
           }
+        }
 
         case 'stopSale':
           return {
@@ -207,7 +221,7 @@ const PriceCell = {
           }
 
         case 'price':
-        default:
+        default: {
           const price = props.cell.pricePerNight
           if (!price && price !== 0) {
             return { text: '-', class: 'text-gray-300 dark:text-slate-600' }
@@ -217,6 +231,7 @@ const PriceCell = {
             subtext: props.currency,
             class: 'text-purple-600 dark:text-purple-400 font-semibold'
           }
+        }
       }
     }
 
@@ -224,16 +239,20 @@ const PriceCell = {
       const content = getContent()
 
       if (content.icon) {
-        return h('div', {
-          class: ['flex items-center justify-center rounded p-1', content.bg || '']
-        }, [
-          h('span', { class: ['material-icons text-sm', content.class] }, content.icon)
-        ])
+        return h(
+          'div',
+          {
+            class: ['flex items-center justify-center rounded p-1', content.bg || '']
+          },
+          [h('span', { class: ['material-icons text-sm', content.class] }, content.icon)]
+        )
       }
 
       return h('div', { class: 'flex flex-col items-center justify-center' }, [
         h('span', { class: ['text-sm', content.class] }, content.text),
-        content.subtext ? h('span', { class: 'text-xs text-gray-400 dark:text-slate-500' }, content.subtext) : null
+        content.subtext
+          ? h('span', { class: 'text-xs text-gray-400 dark:text-slate-500' }, content.subtext)
+          : null
       ])
     }
   }

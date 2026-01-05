@@ -4,23 +4,25 @@
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
       <div class="flex items-center gap-2 sm:gap-3">
         <button
-          @click="previousMonth"
           class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          @click="previousMonth"
         >
           <span class="material-icons text-lg sm:text-2xl">chevron_left</span>
         </button>
-        <h3 class="text-base sm:text-xl font-bold text-gray-800 dark:text-white min-w-[140px] sm:min-w-[200px] text-center">
+        <h3
+          class="text-base sm:text-xl font-bold text-gray-800 dark:text-white min-w-[140px] sm:min-w-[200px] text-center"
+        >
           {{ monthYearLabel }}
         </h3>
         <button
-          @click="nextMonth"
           class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          @click="nextMonth"
         >
           <span class="material-icons text-lg sm:text-2xl">chevron_right</span>
         </button>
         <button
-          @click="goToToday"
           class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+          @click="goToToday"
         >
           {{ $t('planning.pricing.today') }}
         </button>
@@ -47,37 +49,42 @@
         <!-- Copy/Paste Buttons -->
         <button
           v-if="selectedCells.length > 0"
-          @click="copyWeek"
           class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1 whitespace-nowrap"
           :title="'Ctrl+C'"
+          @click="copyWeek"
         >
           <span class="material-icons text-sm">content_copy</span>
           <span class="hidden sm:inline">{{ $t('planning.pricing.copyWeek') }}</span>
         </button>
         <button
           v-if="copiedWeek"
-          @click="pasteWeek"
           class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 transition-colors flex items-center gap-1 whitespace-nowrap"
           :title="'Ctrl+V'"
+          @click="pasteWeek"
         >
           <span class="material-icons text-sm">content_paste</span>
           <span class="hidden sm:inline">{{ $t('planning.pricing.pasteWeek') }}</span>
         </button>
 
-        <div v-if="selectedCells.length > 0 || copiedWeek" class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-slate-600 mx-0.5 sm:mx-1"></div>
+        <div
+          v-if="selectedCells.length > 0 || copiedWeek"
+          class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-slate-600 mx-0.5 sm:mx-1"
+        ></div>
 
         <button
           v-if="selectedCells.length > 0"
-          @click="clearSelection"
           class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+          @click="clearSelection"
         >
           <span class="material-icons text-sm align-middle mr-0.5 sm:mr-1">close</span>
-          <span class="hidden sm:inline">{{ $t('planning.pricing.clearSelection') }}</span> ({{ selectedCells.length }})
+          <span class="hidden sm:inline">{{ $t('planning.pricing.clearSelection') }}</span> ({{
+            selectedCells.length
+          }})
         </button>
         <button
           v-if="selectedCells.length > 0"
-          @click="bulkEdit"
           class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1 whitespace-nowrap"
+          @click="bulkEdit"
         >
           <span class="material-icons text-sm">edit</span>
           <span class="hidden sm:inline">{{ $t('planning.pricing.bulkEdit') }}</span>
@@ -87,19 +94,25 @@
 
         <!-- Inline Edit Mode Toggle -->
         <button
-          @click="toggleInlineEditMode"
           class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg transition-colors flex items-center gap-1 whitespace-nowrap"
-          :class="inlineEditMode
-            ? 'bg-green-600 text-white hover:bg-green-700'
-            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200'"
+          :class="
+            inlineEditMode
+              ? 'bg-green-600 text-white hover:bg-green-700'
+              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200'
+          "
+          @click="toggleInlineEditMode"
         >
           <span class="material-icons text-sm">{{ inlineEditMode ? 'save' : 'edit_note' }}</span>
-          <span class="hidden sm:inline">{{ inlineEditMode ? $t('planning.pricing.saveInlineEdit') : $t('planning.pricing.inlineEditMode') }}</span>
+          <span class="hidden sm:inline">{{
+            inlineEditMode
+              ? $t('planning.pricing.saveInlineEdit')
+              : $t('planning.pricing.inlineEditMode')
+          }}</span>
         </button>
         <button
           v-if="inlineEditMode"
-          @click="cancelInlineEdit"
           class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1 whitespace-nowrap"
+          @click="cancelInlineEdit"
         >
           <span class="material-icons text-sm">close</span>
           <span class="hidden sm:inline">{{ $t('common.cancel') }}</span>
@@ -108,7 +121,10 @@
     </div>
 
     <!-- Inline Edit Mode Banner -->
-    <div v-if="inlineEditMode" class="mb-3 p-2 sm:p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+    <div
+      v-if="inlineEditMode"
+      class="mb-3 p-2 sm:p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800"
+    >
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div class="flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs sm:text-sm">
           <span class="material-icons text-lg">edit_note</span>
@@ -118,8 +134,8 @@
         <div v-if="hasBaseRoom" class="flex items-center gap-3">
           <label class="flex items-center gap-2 cursor-pointer">
             <input
-              type="checkbox"
               v-model="inlineRelativePricing"
+              type="checkbox"
               class="w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
             />
             <span class="text-xs text-amber-700 dark:text-amber-300">
@@ -128,8 +144,8 @@
           </label>
           <label v-if="inlineRelativePricing" class="flex items-center gap-2 cursor-pointer">
             <input
-              type="checkbox"
               v-model="inlineAllowEditCalculated"
+              type="checkbox"
               class="w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
             />
             <span class="text-xs text-amber-700 dark:text-amber-300">
@@ -141,11 +157,15 @@
     </div>
 
     <!-- Selection Summary -->
-    <div v-if="selectedCells.length > 0" class="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+    <div
+      v-if="selectedCells.length > 0"
+      class="mb-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800"
+    >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4 text-sm">
           <span class="text-purple-700 dark:text-purple-300">
-            <span class="font-semibold">{{ selectedCells.length }}</span> {{ $t('planning.pricing.cellsSelected') }}
+            <span class="font-semibold">{{ selectedCells.length }}</span>
+            {{ $t('planning.pricing.cellsSelected') }}
           </span>
           <span class="text-gray-500 dark:text-slate-400">|</span>
           <span class="text-gray-600 dark:text-slate-400">
@@ -154,29 +174,29 @@
         </div>
         <div class="flex gap-2 flex-wrap">
           <button
-            @click="quickAction('stopSale', true)"
             class="px-2 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 transition-colors"
+            @click="quickAction('stopSale', true)"
           >
             <span class="material-icons text-xs align-middle">block</span>
             Stop Sale
           </button>
           <button
-            @click="quickAction('stopSale', false)"
             class="px-2 py-1 text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded hover:bg-green-200 transition-colors"
+            @click="quickAction('stopSale', false)"
           >
             <span class="material-icons text-xs align-middle">check_circle</span>
             Open Sale
           </button>
           <button
-            @click="quickAction('singleStop', true)"
             class="px-2 py-1 text-xs bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded hover:bg-pink-200 transition-colors"
+            @click="quickAction('singleStop', true)"
           >
             <span class="material-icons text-xs align-middle">person_off</span>
             1P Stop
           </button>
           <button
-            @click="quickAction('singleStop', false)"
             class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700/30 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 transition-colors"
+            @click="quickAction('singleStop', false)"
           >
             <span class="material-icons text-xs align-middle">person</span>
             1P Open
@@ -187,7 +207,10 @@
 
     <!-- Compact Allotment Status Bar -->
     <div
-      v-if="allotmentStats.totalCells > 0 && (allotmentStats.critical > 0 || allotmentStats.low > 0 || allotmentStats.stopSale > 0)"
+      v-if="
+        allotmentStats.totalCells > 0 &&
+        (allotmentStats.critical > 0 || allotmentStats.low > 0 || allotmentStats.stopSale > 0)
+      "
       class="mb-3 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600"
     >
       <div class="flex items-center gap-4 text-xs">
@@ -230,8 +253,8 @@
       </div>
       <!-- Details Link -->
       <button
-        @click="showAllotmentModal = true"
         class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 hover:underline flex items-center gap-1"
+        @click="showAllotmentModal = true"
       >
         <span class="material-icons text-sm">info</span>
         Detaylar
@@ -246,16 +269,20 @@
           class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
           @click.self="showAllotmentModal = false"
         >
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+          >
             <!-- Modal Header -->
-            <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
+            <div
+              class="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between"
+            >
               <div class="flex items-center gap-3">
                 <span class="material-icons">monitoring</span>
                 <h3 class="text-lg font-bold">Kontenjan Durumu</h3>
               </div>
               <button
-                @click="showAllotmentModal = false"
                 class="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                @click="showAllotmentModal = false"
               >
                 <span class="material-icons">close</span>
               </button>
@@ -277,14 +304,18 @@
                   <div class="text-xs text-green-500">Normal (4+)</div>
                 </div>
                 <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-center">
-                  <div class="text-2xl font-bold text-purple-600">{{ allotmentStats.stopSale }}</div>
+                  <div class="text-2xl font-bold text-purple-600">
+                    {{ allotmentStats.stopSale }}
+                  </div>
                   <div class="text-xs text-purple-500">Stop Sale</div>
                 </div>
               </div>
 
               <!-- Details List -->
               <div v-if="allotmentDetails.length > 0" class="space-y-2">
-                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Oda Bazlı Detay</h4>
+                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                  Oda Bazlı Detay
+                </h4>
                 <div
                   v-for="detail in allotmentDetails"
                   :key="detail.key"
@@ -292,18 +323,30 @@
                 >
                   <div class="flex items-center gap-2">
                     <span class="font-bold text-purple-600">{{ detail.roomCode }}</span>
-                    <span class="px-2 py-0.5 rounded text-xs font-medium" :class="getMealPlanBadgeClass(detail.mealPlanCode)">
+                    <span
+                      class="px-2 py-0.5 rounded text-xs font-medium"
+                      :class="getMealPlanBadgeClass(detail.mealPlanCode)"
+                    >
                       {{ detail.mealPlanCode }}
                     </span>
                   </div>
                   <div class="flex items-center gap-3">
-                    <span v-if="detail.critical > 0" class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full">
+                    <span
+                      v-if="detail.critical > 0"
+                      class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full"
+                    >
                       {{ detail.critical }} stok yok
                     </span>
-                    <span v-if="detail.low > 0" class="text-xs px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full">
+                    <span
+                      v-if="detail.low > 0"
+                      class="text-xs px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full"
+                    >
                       {{ detail.low }} düşük
                     </span>
-                    <span v-if="detail.stopSale > 0" class="text-xs px-2 py-0.5 bg-purple-100 text-purple-600 rounded-full">
+                    <span
+                      v-if="detail.stopSale > 0"
+                      class="text-xs px-2 py-0.5 bg-purple-100 text-purple-600 rounded-full"
+                    >
                       {{ detail.stopSale }} stop
                     </span>
                   </div>
@@ -326,21 +369,27 @@
     </div>
 
     <!-- Calendar Grid -->
-    <div v-else class="calendar-grid-wrapper overflow-auto rounded-xl border border-gray-200 dark:border-slate-600 shadow-sm">
-      <table class="calendar-table w-full" :style="{ minWidth: `${100 + (daysInMonth * 44)}px` }">
+    <div
+      v-else
+      class="calendar-grid-wrapper overflow-auto rounded-xl border border-gray-200 dark:border-slate-600 shadow-sm"
+    >
+      <table class="calendar-table w-full" :style="{ minWidth: `${100 + daysInMonth * 44}px` }">
         <!-- Days Header -->
         <thead>
           <!-- Day Numbers -->
           <tr class="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
-            <th class="sticky left-0 z-30 bg-gray-50 dark:bg-slate-800 px-2 sm:px-3 py-2 text-left min-w-[120px] sm:min-w-[180px] border-r border-gray-200 dark:border-slate-700">
-              <span class="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">
+            <th
+              class="sticky left-0 z-30 bg-gray-50 dark:bg-slate-800 px-2 sm:px-3 py-2 text-left min-w-[120px] sm:min-w-[180px] border-r border-gray-200 dark:border-slate-700"
+            >
+              <span
+                class="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
                 {{ $t('planning.pricing.roomType') }}
               </span>
             </th>
             <th
               v-for="day in calendarDays"
               :key="day.date"
-              @click="selectDateColumn(day.date, $event)"
               class="px-0.5 sm:px-1 py-1.5 sm:py-2 text-center min-w-[36px] sm:min-w-[48px] border-r border-gray-100 dark:border-slate-700 last:border-r-0 cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
               :class="{
                 'bg-blue-50 dark:bg-blue-900/20': day.isToday,
@@ -348,13 +397,25 @@
                 'bg-purple-100 dark:bg-purple-900/30': isDateColumnSelected(day.date)
               }"
               :title="$t('planning.pricing.clickToSelectDate')"
+              @click="selectDateColumn(day.date, $event)"
             >
-              <div class="text-[10px] sm:text-xs font-medium" :class="day.isToday ? 'text-blue-600 dark:text-blue-400' : day.isWeekend ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-slate-400'">
+              <div
+                class="text-[10px] sm:text-xs font-medium"
+                :class="
+                  day.isToday
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : day.isWeekend
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-gray-500 dark:text-slate-400'
+                "
+              >
                 {{ day.weekday }}
               </div>
               <div
                 class="text-xs sm:text-sm font-bold mt-0.5"
-                :class="day.isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-white'"
+                :class="
+                  day.isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-white'
+                "
               >
                 {{ day.dayNumber }}
               </div>
@@ -375,12 +436,18 @@
                 class="sticky left-0 z-20 bg-white dark:bg-slate-800 px-2 sm:px-3 py-1.5 sm:py-2 border-r border-gray-200 dark:border-slate-700 cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
                 :class="{
                   'border-t border-gray-200 dark:border-slate-700': mpIndex === 0,
-                  'bg-purple-50 dark:bg-purple-900/20': isRoomMealPlanSelected(roomType._id, mealPlan._id)
+                  'bg-purple-50 dark:bg-purple-900/20': isRoomMealPlanSelected(
+                    roomType._id,
+                    mealPlan._id
+                  )
                 }"
-                @click="selectRoomRow(roomType._id, mealPlan._id, $event)"
                 :title="$t('planning.pricing.clickToSelectRow')"
+                @click="selectRoomRow(roomType._id, mealPlan._id, $event)"
               >
-                <div v-if="mpIndex === 0" class="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[160px]">
+                <div
+                  v-if="mpIndex === 0"
+                  class="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[160px]"
+                >
                   <span class="text-purple-600 dark:text-purple-400">{{ roomType.code }}</span>
                   <span class="text-gray-400 mx-0.5">·</span>
                   {{ getRoomTypeName(roomType) }}
@@ -398,7 +465,9 @@
                   >
                     {{ mealPlan.code }}
                   </span>
-                  <span class="text-[10px] sm:text-xs text-gray-400 dark:text-slate-500 hidden sm:inline truncate max-w-[80px]">
+                  <span
+                    class="text-[10px] sm:text-xs text-gray-400 dark:text-slate-500 hidden sm:inline truncate max-w-[80px]"
+                  >
                     {{ getMealPlanName(mealPlan) }}
                   </span>
                 </div>
@@ -443,9 +512,13 @@
     </div>
 
     <!-- Legend & Keyboard Shortcuts -->
-    <div class="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 sm:gap-4">
+    <div
+      class="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 sm:gap-4"
+    >
       <!-- Legend -->
-      <div class="flex flex-wrap items-center gap-3 sm:gap-6 text-[10px] sm:text-xs text-gray-600 dark:text-slate-400">
+      <div
+        class="flex flex-wrap items-center gap-3 sm:gap-6 text-[10px] sm:text-xs text-gray-600 dark:text-slate-400"
+      >
         <div class="flex items-center gap-1.5 sm:gap-2">
           <div class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full bg-green-500"></div>
           <span>{{ $t('planning.pricing.available') }}</span>
@@ -471,15 +544,21 @@
       <!-- Keyboard Shortcuts (hidden on mobile) -->
       <div class="hidden sm:flex items-center gap-4 text-xs text-gray-500 dark:text-slate-500">
         <div class="flex items-center gap-1">
-          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono">Shift</kbd>
+          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono"
+            >Shift</kbd
+          >
           <span>+ Click: Range</span>
         </div>
         <div class="flex items-center gap-1">
-          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono">Ctrl</kbd>
+          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono"
+            >Ctrl</kbd
+          >
           <span>+ C/V: Copy/Paste</span>
         </div>
         <div class="flex items-center gap-1">
-          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono">Delete</kbd>
+          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono"
+            >Delete</kbd
+          >
           <span>: Stop Sale</span>
         </div>
       </div>
@@ -494,11 +573,13 @@
         <span class="material-icons text-lg">content_paste</span>
         <div>
           <div class="font-medium text-sm">{{ $t('planning.pricing.weekCopied') }}</div>
-          <div class="text-xs opacity-80">{{ copiedWeek.duration }} {{ locale === 'tr' ? 'gün' : 'days' }}</div>
+          <div class="text-xs opacity-80">
+            {{ copiedWeek.duration }} {{ locale === 'tr' ? 'gün' : 'days' }}
+          </div>
         </div>
         <button
-          @click="copiedWeek = null"
           class="ml-2 p-1 hover:bg-blue-500 rounded transition-colors"
+          @click="copiedWeek = null"
         >
           <span class="material-icons text-sm">close</span>
         </button>
@@ -532,13 +613,18 @@
         >
           <div class="flex flex-col gap-2">
             <!-- Header -->
-            <div class="text-xs text-gray-500 dark:text-slate-400 border-b border-gray-100 dark:border-slate-700 pb-2">
-              {{ $t('planning.pricing.copyValue') }}: <span class="font-bold text-green-600">{{ contextMenuCell?.value }}</span>
+            <div
+              class="text-xs text-gray-500 dark:text-slate-400 border-b border-gray-100 dark:border-slate-700 pb-2"
+            >
+              {{ $t('planning.pricing.copyValue') }}:
+              <span class="font-bold text-green-600">{{ contextMenuCell?.value }}</span>
             </div>
 
             <!-- Input and Button -->
             <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600 dark:text-slate-400 whitespace-nowrap">{{ $t('planning.pricing.copyToNextDays') }}</span>
+              <span class="text-sm text-gray-600 dark:text-slate-400 whitespace-nowrap">{{
+                $t('planning.pricing.copyToNextDays')
+              }}</span>
               <input
                 v-model.number="copyDaysCount"
                 type="number"
@@ -548,8 +634,8 @@
                 @keyup.enter="copyToRightDays"
               />
               <button
-                @click="copyToRightDays"
                 class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-1"
+                @click="copyToRightDays"
               >
                 <span class="material-icons text-sm">content_copy</span>
                 {{ $t('common.copy') }}
@@ -558,8 +644,8 @@
 
             <!-- Cancel -->
             <button
-              @click="closeContextMenu"
               class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 mt-1"
+              @click="closeContextMenu"
             >
               {{ $t('common.cancel') }}
             </button>
@@ -607,8 +693,6 @@ const currentDate = ref(getInitialDate())
 
 // Selection state
 const selectedCells = ref([])
-const isSelecting = ref(false)
-const selectionStart = ref(null)
 
 // Copy/Paste state
 const copiedWeek = ref(null)
@@ -630,7 +714,11 @@ const allotmentStats = computed(() => {
   for (const rt of props.roomTypes) {
     for (const mp of filteredMealPlans.value) {
       for (let day = 1; day <= daysInMonth.value; day++) {
-        const date = formatDateKey(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, day)
+        const date = formatDateKey(
+          currentDate.value.getFullYear(),
+          currentDate.value.getMonth() + 1,
+          day
+        )
         const rateInfo = getRateForCell(rt._id, mp._id, date)
 
         if (rateInfo) {
@@ -669,7 +757,11 @@ const allotmentDetails = computed(() => {
       }
 
       for (let day = 1; day <= daysInMonth.value; day++) {
-        const date = formatDateKey(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, day)
+        const date = formatDateKey(
+          currentDate.value.getFullYear(),
+          currentDate.value.getMonth() + 1,
+          day
+        )
         const rateInfo = getRateForCell(rt._id, mp._id, date)
 
         if (rateInfo) {
@@ -690,10 +782,10 @@ const allotmentDetails = computed(() => {
     }
   }
 
-  return details.sort((a, b) => (b.critical + b.low + b.stopSale) - (a.critical + a.low + a.stopSale))
+  return details.sort((a, b) => b.critical + b.low + b.stopSale - (a.critical + a.low + a.stopSale))
 })
 
-const highlightAllotmentLevel = (level) => {
+const highlightAllotmentLevel = level => {
   highlightedAllotmentLevel.value = highlightedAllotmentLevel.value === level ? null : level
   // Auto-select cells with this allotment level
   if (highlightedAllotmentLevel.value) {
@@ -701,13 +793,24 @@ const highlightAllotmentLevel = (level) => {
     for (const rt of props.roomTypes) {
       for (const mp of filteredMealPlans.value) {
         for (let day = 1; day <= daysInMonth.value; day++) {
-          const date = formatDateKey(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, day)
+          const date = formatDateKey(
+            currentDate.value.getFullYear(),
+            currentDate.value.getMonth() + 1,
+            day
+          )
           const rateInfo = getRateForCell(rt._id, mp._id, date)
 
           if (rateInfo) {
             let matches = false
-            if (level === 'critical' && !rateInfo.stopSale && rateInfo.allotment === 0) matches = true
-            if (level === 'low' && !rateInfo.stopSale && rateInfo.allotment > 0 && rateInfo.allotment <= 3) matches = true
+            if (level === 'critical' && !rateInfo.stopSale && rateInfo.allotment === 0)
+              matches = true
+            if (
+              level === 'low' &&
+              !rateInfo.stopSale &&
+              rateInfo.allotment > 0 &&
+              rateInfo.allotment <= 3
+            )
+              matches = true
             if (level === 'stopSale' && rateInfo.stopSale) matches = true
 
             if (matches) {
@@ -728,16 +831,19 @@ const highlightAllotmentLevel = (level) => {
   }
 }
 
-const getMealPlanBadgeClass = (code) => {
+const getMealPlanBadgeClass = code => {
   const colors = {
-    'RO': 'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium',
-    'BB': 'px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium',
-    'HB': 'px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded text-xs font-medium',
-    'FB': 'px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium',
-    'AI': 'px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs font-medium',
-    'UAI': 'px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded text-xs font-medium'
+    RO: 'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium',
+    BB: 'px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium',
+    HB: 'px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded text-xs font-medium',
+    FB: 'px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium',
+    AI: 'px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs font-medium',
+    UAI: 'px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded text-xs font-medium'
   }
-  return colors[code] || 'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium'
+  return (
+    colors[code] ||
+    'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium'
+  )
 }
 
 // Base room/meal plan for relative pricing (only if explicitly set)
@@ -848,7 +954,7 @@ const contextMenuRef = ref(null)
 const popoverCopyDays = ref(7) // For quick edit popover copy
 
 // Helper: Format date to YYYY-MM-DD without timezone issues
-const formatDateToString = (date) => {
+const formatDateToString = date => {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
@@ -861,7 +967,7 @@ const formatDateKey = (year, month, day) => {
 }
 
 // Helper: Parse YYYY-MM-DD string to local Date without timezone issues
-const parseDateString = (dateStr) => {
+const parseDateString = dateStr => {
   const [year, month, day] = dateStr.split('-').map(Number)
   return new Date(year, month - 1, day)
 }
@@ -875,7 +981,7 @@ const editingCellLabel = computed(() => {
   const { roomTypeId, mealPlanId, date } = editingCell.value
   const room = props.roomTypes.find(r => r._id === roomTypeId)
   const meal = props.mealPlans.find(m => m._id === mealPlanId)
-  const [year, month, day] = date.split('-')
+  const [, month, day] = date.split('-')
   return `${room?.code || ''},${meal?.code || ''} ${day}.${month}`
 })
 
@@ -884,9 +990,36 @@ const filteredMealPlans = computed(() => {
 })
 
 const monthYearLabel = computed(() => {
-  const months = locale.value === 'tr'
-    ? ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
-    : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  const months =
+    locale.value === 'tr'
+      ? [
+          'Ocak',
+          'Şubat',
+          'Mart',
+          'Nisan',
+          'Mayıs',
+          'Haziran',
+          'Temmuz',
+          'Ağustos',
+          'Eylül',
+          'Ekim',
+          'Kasım',
+          'Aralık'
+        ]
+      : [
+          'January',
+          'February',
+          'March',
+          'April',
+          'May',
+          'June',
+          'July',
+          'August',
+          'September',
+          'October',
+          'November',
+          'December'
+        ]
 
   return `${months[currentDate.value.getMonth()]} ${currentDate.value.getFullYear()}`
 })
@@ -904,9 +1037,10 @@ const calendarDays = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const weekdaysShort = locale.value === 'tr'
-    ? ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
-    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const weekdaysShort =
+    locale.value === 'tr'
+      ? ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
+      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
   for (let i = 1; i <= daysInMonth.value; i++) {
     const date = new Date(year, month, i)
@@ -933,7 +1067,7 @@ const getSelectionDateRange = computed(() => {
   const last = dates[dates.length - 1]
 
   // Parse date without timezone issues (YYYY-MM-DD format)
-  const formatDateStr = (dateStr) => {
+  const formatDateStr = dateStr => {
     const [year, month, day] = dateStr.split('-').map(Number)
     const date = new Date(year, month - 1, day) // month is 0-indexed
     return date.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US')
@@ -963,50 +1097,55 @@ const nextMonth = () => {
 
 const goToToday = () => {
   currentDate.value = new Date()
-  emit('refresh', { year: currentDate.value.getFullYear(), month: currentDate.value.getMonth() + 1 })
+  emit('refresh', {
+    year: currentDate.value.getFullYear(),
+    month: currentDate.value.getMonth() + 1
+  })
 }
 
-const getRoomTypeName = (roomType) => {
+const getRoomTypeName = roomType => {
   return roomType.name?.[locale.value] || roomType.name?.tr || roomType.name?.en || roomType.code
 }
 
-const getMealPlanName = (mealPlan) => {
+const getMealPlanName = mealPlan => {
   return mealPlan.name?.[locale.value] || mealPlan.name?.tr || mealPlan.name?.en || ''
 }
 
-const getSeasonName = (season) => {
+const getSeasonName = season => {
   return season.name?.[locale.value] || season.name?.tr || season.name?.en || season.code
 }
 
-const getMealPlanColor = (code) => {
+const getMealPlanColor = code => {
   const colors = {
-    'RO': 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-    'BB': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-    'HB': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-    'FB': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-    'AI': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-    'UAI': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+    RO: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+    BB: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
+    HB: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+    FB: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+    AI: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+    UAI: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
   }
   return colors[code] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
 }
 
 const getRateForCell = (roomTypeId, mealPlanId, dateStr) => {
   // Daily rate model - find the rate that matches this exact date
-  return props.rates.find(rate => {
-    const rtId = rate.roomType?._id || rate.roomType
-    const mpId = rate.mealPlan?._id || rate.mealPlan
+  return (
+    props.rates.find(rate => {
+      const rtId = rate.roomType?._id || rate.roomType
+      const mpId = rate.mealPlan?._id || rate.mealPlan
 
-    if (rtId !== roomTypeId || mpId !== mealPlanId) return false
+      if (rtId !== roomTypeId || mpId !== mealPlanId) return false
 
-    // Compare date string directly (YYYY-MM-DD format)
-    const rateDateStr = rate.date?.substring?.(0, 10) || ''
-    return rateDateStr === dateStr
-  }) || null
+      // Compare date string directly (YYYY-MM-DD format)
+      const rateDateStr = rate.date?.substring?.(0, 10) || ''
+      return rateDateStr === dateStr
+    }) || null
+  )
 }
 
 const isCellSelected = (roomTypeId, mealPlanId, date) => {
-  return selectedCells.value.some(c =>
-    c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId && c.date === date
+  return selectedCells.value.some(
+    c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId && c.date === date
   )
 }
 
@@ -1021,8 +1160,8 @@ const handleCellClick = (event, roomTypeId, mealPlanId, date) => {
     selectRange(lastSelected, cellKey)
   } else if (event.ctrlKey || event.metaKey) {
     // Toggle single cell
-    const idx = selectedCells.value.findIndex(c =>
-      c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId && c.date === date
+    const idx = selectedCells.value.findIndex(
+      c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId && c.date === date
     )
     if (idx > -1) {
       selectedCells.value.splice(idx, 1)
@@ -1205,7 +1344,7 @@ const selectDateColumn = (date, event) => {
 }
 
 // Check if a date column is fully selected
-const isDateColumnSelected = (date) => {
+const isDateColumnSelected = date => {
   const totalCells = props.roomTypes.length * filteredMealPlans.value.length
   const selectedCount = selectedCells.value.filter(c => c.date === date).length
   return selectedCount === totalCells && totalCells > 0
@@ -1225,9 +1364,13 @@ const selectRoomRow = (roomTypeId, mealPlanId, event) => {
 
   if (event.ctrlKey || event.metaKey) {
     // Toggle row
-    const rowSelected = selectedCells.value.some(c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId)
+    const rowSelected = selectedCells.value.some(
+      c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId
+    )
     if (rowSelected) {
-      selectedCells.value = selectedCells.value.filter(c => !(c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId))
+      selectedCells.value = selectedCells.value.filter(
+        c => !(c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId)
+      )
     } else {
       selectedCells.value = [...selectedCells.value, ...newCells]
     }
@@ -1239,7 +1382,9 @@ const selectRoomRow = (roomTypeId, mealPlanId, event) => {
 // Check if a room/meal plan row is fully selected
 const isRoomMealPlanSelected = (roomTypeId, mealPlanId) => {
   const totalCells = calendarDays.value.length
-  const selectedCount = selectedCells.value.filter(c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId).length
+  const selectedCount = selectedCells.value.filter(
+    c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId
+  ).length
   return selectedCount === totalCells && totalCells > 0
 }
 
@@ -1370,7 +1515,7 @@ const saveInlineEditPrices = async () => {
     }
     toast.success(t('planning.pricing.inlineEditSaved', { count: updates.length }))
     emit('refresh')
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   }
 }
@@ -1395,7 +1540,7 @@ const quickAction = async (field, value) => {
     toast.success(t('planning.pricing.quickUpdateSuccess'))
     emit('refresh')
     clearSelection()
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   }
 }
@@ -1515,7 +1660,7 @@ const pasteWeek = async () => {
 }
 
 // Keyboard shortcuts
-const handleKeyDown = (e) => {
+const handleKeyDown = e => {
   // Ctrl+C or Cmd+C - Copy
   if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !editingCell.value) {
     e.preventDefault()
@@ -1542,12 +1687,6 @@ const handleKeyDown = (e) => {
     e.preventDefault()
     quickAction('stopSale', true)
   }
-}
-
-// Get max children for a room type
-const getMaxChildrenForRoom = (roomTypeId) => {
-  const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
-  return roomType?.occupancy?.maxChildren ?? 2
 }
 
 const openInlineEdit = async (roomTypeId, mealPlanId, date, rate) => {
@@ -1577,10 +1716,12 @@ const openInlineEdit = async (roomTypeId, mealPlanId, date, rate) => {
   }
 
   // Pre-populate child pricing array
-  inlineForm.childOrderPricing = Array(maxChildren).fill('').map((_, i) => {
-    const existing = rate?.childOrderPricing?.[i]
-    return typeof existing === 'number' ? existing : ''
-  })
+  inlineForm.childOrderPricing = Array(maxChildren)
+    .fill('')
+    .map((_, i) => {
+      const existing = rate?.childOrderPricing?.[i]
+      return typeof existing === 'number' ? existing : ''
+    })
 
   // Position popover near the click - smart positioning to avoid going off-screen
   await nextTick()
@@ -1659,7 +1800,8 @@ const saveInlineEdit = async () => {
 
     // Handle pricing based on type
     const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
-    const usesMultipliers = roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
+    const usesMultipliers =
+      roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
 
     if (inlineForm.pricingType === 'per_person' && usesMultipliers) {
       // OBP with Multipliers: pricePerNight is the base price
@@ -1733,7 +1875,7 @@ const saveInlineEdit = async () => {
 }
 
 // Copy all values from quick edit popover to next X days
-const copyPopoverToNextDays = async (days) => {
+const copyPopoverToNextDays = async days => {
   const copyCount = days || popoverCopyDays.value || 7
   if (!editingCell.value || !copyCount) return
 
@@ -1763,7 +1905,8 @@ const copyPopoverToNextDays = async (days) => {
 
     // Handle pricing based on type
     const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
-    const usesMultipliers = roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
+    const usesMultipliers =
+      roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
 
     if (inlineForm.pricingType === 'per_person' && usesMultipliers) {
       // OBP with Multipliers: pricePerNight is the base price
@@ -1857,7 +2000,7 @@ const copyPopoverToNextDays = async (days) => {
 }
 
 // Click outside to close inline edit and context menu
-const handleClickOutside = (e) => {
+const handleClickOutside = e => {
   const popoverEl = quickEditPopoverRef.value?.popoverRef
   if (popoverEl && !popoverEl.contains(e.target)) {
     closeInlineEdit()
@@ -1884,9 +2027,12 @@ watch(currentDate, () => {
 })
 
 // Emit selection change for AI assistant
-watch(() => [...selectedCells.value], (newVal) => {
-  emit('selection-change', newVal)
-})
+watch(
+  () => [...selectedCells.value],
+  newVal => {
+    emit('selection-change', newVal)
+  }
+)
 
 // Expose clearSelection for parent component (AI assistant)
 defineExpose({

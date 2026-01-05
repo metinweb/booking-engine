@@ -3,8 +3,8 @@
     <!-- Action Button -->
     <div class="flex justify-end">
       <button
-        @click="showWalkInModal = true"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+        @click="showWalkInModal = true"
       >
         <span class="material-icons text-lg">person_add</span>
         Walk-in
@@ -32,33 +32,42 @@
     </div>
 
     <!-- No Hotel Selected -->
-    <div v-else-if="!hotelId" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center">
+    <div
+      v-else-if="!hotelId"
+      class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center"
+    >
       <span class="material-icons text-4xl text-amber-500 mb-2">hotel</span>
       <p class="text-amber-700 dark:text-amber-300">Lutfen ust bardaki seciciden bir otel secin.</p>
     </div>
 
     <template v-else>
       <!-- Today's Activity Tabs -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700"
+      >
         <!-- Tabs -->
         <div class="border-b border-gray-200 dark:border-slate-700">
           <nav class="flex -mb-px">
             <button
               v-for="tab in tabs"
               :key="tab.key"
-              @click="activeTab = tab.key"
               class="px-6 py-3 text-sm font-medium border-b-2 transition-colors"
-              :class="activeTab === tab.key
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+              :class="
+                activeTab === tab.key
+                  ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+              "
+              @click="activeTab = tab.key"
             >
               {{ tab.label }}
               <span
                 v-if="tab.count > 0"
                 class="ml-2 px-2 py-0.5 rounded-full text-xs"
-                :class="activeTab === tab.key
-                  ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
-                  : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400'"
+                :class="
+                  activeTab === tab.key
+                    ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400'
+                    : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400'
+                "
               >
                 {{ tab.count }}
               </span>
@@ -71,7 +80,9 @@
           <!-- Expected Arrivals -->
           <div v-if="activeTab === 'arrivals'">
             <div v-if="todayActivity.expectedArrivals?.length === 0" class="text-center py-8">
-              <span class="material-icons text-4xl text-gray-300 dark:text-gray-600">flight_land</span>
+              <span class="material-icons text-4xl text-gray-300 dark:text-gray-600"
+                >flight_land</span
+              >
               <p class="mt-2 text-gray-500 dark:text-slate-400">Bugun beklenen giris yok</p>
             </div>
             <div v-else class="space-y-3">
@@ -81,7 +92,9 @@
                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
               >
                 <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <div
+                    class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center"
+                  >
                     <span class="material-icons text-blue-600 dark:text-blue-400">person</span>
                   </div>
                   <div>
@@ -89,7 +102,9 @@
                       {{ getGuestName(item) }}
                     </p>
                     <p class="text-sm text-gray-500 dark:text-slate-400">
-                      {{ item.bookingNumber || item.stayNumber }} - Oda {{ item.room?.roomNumber || 'Atanmadi' }} - {{ item.roomType?.name?.tr || item.roomType?.code }}
+                      {{ item.bookingNumber || item.stayNumber }} - Oda
+                      {{ item.room?.roomNumber || 'Atanmadi' }} -
+                      {{ item.roomType?.name?.tr || item.roomType?.code }}
                     </p>
                   </div>
                 </div>
@@ -98,8 +113,8 @@
                     {{ item.nights }} gece
                   </span>
                   <button
-                    @click="openCheckInModal(item)"
                     class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    @click="openCheckInModal(item)"
                   >
                     Check-in
                   </button>
@@ -111,7 +126,9 @@
           <!-- Pending Checkouts -->
           <div v-if="activeTab === 'departures'">
             <div v-if="todayActivity.pendingCheckOuts?.length === 0" class="text-center py-8">
-              <span class="material-icons text-4xl text-gray-300 dark:text-gray-600">flight_takeoff</span>
+              <span class="material-icons text-4xl text-gray-300 dark:text-gray-600"
+                >flight_takeoff</span
+              >
               <p class="mt-2 text-gray-500 dark:text-slate-400">Bugun beklenen cikis yok</p>
             </div>
             <div v-else class="space-y-3">
@@ -121,7 +138,9 @@
                 class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
               >
                 <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center">
+                  <div
+                    class="w-10 h-10 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center"
+                  >
                     <span class="material-icons text-orange-600 dark:text-orange-400">logout</span>
                   </div>
                   <div>
@@ -135,14 +154,17 @@
                 </div>
                 <div class="flex items-center gap-3">
                   <div class="text-right">
-                    <p class="text-sm font-medium" :class="stay.balance > 0 ? 'text-red-600' : 'text-green-600'">
+                    <p
+                      class="text-sm font-medium"
+                      :class="stay.balance > 0 ? 'text-red-600' : 'text-green-600'"
+                    >
                       {{ formatCurrency(stay.balance) }}
                     </p>
                     <p class="text-xs text-gray-500 dark:text-slate-400">Bakiye</p>
                   </div>
                   <button
-                    @click="openCheckOutModal(stay)"
                     class="px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    @click="openCheckOutModal(stay)"
                   >
                     Check-out
                   </button>
@@ -160,7 +182,9 @@
             <div v-else class="overflow-x-auto">
               <table class="w-full">
                 <thead>
-                  <tr class="text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">
+                  <tr
+                    class="text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+                  >
                     <th class="pb-3">Oda</th>
                     <th class="pb-3">Misafir</th>
                     <th class="pb-3">Giris</th>
@@ -177,11 +201,17 @@
                     class="hover:bg-gray-50 dark:hover:bg-slate-700/50"
                   >
                     <td class="py-3">
-                      <span class="font-medium text-gray-900 dark:text-white">{{ stay.room?.roomNumber }}</span>
-                      <span class="text-xs text-gray-500 dark:text-slate-400 ml-1">{{ stay.roomType?.code }}</span>
+                      <span class="font-medium text-gray-900 dark:text-white">{{
+                        stay.room?.roomNumber
+                      }}</span>
+                      <span class="text-xs text-gray-500 dark:text-slate-400 ml-1">{{
+                        stay.roomType?.code
+                      }}</span>
                     </td>
                     <td class="py-3">
-                      <p class="text-gray-900 dark:text-white">{{ stay.guests?.[0]?.firstName }} {{ stay.guests?.[0]?.lastName }}</p>
+                      <p class="text-gray-900 dark:text-white">
+                        {{ stay.guests?.[0]?.firstName }} {{ stay.guests?.[0]?.lastName }}
+                      </p>
                       <p class="text-xs text-gray-500 dark:text-slate-400">{{ stay.stayNumber }}</p>
                     </td>
                     <td class="py-3 text-sm text-gray-600 dark:text-slate-300">
@@ -204,16 +234,16 @@
                     <td class="py-3 text-right">
                       <div class="flex items-center justify-end gap-1">
                         <button
-                          @click="openStayDetail(stay)"
                           class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
                           title="Detay"
+                          @click="openStayDetail(stay)"
                         >
                           <span class="material-icons text-lg">visibility</span>
                         </button>
                         <button
-                          @click="openCheckOutModal(stay)"
                           class="p-1.5 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded transition-colors"
                           title="Check-out"
+                          @click="openCheckOutModal(stay)"
                         >
                           <span class="material-icons text-lg">logout</span>
                         </button>
@@ -238,8 +268,12 @@
                 class="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"
               >
                 <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
-                    <span class="material-icons text-green-600 dark:text-green-400">check_circle</span>
+                  <div
+                    class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center"
+                  >
+                    <span class="material-icons text-green-600 dark:text-green-400"
+                      >check_circle</span
+                    >
                   </div>
                   <div>
                     <p class="font-medium text-gray-900 dark:text-white">
@@ -250,7 +284,9 @@
                     </p>
                   </div>
                 </div>
-                <span class="px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded">
+                <span
+                  class="px-2 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 text-xs font-medium rounded"
+                >
                   Check-in Yapildi
                 </span>
               </div>
@@ -261,11 +297,7 @@
     </template>
 
     <!-- Walk-in Modal -->
-    <WalkInModal
-      v-model="showWalkInModal"
-      :hotel-id="hotelId"
-      @created="handleCheckInComplete"
-    />
+    <WalkInModal v-model="showWalkInModal" :hotel-id="hotelId" @created="handleCheckInComplete" />
 
     <!-- Check-in Modal -->
     <CheckInModal
@@ -294,7 +326,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import stayService from '@/services/pms/stayService'
 import { usePMSSocket } from '@/composables/usePMSSocket'
@@ -326,23 +358,71 @@ const selectedStay = ref(null)
 
 // Computed
 const tabs = computed(() => [
-  { key: 'arrivals', label: 'Beklenen Girisler', count: todayActivity.value.expectedArrivals?.length || 0 },
-  { key: 'departures', label: 'Beklenen Cikislar', count: todayActivity.value.pendingCheckOuts?.length || 0 },
+  {
+    key: 'arrivals',
+    label: 'Beklenen Girisler',
+    count: todayActivity.value.expectedArrivals?.length || 0
+  },
+  {
+    key: 'departures',
+    label: 'Beklenen Cikislar',
+    count: todayActivity.value.pendingCheckOuts?.length || 0
+  },
   { key: 'inhouse', label: 'Aktif Konaklamalar', count: activeStays.value.length },
-  { key: 'today_checkins', label: 'Bugun Check-in', count: todayActivity.value.todayCheckIns?.length || 0 }
+  {
+    key: 'today_checkins',
+    label: 'Bugun Check-in',
+    count: todayActivity.value.todayCheckIns?.length || 0
+  }
 ])
 
 const statsCards = computed(() => [
-  { key: 'active', label: 'Aktif', value: statistics.value.activeStays || 0, icon: 'hotel', iconColor: 'text-blue-500' },
-  { key: 'arrivals', label: 'Beklenen Giris', value: todayActivity.value.expectedArrivals?.length || 0, icon: 'flight_land', iconColor: 'text-green-500' },
-  { key: 'departures', label: 'Beklenen Cikis', value: todayActivity.value.pendingCheckOuts?.length || 0, icon: 'flight_takeoff', iconColor: 'text-orange-500' },
-  { key: 'available', label: 'Musait Oda', value: statistics.value.vacantClean || 0, icon: 'check_circle', iconColor: 'text-emerald-500' },
-  { key: 'dirty', label: 'Temizlik Bekliyor', value: (statistics.value.vacantDirty || 0) + (statistics.value.checkout || 0), icon: 'cleaning_services', iconColor: 'text-amber-500' },
-  { key: 'total', label: 'Toplam Oda', value: statistics.value.total || 0, icon: 'meeting_room', iconColor: 'text-gray-500' }
+  {
+    key: 'active',
+    label: 'Aktif',
+    value: statistics.value.activeStays || 0,
+    icon: 'hotel',
+    iconColor: 'text-blue-500'
+  },
+  {
+    key: 'arrivals',
+    label: 'Beklenen Giris',
+    value: todayActivity.value.expectedArrivals?.length || 0,
+    icon: 'flight_land',
+    iconColor: 'text-green-500'
+  },
+  {
+    key: 'departures',
+    label: 'Beklenen Cikis',
+    value: todayActivity.value.pendingCheckOuts?.length || 0,
+    icon: 'flight_takeoff',
+    iconColor: 'text-orange-500'
+  },
+  {
+    key: 'available',
+    label: 'Musait Oda',
+    value: statistics.value.vacantClean || 0,
+    icon: 'check_circle',
+    iconColor: 'text-emerald-500'
+  },
+  {
+    key: 'dirty',
+    label: 'Temizlik Bekliyor',
+    value: (statistics.value.vacantDirty || 0) + (statistics.value.checkout || 0),
+    icon: 'cleaning_services',
+    iconColor: 'text-amber-500'
+  },
+  {
+    key: 'total',
+    label: 'Toplam Oda',
+    value: statistics.value.total || 0,
+    icon: 'meeting_room',
+    iconColor: 'text-gray-500'
+  }
 ])
 
 // Helper to get guest name from Booking or Stay object
-const getGuestName = (item) => {
+const getGuestName = item => {
   // If it's a Stay, use guests array
   if (item.guests && item.guests.length > 0) {
     const mainGuest = item.guests.find(g => g.isMainGuest) || item.guests[0]
@@ -384,17 +464,17 @@ const fetchData = async () => {
   }
 }
 
-const openCheckInModal = (booking) => {
+const openCheckInModal = booking => {
   selectedBooking.value = booking
   showCheckInModal.value = true
 }
 
-const openCheckOutModal = (stay) => {
+const openCheckOutModal = stay => {
   selectedStay.value = stay
   showCheckOutModal.value = true
 }
 
-const openStayDetail = (stay) => {
+const openStayDetail = stay => {
   selectedStay.value = stay
   showStayDetailModal.value = true
 }
@@ -407,7 +487,7 @@ const handleCheckOutComplete = async () => {
   await fetchData()
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -415,7 +495,7 @@ const formatDate = (date) => {
   })
 }
 
-const formatTime = (date) => {
+const formatTime = date => {
   if (!date) return '-'
   return new Date(date).toLocaleTimeString('tr-TR', {
     hour: '2-digit',
@@ -423,7 +503,7 @@ const formatTime = (date) => {
   })
 }
 
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
     currency: 'TRY'
@@ -431,29 +511,28 @@ const formatCurrency = (amount) => {
 }
 
 // Watch hotel changes
-watch(hotelId, (newId) => {
-  if (newId) {
-    fetchData()
-  } else {
-    statistics.value = {}
-    todayActivity.value = {}
-    activeStays.value = []
-  }
-}, { immediate: true })
+watch(
+  hotelId,
+  newId => {
+    if (newId) {
+      fetchData()
+    } else {
+      statistics.value = {}
+      todayActivity.value = {}
+      activeStays.value = []
+    }
+  },
+  { immediate: true }
+)
 
 // Socket.io real-time updates (socket room managed by PMSLayout)
-const {
-  onCheckIn,
-  onCheckOut,
-  onRoomStatusChange,
-  isConnected
-} = usePMSSocket()
+const { onCheckIn, onCheckOut, onRoomStatusChange } = usePMSSocket()
 
 // Store unregister functions for cleanup
 const unregisterCallbacks = []
 
 // Handle real-time check-in events
-const handleCheckInEvent = (data) => {
+const handleCheckInEvent = data => {
   console.log('[FrontDesk] Real-time check-in:', data)
   toast.success(`Check-in: Oda ${data.roomNumber} - ${data.guestName}`)
   announce(`Check-in yapildi. Oda ${data.roomNumber}, misafir ${data.guestName}`)
@@ -462,7 +541,7 @@ const handleCheckInEvent = (data) => {
 unregisterCallbacks.push(onCheckIn(handleCheckInEvent))
 
 // Handle real-time check-out events
-const handleCheckOutEvent = (data) => {
+const handleCheckOutEvent = data => {
   console.log('[FrontDesk] Real-time check-out:', data)
   toast.info(`Check-out: Oda ${data.roomNumber} - ${data.guestName}`)
   announce(`Check-out yapildi. Oda ${data.roomNumber}, misafir ${data.guestName}`)
@@ -471,7 +550,7 @@ const handleCheckOutEvent = (data) => {
 unregisterCallbacks.push(onCheckOut(handleCheckOutEvent))
 
 // Handle room status changes
-const handleRoomStatusChange = (data) => {
+const handleRoomStatusChange = data => {
   console.log('[FrontDesk] Room status change:', data)
   // Refresh stats to update room counts
   fetchData()

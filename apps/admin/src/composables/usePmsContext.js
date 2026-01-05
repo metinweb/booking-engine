@@ -18,9 +18,9 @@
  */
 
 import { ref, computed, watch, readonly, inject } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useHotelStore } from '@/stores/hotel'
+import { socketLogger } from '@/utils/logger'
 
 // PMS Auth store'u lazy import (circular dependency önlemek için)
 let pmsAuthStore = null
@@ -34,9 +34,9 @@ const getPmsAuthStore = async () => {
 
 // Context mode enum
 export const PMS_CONTEXT_MODE = {
-  PMS_USER: 'pms_user',     // Direkt PMS kullanıcısı (pmsToken ile)
-  PARTNER: 'partner',       // Partner kullanıcısı (normal token ile)
-  ADMIN: 'admin'            // Platform admin (tüm yetkilere sahip)
+  PMS_USER: 'pms_user', // Direkt PMS kullanıcısı (pmsToken ile)
+  PARTNER: 'partner', // Partner kullanıcısı (normal token ile)
+  ADMIN: 'admin' // Platform admin (tüm yetkilere sahip)
 }
 
 // Singleton state (tüm component'ler aynı state'i paylaşır)
@@ -94,7 +94,7 @@ export function usePmsContext() {
         await detectMode()
         _initialized.value = true
       } catch (error) {
-        console.error('[PmsContext] Initialization failed:', error)
+        socketLogger.error('[PmsContext] Initialization failed:', error)
         _initialized.value = false
         throw error
       } finally {
@@ -260,7 +260,7 @@ export function usePmsContext() {
    * @param {string} permission - Permission to check
    * @returns {boolean}
    */
-  const hasPermission = (permission) => {
+  const hasPermission = permission => {
     // Admin and Partner always have all permissions
     if (_mode.value === PMS_CONTEXT_MODE.ADMIN || _mode.value === PMS_CONTEXT_MODE.PARTNER) {
       return true
@@ -278,7 +278,7 @@ export function usePmsContext() {
    * @param {string[]} perms - Permissions to check
    * @returns {boolean}
    */
-  const hasAnyPermission = (perms) => {
+  const hasAnyPermission = perms => {
     if (_mode.value === PMS_CONTEXT_MODE.ADMIN || _mode.value === PMS_CONTEXT_MODE.PARTNER) {
       return true
     }
@@ -292,7 +292,7 @@ export function usePmsContext() {
    * @param {string[]} perms - Permissions to check
    * @returns {boolean}
    */
-  const hasAllPermissions = (perms) => {
+  const hasAllPermissions = perms => {
     if (_mode.value === PMS_CONTEXT_MODE.ADMIN || _mode.value === PMS_CONTEXT_MODE.PARTNER) {
       return true
     }
@@ -309,14 +309,14 @@ export function usePmsContext() {
    * Set/select hotel
    * @param {Object} hotel - Hotel object
    */
-  const setHotel = async (hotel) => {
+  const setHotel = async hotel => {
     if (_mode.value === PMS_CONTEXT_MODE.PMS_USER) {
       // PMS user - use pmsAuth store
       try {
         const store = await getPmsAuthStore()
         await store.switchHotel(hotel._id || hotel.id)
       } catch (error) {
-        console.error('[PmsContext] Switch hotel failed:', error)
+        socketLogger.error('[PmsContext] Switch hotel failed:', error)
         throw error
       }
     } else {
@@ -349,10 +349,10 @@ export function usePmsContext() {
   // Watch for hotel store changes (Partner mode)
   watch(
     () => hotelStore.selectedHotel,
-    (newHotel) => {
+    newHotel => {
       if (_mode.value === PMS_CONTEXT_MODE.PARTNER || _mode.value === PMS_CONTEXT_MODE.ADMIN) {
         // Trigger reactivity for dependent components
-        console.log('[PmsContext] Hotel changed:', newHotel?.name)
+        socketLogger.debug('[PmsContext] Hotel changed:', newHotel?.name)
       }
     }
   )
@@ -362,16 +362,15 @@ export function usePmsContext() {
   // ============================================================================
 
   const debug = () => {
-    console.group('[PmsContext Debug]')
-    console.log('Mode:', _mode.value)
-    console.log('Initialized:', _initialized.value)
-    console.log('Hotel ID:', hotelId.value)
-    console.log('Hotel Name:', hotelName.value)
-    console.log('User:', user.value)
-    console.log('Role:', role.value)
-    console.log('Permissions:', permissions.value)
-    console.log('Is Authenticated:', isAuthenticated.value)
-    console.groupEnd()
+    socketLogger.debug('[PmsContext Debug]')
+    socketLogger.debug('Mode:', _mode.value)
+    socketLogger.debug('Initialized:', _initialized.value)
+    socketLogger.debug('Hotel ID:', hotelId.value)
+    socketLogger.debug('Hotel Name:', hotelName.value)
+    socketLogger.debug('User:', user.value)
+    socketLogger.debug('Role:', role.value)
+    socketLogger.debug('Permissions:', permissions.value)
+    socketLogger.debug('Is Authenticated:', isAuthenticated.value)
     return {
       mode: _mode.value,
       hotelId: hotelId.value,

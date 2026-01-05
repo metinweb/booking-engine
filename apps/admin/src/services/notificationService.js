@@ -26,7 +26,7 @@ export const getUnreadCount = async () => {
  * Mark a single notification as read
  * @param {string} notificationId - Notification ID
  */
-export const markAsRead = async (notificationId) => {
+export const markAsRead = async notificationId => {
   const response = await pmsApiClient.post(`${BASE_URL}/${notificationId}/read`)
   return response.data
 }
@@ -43,7 +43,7 @@ export const markAllAsRead = async () => {
  * Mark multiple notifications as read
  * @param {string[]} ids - Array of notification IDs
  */
-export const markMultipleAsRead = async (ids) => {
+export const markMultipleAsRead = async ids => {
   const response = await pmsApiClient.post(`${BASE_URL}/read-multiple`, { ids })
   return response.data
 }
@@ -52,7 +52,7 @@ export const markMultipleAsRead = async (ids) => {
  * Delete a notification
  * @param {string} notificationId - Notification ID
  */
-export const deleteNotification = async (notificationId) => {
+export const deleteNotification = async notificationId => {
   const response = await pmsApiClient.delete(`${BASE_URL}/${notificationId}`)
   return response.data
 }

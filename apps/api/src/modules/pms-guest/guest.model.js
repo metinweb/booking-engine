@@ -31,215 +31,231 @@ export const KBS_STATUS = {
 }
 
 // Contact preference schema
-const contactPreferenceSchema = new mongoose.Schema({
-  email: { type: Boolean, default: true },
-  sms: { type: Boolean, default: true },
-  phone: { type: Boolean, default: true },
-  whatsapp: { type: Boolean, default: false }
-}, { _id: false })
+const contactPreferenceSchema = new mongoose.Schema(
+  {
+    email: { type: Boolean, default: true },
+    sms: { type: Boolean, default: true },
+    phone: { type: Boolean, default: true },
+    whatsapp: { type: Boolean, default: false }
+  },
+  { _id: false }
+)
 
 // Address schema
-const addressSchema = new mongoose.Schema({
-  street: { type: String, trim: true },
-  city: { type: String, trim: true },
-  state: { type: String, trim: true },
-  postalCode: { type: String, trim: true },
-  country: { type: String, trim: true, uppercase: true }
-}, { _id: false })
+const addressSchema = new mongoose.Schema(
+  {
+    street: { type: String, trim: true },
+    city: { type: String, trim: true },
+    state: { type: String, trim: true },
+    postalCode: { type: String, trim: true },
+    country: { type: String, trim: true, uppercase: true }
+  },
+  { _id: false }
+)
 
 // Guest preferences schema
-const preferencesSchema = new mongoose.Schema({
-  roomType: { type: String, trim: true },
-  floorPreference: { type: String, enum: ['low', 'mid', 'high', 'any'], default: 'any' },
-  bedType: { type: String, enum: ['single', 'double', 'twin', 'king', 'any'], default: 'any' },
-  smokingRoom: { type: Boolean, default: false },
-  quietRoom: { type: Boolean, default: false },
-  accessibleRoom: { type: Boolean, default: false },
-  pillow: { type: String, trim: true },
-  roomTemperature: { type: String, trim: true },
-  newspaper: { type: String, trim: true },
-  minibarItems: [{ type: String, trim: true }],
-  dietaryRestrictions: [{ type: String, trim: true }],
-  allergies: [{ type: String, trim: true }],
-  specialRequests: { type: String, trim: true }
-}, { _id: false })
+const preferencesSchema = new mongoose.Schema(
+  {
+    roomType: { type: String, trim: true },
+    floorPreference: { type: String, enum: ['low', 'mid', 'high', 'any'], default: 'any' },
+    bedType: { type: String, enum: ['single', 'double', 'twin', 'king', 'any'], default: 'any' },
+    smokingRoom: { type: Boolean, default: false },
+    quietRoom: { type: Boolean, default: false },
+    accessibleRoom: { type: Boolean, default: false },
+    pillow: { type: String, trim: true },
+    roomTemperature: { type: String, trim: true },
+    newspaper: { type: String, trim: true },
+    minibarItems: [{ type: String, trim: true }],
+    dietaryRestrictions: [{ type: String, trim: true }],
+    allergies: [{ type: String, trim: true }],
+    specialRequests: { type: String, trim: true }
+  },
+  { _id: false }
+)
 
 // Stay history entry (denormalized for quick access)
-const stayHistorySchema = new mongoose.Schema({
-  stayId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Stay'
+const stayHistorySchema = new mongoose.Schema(
+  {
+    stayId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stay'
+    },
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Booking'
+    },
+    checkInDate: { type: Date },
+    checkOutDate: { type: Date },
+    roomNumber: { type: String },
+    roomType: { type: String },
+    totalAmount: { type: Number },
+    status: { type: String }
   },
-  bookingId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Booking'
-  },
-  checkInDate: { type: Date },
-  checkOutDate: { type: Date },
-  roomNumber: { type: String },
-  roomType: { type: String },
-  totalAmount: { type: Number },
-  status: { type: String }
-}, { _id: false })
+  { _id: false }
+)
 
-const guestSchema = new mongoose.Schema({
-  // Multi-tenant
-  partner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Partner',
-    required: true,
-    index: true
-  },
+const guestSchema = new mongoose.Schema(
+  {
+    // Multi-tenant
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Partner',
+      required: true,
+      index: true
+    },
 
-  // Hotel (guests are hotel-specific for PMS)
-  hotel: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Hotel',
-    required: true,
-    index: true
-  },
+    // Hotel (guests are hotel-specific for PMS)
+    hotel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hotel',
+      required: true,
+      index: true
+    },
 
-  // Basic Info
-  title: {
-    type: String,
-    enum: ['mr', 'mrs', 'ms', 'miss', 'dr', 'prof'],
-    default: 'mr'
-  },
-  firstName: {
-    type: String,
-    required: true,
-    trim: true,
-    index: true
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true,
-    index: true
-  },
-  gender: {
-    type: String,
-    enum: ['male', 'female', 'other', 'prefer_not_to_say'],
-    default: 'prefer_not_to_say'
-  },
-  dateOfBirth: { type: Date },
-  nationality: {
-    type: String,
-    trim: true,
-    uppercase: true // ISO country code
-  },
+    // Basic Info
+    title: {
+      type: String,
+      enum: ['mr', 'mrs', 'ms', 'miss', 'dr', 'prof'],
+      default: 'mr'
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'other', 'prefer_not_to_say'],
+      default: 'prefer_not_to_say'
+    },
+    dateOfBirth: { type: Date },
+    nationality: {
+      type: String,
+      trim: true,
+      uppercase: true // ISO country code
+    },
 
-  // Identification
-  idType: {
-    type: String,
-    enum: Object.values(ID_TYPES),
-    default: ID_TYPES.TC_KIMLIK
-  },
-  idNumber: {
-    type: String,
-    trim: true,
-    index: true
-  },
-  idExpiry: { type: Date },
-  idIssuingCountry: { type: String, trim: true, uppercase: true },
+    // Identification
+    idType: {
+      type: String,
+      enum: Object.values(ID_TYPES),
+      default: ID_TYPES.TC_KIMLIK
+    },
+    idNumber: {
+      type: String,
+      trim: true,
+      index: true
+    },
+    idExpiry: { type: Date },
+    idIssuingCountry: { type: String, trim: true, uppercase: true },
 
-  // KBS (Kimlik Bildirim Sistemi) - Turkish police notification fields
-  fatherName: { type: String, trim: true },
-  motherName: { type: String, trim: true },
-  birthPlace: { type: String, trim: true },
-  kbsStatus: {
-    type: String,
-    enum: Object.values(KBS_STATUS),
-    default: KBS_STATUS.PENDING
-  },
-  kbsSentAt: { type: Date },
-  kbsReference: { type: String, trim: true }, // Reference number from KBS system
+    // KBS (Kimlik Bildirim Sistemi) - Turkish police notification fields
+    fatherName: { type: String, trim: true },
+    motherName: { type: String, trim: true },
+    birthPlace: { type: String, trim: true },
+    kbsStatus: {
+      type: String,
+      enum: Object.values(KBS_STATUS),
+      default: KBS_STATUS.PENDING
+    },
+    kbsSentAt: { type: Date },
+    kbsReference: { type: String, trim: true }, // Reference number from KBS system
 
-  // Contact Info
-  email: {
-    type: String,
-    trim: true,
-    lowercase: true,
-    index: true
-  },
-  phone: {
-    type: String,
-    trim: true,
-    index: true
-  },
-  alternatePhone: { type: String, trim: true },
-  whatsapp: { type: String, trim: true },
+    // Contact Info
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      index: true
+    },
+    phone: {
+      type: String,
+      trim: true,
+      index: true
+    },
+    alternatePhone: { type: String, trim: true },
+    whatsapp: { type: String, trim: true },
 
-  // Address
-  address: addressSchema,
+    // Address
+    address: addressSchema,
 
-  // Company Info (for business travelers)
-  company: {
-    name: { type: String, trim: true },
-    position: { type: String, trim: true },
-    taxNumber: { type: String, trim: true }
-  },
+    // Company Info (for business travelers)
+    company: {
+      name: { type: String, trim: true },
+      position: { type: String, trim: true },
+      taxNumber: { type: String, trim: true }
+    },
 
-  // VIP & Loyalty
-  vipLevel: {
-    type: String,
-    enum: Object.values(VIP_LEVELS),
-    default: VIP_LEVELS.NONE
-  },
-  loyaltyNumber: { type: String, trim: true },
-  loyaltyPoints: { type: Number, default: 0 },
+    // VIP & Loyalty
+    vipLevel: {
+      type: String,
+      enum: Object.values(VIP_LEVELS),
+      default: VIP_LEVELS.NONE
+    },
+    loyaltyNumber: { type: String, trim: true },
+    loyaltyPoints: { type: Number, default: 0 },
 
-  // Preferences
-  preferences: preferencesSchema,
-  contactPreferences: contactPreferenceSchema,
+    // Preferences
+    preferences: preferencesSchema,
+    contactPreferences: contactPreferenceSchema,
 
-  // Stay Statistics (auto-updated)
-  statistics: {
-    totalStays: { type: Number, default: 0 },
-    totalNights: { type: Number, default: 0 },
-    totalSpent: { type: Number, default: 0 },
-    lastStayDate: { type: Date },
-    firstStayDate: { type: Date },
-    averageStayLength: { type: Number, default: 0 },
-    noShowCount: { type: Number, default: 0 },
-    cancellationCount: { type: Number, default: 0 }
-  },
+    // Stay Statistics (auto-updated)
+    statistics: {
+      totalStays: { type: Number, default: 0 },
+      totalNights: { type: Number, default: 0 },
+      totalSpent: { type: Number, default: 0 },
+      lastStayDate: { type: Date },
+      firstStayDate: { type: Date },
+      averageStayLength: { type: Number, default: 0 },
+      noShowCount: { type: Number, default: 0 },
+      cancellationCount: { type: Number, default: 0 }
+    },
 
-  // Recent Stay History (last 10 stays for quick reference)
-  recentStays: [stayHistorySchema],
+    // Recent Stay History (last 10 stays for quick reference)
+    recentStays: [stayHistorySchema],
 
-  // Notes & Tags
-  notes: [{
-    content: { type: String, trim: true },
-    createdAt: { type: Date, default: Date.now },
-    createdBy: {
+    // Notes & Tags
+    notes: [
+      {
+        content: { type: String, trim: true },
+        createdAt: { type: Date, default: Date.now },
+        createdBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User'
+        },
+        isImportant: { type: Boolean, default: false }
+      }
+    ],
+    tags: [{ type: String, trim: true }],
+
+    // Blacklist
+    isBlacklisted: { type: Boolean, default: false },
+    blacklistReason: { type: String, trim: true },
+    blacklistedAt: { type: Date },
+    blacklistedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
-    isImportant: { type: Boolean, default: false }
-  }],
-  tags: [{ type: String, trim: true }],
 
-  // Blacklist
-  isBlacklisted: { type: Boolean, default: false },
-  blacklistReason: { type: String, trim: true },
-  blacklistedAt: { type: Date },
-  blacklistedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    // Status
+    isActive: { type: Boolean, default: true },
+
+    // Profile photo
+    photoUrl: { type: String, trim: true }
   },
-
-  // Status
-  isActive: { type: Boolean, default: true },
-
-  // Profile photo
-  photoUrl: { type: String, trim: true }
-
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-})
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
+)
 
 // Indexes
 guestSchema.index({ partner: 1, hotel: 1, lastName: 1, firstName: 1 })
@@ -259,13 +275,13 @@ guestSchema.index({
 })
 
 // Virtual for full name
-guestSchema.virtual('fullName').get(function() {
+guestSchema.virtual('fullName').get(function () {
   const title = this.title ? this.title.charAt(0).toUpperCase() + this.title.slice(1) + '. ' : ''
   return `${title}${this.firstName} ${this.lastName}`
 })
 
 // Virtual for age
-guestSchema.virtual('age').get(function() {
+guestSchema.virtual('age').get(function () {
   if (!this.dateOfBirth) return null
   const today = new Date()
   const birth = new Date(this.dateOfBirth)
@@ -278,7 +294,7 @@ guestSchema.virtual('age').get(function() {
 })
 
 // Method: Add stay to history
-guestSchema.methods.addStayToHistory = function(stayData) {
+guestSchema.methods.addStayToHistory = function (stayData) {
   // Add to recent stays (keep last 10)
   this.recentStays.unshift({
     stayId: stayData._id,
@@ -311,7 +327,7 @@ guestSchema.methods.addStayToHistory = function(stayData) {
 }
 
 // Method: Update VIP level based on statistics
-guestSchema.methods.updateVipLevel = function() {
+guestSchema.methods.updateVipLevel = function () {
   const { totalStays, totalSpent } = this.statistics
 
   if (totalStays >= 20 || totalSpent >= 50000) {
@@ -326,7 +342,7 @@ guestSchema.methods.updateVipLevel = function() {
 }
 
 // Method: Blacklist guest
-guestSchema.methods.blacklist = function(reason, userId) {
+guestSchema.methods.blacklist = function (reason, userId) {
   this.isBlacklisted = true
   this.blacklistReason = reason
   this.blacklistedAt = new Date()
@@ -335,7 +351,7 @@ guestSchema.methods.blacklist = function(reason, userId) {
 }
 
 // Method: Remove from blacklist
-guestSchema.methods.removeFromBlacklist = function() {
+guestSchema.methods.removeFromBlacklist = function () {
   this.isBlacklisted = false
   this.blacklistReason = undefined
   this.blacklistedAt = undefined
@@ -344,7 +360,7 @@ guestSchema.methods.removeFromBlacklist = function() {
 }
 
 // Static: Find or create guest
-guestSchema.statics.findOrCreate = async function(hotelId, guestData) {
+guestSchema.statics.findOrCreate = async function (hotelId, guestData) {
   // Try to find by ID number first
   if (guestData.idNumber) {
     const existingByIdNumber = await this.findOne({
@@ -381,7 +397,7 @@ guestSchema.statics.findOrCreate = async function(hotelId, guestData) {
 }
 
 // Static: Search guests
-guestSchema.statics.search = async function(hotelId, query, options = {}) {
+guestSchema.statics.search = async function (hotelId, query, options = {}) {
   const { page = 1, limit = 20, sort = '-statistics.lastStayDate' } = options
 
   const searchQuery = {
@@ -402,11 +418,7 @@ guestSchema.statics.search = async function(hotelId, query, options = {}) {
   const skip = (page - 1) * limit
 
   const [guests, total] = await Promise.all([
-    this.find(searchQuery)
-      .sort(sort)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .lean(),
+    this.find(searchQuery).sort(sort).skip(skip).limit(parseInt(limit)).lean(),
     this.countDocuments(searchQuery)
   ])
 
@@ -422,28 +434,28 @@ guestSchema.statics.search = async function(hotelId, query, options = {}) {
 }
 
 // Static: Get VIP guests
-guestSchema.statics.getVipGuests = function(hotelId) {
+guestSchema.statics.getVipGuests = function (hotelId) {
   return this.find({
     hotel: hotelId,
     vipLevel: { $ne: VIP_LEVELS.NONE },
     isActive: true
   })
-  .sort({ vipLevel: -1, 'statistics.totalSpent': -1 })
-  .lean()
+    .sort({ vipLevel: -1, 'statistics.totalSpent': -1 })
+    .lean()
 }
 
 // Static: Get blacklisted guests
-guestSchema.statics.getBlacklisted = function(hotelId) {
+guestSchema.statics.getBlacklisted = function (hotelId) {
   return this.find({
     hotel: hotelId,
     isBlacklisted: true
   })
-  .sort({ blacklistedAt: -1 })
-  .lean()
+    .sort({ blacklistedAt: -1 })
+    .lean()
 }
 
 // Static: Get recent guests (checked in recently)
-guestSchema.statics.getRecentGuests = function(hotelId, days = 30) {
+guestSchema.statics.getRecentGuests = function (hotelId, days = 30) {
   const cutoffDate = new Date()
   cutoffDate.setDate(cutoffDate.getDate() - days)
 
@@ -452,20 +464,14 @@ guestSchema.statics.getRecentGuests = function(hotelId, days = 30) {
     'statistics.lastStayDate': { $gte: cutoffDate },
     isActive: true
   })
-  .sort({ 'statistics.lastStayDate': -1 })
-  .limit(50)
-  .lean()
+    .sort({ 'statistics.lastStayDate': -1 })
+    .limit(50)
+    .lean()
 }
 
 // Static: Get guest statistics
-guestSchema.statics.getStatistics = async function(hotelId) {
-  const [
-    totalGuests,
-    vipGuests,
-    blacklistedGuests,
-    recentGuests,
-    topSpenders
-  ] = await Promise.all([
+guestSchema.statics.getStatistics = async function (hotelId) {
+  const [totalGuests, vipGuests, blacklistedGuests, recentGuests, topSpenders] = await Promise.all([
     this.countDocuments({ hotel: hotelId, isActive: true }),
     this.countDocuments({ hotel: hotelId, vipLevel: { $ne: VIP_LEVELS.NONE }, isActive: true }),
     this.countDocuments({ hotel: hotelId, isBlacklisted: true }),

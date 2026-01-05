@@ -3,7 +3,9 @@
     <div class="flex items-center justify-between">
       <div>
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Genel Ayarlar</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">Zaman dilimi, tarih formati ve dil ayarlari</p>
+        <p class="text-sm text-gray-500 dark:text-slate-400">
+          Zaman dilimi, tarih formati ve dil ayarlari
+        </p>
       </div>
     </div>
 
@@ -15,8 +17,8 @@
         </label>
         <select
           v-model="localSettings.timezone"
-          @change="emitChange"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+          @change="emitChange"
         >
           <option v-for="tz in timezones" :key="tz.value" :value="tz.value">
             {{ tz.label }}
@@ -31,8 +33,8 @@
         </label>
         <select
           v-model="localSettings.currency"
-          @change="emitChange"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+          @change="emitChange"
         >
           <option v-for="curr in currencies" :key="curr.value" :value="curr.value">
             {{ curr.label }}
@@ -47,8 +49,8 @@
         </label>
         <select
           v-model="localSettings.dateFormat"
-          @change="emitChange"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+          @change="emitChange"
         >
           <option value="DD/MM/YYYY">31/12/2024 (Gun/Ay/Yil)</option>
           <option value="MM/DD/YYYY">12/31/2024 (Ay/Gun/Yil)</option>
@@ -63,8 +65,8 @@
         </label>
         <select
           v-model="localSettings.timeFormat"
-          @change="emitChange"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+          @change="emitChange"
         >
           <option value="24h">24 Saat (14:00)</option>
           <option value="12h">12 Saat (2:00 PM)</option>
@@ -78,8 +80,8 @@
         </label>
         <select
           v-model="localSettings.language"
-          @change="emitChange"
           class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+          @change="emitChange"
         >
           <option value="tr">Turkce</option>
           <option value="en">English</option>
@@ -139,9 +141,13 @@ const localSettings = ref({
   ...props.modelValue
 })
 
-watch(() => props.modelValue, (newVal) => {
-  localSettings.value = { ...localSettings.value, ...newVal }
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  newVal => {
+    localSettings.value = { ...localSettings.value, ...newVal }
+  },
+  { deep: true }
+)
 
 const emitChange = () => {
   emit('update:modelValue', localSettings.value)

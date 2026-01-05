@@ -6,13 +6,13 @@ Rezervasyon sürecinin F5'e dayanıklı, kalıcı ve devam edilebilir olmasını
 
 ## Kararlar
 
-| Konu | Karar |
-|------|-------|
-| Draft süresi | 7 gün |
-| Kontenjan | Draft'ta rezerve edilmez, son aşamada kontrol edilir |
-| Fatura bilgileri | Zorunlu (Bireysel/Kurumsal) |
-| TC Kimlik | TR vatandaşları için zorunlu |
-| Depolama | Hibrit (localStorage + Database) |
+| Konu             | Karar                                                |
+| ---------------- | ---------------------------------------------------- |
+| Draft süresi     | 7 gün                                                |
+| Kontenjan        | Draft'ta rezerve edilmez, son aşamada kontrol edilir |
+| Fatura bilgileri | Zorunlu (Bireysel/Kurumsal)                          |
+| TC Kimlik        | TR vatandaşları için zorunlu                         |
+| Depolama         | Hibrit (localStorage + Database)                     |
 
 ---
 
@@ -60,113 +60,115 @@ Rezervasyon sürecinin F5'e dayanıklı, kalıcı ve devam edilebilir olmasını
 ```javascript
 // /api/src/modules/booking/booking.model.js
 
-const bookingSchema = new mongoose.Schema({
-  // Mevcut alanlar...
+const bookingSchema = new mongoose.Schema(
+  {
+    // Mevcut alanlar...
 
-  // ─────────────────────────────────────────────────────────
-  // YENİ: Booking Number & Status
-  // ─────────────────────────────────────────────────────────
-  bookingNumber: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-    // Format: DRF-2024-000001 (draft) veya BKG-2024-000001 (confirmed)
-  },
-
-  status: {
-    type: String,
-    enum: ['draft', 'pending', 'confirmed', 'cancelled', 'expired', 'completed'],
-    default: 'draft',
-    index: true
-  },
-
-  currentPhase: {
-    type: Number,
-    enum: [1, 2],
-    default: 2 // Draft her zaman Phase 2'de oluşur
-  },
-
-  // ─────────────────────────────────────────────────────────
-  // YENİ: Arama Kriterleri (Phase 1 snapshot)
-  // ─────────────────────────────────────────────────────────
-  searchCriteria: {
-    hotelIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Hotel' }],
-    tourismRegionIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TourismRegion' }],
-    dateRange: {
-      start: Date,
-      end: Date
-    },
-    adults: { type: Number, default: 2 },
-    children: [{ type: Number }], // Yaşlar
-    channel: { type: String, enum: ['B2B', 'B2C'], default: 'B2B' },
-    countryCode: { type: String, default: 'TR' }
-  },
-
-  // ─────────────────────────────────────────────────────────
-  // YENİ: Fatura Bilgileri
-  // ─────────────────────────────────────────────────────────
-  invoiceDetails: {
-    type: {
+    // ─────────────────────────────────────────────────────────
+    // YENİ: Booking Number & Status
+    // ─────────────────────────────────────────────────────────
+    bookingNumber: {
       type: String,
-      enum: ['individual', 'corporate'],
-      required: true
+      required: true,
+      unique: true,
+      index: true
+      // Format: DRF-2024-000001 (draft) veya BKG-2024-000001 (confirmed)
     },
-    // Bireysel fatura
-    individual: {
-      firstName: String,
-      lastName: String,
-      tcNumber: String, // TR vatandaşları için zorunlu
-      address: {
-        street: String,
-        city: String,
-        district: String,
-        postalCode: String,
-        country: { type: String, default: 'TR' }
+
+    status: {
+      type: String,
+      enum: ['draft', 'pending', 'confirmed', 'cancelled', 'expired', 'completed'],
+      default: 'draft',
+      index: true
+    },
+
+    currentPhase: {
+      type: Number,
+      enum: [1, 2],
+      default: 2 // Draft her zaman Phase 2'de oluşur
+    },
+
+    // ─────────────────────────────────────────────────────────
+    // YENİ: Arama Kriterleri (Phase 1 snapshot)
+    // ─────────────────────────────────────────────────────────
+    searchCriteria: {
+      hotelIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Hotel' }],
+      tourismRegionIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TourismRegion' }],
+      dateRange: {
+        start: Date,
+        end: Date
+      },
+      adults: { type: Number, default: 2 },
+      children: [{ type: Number }], // Yaşlar
+      channel: { type: String, enum: ['B2B', 'B2C'], default: 'B2B' },
+      countryCode: { type: String, default: 'TR' }
+    },
+
+    // ─────────────────────────────────────────────────────────
+    // YENİ: Fatura Bilgileri
+    // ─────────────────────────────────────────────────────────
+    invoiceDetails: {
+      type: {
+        type: String,
+        enum: ['individual', 'corporate'],
+        required: true
+      },
+      // Bireysel fatura
+      individual: {
+        firstName: String,
+        lastName: String,
+        tcNumber: String, // TR vatandaşları için zorunlu
+        address: {
+          street: String,
+          city: String,
+          district: String,
+          postalCode: String,
+          country: { type: String, default: 'TR' }
+        }
+      },
+      // Kurumsal fatura
+      corporate: {
+        companyName: String,
+        taxNumber: String,
+        taxOffice: String,
+        address: {
+          street: String,
+          city: String,
+          district: String,
+          postalCode: String,
+          country: { type: String, default: 'TR' }
+        }
       }
     },
-    // Kurumsal fatura
-    corporate: {
-      companyName: String,
-      taxNumber: String,
-      taxOffice: String,
-      address: {
-        street: String,
-        city: String,
-        district: String,
-        postalCode: String,
-        country: { type: String, default: 'TR' }
-      }
-    }
+
+    // ─────────────────────────────────────────────────────────
+    // YENİ: İletişim Bilgileri
+    // ─────────────────────────────────────────────────────────
+    contactInfo: {
+      email: { type: String, required: true },
+      phone: { type: String, required: true },
+      alternativePhone: String
+    },
+
+    // ─────────────────────────────────────────────────────────
+    // YENİ: Zaman Damgaları
+    // ─────────────────────────────────────────────────────────
+    expiresAt: {
+      type: Date,
+      index: true
+      // Draft için: createdAt + 7 gün
+    },
+
+    lastActivityAt: {
+      type: Date,
+      default: Date.now
+    },
+
+    completedAt: Date,
+    cancelledAt: Date
   },
-
-  // ─────────────────────────────────────────────────────────
-  // YENİ: İletişim Bilgileri
-  // ─────────────────────────────────────────────────────────
-  contactInfo: {
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
-    alternativePhone: String
-  },
-
-  // ─────────────────────────────────────────────────────────
-  // YENİ: Zaman Damgaları
-  // ─────────────────────────────────────────────────────────
-  expiresAt: {
-    type: Date,
-    index: true
-    // Draft için: createdAt + 7 gün
-  },
-
-  lastActivityAt: {
-    type: Date,
-    default: Date.now
-  },
-
-  completedAt: Date,
-  cancelledAt: Date,
-
-}, { timestamps: true })
+  { timestamps: true }
+)
 
 // Indexes
 bookingSchema.index({ status: 1, expiresAt: 1 }) // Expire query için
@@ -213,8 +215,8 @@ export async function generateBookingNumber(type = 'booking') {
 // /api/src/modules/booking/booking.routes.js
 
 // Draft CRUD
-router.post('/drafts', protect, createDraft)           // Phase 2'ye geçerken
-router.get('/drafts', protect, getMyDrafts)            // Kullanıcının draftları
+router.post('/drafts', protect, createDraft) // Phase 2'ye geçerken
+router.get('/drafts', protect, getMyDrafts) // Kullanıcının draftları
 router.get('/drafts/:bookingNumber', protect, getDraft)
 router.put('/drafts/:bookingNumber', protect, updateDraft)
 router.delete('/drafts/:bookingNumber', protect, deleteDraft)
@@ -630,7 +632,9 @@ watch(
 <!-- /admin/src/components/booking/checkout/InvoiceDetailsForm.vue -->
 
 <template>
-  <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+  <div
+    class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+  >
     <!-- Header -->
     <div class="px-5 py-4 border-b border-gray-200 dark:border-slate-700">
       <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
@@ -680,21 +684,13 @@ watch(
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('booking.firstName') }} *
             </label>
-            <input
-              v-model="individual.firstName"
-              type="text"
-              class="form-input w-full"
-            />
+            <input v-model="individual.firstName" type="text" class="form-input w-full" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('booking.lastName') }} *
             </label>
-            <input
-              v-model="individual.lastName"
-              type="text"
-              class="form-input w-full"
-            />
+            <input v-model="individual.lastName" type="text" class="form-input w-full" />
           </div>
         </div>
 
@@ -723,11 +719,7 @@ watch(
           <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
             {{ $t('booking.companyName') }} *
           </label>
-          <input
-            v-model="corporate.companyName"
-            type="text"
-            class="form-input w-full"
-          />
+          <input v-model="corporate.companyName" type="text" class="form-input w-full" />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -735,21 +727,13 @@ watch(
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('booking.taxNumber') }} *
             </label>
-            <input
-              v-model="corporate.taxNumber"
-              type="text"
-              class="form-input w-full"
-            />
+            <input v-model="corporate.taxNumber" type="text" class="form-input w-full" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('booking.taxOffice') }} *
             </label>
-            <input
-              v-model="corporate.taxOffice"
-              type="text"
-              class="form-input w-full"
-            />
+            <input v-model="corporate.taxOffice" type="text" class="form-input w-full" />
           </div>
         </div>
 
@@ -821,11 +805,7 @@ cron.schedule('0 3 * * *', async () => {
       </router-link>
 
       <!-- Diğer durumlar için "Görüntüle" -->
-      <router-link
-        v-else
-        :to="`/bookings/${booking.bookingNumber}`"
-        class="btn-secondary btn-sm"
-      >
+      <router-link v-else :to="`/bookings/${booking.bookingNumber}`" class="btn-secondary btn-sm">
         {{ $t('common.view') }}
       </router-link>
     </td>
@@ -838,47 +818,57 @@ cron.schedule('0 3 * * *', async () => {
 ## Uygulama Adımları
 
 ### Adım 1: Backend Model & Service
+
 - [ ] Booking model güncelle (yeni alanlar)
 - [ ] generateBookingNumber fonksiyonu
 - [ ] Draft CRUD servisleri
 - [ ] completeDraft servisi (kontenjan kontrol dahil)
 
 ### Adım 2: Backend Routes & Validation
+
 - [ ] Draft routes ekle
 - [ ] Validation middleware
 - [ ] Error handling (kontenjan yok, vs.)
 
 ### Adım 3: Frontend Storage Service
+
 - [ ] bookingStorageService oluştur
 - [ ] localStorage helpers
 
 ### Adım 4: Store Güncellemeleri
+
 - [ ] Draft actions ekle
 - [ ] localStorage entegrasyonu
 - [ ] Auto-save mekanizması
 
 ### Adım 5: Router & View
+
 - [ ] Route yapısı güncelle
 - [ ] BookingView draft/resume logic
 
 ### Adım 6: Yeni Componentler
+
 - [ ] InvoiceDetailsForm.vue
 - [ ] AddressForm.vue
 - [ ] DraftSavedIndicator.vue
 
 ### Adım 7: Booking Listesi
+
 - [ ] Draft filtresi ekle
 - [ ] "Devam Et" butonu
 - [ ] Status badge'leri
 
 ### Adım 8: Cron Job
+
 - [ ] Draft expire job
 - [ ] Test
 
 ### Adım 9: i18n
+
 - [ ] Yeni çeviri key'leri
 
 ### Adım 10: Test & Polish
+
 - [ ] F5 testleri
 - [ ] Kontenjan kontrol testi
 - [ ] Edge case'ler

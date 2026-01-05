@@ -13,8 +13,8 @@
           <p class="text-sm text-gray-500 dark:text-slate-400">Oteldeki fiziksel odalari yonetin</p>
         </div>
         <button
-          @click="showAddRoomModal = true"
           class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1"
+          @click="showAddRoomModal = true"
         >
           <span class="material-icons text-sm">add</span>
           Oda Ekle
@@ -31,8 +31,8 @@
         <span class="material-icons text-4xl text-gray-400 dark:text-slate-500">meeting_room</span>
         <p class="mt-2 text-gray-500 dark:text-slate-400">Henuz oda eklenmemis</p>
         <button
-          @click="showAddRoomModal = true"
           class="mt-3 text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+          @click="showAddRoomModal = true"
         >
           Ilk odayi ekleyin
         </button>
@@ -45,11 +45,15 @@
           :key="floor"
           class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden"
         >
-          <div class="px-4 py-2 bg-gray-100 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
+          <div
+            class="px-4 py-2 bg-gray-100 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600"
+          >
             <span class="font-medium text-gray-900 dark:text-white">
               {{ floor === '0' ? 'Zemin Kat' : floor + '. Kat' }}
             </span>
-            <span class="ml-2 text-sm text-gray-500 dark:text-slate-400">({{ floorRooms.length }} oda)</span>
+            <span class="ml-2 text-sm text-gray-500 dark:text-slate-400"
+              >({{ floorRooms.length }} oda)</span
+            >
           </div>
           <div class="p-3 flex flex-wrap gap-2">
             <div
@@ -57,14 +61,16 @@
               :key="room._id"
               class="group relative inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-slate-700 rounded-lg text-sm"
             >
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ room.roomNumber }}</span>
+              <span class="font-medium text-gray-700 dark:text-gray-300">{{
+                room.roomNumber
+              }}</span>
               <span v-if="room.roomType?.code" class="text-xs text-gray-500 dark:text-slate-400">
                 ({{ room.roomType.code }})
               </span>
               <button
-                @click="confirmDeleteRoom(room)"
                 class="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"
                 title="Odayi Sil"
+                @click="confirmDeleteRoom(room)"
               >
                 <span class="material-icons text-sm">close</span>
               </button>
@@ -76,7 +82,8 @@
       <!-- Room Count Summary -->
       <div v-if="rooms.length > 0" class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-600">
         <p class="text-sm text-gray-600 dark:text-slate-400">
-          Toplam <span class="font-semibold text-gray-900 dark:text-white">{{ rooms.length }}</span> oda
+          Toplam
+          <span class="font-semibold text-gray-900 dark:text-white">{{ rooms.length }}</span> oda
         </p>
       </div>
     </div>
@@ -91,10 +98,10 @@
               Gunluk Temizlik Saati
             </label>
             <input
-              type="time"
               v-model="localSettings.dailyCleaningTime"
-              @change="emitChange"
+              type="time"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @change="emitChange"
             />
           </div>
           <div>
@@ -103,8 +110,8 @@
             </label>
             <select
               v-model="localSettings.cleaningPriority"
-              @change="emitChange"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @change="emitChange"
             >
               <option value="checkout_first">Once Check-out Odalari</option>
               <option value="vip_first">Once VIP Odalar</option>
@@ -113,19 +120,27 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-slate-600">
+        <div
+          class="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-slate-600"
+        >
           <div>
-            <p class="font-medium text-gray-900 dark:text-white">Check-out Sonrasi Otomatik Kirli Isaretle</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">Misafir cikis yaptiginda oda otomatik kirli olarak isaretlenir</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              Check-out Sonrasi Otomatik Kirli Isaretle
+            </p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              Misafir cikis yaptiginda oda otomatik kirli olarak isaretlenir
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="localSettings.autoMarkDirtyOnCheckout"
-              @change="emitChange"
+              type="checkbox"
               class="sr-only peer"
+              @change="emitChange"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
           </label>
         </div>
       </div>
@@ -136,8 +151,8 @@
       <div class="flex items-center justify-between mb-4">
         <h4 class="font-medium text-gray-900 dark:text-white">Temizlik Durumlari</h4>
         <button
-          @click="addCleaningStatus"
           class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1"
+          @click="addCleaningStatus"
         >
           <span class="material-icons text-sm">add</span>
           Yeni Durum
@@ -151,36 +166,36 @@
           class="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-600 flex items-center gap-3"
         >
           <input
-            type="color"
             v-model="status.color"
-            @input="emitChange"
+            type="color"
             class="w-8 h-8 rounded cursor-pointer"
+            @input="emitChange"
           />
           <input
-            type="text"
             v-model="status.code"
-            @input="emitChange"
+            type="text"
             placeholder="Kod"
             class="w-24 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
           <input
-            type="text"
             v-model="status.name"
-            @input="emitChange"
+            type="text"
             placeholder="Durum Adi"
             class="flex-1 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
           <input
-            type="number"
             v-model.number="status.order"
-            @input="emitChange"
+            type="number"
             min="0"
             placeholder="Sira"
             class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
           <button
-            @click="removeCleaningStatus(index)"
             class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+            @click="removeCleaningStatus(index)"
           >
             <span class="material-icons text-sm">delete</span>
           </button>
@@ -193,8 +208,8 @@
       <div class="flex items-center justify-between mb-4">
         <h4 class="font-medium text-gray-900 dark:text-white">Gorev Turleri</h4>
         <button
-          @click="addTaskType"
           class="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-1"
+          @click="addTaskType"
         >
           <span class="material-icons text-sm">add</span>
           Yeni Gorev
@@ -208,40 +223,40 @@
           class="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-600 flex items-center gap-3"
         >
           <input
-            type="text"
             v-model="task.code"
-            @input="emitChange"
+            type="text"
             placeholder="Kod"
             class="w-24 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
           <input
-            type="text"
             v-model="task.name"
-            @input="emitChange"
+            type="text"
             placeholder="Gorev Adi"
             class="flex-1 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
           <div class="flex items-center gap-1">
             <input
-              type="number"
               v-model.number="task.estimatedMinutes"
-              @input="emitChange"
+              type="number"
               min="1"
               class="w-16 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @input="emitChange"
             />
             <span class="text-xs text-gray-500">dk</span>
           </div>
           <label class="flex items-center">
             <input
-              type="checkbox"
               v-model="task.isActive"
-              @change="emitChange"
+              type="checkbox"
               class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+              @change="emitChange"
             />
           </label>
           <button
-            @click="removeTaskType(index)"
             class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+            @click="removeTaskType(index)"
           >
             <span class="material-icons text-sm">delete</span>
           </button>
@@ -258,21 +273,21 @@
       <div class="bg-white dark:bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Odayi Sil</h3>
         <p class="text-gray-600 dark:text-gray-400 mb-4">
-          <span class="font-semibold">{{ roomToDelete?.roomNumber }}</span> numarali odayi silmek istediginizden emin misiniz?
-          Bu islem geri alinamaz.
+          <span class="font-semibold">{{ roomToDelete?.roomNumber }}</span> numarali odayi silmek
+          istediginizden emin misiniz? Bu islem geri alinamaz.
         </p>
         <div class="flex justify-end gap-3">
           <button
-            @click="showDeleteModal = false"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
             :disabled="deletingRoom"
+            @click="showDeleteModal = false"
           >
             Iptal
           </button>
           <button
-            @click="deleteRoomConfirmed"
             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
             :disabled="deletingRoom"
+            @click="deleteRoomConfirmed"
           >
             <span v-if="deletingRoom" class="material-icons animate-spin text-sm">refresh</span>
             Sil
@@ -362,7 +377,7 @@ const loadRooms = async () => {
 }
 
 // Confirm delete room
-const confirmDeleteRoom = (room) => {
+const confirmDeleteRoom = room => {
   roomToDelete.value = room
   showDeleteModal.value = true
 }
@@ -405,9 +420,13 @@ const localSettings = ref({
   ...props.modelValue
 })
 
-watch(() => props.modelValue, (newVal) => {
-  localSettings.value = { ...localSettings.value, ...newVal }
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  newVal => {
+    localSettings.value = { ...localSettings.value, ...newVal }
+  },
+  { deep: true }
+)
 
 const emitChange = () => {
   emit('update:modelValue', localSettings.value)
@@ -427,7 +446,7 @@ const addCleaningStatus = () => {
   emitChange()
 }
 
-const removeCleaningStatus = (index) => {
+const removeCleaningStatus = index => {
   localSettings.value.cleaningStatuses.splice(index, 1)
   emitChange()
 }
@@ -445,7 +464,7 @@ const addTaskType = () => {
   emitChange()
 }
 
-const removeTaskType = (index) => {
+const removeTaskType = index => {
   localSettings.value.taskTypes.splice(index, 1)
   emitChange()
 }

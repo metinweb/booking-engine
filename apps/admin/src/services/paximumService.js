@@ -30,7 +30,7 @@ export const autocomplete = async (query, productType = 2) => {
  * @param {string} params.culture - Culture code (e.g., 'tr-TR')
  * @param {number} params.markupPercent - Optional markup percentage
  */
-export const searchHotels = async (params) => {
+export const searchHotels = async params => {
   const response = await apiClient.post('/paximum/search', params)
   return response.data.data
 }
@@ -58,7 +58,7 @@ export const getHotelDetails = async (hotelId, culture = 'tr-TR') => {
  * @param {string} params.culture - Culture code
  * @param {number} params.markupPercent - Optional markup percentage
  */
-export const getOffers = async (params) => {
+export const getOffers = async params => {
   const response = await apiClient.post('/paximum/offers', params)
   return response.data.data
 }
@@ -108,7 +108,12 @@ export const addServices = async (transactionId, offers, currency = 'TRY', cultu
  * @param {Object} customerInfo - Customer contact info
  * @param {string} agencyReservationNumber - Optional agency reference
  */
-export const setReservationInfo = async (transactionId, travellers, customerInfo, agencyReservationNumber) => {
+export const setReservationInfo = async (
+  transactionId,
+  travellers,
+  customerInfo,
+  agencyReservationNumber
+) => {
   const response = await apiClient.post(`/paximum/transaction/${transactionId}/reservation-info`, {
     travellers,
     customerInfo,
@@ -121,7 +126,7 @@ export const setReservationInfo = async (transactionId, travellers, customerInfo
  * Commit transaction (finalize booking)
  * @param {string} transactionId - Transaction ID
  */
-export const commitTransaction = async (transactionId) => {
+export const commitTransaction = async transactionId => {
   const response = await apiClient.post(`/paximum/transaction/${transactionId}/commit`)
   return response.data.data
 }
@@ -130,7 +135,7 @@ export const commitTransaction = async (transactionId) => {
  * Get reservation details
  * @param {string} reservationNumber - Paximum reservation number
  */
-export const getReservation = async (reservationNumber) => {
+export const getReservation = async reservationNumber => {
   const response = await apiClient.get(`/paximum/reservation/${reservationNumber}`)
   return response.data.data
 }
@@ -148,7 +153,7 @@ export const getReservationList = async (params = {}) => {
  * Get cancellation penalty
  * @param {string} reservationNumber - Paximum reservation number
  */
-export const getCancellationPenalty = async (reservationNumber) => {
+export const getCancellationPenalty = async reservationNumber => {
   const response = await apiClient.get(`/paximum/reservation/${reservationNumber}/penalty`)
   return response.data.data
 }
@@ -159,7 +164,9 @@ export const getCancellationPenalty = async (reservationNumber) => {
  * @param {string} reason - Cancellation reason
  */
 export const cancelReservation = async (reservationNumber, reason) => {
-  const response = await apiClient.post(`/paximum/reservation/${reservationNumber}/cancel`, { reason })
+  const response = await apiClient.post(`/paximum/reservation/${reservationNumber}/cancel`, {
+    reason
+  })
   return response.data.data
 }
 

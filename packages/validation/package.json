@@ -1,0 +1,22 @@
+{
+  "name": "@booking-engine/validation",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./validators": "./src/validators/index.js",
+    "./schemas": "./src/schemas/index.js",
+    "./adapters/mongoose": "./src/adapters/mongoose.js",
+    "./adapters/vue": "./src/adapters/vue.js"
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "validation",
+    "mongoose",
+    "vue",
+    "booking-engine"
+  ]
+}

@@ -7,6 +7,7 @@ import { BadRequestError, NotFoundError } from '../../core/errors.js'
 import { emitCheckIn, emitCheckOut, getGuestDisplayName } from '../pms/pmsSocket.js'
 import { scheduleAutoSend } from '../pms-guest/kbsClient.js'
 import { notifyHotelUsers } from '../notification/notification.service.js'
+import logger from '../../core/logger.js'
 
 /**
  * Get all stays for a hotel
@@ -121,7 +122,7 @@ export const getTodayActivity = asyncHandler(async (req, res) => {
       status: { $in: ['confirmed', 'pending'] },
       _id: { $nin: checkedInBookingIds }
     }).populate('roomType', 'name code')
-  } catch (e) {
+  } catch {
     // Booking model might not exist yet
   }
 
@@ -261,10 +262,13 @@ export const walkInCheckIn = asyncHandler(async (req, res) => {
 
   // Add initial payment if provided
   if (paymentAmount && paymentAmount > 0) {
-    await stay.addPayment({
-      amount: paymentAmount,
-      method: paymentMethod || 'cash'
-    }, req.user._id)
+    await stay.addPayment(
+      {
+        amount: paymentAmount,
+        method: paymentMethod || 'cash'
+      },
+      req.user._id
+    )
   }
 
   // Update room status
@@ -290,7 +294,7 @@ export const walkInCheckIn = asyncHandler(async (req, res) => {
     message: `${getGuestDisplayName(guestList[0])} - Oda ${room.roomNumber}`,
     reference: { model: 'Stay', id: stay._id },
     actionUrl: `/pms/front-desk?stayId=${stay._id}`
-  }).catch(err => console.error('[Notification] Check-in notification error:', err.message))
+  }).catch(err => logger.error('[Notification] Check-in notification error:', err.message))
 
   // Schedule automatic KBS notification (if enabled)
   scheduleAutoSend(hotelId, populatedStay, room)
@@ -317,7 +321,7 @@ export const checkInFromBooking = asyncHandler(async (req, res) => {
       partner: req.partner._id
     }).populate('rooms.roomType')
   } catch (e) {
-    console.error('Booking query error:', e.message)
+    logger.error('Booking query error:', e.message)
     throw new NotFoundError('Rezervasyon bulunamadi')
   }
 
@@ -346,13 +350,16 @@ export const checkInFromBooking = asyncHandler(async (req, res) => {
   const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
 
   // Use provided guests or booking guests
-  const guestList = guests || booking.guests || [{
-    firstName: booking.customerName?.split(' ')[0] || 'Misafir',
-    lastName: booking.customerName?.split(' ').slice(1).join(' ') || '',
-    isMainGuest: true,
-    phone: booking.customerPhone,
-    email: booking.customerEmail
-  }]
+  const guestList = guests ||
+    booking.guests || [
+      {
+        firstName: booking.customerName?.split(' ')[0] || 'Misafir',
+        lastName: booking.customerName?.split(' ').slice(1).join(' ') || '',
+        isMainGuest: true,
+        phone: booking.customerPhone,
+        email: booking.customerEmail
+      }
+    ]
 
   // Check if pending Stay exists (from booking confirmation)
   let stay = await Stay.findOne({ booking: bookingId })
@@ -411,7 +418,7 @@ export const checkInFromBooking = asyncHandler(async (req, res) => {
   // Update booking status
   try {
     await Booking.findByIdAndUpdate(bookingId, { status: 'checked_in' })
-  } catch (e) {
+  } catch {
     // Non-critical - booking status update failed
   }
 
@@ -440,7 +447,7 @@ export const checkInFromBooking = asyncHandler(async (req, res) => {
         status: stay.status
       })
     }
-  } catch (e) {
+  } catch {
     // Non-critical - guest history update failed
   }
 
@@ -464,7 +471,7 @@ export const checkInFromBooking = asyncHandler(async (req, res) => {
     message: `${getGuestDisplayName(guestList[0])} - Oda ${room.roomNumber} (${booking.bookingNumber || 'Walk-in'})`,
     reference: { model: 'Stay', id: stay._id },
     actionUrl: `/pms/front-desk?stayId=${stay._id}`
-  }).catch(err => console.error('[Notification] Booking check-in notification error:', err.message))
+  }).catch(err => logger.error('[Notification] Booking check-in notification error:', err.message))
 
   // Schedule automatic KBS notification (if enabled)
   scheduleAutoSend(hotelId, populatedStay, room)
@@ -495,11 +502,14 @@ export const checkOut = asyncHandler(async (req, res) => {
 
   // If settling balance, add final payment
   if (settleBalance && stay.balance > 0) {
-    await stay.addPayment({
-      amount: stay.balance,
-      method: paymentMethod || 'cash',
-      notes: 'Check-out odemesi'
-    }, req.user._id)
+    await stay.addPayment(
+      {
+        amount: stay.balance,
+        method: paymentMethod || 'cash',
+        notes: 'Check-out odemesi'
+      },
+      req.user._id
+    )
   }
 
   // Perform checkout
@@ -509,7 +519,7 @@ export const checkOut = asyncHandler(async (req, res) => {
   if (stay.booking) {
     try {
       await Booking.findByIdAndUpdate(stay.booking, { status: 'completed' })
-    } catch (e) {
+    } catch {
       // Non-critical - booking status update failed
     }
   }
@@ -533,8 +543,8 @@ export const checkOut = asyncHandler(async (req, res) => {
     title: 'Check-out Yapıldı',
     message: `${getGuestDisplayName(stay.guests?.[0])} - Oda ${updatedStay.room?.roomNumber}`,
     reference: { model: 'Stay', id: stayId },
-    actionUrl: `/pms/housekeeping`
-  }).catch(err => console.error('[Notification] Check-out notification error:', err.message))
+    actionUrl: '/pms/housekeeping'
+  }).catch(err => logger.error('[Notification] Check-out notification error:', err.message))
 
   res.json({
     success: true,
@@ -560,12 +570,15 @@ export const addExtra = asyncHandler(async (req, res) => {
     throw new NotFoundError('Aktif konaklama bulunamadi')
   }
 
-  await stay.addExtra({
-    description,
-    amount,
-    quantity: quantity || 1,
-    category: category || 'other'
-  }, req.user._id)
+  await stay.addExtra(
+    {
+      description,
+      amount,
+      quantity: quantity || 1,
+      category: category || 'other'
+    },
+    req.user._id
+  )
 
   const updatedStay = await Stay.findById(stayId)
 
@@ -592,12 +605,15 @@ export const addPayment = asyncHandler(async (req, res) => {
     throw new NotFoundError('Konaklama bulunamadi')
   }
 
-  await stay.addPayment({
-    amount,
-    method,
-    reference,
-    notes
-  }, req.user._id)
+  await stay.addPayment(
+    {
+      amount,
+      method,
+      reference,
+      notes
+    },
+    req.user._id
+  )
 
   const updatedStay = await Stay.findById(stayId)
 
@@ -786,12 +802,12 @@ export const createStay = asyncHandler(async (req, res) => {
 
   // Map source to valid enum values
   const sourceMap = {
-    'direct': 'phone',
+    direct: 'phone',
     'booking.com': 'ota',
-    'expedia': 'ota',
-    'airbnb': 'ota',
+    expedia: 'ota',
+    airbnb: 'ota',
     'hotels.com': 'ota',
-    'agoda': 'ota'
+    agoda: 'ota'
   }
   const mappedSource = sourceMap[source] || source
 
@@ -815,9 +831,7 @@ export const createStay = asyncHandler(async (req, res) => {
     hotel: hotelId,
     room: roomId,
     status: { $in: [STAY_STATUS.PENDING, STAY_STATUS.CHECKED_IN] },
-    $or: [
-      { checkInDate: { $lt: checkOut }, checkOutDate: { $gt: checkIn } }
-    ]
+    $or: [{ checkInDate: { $lt: checkOut }, checkOutDate: { $gt: checkIn } }]
   })
 
   if (conflictingStay) {
@@ -832,16 +846,17 @@ export const createStay = asyncHandler(async (req, res) => {
   }
 
   // Format guests
-  const guestList = guests?.map((g, index) => ({
-    firstName: g.firstName,
-    lastName: g.lastName,
-    email: g.email,
-    phone: g.phone,
-    nationality: g.nationality,
-    idType: g.idType,
-    idNumber: g.idNumber,
-    isMainGuest: g.isPrimary || index === 0
-  })) || []
+  const guestList =
+    guests?.map((g, index) => ({
+      firstName: g.firstName,
+      lastName: g.lastName,
+      email: g.email,
+      phone: g.phone,
+      nationality: g.nationality,
+      idType: g.idType,
+      idNumber: g.idNumber,
+      isMainGuest: g.isPrimary || index === 0
+    })) || []
 
   // Create stay
   const stay = await Stay.create({
@@ -951,7 +966,7 @@ export const checkInFromStay = asyncHandler(async (req, res) => {
   if (stay.booking) {
     try {
       await Booking.findByIdAndUpdate(stay.booking, { status: 'checked_in' })
-    } catch (e) {
+    } catch {
       // Non-critical - booking status update failed
     }
   }
@@ -983,7 +998,7 @@ export const checkInFromStay = asyncHandler(async (req, res) => {
         })
       }
     }
-  } catch (e) {
+  } catch {
     // Non-critical - guest history update failed
   }
 
@@ -1007,7 +1022,7 @@ export const checkInFromStay = asyncHandler(async (req, res) => {
     message: `${getGuestDisplayName(stay.guests[0])} - Oda ${room.roomNumber}`,
     reference: { model: 'Stay', id: stay._id },
     actionUrl: `/pms/front-desk?stayId=${stay._id}`
-  }).catch(err => console.error('[Notification] Stay check-in notification error:', err.message))
+  }).catch(err => logger.error('[Notification] Stay check-in notification error:', err.message))
 
   // Schedule automatic KBS notification (if enabled)
   scheduleAutoSend(hotelId, populatedStay, room)

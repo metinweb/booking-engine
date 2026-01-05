@@ -153,7 +153,7 @@ export const PRIORITY_INFO = {
 /**
  * Get room types for a hotel
  */
-export const getRoomTypes = async (hotelId) => {
+export const getRoomTypes = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/room-types`)
   return response.data
 }
@@ -161,7 +161,7 @@ export const getRoomTypes = async (hotelId) => {
 /**
  * Get meal plans for a hotel
  */
-export const getMealPlans = async (hotelId) => {
+export const getMealPlans = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/meal-plans`)
   return response.data
 }
@@ -169,7 +169,7 @@ export const getMealPlans = async (hotelId) => {
 /**
  * Get housekeeping dashboard
  */
-export const getHousekeeping = async (hotelId) => {
+export const getHousekeeping = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/housekeeping`)
   return response.data
 }
@@ -200,7 +200,7 @@ export const getRoom = async (hotelId, roomId) => {
 /**
  * Get room statistics
  */
-export const getRoomStatistics = async (hotelId) => {
+export const getRoomStatistics = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/rooms/statistics`)
   return response.data
 }
@@ -208,7 +208,7 @@ export const getRoomStatistics = async (hotelId) => {
 /**
  * Get rooms needing cleaning
  */
-export const getRoomsNeedingCleaning = async (hotelId) => {
+export const getRoomsNeedingCleaning = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/${hotelId}/rooms/needs-cleaning`)
   return response.data
 }
@@ -268,7 +268,10 @@ export const updateRoomStatus = async (hotelId, roomId, status, notes = '') => {
  * Update housekeeping status
  */
 export const updateHousekeepingStatus = async (hotelId, roomId, data) => {
-  const response = await pmsApiClient.patch(`${BASE_URL}/${hotelId}/rooms/${roomId}/housekeeping`, data)
+  const response = await pmsApiClient.patch(
+    `${BASE_URL}/${hotelId}/rooms/${roomId}/housekeeping`,
+    data
+  )
   return response.data
 }
 

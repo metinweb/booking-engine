@@ -5,24 +5,24 @@
       <div class="flex items-center gap-2">
         <button
           v-if="!activeShift"
-          @click="showOpenShiftModal = true"
           class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+          @click="showOpenShiftModal = true"
         >
           <span class="material-icons text-lg">login</span>
           Vardiya Ac
         </button>
         <button
           v-else
-          @click="showCloseShiftModal = true"
           class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+          @click="showCloseShiftModal = true"
         >
           <span class="material-icons text-lg">logout</span>
           Vardiya Kapat
         </button>
         <button
-          @click="showTransactionModal = true"
           :disabled="!activeShift"
           class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="showTransactionModal = true"
         >
           <span class="material-icons text-lg">add_card</span>
           Yeni Islem
@@ -31,28 +31,40 @@
     </div>
 
     <!-- Active Shift Alert -->
-    <div v-if="activeShift" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
+    <div
+      v-if="activeShift"
+      class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4"
+    >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
             <span class="material-icons text-white">point_of_sale</span>
           </div>
           <div>
-            <p class="font-medium text-green-800 dark:text-green-200">{{ $t('pms.cashier.activeShift') }}: {{ activeShift.shiftNumber }}</p>
+            <p class="font-medium text-green-800 dark:text-green-200">
+              {{ $t('pms.cashier.activeShift') }}: {{ activeShift.shiftNumber }}
+            </p>
             <p class="text-sm text-green-600 dark:text-green-400">
-              {{ activeShift.cashierName }} - {{ formatDateTime(activeShift.openedAt) }}'den beri acik
-              ({{ formatShiftDuration(activeShift.openedAt) }})
+              {{ activeShift.cashierName }} - {{ formatDateTime(activeShift.openedAt) }}'den beri
+              acik ({{ formatShiftDuration(activeShift.openedAt) }})
             </p>
           </div>
         </div>
         <div class="text-right">
-          <p class="text-sm text-green-600 dark:text-green-400">{{ $t('pms.cashier.currentBalance') }}</p>
-          <p class="text-xl font-bold text-green-800 dark:text-green-200">{{ formatCurrency(activeShift.currentBalance?.cash) }}</p>
+          <p class="text-sm text-green-600 dark:text-green-400">
+            {{ $t('pms.cashier.currentBalance') }}
+          </p>
+          <p class="text-xl font-bold text-green-800 dark:text-green-200">
+            {{ formatCurrency(activeShift.currentBalance?.cash) }}
+          </p>
         </div>
       </div>
 
       <!-- Multi-Currency Balances -->
-      <div v-if="hasMultipleCurrencies" class="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+      <div
+        v-if="hasMultipleCurrencies"
+        class="mt-4 pt-4 border-t border-green-200 dark:border-green-700"
+      >
         <div class="flex items-center justify-between mb-3">
           <p class="text-sm font-medium text-green-700 dark:text-green-300">
             <span class="material-icons text-sm align-middle mr-1">currency_exchange</span>
@@ -65,26 +77,33 @@
             :key="balance.currency"
             :currency="balance.currency"
             :balances="balance"
-            :exchangeRate="exchangeRates[balance.currency]"
-            :showTryEquivalent="balance.currency !== 'TRY'"
+            :exchange-rate="exchangeRates[balance.currency]"
+            :show-try-equivalent="balance.currency !== 'TRY'"
             :highlighted="balance.currency === 'TRY'"
           />
         </div>
       </div>
     </div>
 
-    <div v-else class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
+    <div
+      v-else
+      class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4"
+    >
       <div class="flex items-center gap-3">
         <span class="material-icons text-yellow-600 dark:text-yellow-400">warning</span>
         <div>
           <p class="font-medium text-yellow-800 dark:text-yellow-200">Aktif vardiya yok</p>
-          <p class="text-sm text-yellow-600 dark:text-yellow-400">Islem yapabilmek icin lutfen bir vardiya acin.</p>
+          <p class="text-sm text-yellow-600 dark:text-yellow-400">
+            Islem yapabilmek icin lutfen bir vardiya acin.
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Statistics Cards - Multi Currency -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+    >
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
           <span class="material-icons text-green-600">payments</span>
@@ -109,26 +128,39 @@
               <span class="text-lg font-bold" :class="getCurrencyTextColor(currency)">
                 {{ getCurrencySymbol(currency) }}
               </span>
-              <span class="text-xs font-medium px-2 py-0.5 rounded" :class="getCurrencyBadgeClass(currency)">
+              <span
+                class="text-xs font-medium px-2 py-0.5 rounded"
+                :class="getCurrencyBadgeClass(currency)"
+              >
                 {{ currency }}
               </span>
             </div>
             <div class="space-y-1">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500 dark:text-slate-400">{{ $t('pms.currency.cash') }}</span>
-                <span class="font-medium text-green-600 dark:text-green-400">{{ formatAmount(data.cash, currency) }}</span>
+                <span class="font-medium text-green-600 dark:text-green-400">{{
+                  formatAmount(data.cash, currency)
+                }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500 dark:text-slate-400">{{ $t('pms.currency.card') }}</span>
-                <span class="font-medium text-blue-600 dark:text-blue-400">{{ formatAmount(data.card, currency) }}</span>
+                <span class="font-medium text-blue-600 dark:text-blue-400">{{
+                  formatAmount(data.card, currency)
+                }}</span>
               </div>
               <div class="flex justify-between text-sm">
-                <span class="text-gray-500 dark:text-slate-400">{{ $t('pms.currency.other') }}</span>
-                <span class="font-medium text-purple-600 dark:text-purple-400">{{ formatAmount(data.other, currency) }}</span>
+                <span class="text-gray-500 dark:text-slate-400">{{
+                  $t('pms.currency.other')
+                }}</span>
+                <span class="font-medium text-purple-600 dark:text-purple-400">{{
+                  formatAmount(data.other, currency)
+                }}</span>
               </div>
               <div class="pt-2 mt-2 border-t border-gray-200 dark:border-slate-600">
                 <div class="flex justify-between">
-                  <span class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('pms.currency.total') }}</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                    $t('pms.currency.total')
+                  }}</span>
                   <span class="text-lg font-bold" :class="getCurrencyTextColor(currency)">
                     {{ formatAmount(data.total, currency) }}
                   </span>
@@ -139,15 +171,26 @@
         </div>
 
         <!-- Grand Total in TRY -->
-        <div v-if="Object.keys(currencySummary).length > 1 || !currencySummary['TRY']"
-             class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+        <div
+          v-if="Object.keys(currencySummary).length > 1 || !currencySummary['TRY']"
+          class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800"
+        >
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <span class="material-icons text-indigo-600 dark:text-indigo-400">currency_exchange</span>
-              <span class="font-medium text-indigo-700 dark:text-indigo-300">{{ $t('pms.currency.totalInTRY') }}</span>
+              <span class="material-icons text-indigo-600 dark:text-indigo-400"
+                >currency_exchange</span
+              >
+              <span class="font-medium text-indigo-700 dark:text-indigo-300">{{
+                $t('pms.currency.totalInTRY')
+              }}</span>
             </div>
             <span class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
-              {{ formatCurrency(stats.todaySummary?.totalInTRY || stats.todaySummary?.total || 0, 'TRY') }}
+              {{
+                formatCurrency(
+                  stats.todaySummary?.totalInTRY || stats.todaySummary?.total || 0,
+                  'TRY'
+                )
+              }}
             </span>
           </div>
           <p class="text-xs text-indigo-500 dark:text-indigo-400 mt-1">
@@ -159,34 +202,50 @@
       <!-- Fallback: Single Currency Display -->
       <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-          <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(stats.todaySummary?.cash || 0) }}</p>
+          <p class="text-2xl font-bold text-green-600 dark:text-green-400">
+            {{ formatCurrency(stats.todaySummary?.cash || 0) }}
+          </p>
           <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.currency.cash') }}</p>
         </div>
         <div class="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-          <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(stats.todaySummary?.card || 0) }}</p>
+          <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            {{ formatCurrency(stats.todaySummary?.card || 0) }}
+          </p>
           <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.currency.card') }}</p>
         </div>
         <div class="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-          <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ formatCurrency(stats.todaySummary?.other || 0) }}</p>
+          <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            {{ formatCurrency(stats.todaySummary?.other || 0) }}
+          </p>
           <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.currency.other') }}</p>
         </div>
         <div class="text-center p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
-          <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(stats.todaySummary?.total || 0) }}</p>
+          <p class="text-2xl font-bold text-gray-900 dark:text-white">
+            {{ formatCurrency(stats.todaySummary?.total || 0) }}
+          </p>
           <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.currency.total') }}</p>
         </div>
       </div>
     </div>
 
     <!-- Monthly Summary -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+    >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center"
+          >
             <span class="material-icons text-orange-600 dark:text-orange-400">calendar_month</span>
           </div>
           <div>
-            <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.cashier.thisMonth') || 'Bu Ay' }}</p>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(stats.monthlyTotal || 0) }}</p>
+            <p class="text-xs text-gray-500 dark:text-slate-400">
+              {{ $t('pms.cashier.thisMonth') || 'Bu Ay' }}
+            </p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ formatCurrency(stats.monthlyTotal || 0) }}
+            </p>
           </div>
         </div>
         <!-- Monthly by currency if available -->
@@ -208,37 +267,37 @@
       <div class="border-b border-gray-200 dark:border-slate-700">
         <nav class="flex -mb-px">
           <button
-            @click="activeTab = 'transactions'"
             :class="[
               'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
               activeTab === 'transactions'
                 ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
                 : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-gray-300'
             ]"
+            @click="activeTab = 'transactions'"
           >
             <span class="material-icons text-lg align-middle mr-1">receipt</span>
             Islemler
           </button>
           <button
-            @click="activeTab = 'shifts'"
             :class="[
               'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
               activeTab === 'shifts'
                 ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
                 : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-gray-300'
             ]"
+            @click="activeTab = 'shifts'"
           >
             <span class="material-icons text-lg align-middle mr-1">schedule</span>
             Vardiyalar
           </button>
           <button
-            @click="activeTab = 'movements'"
             :class="[
               'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
               activeTab === 'movements'
                 ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
                 : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-gray-300'
             ]"
+            @click="activeTab = 'movements'"
           >
             <span class="material-icons text-lg align-middle mr-1">swap_horiz</span>
             Kasa Hareketleri
@@ -252,7 +311,9 @@
         <div class="flex flex-wrap gap-4 mb-4">
           <div class="flex-1 min-w-[200px]">
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400">search</span>
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400"
+                >search</span
+              >
               <input
                 v-model="filters.search"
                 type="text"
@@ -265,18 +326,20 @@
           <div class="w-40">
             <select
               v-model="filters.type"
-              @change="fetchTransactions"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @change="fetchTransactions"
             >
               <option value="all">Tum Tipler</option>
-              <option v-for="opt in transactionTypeOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+              <option v-for="opt in transactionTypeOptions" :key="opt.value" :value="opt.value">
+                {{ opt.label }}
+              </option>
             </select>
           </div>
           <div class="w-36">
             <select
               v-model="filters.status"
-              @change="fetchTransactions"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @change="fetchTransactions"
             >
               <option value="all">Tum Durumlar</option>
               <option value="completed">Tamamlandi</option>
@@ -287,8 +350,8 @@
           <div class="w-28">
             <select
               v-model="filters.currency"
-              @change="fetchTransactions"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @change="fetchTransactions"
             >
               <option value="all">{{ $t('pms.currency.allCurrencies') || 'Tüm Döviz' }}</option>
               <option value="TRY">₺ TRY</option>
@@ -328,28 +391,67 @@
         <table v-else class="w-full">
           <thead class="bg-gray-50 dark:bg-slate-700/50">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Islem No</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Tip</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Aciklama</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Odeme</th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Tutar</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Durum</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Tarih</th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Islem</th>
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Islem No
+              </th>
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Tip
+              </th>
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Aciklama
+              </th>
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Odeme
+              </th>
+              <th
+                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Tutar
+              </th>
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Durum
+              </th>
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Tarih
+              </th>
+              <th
+                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+              >
+                Islem
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
-            <tr v-for="txn in transactions" :key="txn._id" class="hover:bg-gray-50 dark:hover:bg-slate-700/30">
+            <tr
+              v-for="txn in transactions"
+              :key="txn._id"
+              class="hover:bg-gray-50 dark:hover:bg-slate-700/30"
+            >
               <td class="px-4 py-3">
-                <span class="font-mono text-sm text-gray-900 dark:text-white">{{ txn.transactionNumber }}</span>
+                <span class="font-mono text-sm text-gray-900 dark:text-white">{{
+                  txn.transactionNumber
+                }}</span>
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-2">
-                  <span
-                    class="material-icons text-sm"
-                    :class="getTransactionTypeColor(txn.type)"
-                  >{{ getTransactionTypeIcon(txn.type) }}</span>
-                  <span class="text-sm text-gray-900 dark:text-white">{{ getTransactionTypeLabel(txn.type) }}</span>
+                  <span class="material-icons text-sm" :class="getTransactionTypeColor(txn.type)">{{
+                    getTransactionTypeIcon(txn.type)
+                  }}</span>
+                  <span class="text-sm text-gray-900 dark:text-white">{{
+                    getTransactionTypeLabel(txn.type)
+                  }}</span>
                 </div>
               </td>
               <td class="px-4 py-3">
@@ -360,17 +462,26 @@
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-1">
-                  <span class="material-icons text-sm text-gray-400">{{ getPaymentMethodIcon(txn.paymentMethod) }}</span>
-                  <span class="text-sm text-gray-600 dark:text-gray-400">{{ getPaymentMethodLabel(txn.paymentMethod) }}</span>
+                  <span class="material-icons text-sm text-gray-400">{{
+                    getPaymentMethodIcon(txn.paymentMethod)
+                  }}</span>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">{{
+                    getPaymentMethodLabel(txn.paymentMethod)
+                  }}</span>
                 </div>
               </td>
               <td class="px-4 py-3 text-right">
                 <div class="flex flex-col items-end">
                   <span
                     class="font-medium"
-                    :class="txn.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                    :class="
+                      txn.amount >= 0
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
+                    "
                   >
-                    {{ getCurrencySymbol(txn.currency || 'TRY') }}{{ formatAmount(txn.amount, txn.currency || 'TRY') }}
+                    {{ getCurrencySymbol(txn.currency || 'TRY')
+                    }}{{ formatAmount(txn.amount, txn.currency || 'TRY') }}
                   </span>
                   <span
                     v-if="txn.currency && txn.currency !== 'TRY' && txn.amountInTRY"
@@ -389,23 +500,25 @@
                 </span>
               </td>
               <td class="px-4 py-3">
-                <span class="text-sm text-gray-600 dark:text-gray-400">{{ formatDateTime(txn.createdAt) }}</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">{{
+                  formatDateTime(txn.createdAt)
+                }}</span>
               </td>
               <td class="px-4 py-3 text-right">
                 <div class="flex items-center justify-end gap-1">
                   <button
                     v-if="txn.status === 'completed'"
-                    @click="openVoidModal(txn)"
                     class="p-1.5 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"
                     title="Iptal Et"
+                    @click="openVoidModal(txn)"
                   >
                     <span class="material-icons text-sm">cancel</span>
                   </button>
                   <button
                     v-if="txn.status === 'completed' && txn.type !== 'refund'"
-                    @click="openRefundModal(txn)"
                     class="p-1.5 text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded"
                     title="Iade"
+                    @click="openRefundModal(txn)"
                   >
                     <span class="material-icons text-sm">replay</span>
                   </button>
@@ -416,23 +529,28 @@
         </table>
 
         <!-- Pagination -->
-        <div v-if="transactionPagination.totalPages > 1" class="mt-4 flex items-center justify-between">
+        <div
+          v-if="transactionPagination.totalPages > 1"
+          class="mt-4 flex items-center justify-between"
+        >
           <p class="text-sm text-gray-500 dark:text-slate-400">
             Toplam {{ transactionPagination.total }} islem
           </p>
           <div class="flex items-center gap-2">
             <button
-              @click="changeTransactionPage(transactionPagination.page - 1)"
               :disabled="transactionPagination.page === 1"
               class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50"
+              @click="changeTransactionPage(transactionPagination.page - 1)"
             >
               <span class="material-icons text-sm">chevron_left</span>
             </button>
-            <span class="text-sm">{{ transactionPagination.page }} / {{ transactionPagination.totalPages }}</span>
+            <span class="text-sm"
+              >{{ transactionPagination.page }} / {{ transactionPagination.totalPages }}</span
+            >
             <button
-              @click="changeTransactionPage(transactionPagination.page + 1)"
               :disabled="transactionPagination.page === transactionPagination.totalPages"
               class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50"
+              @click="changeTransactionPage(transactionPagination.page + 1)"
             >
               <span class="material-icons text-sm">chevron_right</span>
             </button>
@@ -454,8 +572,8 @@
           <div class="w-36">
             <select
               v-model="shiftFilters.status"
-              @change="fetchShifts"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @change="fetchShifts"
             >
               <option value="all">Tum Vardiyalar</option>
               <option value="open">Acik</option>
@@ -484,12 +602,17 @@
               <div class="flex items-center gap-4">
                 <div
                   class="w-12 h-12 rounded-lg flex items-center justify-center"
-                  :class="shift.status === 'open' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'"
+                  :class="
+                    shift.status === 'open'
+                      ? 'bg-green-100 dark:bg-green-900/30'
+                      : 'bg-gray-100 dark:bg-gray-700'
+                  "
                 >
                   <span
                     class="material-icons"
                     :class="shift.status === 'open' ? 'text-green-600' : 'text-gray-500'"
-                  >point_of_sale</span>
+                    >point_of_sale</span
+                  >
                 </div>
                 <div>
                   <p class="font-medium text-gray-900 dark:text-white">{{ shift.shiftNumber }}</p>
@@ -501,19 +624,29 @@
               <div class="flex items-center gap-6">
                 <div class="text-right">
                   <p class="text-sm text-gray-500 dark:text-slate-400">Islem Sayisi</p>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ shift.transactionCounts?.total || 0 }}</p>
+                  <p class="font-medium text-gray-900 dark:text-white">
+                    {{ shift.transactionCounts?.total || 0 }}
+                  </p>
                 </div>
                 <div class="text-right">
                   <p class="text-sm text-gray-500 dark:text-slate-400">Net Satis</p>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(shift.totals?.netSales || 0) }}</p>
+                  <p class="font-medium text-gray-900 dark:text-white">
+                    {{ formatCurrency(shift.totals?.netSales || 0) }}
+                  </p>
                 </div>
                 <div class="text-right">
                   <p class="text-sm text-gray-500 dark:text-slate-400">Nakit</p>
-                  <p class="font-medium text-green-600 dark:text-green-400">{{ formatCurrency(shift.totals?.cashReceived || 0) }}</p>
+                  <p class="font-medium text-green-600 dark:text-green-400">
+                    {{ formatCurrency(shift.totals?.cashReceived || 0) }}
+                  </p>
                 </div>
                 <span
                   class="px-2 py-1 rounded-full text-xs font-medium"
-                  :class="shift.status === 'open' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'"
+                  :class="
+                    shift.status === 'open'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                  "
                 >
                   {{ shift.status === 'open' ? 'Acik' : 'Kapali' }}
                 </span>
@@ -528,17 +661,19 @@
           <p class="text-sm text-gray-500">Toplam {{ shiftPagination.total }} vardiya</p>
           <div class="flex items-center gap-2">
             <button
-              @click="changeShiftPage(shiftPagination.page - 1)"
               :disabled="shiftPagination.page === 1"
               class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50"
+              @click="changeShiftPage(shiftPagination.page - 1)"
             >
               <span class="material-icons text-sm">chevron_left</span>
             </button>
-            <span class="text-sm">{{ shiftPagination.page }} / {{ shiftPagination.totalPages }}</span>
+            <span class="text-sm"
+              >{{ shiftPagination.page }} / {{ shiftPagination.totalPages }}</span
+            >
             <button
-              @click="changeShiftPage(shiftPagination.page + 1)"
               :disabled="shiftPagination.page === shiftPagination.totalPages"
               class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50"
+              @click="changeShiftPage(shiftPagination.page + 1)"
             >
               <span class="material-icons text-sm">chevron_right</span>
             </button>
@@ -550,15 +685,19 @@
       <div v-if="activeTab === 'movements'" class="p-4">
         <div v-if="!activeShift" class="p-8 text-center">
           <span class="material-icons text-4xl text-gray-400 mb-2">warning</span>
-          <p class="text-gray-500 dark:text-slate-400">Aktif vardiya yok. Kasa hareketlerini gormek icin vardiya acin.</p>
+          <p class="text-gray-500 dark:text-slate-400">
+            Aktif vardiya yok. Kasa hareketlerini gormek icin vardiya acin.
+          </p>
         </div>
 
         <div v-else>
           <div class="flex items-center justify-between mb-4">
-            <h3 class="font-medium text-gray-900 dark:text-white">Kasa Hareketleri - {{ activeShift.shiftNumber }}</h3>
+            <h3 class="font-medium text-gray-900 dark:text-white">
+              Kasa Hareketleri - {{ activeShift.shiftNumber }}
+            </h3>
             <button
-              @click="showCashMovementModal = true"
               class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg flex items-center gap-1"
+              @click="showCashMovementModal = true"
             >
               <span class="material-icons text-sm">add</span>
               Hareket Ekle
@@ -577,13 +716,16 @@
               class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
             >
               <div class="flex items-center gap-3">
-                <span
-                  class="material-icons"
-                  :class="getMovementColor(movement.type)"
-                >{{ getMovementIcon(movement.type) }}</span>
+                <span class="material-icons" :class="getMovementColor(movement.type)">{{
+                  getMovementIcon(movement.type)
+                }}</span>
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ getMovementLabel(movement.type) }}</p>
-                  <p class="text-sm text-gray-500 dark:text-slate-400">{{ movement.description || '-' }}</p>
+                  <p class="font-medium text-gray-900 dark:text-white">
+                    {{ getMovementLabel(movement.type) }}
+                  </p>
+                  <p class="text-sm text-gray-500 dark:text-slate-400">
+                    {{ movement.description || '-' }}
+                  </p>
                 </div>
               </div>
               <div class="text-right">
@@ -591,7 +733,8 @@
                   class="font-medium"
                   :class="isPositiveMovement(movement.type) ? 'text-green-600' : 'text-red-600'"
                 >
-                  {{ isPositiveMovement(movement.type) ? '+' : '-' }}{{ formatCurrency(Math.abs(movement.amount)) }}
+                  {{ isPositiveMovement(movement.type) ? '+' : '-'
+                  }}{{ formatCurrency(Math.abs(movement.amount)) }}
                 </p>
                 <p class="text-xs text-gray-500">{{ formatDateTime(movement.createdAt) }}</p>
               </div>
@@ -602,48 +745,40 @@
     </div>
 
     <!-- Modals -->
-    <OpenShiftModal
-      v-model="showOpenShiftModal"
-      :hotelId="hotelId"
-      @opened="onShiftOpened"
-    />
+    <OpenShiftModal v-model="showOpenShiftModal" :hotel-id="hotelId" @opened="onShiftOpened" />
 
     <CloseShiftModal
       v-model="showCloseShiftModal"
-      :hotelId="hotelId"
+      :hotel-id="hotelId"
       :shift="activeShift"
       @closed="onShiftClosed"
     />
 
     <TransactionModal
       v-model="showTransactionModal"
-      :hotelId="hotelId"
+      :hotel-id="hotelId"
       @created="onTransactionCreated"
     />
 
     <CashMovementModal
       v-model="showCashMovementModal"
-      :hotelId="hotelId"
-      :shiftId="activeShift?._id"
+      :hotel-id="hotelId"
+      :shift-id="activeShift?._id"
       @added="onCashMovementAdded"
     />
 
-    <ShiftDetailModal
-      v-model="showShiftDetailModal"
-      :hotelId="hotelId"
-      :shift="selectedShift"
-    />
+    <ShiftDetailModal v-model="showShiftDetailModal" :hotel-id="hotelId" :shift="selectedShift" />
 
     <VoidTransactionModal
       v-model="showVoidModal"
-      :hotelId="hotelId"
+      :hotel-id="hotelId"
       :transaction="selectedTransaction"
       @voided="onTransactionVoided"
     />
 
     <RefundTransactionModal
       v-model="showRefundModal"
-      :hotelId="hotelId"
+      :hotel-id="hotelId"
       :transaction="selectedTransaction"
       @refunded="onTransactionRefunded"
     />
@@ -653,7 +788,6 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { useToast } from 'vue-toastification'
-import { useI18n } from 'vue-i18n'
 import cashierService, {
   TRANSACTION_TYPE_INFO,
   PAYMENT_METHOD_INFO,
@@ -673,7 +807,6 @@ import RefundTransactionModal from '@/modules/billing/components/RefundTransacti
 import CurrencyBalanceCard from '@/modules/billing/components/CurrencyBalanceCard.vue'
 import { usePmsContextInjection } from '@/composables/usePmsContext'
 
-const { t } = useI18n()
 const { hotelId } = usePmsContextInjection()
 const toast = useToast()
 
@@ -703,8 +836,10 @@ const exchangeRates = ref({})
 
 // Multi-currency computed
 const hasMultipleCurrencies = computed(() => {
-  return activeShift.value?.currentBalances?.length > 1 ||
-    (activeShift.value?.activeCurrencies?.length > 1)
+  return (
+    activeShift.value?.currentBalances?.length > 1 ||
+    activeShift.value?.activeCurrencies?.length > 1
+  )
 })
 
 // Currency summary from daily stats
@@ -728,23 +863,55 @@ const currencySymbols = {
 
 // Currency colors
 const currencyColorMap = {
-  TRY: { text: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-200 dark:border-red-800', badge: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
-  USD: { text: 'text-green-600 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-200 dark:border-green-800', badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  EUR: { text: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  GBP: { text: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-200 dark:border-purple-800', badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
-  RUB: { text: 'text-orange-600 dark:text-orange-400', bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-orange-200 dark:border-orange-800', badge: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
-  default: { text: 'text-gray-600 dark:text-gray-400', bg: 'bg-gray-50 dark:bg-gray-900/20', border: 'border-gray-200 dark:border-gray-700', badge: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' }
+  TRY: {
+    text: 'text-red-600 dark:text-red-400',
+    bg: 'bg-red-50 dark:bg-red-900/20',
+    border: 'border-red-200 dark:border-red-800',
+    badge: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+  },
+  USD: {
+    text: 'text-green-600 dark:text-green-400',
+    bg: 'bg-green-50 dark:bg-green-900/20',
+    border: 'border-green-200 dark:border-green-800',
+    badge: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+  },
+  EUR: {
+    text: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+    border: 'border-blue-200 dark:border-blue-800',
+    badge: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+  },
+  GBP: {
+    text: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 dark:bg-purple-900/20',
+    border: 'border-purple-200 dark:border-purple-800',
+    badge: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+  },
+  RUB: {
+    text: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-orange-50 dark:bg-orange-900/20',
+    border: 'border-orange-200 dark:border-orange-800',
+    badge: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+  },
+  default: {
+    text: 'text-gray-600 dark:text-gray-400',
+    bg: 'bg-gray-50 dark:bg-gray-900/20',
+    border: 'border-gray-200 dark:border-gray-700',
+    badge: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+  }
 }
 
-const getCurrencySymbol = (currency) => currencySymbols[currency] || currency
-const getCurrencyTextColor = (currency) => (currencyColorMap[currency] || currencyColorMap.default).text
-const getCurrencyCardClass = (currency) => {
+const getCurrencySymbol = currency => currencySymbols[currency] || currency
+const getCurrencyTextColor = currency =>
+  (currencyColorMap[currency] || currencyColorMap.default).text
+const getCurrencyCardClass = currency => {
   const colors = currencyColorMap[currency] || currencyColorMap.default
   return `${colors.bg} ${colors.border}`
 }
-const getCurrencyBadgeClass = (currency) => (currencyColorMap[currency] || currencyColorMap.default).badge
+const getCurrencyBadgeClass = currency =>
+  (currencyColorMap[currency] || currencyColorMap.default).badge
 
-const formatAmount = (amount, currency) => {
+const formatAmount = amount => {
   const num = amount || 0
   return new Intl.NumberFormat('tr-TR', {
     minimumFractionDigits: 2,
@@ -798,7 +965,7 @@ const fetchActiveShift = async () => {
   try {
     const response = await cashierService.getActiveShift(hotelId.value)
     activeShift.value = response.data
-  } catch (error) {
+  } catch {
     activeShift.value = null
   }
 }
@@ -844,7 +1011,7 @@ const fetchTransactions = async () => {
     const response = await cashierService.getTransactions(hotelId.value, params)
     transactions.value = response.data || []
     transactionPagination.value = response.pagination || transactionPagination.value
-  } catch (error) {
+  } catch {
     toast.error('Islemler yuklenemedi')
   } finally {
     loadingTransactions.value = false
@@ -866,34 +1033,34 @@ const fetchShifts = async () => {
     const response = await cashierService.getShifts(hotelId.value, params)
     shifts.value = response.data || []
     shiftPagination.value = response.pagination || shiftPagination.value
-  } catch (error) {
+  } catch {
     toast.error('Vardiyalar yuklenemedi')
   } finally {
     loadingShifts.value = false
   }
 }
 
-const changeTransactionPage = (page) => {
+const changeTransactionPage = page => {
   transactionPagination.value.page = page
   fetchTransactions()
 }
 
-const changeShiftPage = (page) => {
+const changeShiftPage = page => {
   shiftPagination.value.page = page
   fetchShifts()
 }
 
-const openShiftDetail = (shift) => {
+const openShiftDetail = shift => {
   selectedShift.value = shift
   showShiftDetailModal.value = true
 }
 
-const openVoidModal = (txn) => {
+const openVoidModal = txn => {
   selectedTransaction.value = txn
   showVoidModal.value = true
 }
 
-const openRefundModal = (txn) => {
+const openRefundModal = txn => {
   selectedTransaction.value = txn
   showRefundModal.value = true
 }
@@ -933,7 +1100,7 @@ const onTransactionRefunded = () => {
 }
 
 // Helpers
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('tr-TR', {
     day: '2-digit',
@@ -944,41 +1111,45 @@ const formatDateTime = (date) => {
   })
 }
 
-const getTransactionTypeLabel = (type) => TRANSACTION_TYPE_INFO[type]?.label || type
-const getTransactionTypeIcon = (type) => TRANSACTION_TYPE_INFO[type]?.icon || 'receipt'
-const getTransactionTypeColor = (type) => {
+const getTransactionTypeLabel = type => TRANSACTION_TYPE_INFO[type]?.label || type
+const getTransactionTypeIcon = type => TRANSACTION_TYPE_INFO[type]?.icon || 'receipt'
+const getTransactionTypeColor = type => {
   const info = TRANSACTION_TYPE_INFO[type]
   if (!info) return 'text-gray-500'
   return `text-${info.color}-600 dark:text-${info.color}-400`
 }
 
-const getPaymentMethodLabel = (method) => PAYMENT_METHOD_INFO[method]?.label || method || '-'
-const getPaymentMethodIcon = (method) => PAYMENT_METHOD_INFO[method]?.icon || 'help'
+const getPaymentMethodLabel = method => PAYMENT_METHOD_INFO[method]?.label || method || '-'
+const getPaymentMethodIcon = method => PAYMENT_METHOD_INFO[method]?.icon || 'help'
 
-const getStatusLabel = (status) => TRANSACTION_STATUS_INFO[status]?.label || status
-const getStatusClasses = (status) => TRANSACTION_STATUS_INFO[status]?.bgClass || 'bg-gray-100 text-gray-800'
+const getStatusLabel = status => TRANSACTION_STATUS_INFO[status]?.label || status
+const getStatusClasses = status =>
+  TRANSACTION_STATUS_INFO[status]?.bgClass || 'bg-gray-100 text-gray-800'
 
-const getMovementLabel = (type) => CASH_MOVEMENT_INFO[type]?.label || type
-const getMovementIcon = (type) => CASH_MOVEMENT_INFO[type]?.icon || 'swap_horiz'
-const getMovementColor = (type) => {
+const getMovementLabel = type => CASH_MOVEMENT_INFO[type]?.label || type
+const getMovementIcon = type => CASH_MOVEMENT_INFO[type]?.icon || 'swap_horiz'
+const getMovementColor = type => {
   const info = CASH_MOVEMENT_INFO[type]
   if (!info) return 'text-gray-500'
   return `text-${info.color}-600 dark:text-${info.color}-400`
 }
 
-const isPositiveMovement = (type) => {
+const isPositiveMovement = type => {
   return ['opening', 'sale', 'deposit'].includes(type)
 }
 
-watch(() => hotelId.value, () => {
-  if (hotelId.value) {
-    fetchActiveShift()
-    fetchStats()
-    fetchCurrencies()
-    fetchTransactions()
-    fetchShifts()
+watch(
+  () => hotelId.value,
+  () => {
+    if (hotelId.value) {
+      fetchActiveShift()
+      fetchStats()
+      fetchCurrencies()
+      fetchTransactions()
+      fetchShifts()
+    }
   }
-})
+)
 
 onMounted(() => {
   if (hotelId.value) {

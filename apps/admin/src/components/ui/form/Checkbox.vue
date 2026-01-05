@@ -105,13 +105,13 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'green', 'blue', 'red', 'amber', 'purple'].includes(v)
+    validator: v => ['indigo', 'green', 'blue', 'red', 'amber', 'purple'].includes(v)
   }
 })
 
@@ -166,7 +166,7 @@ const isChecked = computed(() => {
 })
 
 // Handle change
-const handleChange = (event) => {
+const handleChange = event => {
   if (props.disabled) return
 
   let newValue

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import hotelService from '@/services/hotelService'
+import { storeLogger } from '@/utils/logger'
 
 /**
  * PMS Store - Manages PMS context for partners
@@ -45,7 +46,7 @@ export const usePmsStore = defineStore('pms', () => {
 
       return hotels.value
     } catch (error) {
-      console.error('Failed to load hotels for PMS:', error)
+      storeLogger.error('Failed to load hotels for PMS:', error)
       hotels.value = []
       throw error
     } finally {
@@ -54,7 +55,7 @@ export const usePmsStore = defineStore('pms', () => {
   }
 
   // Select a hotel for PMS context
-  const selectHotel = (hotel) => {
+  const selectHotel = hotel => {
     currentHotel.value = hotel
     const hotelId = hotel?._id || hotel?.id
     if (hotelId) {
@@ -69,7 +70,7 @@ export const usePmsStore = defineStore('pms', () => {
   }
 
   // Switch to another hotel
-  const switchHotel = (hotelId) => {
+  const switchHotel = hotelId => {
     const hotel = hotels.value.find(h => (h._id || h.id) === hotelId)
     if (hotel) {
       selectHotel(hotel)
@@ -79,12 +80,12 @@ export const usePmsStore = defineStore('pms', () => {
   }
 
   // Partner has all permissions (superadmin of their hotels)
-  const hasPermission = (permission) => {
+  const hasPermission = _permission => {
     // Partner always has all permissions for their own hotels
     return true
   }
 
-  const hasAnyPermission = (permissions) => {
+  const hasAnyPermission = _permissions => {
     return true
   }
 

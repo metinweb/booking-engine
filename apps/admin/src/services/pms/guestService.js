@@ -140,13 +140,17 @@ const guestService = {
 
   // Set VIP level
   async setVipLevel(hotelId, guestId, vipLevel) {
-    const response = await pmsApiClient.patch(`/pms/hotels/${hotelId}/guests/${guestId}/vip`, { vipLevel })
+    const response = await pmsApiClient.patch(`/pms/hotels/${hotelId}/guests/${guestId}/vip`, {
+      vipLevel
+    })
     return response.data
   },
 
   // Blacklist guest
   async blacklist(hotelId, guestId, reason) {
-    const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/guests/${guestId}/blacklist`, { reason })
+    const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/guests/${guestId}/blacklist`, {
+      reason
+    })
     return response.data
   },
 
@@ -164,19 +168,25 @@ const guestService = {
 
   // Delete note
   async deleteNote(hotelId, guestId, noteId) {
-    const response = await pmsApiClient.delete(`/pms/hotels/${hotelId}/guests/${guestId}/notes/${noteId}`)
+    const response = await pmsApiClient.delete(
+      `/pms/hotels/${hotelId}/guests/${guestId}/notes/${noteId}`
+    )
     return response.data
   },
 
   // Update tags
   async updateTags(hotelId, guestId, tags) {
-    const response = await pmsApiClient.patch(`/pms/hotels/${hotelId}/guests/${guestId}/tags`, { tags })
+    const response = await pmsApiClient.patch(`/pms/hotels/${hotelId}/guests/${guestId}/tags`, {
+      tags
+    })
     return response.data
   },
 
   // Get stay history
   async getStayHistory(hotelId, guestId, params = {}) {
-    const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/guests/${guestId}/stays`, { params })
+    const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/guests/${guestId}/stays`, {
+      params
+    })
     return response.data
   },
 

@@ -4,7 +4,7 @@ import apiClient from './api'
  * Get partner email settings
  * @param {string} partnerId - Partner ID
  */
-export const getEmailSettings = async (partnerId) => {
+export const getEmailSettings = async partnerId => {
   const response = await apiClient.get(`/partners/${partnerId}/email-settings`)
   return response.data.data
 }
@@ -28,7 +28,10 @@ export const updateEmailSettings = async (partnerId, settings) => {
  * @param {string} data.fromName - Sender name
  */
 export const createIdentity = async (partnerId, data) => {
-  const response = await apiClient.post(`/partners/${partnerId}/email-settings/create-identity`, data)
+  const response = await apiClient.post(
+    `/partners/${partnerId}/email-settings/create-identity`,
+    data
+  )
   return response.data.data
 }
 
@@ -36,7 +39,7 @@ export const createIdentity = async (partnerId, data) => {
  * Get domain verification status from AWS SES
  * @param {string} partnerId - Partner ID
  */
-export const getVerificationStatus = async (partnerId) => {
+export const getVerificationStatus = async partnerId => {
   const response = await apiClient.get(`/partners/${partnerId}/email-settings/verification-status`)
   return response.data.data
 }
@@ -45,7 +48,7 @@ export const getVerificationStatus = async (partnerId) => {
  * Delete domain identity from AWS SES
  * @param {string} partnerId - Partner ID
  */
-export const deleteIdentity = async (partnerId) => {
+export const deleteIdentity = async partnerId => {
   const response = await apiClient.delete(`/partners/${partnerId}/email-settings/delete-identity`)
   return response.data
 }
@@ -56,7 +59,9 @@ export const deleteIdentity = async (partnerId) => {
  * @param {string} email - Email address to send test to
  */
 export const testEmail = async (partnerId, email) => {
-  const response = await apiClient.post(`/partners/${partnerId}/email-settings/test-email`, { email })
+  const response = await apiClient.post(`/partners/${partnerId}/email-settings/test-email`, {
+    email
+  })
   return response.data
 }
 

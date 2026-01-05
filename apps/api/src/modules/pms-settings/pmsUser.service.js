@@ -38,8 +38,7 @@ export const getAll = asyncHandler(async (req, res) => {
 export const getOne = asyncHandler(async (req, res) => {
   const { id } = req.params
 
-  const user = await PmsUser.findById(id)
-    .populate('assignedHotels.hotel', 'name status')
+  const user = await PmsUser.findById(id).populate('assignedHotels.hotel', 'name status')
 
   if (!user) {
     throw new NotFoundError('USER_NOT_FOUND')
@@ -89,7 +88,7 @@ export const create = asyncHandler(async (req, res) => {
   }
 
   // Process assigned hotels - add default permissions if not provided
-  let processedHotels = []
+  const processedHotels = []
   if (assignedHotels && assignedHotels.length > 0) {
     for (const assignment of assignedHotels) {
       // Verify hotel exists and belongs to partner
@@ -105,7 +104,8 @@ export const create = asyncHandler(async (req, res) => {
       processedHotels.push({
         hotel: assignment.hotel,
         role: assignment.role || 'receptionist',
-        permissions: assignment.permissions || PmsUser.getDefaultPermissions(assignment.role || 'receptionist')
+        permissions:
+          assignment.permissions || PmsUser.getDefaultPermissions(assignment.role || 'receptionist')
       })
     }
   }
@@ -138,16 +138,7 @@ export const create = asyncHandler(async (req, res) => {
 // Update PMS user
 export const update = asyncHandler(async (req, res) => {
   const { id } = req.params
-  const {
-    firstName,
-    lastName,
-    email,
-    phone,
-    department,
-    position,
-    isActive,
-    language
-  } = req.body
+  const { firstName, lastName, email, phone, department, position, isActive, language } = req.body
 
   const user = await PmsUser.findById(id)
 
@@ -243,9 +234,7 @@ export const assignHotel = asyncHandler(async (req, res) => {
   }
 
   // Check if already assigned
-  const existingIndex = user.assignedHotels.findIndex(
-    h => h.hotel.toString() === hotelId
-  )
+  const existingIndex = user.assignedHotels.findIndex(h => h.hotel.toString() === hotelId)
 
   const assignmentRole = role || 'receptionist'
   const assignmentPermissions = permissions || PmsUser.getDefaultPermissions(assignmentRole)
@@ -283,9 +272,7 @@ export const removeHotel = asyncHandler(async (req, res) => {
     throw new NotFoundError('USER_NOT_FOUND')
   }
 
-  const hotelIndex = user.assignedHotels.findIndex(
-    h => h.hotel.toString() === hotelId
-  )
+  const hotelIndex = user.assignedHotels.findIndex(h => h.hotel.toString() === hotelId)
 
   if (hotelIndex === -1) {
     throw new NotFoundError('HOTEL_NOT_ASSIGNED')
@@ -313,9 +300,7 @@ export const updatePermissions = asyncHandler(async (req, res) => {
     throw new NotFoundError('USER_NOT_FOUND')
   }
 
-  const hotelAssignment = user.assignedHotels.find(
-    h => h.hotel.toString() === hotelId
-  )
+  const hotelAssignment = user.assignedHotels.find(h => h.hotel.toString() === hotelId)
 
   if (!hotelAssignment) {
     throw new NotFoundError('HOTEL_NOT_ASSIGNED')

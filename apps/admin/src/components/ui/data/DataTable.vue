@@ -1,7 +1,10 @@
 <template>
   <div class="ui-data-table">
     <!-- Header: Title, Actions, Filters -->
-    <div v-if="showHeader" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+    <div
+      v-if="showHeader"
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4"
+    >
       <div class="flex items-center gap-3">
         <h2 v-if="title" class="text-lg font-semibold text-gray-900 dark:text-white">
           {{ title }}
@@ -18,17 +21,17 @@
             v-model="searchQuery"
             type="text"
             :placeholder="searchPlaceholder || $t('common.search', 'Ara...')"
-            class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg
-                   bg-white dark:bg-slate-700 text-gray-900 dark:text-white
-                   focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl">
+          <span
+            class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-xl"
+          >
             search
           </span>
           <button
             v-if="searchQuery"
-            @click="searchQuery = ''"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            @click="searchQuery = ''"
           >
             <span class="material-icons text-lg">close</span>
           </button>
@@ -37,9 +40,9 @@
         <!-- Filter Toggle -->
         <button
           v-if="filterable && filters.length > 0"
-          @click="showFilters = !showFilters"
           class="p-2 rounded-lg border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
           :class="{ 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300': hasActiveFilters }"
+          @click="showFilters = !showFilters"
         >
           <span class="material-icons text-gray-600 dark:text-gray-300">filter_list</span>
           <span
@@ -51,22 +54,29 @@
         </button>
 
         <!-- View Toggle (Table/Card) -->
-        <div v-if="responsive" class="hidden sm:flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden">
+        <div
+          v-if="responsive"
+          class="hidden sm:flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden"
+        >
           <button
-            @click="viewMode = 'table'"
             class="p-2"
-            :class="viewMode === 'table'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'"
+            :class="
+              viewMode === 'table'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
+            "
+            @click="viewMode = 'table'"
           >
             <span class="material-icons text-xl">table_rows</span>
           </button>
           <button
-            @click="viewMode = 'cards'"
             class="p-2"
-            :class="viewMode === 'cards'
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'"
+            :class="
+              viewMode === 'cards'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
+            "
+            @click="viewMode = 'cards'"
           >
             <span class="material-icons text-xl">grid_view</span>
           </button>
@@ -84,11 +94,7 @@
         class="mb-4 p-4 bg-gray-50 dark:bg-slate-800/50 rounded-lg border border-gray-200 dark:border-slate-700"
       >
         <div class="flex flex-wrap gap-4">
-          <div
-            v-for="filter in filters"
-            :key="filter.key"
-            class="flex-1 min-w-[200px]"
-          >
+          <div v-for="filter in filters" :key="filter.key" class="flex-1 min-w-[200px]">
             <!-- Select Filter -->
             <template v-if="filter.type === 'select'">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -96,9 +102,8 @@
               </label>
               <select
                 :value="filterValues[filter.key]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 @change="updateFilter(filter.key, $event.target.value)"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
               >
                 <option value="">{{ filter.placeholder || $t('common.all', 'Tumü') }}</option>
                 <option v-for="opt in filter.options" :key="opt.value" :value="opt.value">
@@ -115,9 +120,8 @@
               <input
                 type="date"
                 :value="filterValues[filter.key]"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                 @change="updateFilter(filter.key, $event.target.value)"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
               />
             </template>
 
@@ -129,26 +133,27 @@
               <input
                 type="text"
                 :value="filterValues[filter.key]"
-                @input="updateFilter(filter.key, $event.target.value)"
                 :placeholder="filter.placeholder"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg
-                       bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                @input="updateFilter(filter.key, $event.target.value)"
               />
             </template>
           </div>
         </div>
 
         <!-- Filter Actions -->
-        <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
+        <div
+          class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700"
+        >
           <button
-            @click="clearAllFilters"
             class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg"
+            @click="clearAllFilters"
           >
             {{ $t('common.clearFilters', 'Temizle') }}
           </button>
           <button
-            @click="applyFilters"
             class="px-4 py-2 text-sm bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg"
+            @click="applyFilters"
           >
             {{ $t('common.apply', 'Uygula') }}
           </button>
@@ -160,17 +165,16 @@
     <Transition name="slide-down">
       <div
         v-if="selectable && selectedCount > 0"
-        class="mb-4 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-800
-               flex items-center justify-between"
+        class="mb-4 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg border border-indigo-200 dark:border-indigo-800 flex items-center justify-between"
       >
         <span class="text-sm font-medium text-indigo-700 dark:text-indigo-300">
           {{ selectedCount }} {{ $t('common.selected', 'secili') }}
         </span>
         <div class="flex items-center gap-2">
-          <slot name="bulk-actions" :selected="selected" :selectedItems="selectedItems"></slot>
+          <slot name="bulk-actions" :selected="selected" :selected-items="selectedItems"></slot>
           <button
-            @click="clearSelection"
             class="px-3 py-1.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 rounded"
+            @click="clearSelection"
           >
             {{ $t('common.clearSelection', 'Secimi Temizle') }}
           </button>
@@ -180,11 +184,16 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="flex items-center justify-center py-12">
-      <div class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-500 border-t-transparent"></div>
+      <div
+        class="animate-spin rounded-full h-10 w-10 border-4 border-indigo-500 border-t-transparent"
+      ></div>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="!data || data.length === 0" class="text-center py-12 bg-gray-50 dark:bg-slate-800/50 rounded-lg">
+    <div
+      v-else-if="!data || data.length === 0"
+      class="text-center py-12 bg-gray-50 dark:bg-slate-800/50 rounded-lg"
+    >
       <slot name="empty">
         <span class="material-icons text-5xl text-gray-300 dark:text-slate-600 mb-3">
           {{ emptyIcon || 'inbox' }}
@@ -197,7 +206,10 @@
     </div>
 
     <!-- Table View -->
-    <div v-else-if="viewMode === 'table'" class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700">
+    <div
+      v-else-if="viewMode === 'table'"
+      class="overflow-x-auto rounded-lg border border-gray-200 dark:border-slate-700"
+    >
       <table class="w-full">
         <thead class="bg-gray-50 dark:bg-slate-800">
           <tr>
@@ -207,8 +219,8 @@
                 type="checkbox"
                 :checked="isAllSelected"
                 :indeterminate="isIndeterminate"
-                @change="toggleSelectAll"
                 class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                @change="toggleSelectAll"
               />
             </th>
 
@@ -217,7 +229,10 @@
               v-for="col in visibleColumns"
               :key="col.key"
               class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
-              :class="[col.class, col.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700' : '']"
+              :class="[
+                col.class,
+                col.sortable ? 'cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700' : ''
+              ]"
               :style="col.width ? { width: col.width } : {}"
               @click="col.sortable && toggleSort(col.key)"
             >
@@ -252,8 +267,8 @@
               <input
                 type="checkbox"
                 :checked="isRowSelected(row)"
-                @change="toggleRowSelect(row, $event)"
                 class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                @change="toggleRowSelect(row, $event)"
               />
             </td>
 
@@ -264,10 +279,15 @@
               class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100"
               :class="col.cellClass"
             >
-              <slot :name="`cell-${col.key}`" :row="row" :value="getCellValue(row, col.key)" :index="index">
+              <slot
+                :name="`cell-${col.key}`"
+                :row="row"
+                :value="getCellValue(row, col.key)"
+                :index="index"
+              >
                 <component
-                  v-if="col.component"
                   :is="col.component"
+                  v-if="col.component"
                   :value="getCellValue(row, col.key)"
                   :row="row"
                   v-bind="col.componentProps"
@@ -295,21 +315,22 @@
       <div
         v-for="(row, index) in data"
         :key="getRowKey(row, index)"
-        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden
-               hover:shadow-md transition-shadow"
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow"
         :class="isRowSelected(row) ? 'ring-2 ring-indigo-500' : ''"
         @click="handleRowClick(row, $event)"
       >
         <!-- Card Header -->
-        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
+        <div
+          class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700"
+        >
           <div class="flex items-center gap-3">
             <input
               v-if="selectable"
               type="checkbox"
               :checked="isRowSelected(row)"
+              class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
               @change.stop="toggleRowSelect(row, $event)"
               @click.stop
-              class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
             />
             <slot name="card-header" :row="row" :index="index">
               <span class="font-medium text-gray-900 dark:text-white">
@@ -332,7 +353,12 @@
             >
               <span class="text-gray-500 dark:text-gray-400">{{ col.label }}</span>
               <span class="text-gray-900 dark:text-white text-right">
-                <slot :name="`cell-${col.key}`" :row="row" :value="getCellValue(row, col.key)" :index="index">
+                <slot
+                  :name="`cell-${col.key}`"
+                  :row="row"
+                  :value="getCellValue(row, col.key)"
+                  :index="index"
+                >
                   <template v-if="col.format">
                     {{ col.format(getCellValue(row, col.key), row) }}
                   </template>
@@ -346,7 +372,10 @@
         </div>
 
         <!-- Card Footer -->
-        <div v-if="$slots['card-footer']" class="px-4 py-3 bg-gray-50 dark:bg-slate-700/50 border-t border-gray-200 dark:border-slate-700">
+        <div
+          v-if="$slots['card-footer']"
+          class="px-4 py-3 bg-gray-50 dark:bg-slate-700/50 border-t border-gray-200 dark:border-slate-700"
+        >
           <slot name="card-footer" :row="row" :index="index"></slot>
         </div>
       </div>
@@ -369,9 +398,8 @@
         </label>
         <select
           :value="perPage"
+          class="px-2 py-1 border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           @change="handlePerPageChange($event.target.value)"
-          class="px-2 py-1 border border-gray-300 dark:border-slate-600 rounded
-                 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
         >
           <option v-for="opt in perPageOptions" :key="opt" :value="opt">{{ opt }}</option>
         </select>
@@ -380,16 +408,16 @@
       <!-- Page Navigation -->
       <div class="flex items-center gap-1">
         <button
-          @click="goToPage(1)"
           :disabled="page === 1"
           class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="goToPage(1)"
         >
           <span class="material-icons text-xl">first_page</span>
         </button>
         <button
-          @click="goToPage(page - 1)"
           :disabled="page === 1"
           class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="goToPage(page - 1)"
         >
           <span class="material-icons text-xl">chevron_left</span>
         </button>
@@ -398,27 +426,29 @@
           <button
             v-for="p in pageRange"
             :key="p"
-            @click="goToPage(p)"
             class="w-8 h-8 rounded text-sm font-medium"
-            :class="p === page
-              ? 'bg-indigo-600 text-white'
-              : 'hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300'"
+            :class="
+              p === page
+                ? 'bg-indigo-600 text-white'
+                : 'hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300'
+            "
+            @click="goToPage(p)"
           >
             {{ p }}
           </button>
         </div>
 
         <button
-          @click="goToPage(page + 1)"
           :disabled="page >= totalPages"
           class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="goToPage(page + 1)"
         >
           <span class="material-icons text-xl">chevron_right</span>
         </button>
         <button
-          @click="goToPage(totalPages)"
           :disabled="page >= totalPages"
           class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="goToPage(totalPages)"
         >
           <span class="material-icons text-xl">last_page</span>
         </button>
@@ -429,7 +459,6 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   // Data
@@ -592,8 +621,6 @@ const emit = defineEmits([
   'row-click'
 ])
 
-const { t } = useI18n()
-
 // State
 const searchQuery = ref('')
 const showFilters = ref(false)
@@ -652,7 +679,8 @@ const hasActiveFilters = computed(() => {
 })
 
 const activeFilterCount = computed(() => {
-  return Object.values(filterValues.value).filter(v => v !== '' && v !== null && v !== undefined).length
+  return Object.values(filterValues.value).filter(v => v !== '' && v !== null && v !== undefined)
+    .length
 })
 
 const selectedCount = computed(() => props.selected.length)
@@ -687,12 +715,12 @@ const getCellValue = (row, key) => {
   return row[key]
 }
 
-const getSortIcon = (key) => {
+const getSortIcon = key => {
   if (props.sortKey !== key) return 'unfold_more'
   return props.sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'
 }
 
-const toggleSort = (key) => {
+const toggleSort = key => {
   if (props.sortKey === key) {
     const newOrder = props.sortOrder === 'asc' ? 'desc' : 'asc'
     emit('update:sortOrder', newOrder)
@@ -704,13 +732,13 @@ const toggleSort = (key) => {
   }
 }
 
-const goToPage = (newPage) => {
+const goToPage = newPage => {
   if (newPage < 1 || newPage > totalPages.value) return
   emit('update:page', newPage)
   emit('page-change', { page: newPage, perPage: props.perPage })
 }
 
-const handlePerPageChange = (newPerPage) => {
+const handlePerPageChange = newPerPage => {
   const perPage = parseInt(newPerPage)
   emit('update:perPage', perPage)
   emit('update:page', 1)
@@ -732,11 +760,11 @@ const clearAllFilters = () => {
   emit('update:page', 1)
 }
 
-const isRowSelected = (row) => {
+const isRowSelected = row => {
   return props.selected.includes(getRowKey(row))
 }
 
-const toggleRowSelect = (row, event) => {
+const toggleRowSelect = row => {
   const key = getRowKey(row)
   const newSelected = [...props.selected]
   const index = newSelected.indexOf(key)
@@ -768,14 +796,14 @@ const clearSelection = () => {
   emit('update:selected', [])
 }
 
-const handleRowClick = (row, event) => {
+const handleRowClick = row => {
   if (props.clickable) {
     emit('row-click', row)
   }
 }
 
 // Search debounce
-watch(searchQuery, (newValue) => {
+watch(searchQuery, newValue => {
   if (searchTimeout) clearTimeout(searchTimeout)
 
   searchTimeout = setTimeout(() => {
@@ -827,7 +855,7 @@ defineExpose({
 }
 
 /* Checkbox indeterminate state */
-input[type="checkbox"]:indeterminate {
+input[type='checkbox']:indeterminate {
   background-color: #6366f1;
   border-color: #6366f1;
   background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3crect x='3' y='7' width='10' height='2' rx='1'/%3e%3c/svg%3e");

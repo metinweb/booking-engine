@@ -25,13 +25,29 @@ router.patch('/hotels/:hotelId/room-types/:id/status', planningService.updateRoo
 router.patch('/hotels/:hotelId/room-types/reorder', planningService.reorderRoomTypes)
 router.post('/hotels/:hotelId/room-types/import-from-base', planningService.importRoomTypesFromBase)
 router.post('/hotels/:hotelId/room-types/:id/set-base', planningService.setBaseRoom)
-router.patch('/hotels/:hotelId/room-types/:id/adjustment', planningService.updateRoomTypePriceAdjustment)
+router.patch(
+  '/hotels/:hotelId/room-types/:id/adjustment',
+  planningService.updateRoomTypePriceAdjustment
+)
 
 // Room Type Image Management
-router.post('/hotels/:hotelId/room-types/:roomTypeId/images', roomTypeUpload.single('image'), planningService.uploadRoomTypeImage)
-router.delete('/hotels/:hotelId/room-types/:roomTypeId/images/:imageId', planningService.deleteRoomTypeImage)
-router.patch('/hotels/:hotelId/room-types/:roomTypeId/images/reorder', planningService.reorderRoomTypeImages)
-router.patch('/hotels/:hotelId/room-types/:roomTypeId/images/:imageId/main', planningService.setRoomTypeMainImage)
+router.post(
+  '/hotels/:hotelId/room-types/:roomTypeId/images',
+  roomTypeUpload.single('image'),
+  planningService.uploadRoomTypeImage
+)
+router.delete(
+  '/hotels/:hotelId/room-types/:roomTypeId/images/:imageId',
+  planningService.deleteRoomTypeImage
+)
+router.patch(
+  '/hotels/:hotelId/room-types/:roomTypeId/images/reorder',
+  planningService.reorderRoomTypeImages
+)
+router.patch(
+  '/hotels/:hotelId/room-types/:roomTypeId/images/:imageId/main',
+  planningService.setRoomTypeMainImage
+)
 
 // ==================== MEAL PLANS (Hotel-specific) ====================
 router.get('/hotels/:hotelId/meal-plans', planningService.getMealPlans)
@@ -40,7 +56,10 @@ router.post('/hotels/:hotelId/meal-plans/add-standard', planningService.addStand
 router.put('/hotels/:hotelId/meal-plans/:id', planningService.updateMealPlan)
 router.delete('/hotels/:hotelId/meal-plans/:id', planningService.deleteMealPlan)
 router.post('/hotels/:hotelId/meal-plans/:id/set-base', planningService.setBaseMealPlan)
-router.patch('/hotels/:hotelId/meal-plans/:id/adjustment', planningService.updateMealPlanPriceAdjustment)
+router.patch(
+  '/hotels/:hotelId/meal-plans/:id/adjustment',
+  planningService.updateMealPlanPriceAdjustment
+)
 
 // ==================== MARKETS ====================
 router.get('/hotels/:hotelId/markets', planningService.getMarkets)
@@ -96,18 +115,32 @@ router.post('/hotels/:hotelId/pricing/calculate', planningService.calculatePrice
 router.post('/hotels/:hotelId/pricing/bulk-calculate', planningService.bulkCalculatePrices)
 router.post('/hotels/:hotelId/pricing/check-availability', planningService.checkPricingAvailability)
 router.get('/hotels/:hotelId/pricing/effective-rate', planningService.getEffectiveRateEndpoint)
-router.get('/hotels/:hotelId/pricing/effective-multipliers', planningService.getEffectiveMultipliers)
+router.get(
+  '/hotels/:hotelId/pricing/effective-multipliers',
+  planningService.getEffectiveMultipliers
+)
 router.get('/hotels/:hotelId/pricing/combination-table', planningService.getCombinationTable)
 router.get('/hotels/:hotelId/pricing/child-age-groups', planningService.getEffectiveChildAgeGroups)
-router.post('/hotels/:hotelId/pricing/calculate-with-campaigns', planningService.calculatePriceWithCampaigns)
+router.post(
+  '/hotels/:hotelId/pricing/calculate-with-campaigns',
+  planningService.calculatePriceWithCampaigns
+)
 router.get('/hotels/:hotelId/pricing/applicable-campaigns', planningService.getApplicableCampaigns)
 
 // ==================== PLATFORM ADMIN ONLY ====================
-router.delete('/hotels/:hotelId/markets/:marketId/pricing-data', requirePlatformAdmin, planningService.deleteMarketPricingData)
+router.delete(
+  '/hotels/:hotelId/markets/:marketId/pricing-data',
+  requirePlatformAdmin,
+  planningService.deleteMarketPricingData
+)
 
 // ==================== CACHE MANAGEMENT (Platform Admin) ====================
 router.get('/cache/stats', requirePlatformAdmin, planningService.getCacheStats)
 router.post('/cache/clear', requirePlatformAdmin, planningService.clearCache)
-router.post('/cache/invalidate/:entityType/:entityId', requirePlatformAdmin, planningService.invalidateCache)
+router.post(
+  '/cache/invalidate/:entityType/:entityId',
+  requirePlatformAdmin,
+  planningService.invalidateCache
+)
 
 export default router

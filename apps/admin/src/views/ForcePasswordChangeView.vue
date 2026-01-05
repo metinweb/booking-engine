@@ -1,6 +1,8 @@
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">{{ $t('auth.changePasswordRequired') }}</h2>
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">
+      {{ $t('auth.changePasswordRequired') }}
+    </h2>
     <p class="text-center text-gray-600 mb-8">{{ $t('auth.changePasswordRequiredDesc') }}</p>
 
     <!-- Success message -->
@@ -39,17 +41,27 @@
     </div>
 
     <!-- Password Change Form -->
-    <form @submit.prevent="handleChangePassword" class="space-y-6">
+    <form class="space-y-6" @submit.prevent="handleChangePassword">
       <div>
         <label for="currentPassword" class="form-label">{{ $t('auth.currentPassword') }}</label>
         <div class="relative">
-          <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          <svg
+            class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
           </svg>
           <input
-            type="password"
             id="currentPassword"
             v-model="currentPassword"
+            type="password"
             class="form-input pl-10"
             :placeholder="$t('auth.enterCurrentPassword')"
             required
@@ -62,13 +74,23 @@
       <div>
         <label for="newPassword" class="form-label">{{ $t('auth.newPassword') }}</label>
         <div class="relative">
-          <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          <svg
+            class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+            />
           </svg>
           <input
-            type="password"
             id="newPassword"
             v-model="newPassword"
+            type="password"
             class="form-input pl-10"
             :placeholder="$t('auth.enterNewPassword')"
             required
@@ -83,13 +105,23 @@
       <div>
         <label for="confirmPassword" class="form-label">{{ $t('auth.confirmPassword') }}</label>
         <div class="relative">
-          <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <input
-            type="password"
             id="confirmPassword"
             v-model="confirmPassword"
+            type="password"
             class="form-input pl-10"
             :placeholder="$t('auth.confirmNewPassword')"
             required
@@ -105,16 +137,37 @@
         :disabled="loading || !isFormValid"
       >
         <span v-if="loading" class="flex items-center">
-          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           {{ $t('auth.changingPassword') }}
         </span>
         <span v-else class="flex items-center">
           {{ $t('auth.changePassword') }}
           <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M14 5l7 7m0 0l-7 7m7-7H3"
+            />
           </svg>
         </span>
       </button>
@@ -167,10 +220,7 @@ const handleChangePassword = async () => {
   successMessage.value = null
 
   try {
-    const response = await authService.changePassword(
-      currentPassword.value,
-      newPassword.value
-    )
+    const response = await authService.changePassword(currentPassword.value, newPassword.value)
 
     if (response.success) {
       // Clear force password change flag

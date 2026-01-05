@@ -25,270 +25,297 @@ export const CASH_MOVEMENT_TYPES = {
 }
 
 // Supported currencies
-export const SUPPORTED_CURRENCIES = ['TRY', 'USD', 'EUR', 'GBP', 'RUB', 'SAR', 'AED', 'CHF', 'JPY', 'CNY']
+export const SUPPORTED_CURRENCIES = [
+  'TRY',
+  'USD',
+  'EUR',
+  'GBP',
+  'RUB',
+  'SAR',
+  'AED',
+  'CHF',
+  'JPY',
+  'CNY'
+]
 
 // Cash movement schema
-const cashMovementSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    enum: Object.values(CASH_MOVEMENT_TYPES),
-    required: true
+const cashMovementSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      enum: Object.values(CASH_MOVEMENT_TYPES),
+      required: true
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    currency: {
+      type: String,
+      default: 'TRY',
+      uppercase: true,
+      enum: SUPPORTED_CURRENCIES
+    },
+    description: {
+      type: String,
+      trim: true
+    },
+    reference: {
+      type: String,
+      trim: true
+    },
+    transaction: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Transaction'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
   },
-  amount: {
-    type: Number,
-    required: true
-  },
-  currency: {
-    type: String,
-    default: 'TRY',
-    uppercase: true,
-    enum: SUPPORTED_CURRENCIES
-  },
-  description: {
-    type: String,
-    trim: true
-  },
-  reference: {
-    type: String,
-    trim: true
-  },
-  transaction: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Transaction'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }
-}, { _id: true })
+  { _id: true }
+)
 
 // Currency balance schema (for multi-currency support)
-const currencyBalanceSchema = new mongoose.Schema({
-  currency: {
-    type: String,
-    required: true,
-    uppercase: true,
-    enum: SUPPORTED_CURRENCIES
-  },
-  cash: { type: Number, default: 0 },
-  card: { type: Number, default: 0 },
-  other: { type: Number, default: 0 },
-  denominations: [{
-    denomination: { type: Number, required: true },
-    count: { type: Number, default: 0 },
-    total: { type: Number, default: 0 }
-  }]
-}, { _id: false })
-
-// Currency totals schema (for per-currency reporting)
-const currencyTotalsSchema = new mongoose.Schema({
-  currency: {
-    type: String,
-    required: true,
-    uppercase: true,
-    enum: SUPPORTED_CURRENCIES
-  },
-  grossSales: { type: Number, default: 0 },
-  netSales: { type: Number, default: 0 },
-  cashReceived: { type: Number, default: 0 },
-  cardReceived: { type: Number, default: 0 },
-  otherReceived: { type: Number, default: 0 },
-  refunds: { type: Number, default: 0 },
-  payouts: { type: Number, default: 0 },
-  deposits: { type: Number, default: 0 },
-  discounts: { type: Number, default: 0 }
-}, { _id: false })
-
-// Denomination count schema (for cash counting)
-const denominationSchema = new mongoose.Schema({
-  denomination: { type: Number, required: true }, // 200, 100, 50, 20, 10, 5, 1, 0.50, 0.25, 0.10, 0.05
-  count: { type: Number, default: 0 },
-  total: { type: Number, default: 0 }
-}, { _id: false })
-
-const cashRegisterSchema = new mongoose.Schema({
-  // Multi-tenant
-  partner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Partner',
-    required: true,
-    index: true
-  },
-
-  hotel: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Hotel',
-    required: true,
-    index: true
-  },
-
-  // Shift number (auto-generated)
-  shiftNumber: {
-    type: String,
-    unique: true,
-    sparse: true,  // Allow null/undefined for pre-save hook to generate
-    index: true
-  },
-
-  // Register/Terminal ID
-  registerId: {
-    type: String,
-    default: 'MAIN',
-    trim: true
-  },
-
-  // Status
-  status: {
-    type: String,
-    enum: Object.values(SHIFT_STATUS),
-    default: SHIFT_STATUS.OPEN,
-    index: true
-  },
-
-  // Cashier
-  cashier: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-
-  cashierName: {
-    type: String,
-    trim: true
-  },
-
-  // Shift timing
-  openedAt: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
-
-  closedAt: {
-    type: Date
-  },
-
-  // Opening balance
-  openingBalance: {
-    cash: { type: Number, default: 0 },
-    denominations: [denominationSchema]
-  },
-
-  // Current balance (updated with each transaction)
-  currentBalance: {
-    cash: { type: Number, default: 0 },
-    card: { type: Number, default: 0 },
-    other: { type: Number, default: 0 }
-  },
-
-  // Closing balance
-  closingBalance: {
+const currencyBalanceSchema = new mongoose.Schema(
+  {
+    currency: {
+      type: String,
+      required: true,
+      uppercase: true,
+      enum: SUPPORTED_CURRENCIES
+    },
     cash: { type: Number, default: 0 },
     card: { type: Number, default: 0 },
     other: { type: Number, default: 0 },
-    denominations: [denominationSchema]
+    denominations: [
+      {
+        denomination: { type: Number, required: true },
+        count: { type: Number, default: 0 },
+        total: { type: Number, default: 0 }
+      }
+    ]
   },
+  { _id: false }
+)
 
-  // ==========================================
-  // MULTI-CURRENCY SUPPORT
-  // ==========================================
-
-  // Active currencies for this shift
-  activeCurrencies: {
-    type: [String],
-    default: ['TRY'],
-    validate: {
-      validator: function(v) {
-        return v.every(c => SUPPORTED_CURRENCIES.includes(c))
-      },
-      message: 'Invalid currency in activeCurrencies'
-    }
-  },
-
-  // Multi-currency opening balances
-  openingBalances: [currencyBalanceSchema],
-
-  // Multi-currency current balances
-  currentBalances: [currencyBalanceSchema],
-
-  // Multi-currency closing balances
-  closingBalances: [currencyBalanceSchema],
-
-  // Per-currency totals
-  currencyTotals: [currencyTotalsSchema],
-
-  // Exchange rates snapshot at shift opening (for reporting)
-  exchangeRatesSnapshot: {
-    baseCurrency: { type: String, default: 'TRY' },
-    rates: mongoose.Schema.Types.Mixed, // { USD: 35.5, EUR: 38.2, ... }
-    capturedAt: { type: Date }
-  },
-
-  // ==========================================
-  // END MULTI-CURRENCY SUPPORT
-  // ==========================================
-
-  // Expected vs actual (for discrepancy tracking)
-  expectedCash: { type: Number, default: 0 },
-  actualCash: { type: Number, default: 0 },
-  discrepancy: { type: Number, default: 0 },
-  discrepancyNote: { type: String, trim: true },
-
-  // Transaction counts
-  transactionCounts: {
-    total: { type: Number, default: 0 },
-    cash: { type: Number, default: 0 },
-    card: { type: Number, default: 0 },
-    refunds: { type: Number, default: 0 },
-    voids: { type: Number, default: 0 }
-  },
-
-  // Summary totals
-  totals: {
+// Currency totals schema (for per-currency reporting)
+const currencyTotalsSchema = new mongoose.Schema(
+  {
+    currency: {
+      type: String,
+      required: true,
+      uppercase: true,
+      enum: SUPPORTED_CURRENCIES
+    },
     grossSales: { type: Number, default: 0 },
-    discounts: { type: Number, default: 0 },
-    refunds: { type: Number, default: 0 },
     netSales: { type: Number, default: 0 },
     cashReceived: { type: Number, default: 0 },
     cardReceived: { type: Number, default: 0 },
     otherReceived: { type: Number, default: 0 },
+    refunds: { type: Number, default: 0 },
     payouts: { type: Number, default: 0 },
-    deposits: { type: Number, default: 0 }
+    deposits: { type: Number, default: 0 },
+    discounts: { type: Number, default: 0 }
   },
+  { _id: false }
+)
 
-  // Cash movements (in/out)
-  cashMovements: [cashMovementSchema],
-
-  // Notes
-  openingNotes: { type: String, trim: true },
-  closingNotes: { type: String, trim: true },
-
-  // Closed by (can be different from cashier)
-  closedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+// Denomination count schema (for cash counting)
+const denominationSchema = new mongoose.Schema(
+  {
+    denomination: { type: Number, required: true }, // 200, 100, 50, 20, 10, 5, 1, 0.50, 0.25, 0.10, 0.05
+    count: { type: Number, default: 0 },
+    total: { type: Number, default: 0 }
   },
+  { _id: false }
+)
 
-  // Verified by supervisor
-  verifiedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+const cashRegisterSchema = new mongoose.Schema(
+  {
+    // Multi-tenant
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Partner',
+      required: true,
+      index: true
+    },
+
+    hotel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hotel',
+      required: true,
+      index: true
+    },
+
+    // Shift number (auto-generated)
+    shiftNumber: {
+      type: String,
+      unique: true,
+      sparse: true, // Allow null/undefined for pre-save hook to generate
+      index: true
+    },
+
+    // Register/Terminal ID
+    registerId: {
+      type: String,
+      default: 'MAIN',
+      trim: true
+    },
+
+    // Status
+    status: {
+      type: String,
+      enum: Object.values(SHIFT_STATUS),
+      default: SHIFT_STATUS.OPEN,
+      index: true
+    },
+
+    // Cashier
+    cashier: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+
+    cashierName: {
+      type: String,
+      trim: true
+    },
+
+    // Shift timing
+    openedAt: {
+      type: Date,
+      required: true,
+      default: Date.now
+    },
+
+    closedAt: {
+      type: Date
+    },
+
+    // Opening balance
+    openingBalance: {
+      cash: { type: Number, default: 0 },
+      denominations: [denominationSchema]
+    },
+
+    // Current balance (updated with each transaction)
+    currentBalance: {
+      cash: { type: Number, default: 0 },
+      card: { type: Number, default: 0 },
+      other: { type: Number, default: 0 }
+    },
+
+    // Closing balance
+    closingBalance: {
+      cash: { type: Number, default: 0 },
+      card: { type: Number, default: 0 },
+      other: { type: Number, default: 0 },
+      denominations: [denominationSchema]
+    },
+
+    // ==========================================
+    // MULTI-CURRENCY SUPPORT
+    // ==========================================
+
+    // Active currencies for this shift
+    activeCurrencies: {
+      type: [String],
+      default: ['TRY'],
+      validate: {
+        validator: function (v) {
+          return v.every(c => SUPPORTED_CURRENCIES.includes(c))
+        },
+        message: 'Invalid currency in activeCurrencies'
+      }
+    },
+
+    // Multi-currency opening balances
+    openingBalances: [currencyBalanceSchema],
+
+    // Multi-currency current balances
+    currentBalances: [currencyBalanceSchema],
+
+    // Multi-currency closing balances
+    closingBalances: [currencyBalanceSchema],
+
+    // Per-currency totals
+    currencyTotals: [currencyTotalsSchema],
+
+    // Exchange rates snapshot at shift opening (for reporting)
+    exchangeRatesSnapshot: {
+      baseCurrency: { type: String, default: 'TRY' },
+      rates: mongoose.Schema.Types.Mixed, // { USD: 35.5, EUR: 38.2, ... }
+      capturedAt: { type: Date }
+    },
+
+    // ==========================================
+    // END MULTI-CURRENCY SUPPORT
+    // ==========================================
+
+    // Expected vs actual (for discrepancy tracking)
+    expectedCash: { type: Number, default: 0 },
+    actualCash: { type: Number, default: 0 },
+    discrepancy: { type: Number, default: 0 },
+    discrepancyNote: { type: String, trim: true },
+
+    // Transaction counts
+    transactionCounts: {
+      total: { type: Number, default: 0 },
+      cash: { type: Number, default: 0 },
+      card: { type: Number, default: 0 },
+      refunds: { type: Number, default: 0 },
+      voids: { type: Number, default: 0 }
+    },
+
+    // Summary totals
+    totals: {
+      grossSales: { type: Number, default: 0 },
+      discounts: { type: Number, default: 0 },
+      refunds: { type: Number, default: 0 },
+      netSales: { type: Number, default: 0 },
+      cashReceived: { type: Number, default: 0 },
+      cardReceived: { type: Number, default: 0 },
+      otherReceived: { type: Number, default: 0 },
+      payouts: { type: Number, default: 0 },
+      deposits: { type: Number, default: 0 }
+    },
+
+    // Cash movements (in/out)
+    cashMovements: [cashMovementSchema],
+
+    // Notes
+    openingNotes: { type: String, trim: true },
+    closingNotes: { type: String, trim: true },
+
+    // Closed by (can be different from cashier)
+    closedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+
+    // Verified by supervisor
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    verifiedAt: { type: Date },
+
+    // Print status
+    reportPrinted: { type: Boolean, default: false },
+    reportPrintedAt: { type: Date }
   },
-  verifiedAt: { type: Date },
-
-  // Print status
-  reportPrinted: { type: Boolean, default: false },
-  reportPrintedAt: { type: Date }
-
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-})
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
+)
 
 // Indexes
 cashRegisterSchema.index({ hotel: 1, status: 1 })
@@ -296,7 +323,7 @@ cashRegisterSchema.index({ hotel: 1, openedAt: -1 })
 cashRegisterSchema.index({ hotel: 1, cashier: 1, status: 1 })
 
 // Pre-save: Generate shift number
-cashRegisterSchema.pre('save', async function(next) {
+cashRegisterSchema.pre('save', async function (next) {
   if (this.isNew && !this.shiftNumber) {
     const date = new Date()
     const prefix = 'SFT'
@@ -322,20 +349,26 @@ cashRegisterSchema.pre('save', async function(next) {
 })
 
 // Virtual: Duration in hours
-cashRegisterSchema.virtual('durationHours').get(function() {
+cashRegisterSchema.virtual('durationHours').get(function () {
   const end = this.closedAt || new Date()
   const start = this.openedAt
   return ((end - start) / (1000 * 60 * 60)).toFixed(2)
 })
 
 // Method: Add cash movement
-cashRegisterSchema.methods.addCashMovement = function(movement) {
+cashRegisterSchema.methods.addCashMovement = function (movement) {
   this.cashMovements.push(movement)
 
   // Update current balance
   if ([CASH_MOVEMENT_TYPES.SALE, CASH_MOVEMENT_TYPES.DEPOSIT].includes(movement.type)) {
     this.currentBalance.cash += movement.amount
-  } else if ([CASH_MOVEMENT_TYPES.REFUND, CASH_MOVEMENT_TYPES.PAYOUT, CASH_MOVEMENT_TYPES.WITHDRAWAL].includes(movement.type)) {
+  } else if (
+    [
+      CASH_MOVEMENT_TYPES.REFUND,
+      CASH_MOVEMENT_TYPES.PAYOUT,
+      CASH_MOVEMENT_TYPES.WITHDRAWAL
+    ].includes(movement.type)
+  ) {
     this.currentBalance.cash -= Math.abs(movement.amount)
   }
 
@@ -343,7 +376,7 @@ cashRegisterSchema.methods.addCashMovement = function(movement) {
 }
 
 // Method: Record transaction
-cashRegisterSchema.methods.recordTransaction = function(transaction) {
+cashRegisterSchema.methods.recordTransaction = function (transaction) {
   this.transactionCounts.total++
 
   const amount = transaction.amount
@@ -374,7 +407,7 @@ cashRegisterSchema.methods.recordTransaction = function(transaction) {
 }
 
 // Method: Close shift
-cashRegisterSchema.methods.closeShift = function(closingData, userId) {
+cashRegisterSchema.methods.closeShift = function (closingData, userId) {
   this.status = SHIFT_STATUS.CLOSED
   this.closedAt = new Date()
   this.closedBy = userId
@@ -411,7 +444,7 @@ cashRegisterSchema.methods.closeShift = function(closingData, userId) {
 // ==========================================
 
 // Method: Get or create currency balance
-cashRegisterSchema.methods.getCurrencyBalance = function(currency) {
+cashRegisterSchema.methods.getCurrencyBalance = function (currency) {
   let balance = this.currentBalances.find(b => b.currency === currency)
   if (!balance) {
     balance = { currency, cash: 0, card: 0, other: 0 }
@@ -421,7 +454,7 @@ cashRegisterSchema.methods.getCurrencyBalance = function(currency) {
 }
 
 // Method: Get or create currency totals
-cashRegisterSchema.methods.getCurrencyTotals = function(currency) {
+cashRegisterSchema.methods.getCurrencyTotals = function (currency) {
   let totals = this.currencyTotals.find(t => t.currency === currency)
   if (!totals) {
     totals = {
@@ -442,7 +475,7 @@ cashRegisterSchema.methods.getCurrencyTotals = function(currency) {
 }
 
 // Method: Add cash movement with currency
-cashRegisterSchema.methods.addCashMovementWithCurrency = function(movement) {
+cashRegisterSchema.methods.addCashMovementWithCurrency = function (movement) {
   const currency = movement.currency || 'TRY'
   this.cashMovements.push({ ...movement, currency })
 
@@ -456,7 +489,13 @@ cashRegisterSchema.methods.addCashMovementWithCurrency = function(movement) {
   // Update currency balance
   if ([CASH_MOVEMENT_TYPES.SALE, CASH_MOVEMENT_TYPES.DEPOSIT].includes(movement.type)) {
     balance.cash += movement.amount
-  } else if ([CASH_MOVEMENT_TYPES.REFUND, CASH_MOVEMENT_TYPES.PAYOUT, CASH_MOVEMENT_TYPES.WITHDRAWAL].includes(movement.type)) {
+  } else if (
+    [
+      CASH_MOVEMENT_TYPES.REFUND,
+      CASH_MOVEMENT_TYPES.PAYOUT,
+      CASH_MOVEMENT_TYPES.WITHDRAWAL
+    ].includes(movement.type)
+  ) {
     balance.cash -= Math.abs(movement.amount)
   }
 
@@ -464,7 +503,13 @@ cashRegisterSchema.methods.addCashMovementWithCurrency = function(movement) {
   if (currency === 'TRY') {
     if ([CASH_MOVEMENT_TYPES.SALE, CASH_MOVEMENT_TYPES.DEPOSIT].includes(movement.type)) {
       this.currentBalance.cash += movement.amount
-    } else if ([CASH_MOVEMENT_TYPES.REFUND, CASH_MOVEMENT_TYPES.PAYOUT, CASH_MOVEMENT_TYPES.WITHDRAWAL].includes(movement.type)) {
+    } else if (
+      [
+        CASH_MOVEMENT_TYPES.REFUND,
+        CASH_MOVEMENT_TYPES.PAYOUT,
+        CASH_MOVEMENT_TYPES.WITHDRAWAL
+      ].includes(movement.type)
+    ) {
       this.currentBalance.cash -= Math.abs(movement.amount)
     }
   }
@@ -473,7 +518,10 @@ cashRegisterSchema.methods.addCashMovementWithCurrency = function(movement) {
 }
 
 // Method: Record transaction with currency
-cashRegisterSchema.methods.recordTransactionWithCurrency = function(transaction, currency = 'TRY') {
+cashRegisterSchema.methods.recordTransactionWithCurrency = function (
+  transaction,
+  currency = 'TRY'
+) {
   this.transactionCounts.total++
 
   const amount = transaction.amount
@@ -524,7 +572,8 @@ cashRegisterSchema.methods.recordTransactionWithCurrency = function(transaction,
     currencyTotal.grossSales += amount
   }
 
-  currencyTotal.netSales = currencyTotal.grossSales - currencyTotal.discounts - currencyTotal.refunds
+  currencyTotal.netSales =
+    currencyTotal.grossSales - currencyTotal.discounts - currencyTotal.refunds
 
   // Also update legacy single-currency totals for TRY (backward compatibility)
   if (currency === 'TRY') {
@@ -552,7 +601,7 @@ cashRegisterSchema.methods.recordTransactionWithCurrency = function(transaction,
 }
 
 // Method: Close shift with multi-currency
-cashRegisterSchema.methods.closeShiftMultiCurrency = function(closingData, userId) {
+cashRegisterSchema.methods.closeShiftMultiCurrency = function (closingData, userId) {
   this.status = SHIFT_STATUS.CLOSED
   this.closedAt = new Date()
   this.closedBy = userId
@@ -570,7 +619,10 @@ cashRegisterSchema.methods.closeShiftMultiCurrency = function(closingData, userI
   // Handle discrepancy for each currency
   if (closingData.actualCash !== undefined) {
     this.actualCash = closingData.actualCash
-    this.expectedCash = (this.openingBalance?.cash || 0) + (this.totals?.cashReceived || 0) - (this.totals?.payouts || 0)
+    this.expectedCash =
+      (this.openingBalance?.cash || 0) +
+      (this.totals?.cashReceived || 0) -
+      (this.totals?.payouts || 0)
     this.discrepancy = this.actualCash - this.expectedCash
     this.discrepancyNote = closingData.discrepancyNote
   }
@@ -599,7 +651,7 @@ cashRegisterSchema.methods.closeShiftMultiCurrency = function(closingData, userI
 }
 
 // Method: Get total in base currency (for reporting)
-cashRegisterSchema.methods.getTotalInBaseCurrency = function(exchangeRates, baseCurrency = 'TRY') {
+cashRegisterSchema.methods.getTotalInBaseCurrency = function (exchangeRates, baseCurrency = 'TRY') {
   let total = 0
 
   for (const currencyTotal of this.currencyTotals) {
@@ -620,12 +672,19 @@ cashRegisterSchema.methods.getTotalInBaseCurrency = function(exchangeRates, base
 }
 
 // Method: Initialize multi-currency balances
-cashRegisterSchema.methods.initializeCurrencyBalances = function(currencies, openingBalances = []) {
+cashRegisterSchema.methods.initializeCurrencyBalances = function (
+  currencies,
+  openingBalances = []
+) {
   this.activeCurrencies = currencies
 
   // Initialize current balances for each currency
   currencies.forEach(currency => {
-    const opening = openingBalances.find(b => b.currency === currency) || { cash: 0, card: 0, other: 0 }
+    const opening = openingBalances.find(b => b.currency === currency) || {
+      cash: 0,
+      card: 0,
+      other: 0
+    }
     this.currentBalances.push({
       currency,
       cash: opening.cash || 0,
@@ -659,7 +718,7 @@ cashRegisterSchema.methods.initializeCurrencyBalances = function(currencies, ope
  * Method: Reverse a transaction (for voided/cancelled transactions)
  * Decrements all counters that were incremented when the transaction was recorded
  */
-cashRegisterSchema.methods.reverseTransaction = async function(transaction) {
+cashRegisterSchema.methods.reverseTransaction = async function (transaction) {
   const currency = transaction.currency || 'TRY'
   const amount = transaction.amount
 
@@ -667,8 +726,8 @@ cashRegisterSchema.methods.reverseTransaction = async function(transaction) {
   this.transactionCounts.total = Math.max(0, (this.transactionCounts.total || 0) - 1)
 
   // Find or create currency balance and totals
-  let balance = this.currentBalances.find(b => b.currency === currency)
-  let currencyTotal = this.currencyTotals.find(t => t.currency === currency)
+  const balance = this.currentBalances.find(b => b.currency === currency)
+  const currencyTotal = this.currencyTotals.find(t => t.currency === currency)
 
   // Reverse based on payment method
   if (transaction.paymentMethod === 'cash') {
@@ -715,7 +774,8 @@ cashRegisterSchema.methods.reverseTransaction = async function(transaction) {
 
   // Recalculate net sales
   if (currencyTotal) {
-    currencyTotal.netSales = currencyTotal.grossSales - currencyTotal.discounts - currencyTotal.refunds
+    currencyTotal.netSales =
+      currencyTotal.grossSales - currencyTotal.discounts - currencyTotal.refunds
   }
   this.totals.netSales = this.totals.grossSales - this.totals.discounts - this.totals.refunds
 
@@ -737,7 +797,7 @@ cashRegisterSchema.methods.reverseTransaction = async function(transaction) {
 }
 
 // Static: Get active shift for cashier
-cashRegisterSchema.statics.getActiveShift = function(hotelId, cashierId = null) {
+cashRegisterSchema.statics.getActiveShift = function (hotelId, cashierId = null) {
   const query = {
     hotel: hotelId,
     status: SHIFT_STATUS.OPEN
@@ -751,7 +811,7 @@ cashRegisterSchema.statics.getActiveShift = function(hotelId, cashierId = null) 
 }
 
 // Static: Get shifts for date
-cashRegisterSchema.statics.getShiftsForDate = function(hotelId, date = new Date()) {
+cashRegisterSchema.statics.getShiftsForDate = function (hotelId, date = new Date()) {
   const startOfDay = new Date(date)
   startOfDay.setHours(0, 0, 0, 0)
   const endOfDay = new Date(startOfDay)
@@ -761,13 +821,13 @@ cashRegisterSchema.statics.getShiftsForDate = function(hotelId, date = new Date(
     hotel: hotelId,
     openedAt: { $gte: startOfDay, $lt: endOfDay }
   })
-  .sort({ openedAt: -1 })
-  .populate('cashier', 'name email')
-  .lean()
+    .sort({ openedAt: -1 })
+    .populate('cashier', 'name email')
+    .lean()
 }
 
 // Static: Get daily summary
-cashRegisterSchema.statics.getDailySummary = async function(hotelId, date = new Date()) {
+cashRegisterSchema.statics.getDailySummary = async function (hotelId, date = new Date()) {
   const startOfDay = new Date(date)
   startOfDay.setHours(0, 0, 0, 0)
   const endOfDay = new Date(startOfDay)

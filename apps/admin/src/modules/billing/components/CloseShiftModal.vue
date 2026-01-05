@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Vardiya Kapat"
-    size="lg"
-    @close="close"
-  >
+  <Modal v-model="show" title="Vardiya Kapat" size="lg" @close="close">
     <div class="space-y-6">
       <!-- Shift Summary -->
       <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4">
@@ -20,58 +15,88 @@
           </div>
           <div>
             <p class="text-xs text-gray-500 dark:text-slate-400">Acilis Nakit</p>
-            <p class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(shift?.openingBalance?.cash) }}</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ formatCurrency(shift?.openingBalance?.cash) }}
+            </p>
           </div>
           <div>
             <p class="text-xs text-gray-500 dark:text-slate-400">Sure</p>
-            <p class="font-medium text-gray-900 dark:text-white">{{ formatShiftDuration(shift?.openedAt) }}</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ formatShiftDuration(shift?.openedAt) }}
+            </p>
           </div>
         </div>
       </div>
 
       <!-- Transaction Summary -->
-      <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4">
+      <div
+        class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-4"
+      >
         <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Islem Ozeti</h4>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+          <div
+            class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
+          >
             <div>
               <p class="text-xs text-gray-500 dark:text-slate-400">Toplam Islem</p>
-              <p class="text-lg font-bold text-gray-900 dark:text-white">{{ shift?.transactionCounts?.total || 0 }}</p>
+              <p class="text-lg font-bold text-gray-900 dark:text-white">
+                {{ shift?.transactionCounts?.total || 0 }}
+              </p>
             </div>
             <span class="material-icons text-gray-400">receipt_long</span>
           </div>
-          <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+          <div
+            class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg"
+          >
             <div>
               <p class="text-xs text-green-600 dark:text-green-400">Nakit Tahsilat</p>
-              <p class="text-lg font-bold text-green-700 dark:text-green-300">{{ formatCurrency(shift?.totals?.cashReceived) }}</p>
+              <p class="text-lg font-bold text-green-700 dark:text-green-300">
+                {{ formatCurrency(shift?.totals?.cashReceived) }}
+              </p>
             </div>
             <span class="material-icons text-green-500">payments</span>
           </div>
-          <div class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <div
+            class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg"
+          >
             <div>
               <p class="text-xs text-blue-600 dark:text-blue-400">Kart Tahsilat</p>
-              <p class="text-lg font-bold text-blue-700 dark:text-blue-300">{{ formatCurrency(shift?.totals?.cardReceived) }}</p>
+              <p class="text-lg font-bold text-blue-700 dark:text-blue-300">
+                {{ formatCurrency(shift?.totals?.cardReceived) }}
+              </p>
             </div>
             <span class="material-icons text-blue-500">credit_card</span>
           </div>
-          <div class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+          <div
+            class="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg"
+          >
             <div>
               <p class="text-xs text-purple-600 dark:text-purple-400">Brut Satis</p>
-              <p class="text-lg font-bold text-purple-700 dark:text-purple-300">{{ formatCurrency(shift?.totals?.grossSales) }}</p>
+              <p class="text-lg font-bold text-purple-700 dark:text-purple-300">
+                {{ formatCurrency(shift?.totals?.grossSales) }}
+              </p>
             </div>
             <span class="material-icons text-purple-500">trending_up</span>
           </div>
-          <div class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+          <div
+            class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg"
+          >
             <div>
               <p class="text-xs text-orange-600 dark:text-orange-400">Iadeler</p>
-              <p class="text-lg font-bold text-orange-700 dark:text-orange-300">{{ formatCurrency(shift?.totals?.refunds) }}</p>
+              <p class="text-lg font-bold text-orange-700 dark:text-orange-300">
+                {{ formatCurrency(shift?.totals?.refunds) }}
+              </p>
             </div>
             <span class="material-icons text-orange-500">replay</span>
           </div>
-          <div class="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+          <div
+            class="flex items-center justify-between p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg"
+          >
             <div>
               <p class="text-xs text-indigo-600 dark:text-indigo-400">Net Satis</p>
-              <p class="text-lg font-bold text-indigo-700 dark:text-indigo-300">{{ formatCurrency(shift?.totals?.netSales) }}</p>
+              <p class="text-lg font-bold text-indigo-700 dark:text-indigo-300">
+                {{ formatCurrency(shift?.totals?.netSales) }}
+              </p>
             </div>
             <span class="material-icons text-indigo-500">account_balance</span>
           </div>
@@ -83,13 +108,19 @@
         <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Kasa Sayimi</h4>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Beklenen Nakit</label>
+            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+              >Beklenen Nakit</label
+            >
             <div class="px-4 py-3 bg-gray-100 dark:bg-slate-700 rounded-lg">
-              <p class="text-xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(expectedCash) }}</p>
+              <p class="text-xl font-bold text-gray-900 dark:text-white">
+                {{ formatCurrency(expectedCash) }}
+              </p>
             </div>
           </div>
           <div>
-            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Gercek Nakit *</label>
+            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+              >Gercek Nakit *</label
+            >
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">TRY</span>
               <input
@@ -105,12 +136,31 @@
         </div>
 
         <!-- Discrepancy -->
-        <div v-if="discrepancy !== 0" class="mt-3 p-3 rounded-lg" :class="discrepancy > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'">
+        <div
+          v-if="discrepancy !== 0"
+          class="mt-3 p-3 rounded-lg"
+          :class="
+            discrepancy > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'
+          "
+        >
           <div class="flex items-center justify-between">
-            <span :class="discrepancy > 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'">
+            <span
+              :class="
+                discrepancy > 0
+                  ? 'text-green-700 dark:text-green-300'
+                  : 'text-red-700 dark:text-red-300'
+              "
+            >
               {{ discrepancy > 0 ? 'Fazla:' : 'Eksik:' }}
             </span>
-            <span class="font-bold" :class="discrepancy > 0 ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'">
+            <span
+              class="font-bold"
+              :class="
+                discrepancy > 0
+                  ? 'text-green-700 dark:text-green-300'
+                  : 'text-red-700 dark:text-red-300'
+              "
+            >
               {{ formatCurrency(Math.abs(discrepancy)) }}
             </span>
           </div>
@@ -119,7 +169,9 @@
 
       <!-- Discrepancy Note (if any) -->
       <div v-if="discrepancy !== 0">
-        <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Fark Aciklamasi *</label>
+        <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+          >Fark Aciklamasi *</label
+        >
         <textarea
           v-model="form.discrepancyNote"
           rows="2"
@@ -131,7 +183,9 @@
 
       <!-- Closing Notes -->
       <div>
-        <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Kapanis Notlari (Opsiyonel)</label>
+        <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+          >Kapanis Notlari (Opsiyonel)</label
+        >
         <textarea
           v-model="form.closingNotes"
           rows="2"
@@ -143,19 +197,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !isValid"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>logout</span>
+        <span v-else class="material-icons text-sm">logout</span>
         Vardiya Kapat
       </button>
     </template>
@@ -190,7 +244,7 @@ const loading = ref(false)
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const form = ref({
@@ -243,9 +297,12 @@ const close = () => {
   }
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val && props.shift) {
-    form.value.actualCash = expectedCash.value
+watch(
+  () => props.modelValue,
+  val => {
+    if (val && props.shift) {
+      form.value.actualCash = expectedCash.value
+    }
   }
-})
+)
 </script>

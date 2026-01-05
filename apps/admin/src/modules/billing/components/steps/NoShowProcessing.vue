@@ -2,7 +2,9 @@
   <div class="p-6">
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+      <div
+        class="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+      >
         <span class="material-icons text-2xl text-red-600 dark:text-red-400">person_off</span>
       </div>
       <div>
@@ -25,7 +27,9 @@
       v-else-if="noShows.length === 0"
       class="text-center py-12 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800"
     >
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+      <div
+        class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+      >
         <span class="material-icons text-3xl text-green-600 dark:text-green-400">celebration</span>
       </div>
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Harika!</h3>
@@ -41,16 +45,16 @@
         </span>
         <div class="flex items-center gap-2">
           <button
-            @click="markAllNoShow"
             :disabled="allProcessed"
             class="px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="markAllNoShow"
           >
             Tumunu No-Show Yap
           </button>
           <button
-            @click="skipAll"
             :disabled="allProcessed"
             class="px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="skipAll"
           >
             Tumunu Atla
           </button>
@@ -58,11 +62,7 @@
       </div>
 
       <!-- Reservation Cards -->
-      <TransitionGroup
-        name="list"
-        tag="div"
-        class="space-y-4"
-      >
+      <TransitionGroup name="list" tag="div" class="space-y-4">
         <div
           v-for="noShow in noShows"
           :key="noShow._id"
@@ -73,13 +73,17 @@
             <div class="flex items-start justify-between gap-4">
               <!-- Guest Info -->
               <div class="flex items-start gap-3 min-w-0">
-                <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center flex-shrink-0">
+                <div
+                  class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center flex-shrink-0"
+                >
                   <span class="text-lg font-medium text-gray-600 dark:text-gray-400">
                     {{ getInitials(noShow.guestName) }}
                   </span>
                 </div>
                 <div class="min-w-0">
-                  <h4 class="font-medium text-gray-900 dark:text-white truncate">{{ noShow.guestName }}</h4>
+                  <h4 class="font-medium text-gray-900 dark:text-white truncate">
+                    {{ noShow.guestName }}
+                  </h4>
                   <p class="text-sm text-gray-500 dark:text-slate-400">
                     {{ noShow.bookingNumber }}
                   </p>
@@ -90,10 +94,15 @@
                     <span class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-slate-700 rounded">
                       {{ noShow.nights }} gece
                     </span>
-                    <span class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded">
+                    <span
+                      class="text-xs px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded"
+                    >
                       {{ formatCurrency(noShow.totalAmount) }}
                     </span>
-                    <span v-if="noShow.source" class="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">
+                    <span
+                      v-if="noShow.source"
+                      class="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded"
+                    >
                       {{ noShow.source }}
                     </span>
                   </div>
@@ -112,7 +121,10 @@
             </div>
 
             <!-- Guarantee Info -->
-            <div v-if="noShow.guarantee" class="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
+            <div
+              v-if="noShow.guarantee"
+              class="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700"
+            >
               <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-slate-400">
                 <span class="material-icons text-base">credit_card</span>
                 <span>Garanti: {{ getGuaranteeLabel(noShow.guarantee) }}</span>
@@ -120,41 +132,47 @@
             </div>
 
             <!-- Action Buttons -->
-            <div v-if="!actions[noShow._id]" class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+            <div
+              v-if="!actions[noShow._id]"
+              class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700"
+            >
               <button
-                @click="setAction(noShow._id, 'no_show')"
                 class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors"
+                @click="setAction(noShow._id, 'no_show')"
               >
                 <span class="material-icons text-lg">person_off</span>
                 No-Show
               </button>
               <button
-                @click="setAction(noShow._id, 'extended')"
                 class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                @click="setAction(noShow._id, 'extended')"
               >
                 <span class="material-icons text-lg">schedule</span>
                 Beklet
               </button>
               <button
-                @click="setAction(noShow._id, 'cancelled')"
                 class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
+                @click="setAction(noShow._id, 'cancelled')"
               >
                 <span class="material-icons text-lg">cancel</span>
                 Iptal
               </button>
               <button
-                @click="setAction(noShow._id, 'skipped')"
                 class="px-3 py-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-700 text-sm rounded-lg transition-colors"
+                @click="setAction(noShow._id, 'skipped')"
               >
                 <span class="material-icons text-lg">skip_next</span>
               </button>
             </div>
 
             <!-- Undo Button -->
-            <div v-else class="flex items-center justify-end mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+            <div
+              v-else
+              class="flex items-center justify-end mt-4 pt-4 border-t border-gray-100 dark:border-slate-700"
+            >
               <button
-                @click="undoAction(noShow._id)"
                 class="flex items-center gap-1 px-3 py-1 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                @click="undoAction(noShow._id)"
               >
                 <span class="material-icons text-lg">undo</span>
                 Geri Al
@@ -187,24 +205,22 @@
           <template v-if="noShows.length > 0">
             {{ processedCount }} / {{ noShows.length }} rezervasyon islendi
           </template>
-          <template v-else>
-            Islem yapilacak rezervasyon yok
-          </template>
+          <template v-else> Islem yapilacak rezervasyon yok </template>
         </p>
 
         <div class="flex items-center gap-3">
           <button
-            @click="emit('back')"
             class="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="emit('back')"
           >
             <span class="material-icons">arrow_back</span>
             Geri
           </button>
 
           <button
-            @click="handleContinue"
             :disabled="loading || completing || (noShows.length > 0 && !allProcessed)"
             class="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-lg transition-colors"
+            @click="handleContinue"
           >
             <span v-if="completing" class="material-icons animate-spin">refresh</span>
             {{ completing ? 'Kaydediliyor...' : 'Devam Et' }}
@@ -252,16 +268,21 @@ const allProcessed = computed(() => {
 })
 
 // Methods
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return nightAuditService.formatCurrency(amount)
 }
 
-const getInitials = (name) => {
+const getInitials = name => {
   if (!name) return '?'
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 
-const getCardClass = (noShow) => {
+const getCardClass = noShow => {
   const action = actions.value[noShow._id]
   if (!action) {
     return 'border-gray-200 dark:border-slate-700'
@@ -280,7 +301,7 @@ const getCardClass = (noShow) => {
   }
 }
 
-const getActionBadgeClass = (action) => {
+const getActionBadgeClass = action => {
   switch (action) {
     case 'no_show':
       return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
@@ -295,7 +316,7 @@ const getActionBadgeClass = (action) => {
   }
 }
 
-const getActionLabel = (action) => {
+const getActionLabel = action => {
   const labels = {
     no_show: 'No-Show',
     cancelled: 'Iptal Edildi',
@@ -305,7 +326,7 @@ const getActionLabel = (action) => {
   return labels[action] || action
 }
 
-const getGuaranteeLabel = (guarantee) => {
+const getGuaranteeLabel = guarantee => {
   const labels = {
     credit_card: 'Kredi Karti',
     bank_transfer: 'Banka Transferi',
@@ -315,7 +336,7 @@ const getGuaranteeLabel = (guarantee) => {
   return labels[guarantee] || guarantee
 }
 
-const getChargePolicyLabel = (policy) => {
+const getChargePolicyLabel = policy => {
   const labels = {
     none: 'Ucret kesilmeyecek',
     first_night: 'Ilk gece ucreti kesilecek',
@@ -329,7 +350,7 @@ const setAction = (id, action) => {
   actions.value[id] = action
 }
 
-const undoAction = (id) => {
+const undoAction = id => {
   delete actions.value[id]
 }
 
@@ -379,8 +400,8 @@ const handleContinue = async () => {
       return {
         bookingId,
         action,
-        chargeType: action === 'no_show' ? (noShow?.chargePolicy || 'first_night') : 'none',
-        chargeAmount: action === 'no_show' ? (noShow?.chargeAmount || 0) : 0
+        chargeType: action === 'no_show' ? noShow?.chargePolicy || 'first_night' : 'none',
+        chargeAmount: action === 'no_show' ? noShow?.chargeAmount || 0 : 0
       }
     })
 

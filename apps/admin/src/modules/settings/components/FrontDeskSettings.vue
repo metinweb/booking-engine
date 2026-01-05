@@ -2,7 +2,9 @@
   <div class="space-y-6">
     <div>
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Resepsiyon Ayarlari</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400">Check-in/out saatleri ve odeme ayarlari</p>
+      <p class="text-sm text-gray-500 dark:text-slate-400">
+        Check-in/out saatleri ve odeme ayarlari
+      </p>
     </div>
 
     <!-- Check-in/Check-out Times -->
@@ -14,10 +16,10 @@
             Varsayilan Check-in Saati
           </label>
           <input
-            type="time"
             v-model="localSettings.defaultCheckInTime"
-            @change="emitChange"
+            type="time"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @change="emitChange"
           />
         </div>
         <div>
@@ -25,10 +27,10 @@
             Varsayilan Check-out Saati
           </label>
           <input
-            type="time"
             v-model="localSettings.defaultCheckOutTime"
-            @change="emitChange"
+            type="time"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @change="emitChange"
           />
         </div>
       </div>
@@ -41,16 +43,20 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-medium text-gray-900 dark:text-white">Erken Check-in Izni</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">Misafirlerin erken giris yapmasina izin ver</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              Misafirlerin erken giris yapmasina izin ver
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="localSettings.allowEarlyCheckIn"
-              @change="emitChange"
+              type="checkbox"
               class="sr-only peer"
+              @change="emitChange"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
           </label>
         </div>
 
@@ -60,29 +66,35 @@
           </label>
           <div class="flex items-center gap-2">
             <input
-              type="number"
               v-model.number="localSettings.earlyCheckInFee"
-              @input="emitChange"
+              type="number"
               min="0"
               class="w-32 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @input="emitChange"
             />
             <span class="text-gray-500 dark:text-slate-400">TL/saat</span>
           </div>
         </div>
 
-        <div class="border-t border-gray-200 dark:border-slate-600 pt-4 flex items-center justify-between">
+        <div
+          class="border-t border-gray-200 dark:border-slate-600 pt-4 flex items-center justify-between"
+        >
           <div>
             <p class="font-medium text-gray-900 dark:text-white">Gec Check-out Izni</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">Misafirlerin gec cikis yapmasina izin ver</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              Misafirlerin gec cikis yapmasina izin ver
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="localSettings.allowLateCheckOut"
-              @change="emitChange"
+              type="checkbox"
               class="sr-only peer"
+              @change="emitChange"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
           </label>
         </div>
 
@@ -92,11 +104,11 @@
           </label>
           <div class="flex items-center gap-2">
             <input
-              type="number"
               v-model.number="localSettings.lateCheckOutFee"
-              @input="emitChange"
+              type="number"
               min="0"
               class="w-32 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @input="emitChange"
             />
             <span class="text-gray-500 dark:text-slate-400">TL/saat</span>
           </div>
@@ -114,8 +126,8 @@
           </label>
           <select
             v-model="localSettings.defaultPaymentMethod"
-            @change="emitChange"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @change="emitChange"
           >
             <option value="cash">Nakit</option>
             <option value="credit_card">Kredi Karti</option>
@@ -127,16 +139,20 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-medium text-gray-900 dark:text-white">Walk-in icin Depozito Zorunlu</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">Rezervasyonsuz misafirlerden depozito al</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              Rezervasyonsuz misafirlerden depozito al
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="localSettings.requireDepositForWalkIn"
-              @change="emitChange"
+              type="checkbox"
               class="sr-only peer"
+              @change="emitChange"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
           </label>
         </div>
 
@@ -146,30 +162,38 @@
           </label>
           <div class="flex items-center gap-2">
             <input
-              type="number"
               v-model.number="localSettings.minimumDepositPercent"
-              @input="emitChange"
+              type="number"
               min="0"
               max="100"
               class="w-24 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @input="emitChange"
             />
             <span class="text-gray-500 dark:text-slate-400">%</span>
           </div>
         </div>
 
-        <div class="border-t border-gray-200 dark:border-slate-600 pt-4 flex items-center justify-between">
+        <div
+          class="border-t border-gray-200 dark:border-slate-600 pt-4 flex items-center justify-between"
+        >
           <div>
-            <p class="font-medium text-gray-900 dark:text-white">Check-out'ta Sifir Bakiye Zorunlu</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">Cikis icin tum borcun odenmesi gerekir</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              Check-out'ta Sifir Bakiye Zorunlu
+            </p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              Cikis icin tum borcun odenmesi gerekir
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="localSettings.requireZeroBalanceCheckOut"
-              @change="emitChange"
+              type="checkbox"
               class="sr-only peer"
+              @change="emitChange"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
           </label>
         </div>
       </div>
@@ -203,9 +227,13 @@ const localSettings = ref({
   ...props.modelValue
 })
 
-watch(() => props.modelValue, (newVal) => {
-  localSettings.value = { ...localSettings.value, ...newVal }
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  newVal => {
+    localSettings.value = { ...localSettings.value, ...newVal }
+  },
+  { deep: true }
+)
 
 const emitChange = () => {
   emit('update:modelValue', localSettings.value)

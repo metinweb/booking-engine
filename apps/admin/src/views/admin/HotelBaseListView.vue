@@ -2,11 +2,11 @@
   <div>
     <!-- Action Buttons -->
     <div class="mb-6 flex justify-end gap-2">
-      <button @click="showAIImporter = true" class="btn-secondary flex items-center gap-2">
+      <button class="btn-secondary flex items-center gap-2" @click="showAIImporter = true">
         <span class="material-icons">auto_awesome</span>
         {{ $t('hotels.aiImport.button') }}
       </button>
-      <button @click="openCreateModal" class="btn-primary flex items-center gap-2">
+      <button class="btn-primary flex items-center gap-2" @click="openCreateModal">
         <span class="material-icons">add</span>
         {{ $t('hotels.hotelBase.addHotel') }}
       </button>
@@ -72,29 +72,43 @@
       <!-- Empty State -->
       <div v-else-if="hotels.length === 0" class="p-12 text-center">
         <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">domain</span>
-        <p class="mt-4 text-gray-500 dark:text-slate-400">{{ $t('hotels.hotelBase.noBaseHotels') }}</p>
+        <p class="mt-4 text-gray-500 dark:text-slate-400">
+          {{ $t('hotels.hotelBase.noBaseHotels') }}
+        </p>
       </div>
 
       <!-- Table -->
       <table v-else class="w-full">
         <thead class="bg-gray-50 dark:bg-slate-700">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               {{ $t('hotels.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               {{ $t('hotels.location') }}
             </th>
-            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+            <th
+              class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               {{ $t('hotels.stars') }}
             </th>
-            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+            <th
+              class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               {{ $t('common.status.label') }}
             </th>
-            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+            <th
+              class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               {{ $t('hotels.hotelBase.linkedPartners') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+            <th
+              class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+            >
               {{ $t('common.actions') }}
             </th>
           </tr>
@@ -108,7 +122,9 @@
             <!-- Hotel Info -->
             <td class="px-4 py-4">
               <div class="flex items-center gap-3">
-                <div class="w-12 h-10 bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden flex-shrink-0">
+                <div
+                  class="w-12 h-10 bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden flex-shrink-0"
+                >
                   <img
                     v-if="getMainImage(hotel)"
                     :src="getImageUrl(getMainImage(hotel))"
@@ -116,15 +132,14 @@
                     class="w-full h-full object-cover"
                   />
                   <div v-else class="w-full h-full flex items-center justify-center">
-                    <span class="material-icons text-lg text-gray-400 dark:text-slate-500">hotel</span>
+                    <span class="material-icons text-lg text-gray-400 dark:text-slate-500"
+                      >hotel</span
+                    >
                   </div>
                 </div>
                 <div>
                   <h4 class="font-medium text-gray-800 dark:text-white">{{ hotel.name }}</h4>
-                  <span
-                    v-if="hotel.category"
-                    class="text-xs text-gray-500 dark:text-slate-400"
-                  >
+                  <span v-if="hotel.category" class="text-xs text-gray-500 dark:text-slate-400">
                     {{ $t(`hotels.categories.${hotel.category}`) }}
                   </span>
                 </div>
@@ -145,14 +160,19 @@
                   v-for="i in hotel.stars"
                   :key="i"
                   class="material-icons text-sm text-yellow-400"
-                >star</span>
+                  >star</span
+                >
               </div>
             </td>
 
             <!-- Status -->
             <td class="px-4 py-4 text-center">
               <span :class="getStatusClass(hotel.status)">
-                {{ $t(`hotels.status${hotel.status?.charAt(0).toUpperCase()}${hotel.status?.slice(1)}`) }}
+                {{
+                  $t(
+                    `hotels.status${hotel.status?.charAt(0).toUpperCase()}${hotel.status?.slice(1)}`
+                  )
+                }}
               </span>
             </td>
 
@@ -160,8 +180,8 @@
             <td class="px-4 py-4 text-center">
               <button
                 v-if="hotel.linkedCount > 0"
-                @click="showLinkedPartners(hotel)"
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors cursor-pointer"
+                @click="showLinkedPartners(hotel)"
               >
                 <span class="material-icons text-sm mr-1">link</span>
                 {{ hotel.linkedCount }}
@@ -173,17 +193,21 @@
             <td class="px-4 py-4 text-right">
               <div class="flex justify-end gap-2">
                 <button
-                  @click="editHotel(hotel)"
                   class="p-2 text-gray-500 hover:text-purple-600 dark:text-slate-400 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                   :title="$t('common.edit')"
+                  @click="editHotel(hotel)"
                 >
                   <span class="material-icons">edit</span>
                 </button>
                 <button
-                  @click="confirmDelete(hotel)"
                   :disabled="hotel.linkedCount > 0"
                   class="p-2 text-gray-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  :title="hotel.linkedCount > 0 ? $t('hotels.hotelBase.cannotDeleteWithLinked') : $t('common.delete')"
+                  :title="
+                    hotel.linkedCount > 0
+                      ? $t('hotels.hotelBase.cannotDeleteWithLinked')
+                      : $t('common.delete')
+                  "
+                  @click="confirmDelete(hotel)"
                 >
                   <span class="material-icons">delete</span>
                 </button>
@@ -194,22 +218,31 @@
       </table>
 
       <!-- Pagination -->
-      <div v-if="pagination.pages > 1" class="px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center">
+      <div
+        v-if="pagination.pages > 1"
+        class="px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex justify-between items-center"
+      >
         <span class="text-sm text-gray-600 dark:text-slate-400">
-          {{ $t('common.showingOf', { from: (pagination.page - 1) * pagination.limit + 1, to: Math.min(pagination.page * pagination.limit, pagination.total), total: pagination.total }) }}
+          {{
+            $t('common.showingOf', {
+              from: (pagination.page - 1) * pagination.limit + 1,
+              to: Math.min(pagination.page * pagination.limit, pagination.total),
+              total: pagination.total
+            })
+          }}
         </span>
         <div class="flex gap-2">
           <button
             :disabled="pagination.page <= 1"
-            @click="changePage(pagination.page - 1)"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="changePage(pagination.page - 1)"
           >
             <span class="material-icons">chevron_left</span>
           </button>
           <button
             :disabled="pagination.page >= pagination.pages"
-            @click="changePage(pagination.page + 1)"
             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            @click="changePage(pagination.page + 1)"
           >
             <span class="material-icons">chevron_right</span>
           </button>
@@ -232,16 +265,16 @@
         <div class="flex justify-end gap-3">
           <button
             type="button"
-            @click="showDeleteModal = false"
             class="px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white transition-colors"
+            @click="showDeleteModal = false"
           >
             {{ $t('common.cancel') }}
           </button>
           <button
             type="button"
-            @click="deleteHotel"
             :disabled="deleting"
             class="btn-danger flex items-center gap-2"
+            @click="deleteHotel"
           >
             <span v-if="deleting" class="animate-spin material-icons text-lg">refresh</span>
             <span>{{ $t('common.delete') }}</span>
@@ -268,7 +301,10 @@
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
       </div>
 
-      <div v-else-if="linkedPartners.length === 0" class="py-8 text-center text-gray-500 dark:text-slate-400">
+      <div
+        v-else-if="linkedPartners.length === 0"
+        class="py-8 text-center text-gray-500 dark:text-slate-400"
+      >
         {{ $t('hotels.hotelBase.noLinkedPartners') }}
       </div>
 
@@ -279,7 +315,9 @@
           class="py-3 flex items-center gap-3"
         >
           <!-- Partner Logo -->
-          <div class="w-10 h-10 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden flex-shrink-0">
+          <div
+            class="w-10 h-10 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden flex-shrink-0"
+          >
             <img
               v-if="item.partner?.logo"
               :src="getImageUrl(item.partner.logo)"
@@ -303,18 +341,18 @@
 
           <!-- Status -->
           <span :class="getPartnerStatusClass(item.partner?.status)">
-            {{ item.partner?.status === 'active' ? $t('common.status.active') : $t('common.status.inactive') }}
+            {{
+              item.partner?.status === 'active'
+                ? $t('common.status.active')
+                : $t('common.status.inactive')
+            }}
           </span>
         </div>
       </div>
 
       <template #footer>
         <div class="flex justify-end">
-          <button
-            type="button"
-            @click="showPartnersModal = false"
-            class="btn-secondary"
-          >
+          <button type="button" class="btn-secondary" @click="showPartnersModal = false">
             {{ $t('common.close') }}
           </button>
         </div>
@@ -392,7 +430,7 @@ const fetchHotels = async () => {
       pagination.total = response.data.pagination.total
       pagination.pages = response.data.pagination.pages
     }
-  } catch (error) {
+  } catch {
     toast.error(t('common.fetchError'))
   } finally {
     loading.value = false
@@ -412,7 +450,7 @@ const fetchCities = async () => {
 }
 
 // Change page
-const changePage = (page) => {
+const changePage = page => {
   pagination.page = page
   fetchHotels()
 }
@@ -424,19 +462,19 @@ const openCreateModal = () => {
 }
 
 // Edit hotel
-const editHotel = (hotel) => {
+const editHotel = hotel => {
   router.push({ name: 'hotel-base-detail', params: { id: hotel._id } })
 }
 
 // Handle AI imported hotel
-const handleAIImported = (hotel) => {
+const handleAIImported = hotel => {
   showAIImporter.value = false
   // Navigate to edit the newly created hotel
   router.push({ name: 'hotel-base-detail', params: { id: hotel._id } })
 }
 
 // Confirm delete
-const confirmDelete = (hotel) => {
+const confirmDelete = hotel => {
   if (hotel.linkedCount > 0) {
     toast.warning(t('hotels.hotelBase.cannotDeleteWithLinked'))
     return
@@ -471,7 +509,7 @@ const deleteHotel = async () => {
 }
 
 // Get main image from hotel
-const getMainImage = (hotel) => {
+const getMainImage = hotel => {
   if (!hotel.images || hotel.images.length === 0) return null
   const mainImage = hotel.images.find(img => img.isMain)
   return mainImage?.url || hotel.images[0]?.url
@@ -480,7 +518,7 @@ const getMainImage = (hotel) => {
 // getImageUrl imported from @/utils/imageUrl
 
 // Get status badge class
-const getStatusClass = (status) => {
+const getStatusClass = status => {
   const baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium'
   switch (status) {
     case 'active':
@@ -495,7 +533,7 @@ const getStatusClass = (status) => {
 }
 
 // Get partner status badge class
-const getPartnerStatusClass = (status) => {
+const getPartnerStatusClass = status => {
   const baseClass = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium'
   if (status === 'active') {
     return `${baseClass} bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300`
@@ -504,7 +542,7 @@ const getPartnerStatusClass = (status) => {
 }
 
 // Show linked partners modal
-const showLinkedPartners = async (hotel) => {
+const showLinkedPartners = async hotel => {
   selectedHotel.value = hotel
   showPartnersModal.value = true
   loadingPartners.value = true
@@ -515,7 +553,7 @@ const showLinkedPartners = async (hotel) => {
     if (response.success) {
       linkedPartners.value = response.data.partners
     }
-  } catch (error) {
+  } catch {
     toast.error(t('common.fetchError'))
   } finally {
     loadingPartners.value = false

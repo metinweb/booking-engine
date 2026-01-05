@@ -28,11 +28,7 @@
     ></span>
 
     <!-- Custom Badge Slot -->
-    <span
-      v-if="$slots.badge"
-      class="absolute"
-      :class="badgePositionClasses"
-    >
+    <span v-if="$slots.badge" class="absolute" :class="badgePositionClasses">
       <slot name="badge"></slot>
     </span>
   </div>
@@ -68,25 +64,26 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['xs', 'sm', 'md', 'lg', 'xl', '2xl'].includes(v)
+    validator: v => ['xs', 'sm', 'md', 'lg', 'xl', '2xl'].includes(v)
   },
   // Shape
   shape: {
     type: String,
     default: 'circle',
-    validator: (v) => ['circle', 'square', 'rounded'].includes(v)
+    validator: v => ['circle', 'square', 'rounded'].includes(v)
   },
   // Color (for fallback background)
   color: {
     type: String,
     default: 'gray',
-    validator: (v) => ['gray', 'indigo', 'blue', 'green', 'red', 'amber', 'purple', 'pink'].includes(v)
+    validator: v =>
+      ['gray', 'indigo', 'blue', 'green', 'red', 'amber', 'purple', 'pink'].includes(v)
   },
   // Status indicator
   status: {
     type: String,
     default: '',
-    validator: (v) => ['', 'online', 'offline', 'busy', 'away'].includes(v)
+    validator: v => ['', 'online', 'offline', 'busy', 'away'].includes(v)
   },
   // Bordered
   bordered: {

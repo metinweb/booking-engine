@@ -13,7 +13,7 @@ const IMAGES_BASE_URL = import.meta.env.VITE_IMAGES_URL || 'https://images.minir
  * @param {string} url - Relative image path (e.g., /hotels/123/image.png) or full URL
  * @returns {string} Full image URL
  */
-export const getImageUrl = (url) => {
+export const getImageUrl = url => {
   if (!url) return ''
 
   // If already a full URL, return as-is
@@ -35,7 +35,7 @@ export const getImageUrl = (url) => {
  * @param {Object} hotel - Hotel object with logo or images
  * @returns {string|null} Image URL or null
  */
-export const getHotelImageUrl = (hotel) => {
+export const getHotelImageUrl = hotel => {
   if (!hotel) return null
 
   // Try logo first
@@ -59,7 +59,7 @@ export const getHotelImageUrl = (hotel) => {
  * @param {Object} roomType - Room type object with images
  * @returns {string|null} Image URL or null
  */
-export const getRoomImageUrl = (roomType) => {
+export const getRoomImageUrl = roomType => {
   if (!roomType?.images?.length) return null
 
   const mainImage = roomType.images.find(img => img.isMain) || roomType.images[0]

@@ -4,8 +4,16 @@
  */
 
 import { asyncHandler } from '../../helpers/asyncHandler.js'
-import Transaction, { TRANSACTION_TYPES, TRANSACTION_CATEGORIES, PAYMENT_METHODS } from './transaction.model.js'
-import CashRegister, { SHIFT_STATUS, CASH_MOVEMENT_TYPES, SUPPORTED_CURRENCIES } from './cashRegister.model.js'
+import Transaction, {
+  TRANSACTION_TYPES,
+  TRANSACTION_CATEGORIES,
+  PAYMENT_METHODS
+} from './transaction.model.js'
+import CashRegister, {
+  SHIFT_STATUS,
+  CASH_MOVEMENT_TYPES,
+  SUPPORTED_CURRENCIES
+} from './cashRegister.model.js'
 import Stay from '../pms-frontdesk/stay.model.js'
 import Hotel from '../hotel/hotel.model.js'
 import PmsSettings from '../pms-settings/pmsSettings.model.js'
@@ -80,9 +88,9 @@ export const getShift = asyncHandler(async (req, res) => {
     _id: shiftId,
     hotel: hotelId
   })
-  .populate('cashier', 'name email')
-  .populate('closedBy', 'name email')
-  .lean()
+    .populate('cashier', 'name email')
+    .populate('closedBy', 'name email')
+    .lean()
 
   if (!shift) {
     return res.status(404).json({
@@ -96,8 +104,8 @@ export const getShift = asyncHandler(async (req, res) => {
     cashRegister: shiftId,
     status: { $ne: 'cancelled' }
   })
-  .sort({ createdAt: -1 })
-  .lean()
+    .sort({ createdAt: -1 })
+    .lean()
 
   res.json({
     success: true,
@@ -165,14 +173,16 @@ export const openShift = asyncHandler(async (req, res) => {
     activeCurrencies,
     exchangeRatesSnapshot,
     openingNotes: notes,
-    cashMovements: [{
-      type: CASH_MOVEMENT_TYPES.OPENING,
-      amount: openingCash,
-      currency: 'TRY',
-      description: 'Shift opened',
-      createdAt: new Date(),
-      createdBy: req.user._id
-    }]
+    cashMovements: [
+      {
+        type: CASH_MOVEMENT_TYPES.OPENING,
+        amount: openingCash,
+        currency: 'TRY',
+        description: 'Shift opened',
+        createdAt: new Date(),
+        createdBy: req.user._id
+      }
+    ]
   })
 
   // Initialize multi-currency balances
@@ -231,18 +241,24 @@ export const closeShift = asyncHandler(async (req, res) => {
 
   // Use multi-currency close if closingBalances provided
   if (closingBalances.length > 0) {
-    await shift.closeShiftMultiCurrency({
-      closingBalances,
-      closingNotes,
-      discrepancyNote,
-      actualCash
-    }, req.user._id)
+    await shift.closeShiftMultiCurrency(
+      {
+        closingBalances,
+        closingNotes,
+        discrepancyNote,
+        actualCash
+      },
+      req.user._id
+    )
   } else {
-    await shift.closeShift({
-      actualCash,
-      closingNotes,
-      discrepancyNote
-    }, req.user._id)
+    await shift.closeShift(
+      {
+        actualCash,
+        closingNotes,
+        discrepancyNote
+      },
+      req.user._id
+    )
   }
 
   res.json({
@@ -632,54 +648,49 @@ export const getCashierStats = asyncHandler(async (req, res) => {
   const mongoose = (await import('mongoose')).default
   const hotelObjectId = new mongoose.Types.ObjectId(hotelId)
 
-  const [
-    activeShift,
-    todayShifts,
-    todaySummary,
-    monthlyTotals,
-    monthlyByCurrencyResult
-  ] = await Promise.all([
-    CashRegister.getActiveShift(hotelId),
-    CashRegister.countDocuments({
-      hotel: hotelId,
-      openedAt: { $gte: today, $lt: tomorrow }
-    }),
-    Transaction.getDailySummary(hotelId, today),
-    Transaction.aggregate([
-      {
-        $match: {
-          hotel: hotelObjectId,
-          createdAt: { $gte: monthStart },
-          status: { $ne: 'cancelled' }
+  const [activeShift, todayShifts, todaySummary, monthlyTotals, monthlyByCurrencyResult] =
+    await Promise.all([
+      CashRegister.getActiveShift(hotelId),
+      CashRegister.countDocuments({
+        hotel: hotelId,
+        openedAt: { $gte: today, $lt: tomorrow }
+      }),
+      Transaction.getDailySummary(hotelId, today),
+      Transaction.aggregate([
+        {
+          $match: {
+            hotel: hotelObjectId,
+            createdAt: { $gte: monthStart },
+            status: { $ne: 'cancelled' }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            // Use amountInTRY if exists, otherwise fall back to amount (for TRY transactions)
+            total: { $sum: { $ifNull: ['$amountInTRY', '$amount'] } },
+            count: { $sum: 1 }
+          }
         }
-      },
-      {
-        $group: {
-          _id: null,
-          // Use amountInTRY if exists, otherwise fall back to amount (for TRY transactions)
-          total: { $sum: { $ifNull: ['$amountInTRY', '$amount'] } },
-          count: { $sum: 1 }
+      ]),
+      // Monthly totals grouped by currency
+      Transaction.aggregate([
+        {
+          $match: {
+            hotel: hotelObjectId,
+            createdAt: { $gte: monthStart },
+            status: { $ne: 'cancelled' }
+          }
+        },
+        {
+          $group: {
+            _id: { $ifNull: ['$currency', 'TRY'] },
+            total: { $sum: '$amount' },
+            count: { $sum: 1 }
+          }
         }
-      }
-    ]),
-    // Monthly totals grouped by currency
-    Transaction.aggregate([
-      {
-        $match: {
-          hotel: hotelObjectId,
-          createdAt: { $gte: monthStart },
-          status: { $ne: 'cancelled' }
-        }
-      },
-      {
-        $group: {
-          _id: { $ifNull: ['$currency', 'TRY'] },
-          total: { $sum: '$amount' },
-          count: { $sum: 1 }
-        }
-      }
+      ])
     ])
-  ])
 
   // Convert monthlyByCurrency array to object { TRY: 1234, USD: 567, ... }
   const monthlyByCurrency = {}
@@ -691,12 +702,14 @@ export const getCashierStats = asyncHandler(async (req, res) => {
     success: true,
     data: {
       hasActiveShift: !!activeShift,
-      activeShift: activeShift ? {
-        shiftNumber: activeShift.shiftNumber,
-        cashierName: activeShift.cashierName,
-        openedAt: activeShift.openedAt,
-        currentBalance: activeShift.currentBalance
-      } : null,
+      activeShift: activeShift
+        ? {
+            shiftNumber: activeShift.shiftNumber,
+            cashierName: activeShift.cashierName,
+            openedAt: activeShift.openedAt,
+            currentBalance: activeShift.currentBalance
+          }
+        : null,
       todayShifts,
       todaySummary,
       monthlyTotal: monthlyTotals[0]?.total || 0,

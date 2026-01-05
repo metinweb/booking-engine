@@ -34,7 +34,7 @@ const router = express.Router()
 // Let's do it in each file for the `/hotels/:hotelId` routes.
 
 // Common Middleware for this module's hotel routes
-const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel];
+const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel]
 
 // Get all guests
 router.get('/hotels/:hotelId/guests', hotelMiddleware, guestService.getGuests)
@@ -46,7 +46,11 @@ router.get('/hotels/:hotelId/guests/stats', hotelMiddleware, guestService.getGue
 router.get('/hotels/:hotelId/guests/vip', hotelMiddleware, guestService.getVipGuests)
 
 // Get blacklisted guests
-router.get('/hotels/:hotelId/guests/blacklisted', hotelMiddleware, guestService.getBlacklistedGuests)
+router.get(
+  '/hotels/:hotelId/guests/blacklisted',
+  hotelMiddleware,
+  guestService.getBlacklistedGuests
+)
 
 // Get recent guests
 router.get('/hotels/:hotelId/guests/recent', hotelMiddleware, guestService.getRecentGuests)
@@ -67,16 +71,28 @@ router.delete('/hotels/:hotelId/guests/:guestId', hotelMiddleware, guestService.
 router.patch('/hotels/:hotelId/guests/:guestId/vip', hotelMiddleware, guestService.setVipLevel)
 
 // Blacklist guest
-router.post('/hotels/:hotelId/guests/:guestId/blacklist', hotelMiddleware, guestService.blacklistGuest)
+router.post(
+  '/hotels/:hotelId/guests/:guestId/blacklist',
+  hotelMiddleware,
+  guestService.blacklistGuest
+)
 
 // Remove from blacklist
-router.delete('/hotels/:hotelId/guests/:guestId/blacklist', hotelMiddleware, guestService.removeFromBlacklist)
+router.delete(
+  '/hotels/:hotelId/guests/:guestId/blacklist',
+  hotelMiddleware,
+  guestService.removeFromBlacklist
+)
 
 // Add note to guest
 router.post('/hotels/:hotelId/guests/:guestId/notes', hotelMiddleware, guestService.addNote)
 
 // Delete note from guest
-router.delete('/hotels/:hotelId/guests/:guestId/notes/:noteId', hotelMiddleware, guestService.deleteNote)
+router.delete(
+  '/hotels/:hotelId/guests/:guestId/notes/:noteId',
+  hotelMiddleware,
+  guestService.deleteNote
+)
 
 // Update guest tags
 router.patch('/hotels/:hotelId/guests/:guestId/tags', hotelMiddleware, guestService.updateTags)

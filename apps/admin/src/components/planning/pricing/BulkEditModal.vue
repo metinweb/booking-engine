@@ -1,20 +1,17 @@
 <template>
   <Transition name="modal-fade">
-    <div
-      v-if="modelValue"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4"
-    >
+    <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <!-- Backdrop (no click to close) -->
-      <div
-        class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-      ></div>
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
       <!-- Modal Content -->
       <div
         class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-purple-500 to-indigo-600">
+        <div
+          class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-purple-500 to-indigo-600"
+        >
           <div class="text-white">
             <h3 class="text-lg font-bold flex items-center gap-2">
               <span class="material-icons">edit_note</span>
@@ -25,8 +22,8 @@
             </p>
           </div>
           <button
-            @click="close"
             class="p-2 rounded-lg hover:bg-white/20 text-white transition-colors"
+            @click="close"
           >
             <span class="material-icons">close</span>
           </button>
@@ -35,7 +32,9 @@
         <!-- Content -->
         <div class="flex-1 overflow-y-auto p-6">
           <!-- Selection Summary -->
-          <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+          <div
+            class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800"
+          >
             <div class="flex items-start justify-between">
               <div>
                 <div class="text-sm font-medium text-purple-700 dark:text-purple-300 mb-2">
@@ -46,7 +45,9 @@
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('planning.pricing.roomType') }}</div>
+                <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+                  {{ $t('planning.pricing.roomType') }}
+                </div>
                 <div class="flex flex-wrap gap-1 justify-end">
                   <span
                     v-for="rt in uniqueRoomTypes"
@@ -75,11 +76,13 @@
             <button
               v-for="tab in tabs"
               :key="tab.key"
-              @click="activeTab = tab.key"
               class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
-              :class="activeTab === tab.key
-                ? 'bg-white dark:bg-slate-600 text-purple-600 dark:text-purple-400 shadow-sm'
-                : 'text-gray-600 dark:text-slate-400 hover:text-gray-800'"
+              :class="
+                activeTab === tab.key
+                  ? 'bg-white dark:bg-slate-600 text-purple-600 dark:text-purple-400 shadow-sm'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-800'
+              "
+              @click="activeTab = tab.key"
             >
               <span class="material-icons text-lg">{{ tab.icon }}</span>
               <span class="hidden sm:inline">{{ tab.label }}</span>
@@ -97,16 +100,28 @@
                 <button
                   v-for="mode in priceModes"
                   :key="mode.value"
-                  @click="form.priceMode = mode.value"
                   class="p-3 rounded-xl border-2 text-left transition-all"
-                  :class="form.priceMode === mode.value
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                  :class="
+                    form.priceMode === mode.value
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                  "
+                  @click="form.priceMode = mode.value"
                 >
-                  <span class="material-icons text-lg mb-1" :class="form.priceMode === mode.value ? 'text-purple-600' : 'text-gray-400'">
+                  <span
+                    class="material-icons text-lg mb-1"
+                    :class="form.priceMode === mode.value ? 'text-purple-600' : 'text-gray-400'"
+                  >
                     {{ mode.icon }}
                   </span>
-                  <div class="text-sm font-medium" :class="form.priceMode === mode.value ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'">
+                  <div
+                    class="text-sm font-medium"
+                    :class="
+                      form.priceMode === mode.value
+                        ? 'text-purple-700 dark:text-purple-300'
+                        : 'text-gray-700 dark:text-gray-300'
+                    "
+                  >
                     {{ mode.label }}
                   </div>
                 </button>
@@ -114,18 +129,25 @@
             </div>
 
             <!-- Room Type Tabs (when multiple rooms selected) -->
-            <div v-if="uniqueRoomTypes.length > 1" class="border-b border-gray-200 dark:border-slate-700">
+            <div
+              v-if="uniqueRoomTypes.length > 1"
+              class="border-b border-gray-200 dark:border-slate-700"
+            >
               <div class="flex gap-1 overflow-x-auto pb-px">
                 <button
                   v-for="rt in uniqueRoomTypes"
                   :key="rt._id"
-                  @click="selectedRoomTab = rt._id"
                   class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
-                  :class="selectedRoomTab === rt._id
-                    ? 'border-purple-500 text-purple-600 dark:text-purple-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                  :class="
+                    selectedRoomTab === rt._id
+                      ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  "
+                  @click="selectedRoomTab = rt._id"
                 >
-                  <span class="w-8 h-6 rounded bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold flex items-center justify-center">
+                  <span
+                    class="w-8 h-6 rounded bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold flex items-center justify-center"
+                  >
                     {{ rt.code }}
                   </span>
                   <span class="hidden sm:inline">{{ getRoomTypeName(rt) }}</span>
@@ -144,13 +166,21 @@
               <div class="flex items-center gap-2">
                 <span
                   class="px-3 py-1 rounded-full text-xs font-bold"
-                  :class="currentRoomUsesMultipliers
-                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
-                    : currentRoomPricingType === 'per_person'
-                      ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                      : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'"
+                  :class="
+                    currentRoomUsesMultipliers
+                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+                      : currentRoomPricingType === 'per_person'
+                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                        : 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                  "
                 >
-                  {{ currentRoomUsesMultipliers ? 'Çarpanlı OBP' : currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
+                  {{
+                    currentRoomUsesMultipliers
+                      ? 'Çarpanlı OBP'
+                      : currentRoomPricingType === 'per_person'
+                        ? 'Kişi Bazlı (OBP)'
+                        : 'Ünite Bazlı'
+                  }}
                 </span>
                 <span class="text-xs text-gray-500">- {{ currentRoomTypeName }}</span>
               </div>
@@ -158,8 +188,8 @@
               <!-- Meal Plan Cards -->
               <div
                 v-for="mp in uniqueMealPlans"
-                :key="mp._id"
                 v-show="roomPrices[currentRoomId]?.[mp._id]"
+                :key="mp._id"
                 class="border border-gray-200 dark:border-slate-600 rounded-xl overflow-hidden"
               >
                 <!-- Meal Plan Header -->
@@ -170,7 +200,9 @@
                   >
                     {{ mp.code }}
                   </span>
-                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ getMealPlanName(mp) }}</span>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{
+                    getMealPlanName(mp)
+                  }}</span>
                 </div>
 
                 <!-- Pricing Fields -->
@@ -179,7 +211,9 @@
                   <template v-if="currentRoomPricingType === 'unit'">
                     <!-- Base Price -->
                     <div class="flex items-center gap-3">
-                      <label class="text-sm text-gray-600 dark:text-gray-400 w-28">{{ $t('planning.pricing.pricePerNight') }}</label>
+                      <label class="text-sm text-gray-600 dark:text-gray-400 w-28">{{
+                        $t('planning.pricing.pricePerNight')
+                      }}</label>
                       <div class="flex items-center gap-2 flex-1">
                         <input
                           v-model.number="roomPrices[currentRoomId][mp._id].pricePerNight"
@@ -187,7 +221,11 @@
                           min="0"
                           step="10"
                           class="form-input w-32 text-center font-bold"
-                          :class="roomPrices[currentRoomId]?.[mp._id]?.pricePerNight > 0 ? 'border-green-300 dark:border-green-700 text-green-700 dark:text-green-400' : ''"
+                          :class="
+                            roomPrices[currentRoomId]?.[mp._id]?.pricePerNight > 0
+                              ? 'border-green-300 dark:border-green-700 text-green-700 dark:text-green-400'
+                              : ''
+                          "
                           placeholder="0"
                         />
                         <span class="text-sm text-gray-400">{{ currency }}</span>
@@ -196,7 +234,9 @@
 
                     <!-- Extra Adult -->
                     <div class="flex items-center gap-3">
-                      <label class="text-sm text-gray-500 dark:text-gray-400 w-28">{{ $t('planning.pricing.extraAdultShort') }}</label>
+                      <label class="text-sm text-gray-500 dark:text-gray-400 w-28">{{
+                        $t('planning.pricing.extraAdultShort')
+                      }}</label>
                       <div class="flex items-center gap-2">
                         <input
                           v-model.number="roomPrices[currentRoomId][mp._id].extraAdult"
@@ -211,7 +251,9 @@
 
                     <!-- Single Occupancy Discount -->
                     <div class="flex items-center gap-3">
-                      <label class="text-sm text-gray-500 dark:text-gray-400 w-28 flex items-center gap-1">
+                      <label
+                        class="text-sm text-gray-500 dark:text-gray-400 w-28 flex items-center gap-1"
+                      >
                         <span class="material-icons text-blue-500 text-sm">person</span>
                         Tek Kişi İnd.
                       </label>
@@ -233,7 +275,9 @@
                   <template v-else-if="currentRoomUsesMultipliers">
                     <!-- Base Price Input -->
                     <div class="flex items-center gap-3">
-                      <label class="text-sm text-gray-600 dark:text-gray-400 w-28 flex items-center gap-1">
+                      <label
+                        class="text-sm text-gray-600 dark:text-gray-400 w-28 flex items-center gap-1"
+                      >
                         <span class="material-icons text-purple-500 text-sm">calculate</span>
                         Baz Fiyat
                       </label>
@@ -244,7 +288,11 @@
                           min="0"
                           step="10"
                           class="form-input w-32 text-center font-bold text-purple-600"
-                          :class="roomPrices[currentRoomId]?.[mp._id]?.pricePerNight > 0 ? 'border-purple-300 dark:border-purple-700' : ''"
+                          :class="
+                            roomPrices[currentRoomId]?.[mp._id]?.pricePerNight > 0
+                              ? 'border-purple-300 dark:border-purple-700'
+                              : ''
+                          "
                           placeholder="0"
                         />
                         <span class="text-sm text-gray-400">{{ currency }}</span>
@@ -252,8 +300,12 @@
                     </div>
 
                     <!-- Calculated Combinations (Read-only) -->
-                    <div class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg max-h-[180px] overflow-y-auto">
-                      <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1 sticky top-0 bg-indigo-50 dark:bg-indigo-900/20 py-1">
+                    <div
+                      class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg max-h-[180px] overflow-y-auto"
+                    >
+                      <div
+                        class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1 sticky top-0 bg-indigo-50 dark:bg-indigo-900/20 py-1"
+                      >
                         <span class="material-icons text-sm">table_chart</span>
                         Hesaplanan Fiyatlar
                       </div>
@@ -265,10 +317,26 @@
                         >
                           <span class="text-indigo-600 dark:text-indigo-400 truncate">
                             {{ formatCombinationKey(combo) }}
-                            <span class="text-gray-400">(×{{ combo.overrideMultiplier || combo.calculatedMultiplier }})</span>
+                            <span class="text-gray-400"
+                              >(×{{ combo.overrideMultiplier || combo.calculatedMultiplier }})</span
+                            >
                           </span>
-                          <span class="font-bold ml-1" :class="roomPrices[currentRoomId]?.[mp._id]?.pricePerNight ? 'text-green-600' : 'text-gray-400'">
-                            {{ roomPrices[currentRoomId]?.[mp._id]?.pricePerNight ? Math.round(roomPrices[currentRoomId][mp._id].pricePerNight * (combo.overrideMultiplier || combo.calculatedMultiplier)).toLocaleString() : '-' }}
+                          <span
+                            class="font-bold ml-1"
+                            :class="
+                              roomPrices[currentRoomId]?.[mp._id]?.pricePerNight
+                                ? 'text-green-600'
+                                : 'text-gray-400'
+                            "
+                          >
+                            {{
+                              roomPrices[currentRoomId]?.[mp._id]?.pricePerNight
+                                ? Math.round(
+                                    roomPrices[currentRoomId][mp._id].pricePerNight *
+                                      (combo.overrideMultiplier || combo.calculatedMultiplier)
+                                  ).toLocaleString()
+                                : '-'
+                            }}
                           </span>
                         </div>
                       </div>
@@ -283,7 +351,9 @@
                         :key="pax"
                         class="flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg px-2 py-1.5"
                       >
-                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 w-6">{{ pax }}P</span>
+                        <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 w-6"
+                          >{{ pax }}P</span
+                        >
                         <input
                           v-model.number="roomPrices[currentRoomId][mp._id].occupancyPricing[pax]"
                           type="number"
@@ -296,17 +366,26 @@
                   </template>
 
                   <!-- Child Pricing (only for Unit & Standard OBP - not for Multiplier OBP) -->
-                  <div v-if="!currentRoomUsesMultipliers" class="pt-2 border-t border-gray-100 dark:border-slate-700">
-                    <div class="text-xs text-gray-500 mb-2">Çocuk Fiyatları {{ childAgeLabel }}</div>
+                  <div
+                    v-if="!currentRoomUsesMultipliers"
+                    class="pt-2 border-t border-gray-100 dark:border-slate-700"
+                  >
+                    <div class="text-xs text-gray-500 mb-2">
+                      Çocuk Fiyatları {{ childAgeLabel }}
+                    </div>
                     <div class="grid grid-cols-2 gap-2">
                       <div
                         v-for="childIndex in currentRoomMaxChildren"
                         :key="childIndex"
                         class="flex items-center gap-1 bg-pink-50 dark:bg-pink-900/20 rounded-lg px-2 py-1.5"
                       >
-                        <span class="text-xs text-pink-600 dark:text-pink-400 w-12">{{ childIndex }}. Çocuk</span>
+                        <span class="text-xs text-pink-600 dark:text-pink-400 w-12"
+                          >{{ childIndex }}. Çocuk</span
+                        >
                         <input
-                          v-model.number="roomPrices[currentRoomId][mp._id].childOrderPricing[childIndex - 1]"
+                          v-model.number="
+                            roomPrices[currentRoomId][mp._id].childOrderPricing[childIndex - 1]
+                          "
                           type="number"
                           min="0"
                           class="form-input flex-1 w-16 text-center text-sm py-1"
@@ -339,16 +418,16 @@
               <div class="flex flex-wrap gap-2">
                 <button
                   v-if="uniqueMealPlans.length > 1"
-                  @click="copyFirstMealPlanToAll"
                   class="text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 flex items-center gap-1"
+                  @click="copyFirstMealPlanToAll"
                 >
                   <span class="material-icons text-sm">content_copy</span>
                   {{ $t('planning.pricing.copyToAllMealPlans') }}
                 </button>
                 <button
                   v-if="uniqueRoomTypes.length > 1"
-                  @click="copyCurrentRoomToAll"
                   class="text-xs px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-100 flex items-center gap-1"
+                  @click="copyCurrentRoomToAll"
                 >
                   <span class="material-icons text-sm">content_copy</span>
                   {{ $t('planning.pricing.copyToAllRooms') }}
@@ -363,11 +442,15 @@
             <div class="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <label class="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2">
+                  <label
+                    class="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2"
+                  >
                     <span class="material-icons text-blue-600">inventory_2</span>
                     {{ $t('planning.pricing.allotment') }}
                   </label>
-                  <p class="text-xs text-gray-500 mt-1">{{ $t('planning.pricing.allotmentHint') }}</p>
+                  <p class="text-xs text-gray-500 mt-1">
+                    {{ $t('planning.pricing.allotmentHint') }}
+                  </p>
                 </div>
               </div>
 
@@ -376,11 +459,13 @@
                 <button
                   v-for="mode in allotmentModes"
                   :key="mode.value"
-                  @click="form.allotmentMode = mode.value"
                   class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all"
-                  :class="form.allotmentMode === mode.value
-                    ? 'bg-blue-500 text-white shadow-sm'
-                    : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-600'"
+                  :class="
+                    form.allotmentMode === mode.value
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-600'
+                  "
+                  @click="form.allotmentMode = mode.value"
                 >
                   <span class="material-icons text-lg">{{ mode.icon }}</span>
                   <span class="hidden sm:inline">{{ mode.label }}</span>
@@ -389,8 +474,8 @@
 
               <div class="flex items-center justify-center gap-4">
                 <button
-                  @click="form.allotmentValue = Math.max(0, form.allotmentValue - 1)"
                   class="w-12 h-12 rounded-full bg-white dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
+                  @click="form.allotmentValue = Math.max(0, form.allotmentValue - 1)"
                 >
                   <span class="material-icons">remove</span>
                 </button>
@@ -401,8 +486,8 @@
                   class="w-24 text-center text-3xl font-bold border-2 border-blue-300 dark:border-blue-700 rounded-xl py-3 bg-white dark:bg-slate-800"
                 />
                 <button
-                  @click="form.allotmentValue++"
                   class="w-12 h-12 rounded-full bg-white dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors"
+                  @click="form.allotmentValue++"
                 >
                   <span class="material-icons">add</span>
                 </button>
@@ -412,23 +497,40 @@
             <!-- Stay Requirements -->
             <div class="grid grid-cols-2 gap-4">
               <div class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
-                <label class="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2 mb-2">
+                <label
+                  class="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2 mb-2"
+                >
                   <span class="material-icons text-purple-600 text-lg">nights_stay</span>
                   {{ $t('planning.pricing.minStay') }}
                 </label>
                 <div class="flex items-center gap-2">
-                  <input v-model.number="form.minStay" type="number" min="1" max="30" class="form-input" />
+                  <input
+                    v-model.number="form.minStay"
+                    type="number"
+                    min="1"
+                    max="30"
+                    class="form-input"
+                  />
                   <span class="text-sm text-gray-500">{{ $t('planning.pricing.nights') }}</span>
                 </div>
               </div>
               <div class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
-                <label class="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2 mb-2">
+                <label
+                  class="text-sm font-medium text-gray-700 dark:text-slate-300 flex items-center gap-2 mb-2"
+                >
                   <span class="material-icons text-orange-600 text-lg">schedule</span>
                   {{ $t('planning.pricing.releaseDays') }}
                 </label>
                 <div class="flex items-center gap-2">
-                  <input v-model.number="form.releaseDays" type="number" min="0" class="form-input" />
-                  <span class="text-sm text-gray-500">{{ $t('planning.pricing.daysBeforeArrival') }}</span>
+                  <input
+                    v-model.number="form.releaseDays"
+                    type="number"
+                    min="0"
+                    class="form-input"
+                  />
+                  <span class="text-sm text-gray-500">{{
+                    $t('planning.pricing.daysBeforeArrival')
+                  }}</span>
                 </div>
               </div>
             </div>
@@ -439,25 +541,39 @@
             <!-- Stop Sale -->
             <div
               class="p-5 rounded-xl border-2 cursor-pointer transition-all"
-              :class="form.stopSale
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+              :class="
+                form.stopSale
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+              "
               @click="form.stopSale = !form.stopSale"
             >
               <div class="flex items-center gap-4">
                 <div
                   class="w-14 h-14 rounded-full flex items-center justify-center transition-colors"
-                  :class="form.stopSale ? 'bg-red-500 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-500'"
+                  :class="
+                    form.stopSale
+                      ? 'bg-red-500 text-white'
+                      : 'bg-gray-200 dark:bg-slate-600 text-gray-500'
+                  "
                 >
                   <span class="material-icons text-2xl">block</span>
                 </div>
                 <div class="flex-1">
-                  <div class="font-bold text-lg" :class="form.stopSale ? 'text-red-600' : 'text-gray-700 dark:text-slate-300'">
+                  <div
+                    class="font-bold text-lg"
+                    :class="form.stopSale ? 'text-red-600' : 'text-gray-700 dark:text-slate-300'"
+                  >
                     {{ $t('planning.pricing.stopSale') }}
                   </div>
-                  <div class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.stopSaleHint') }}</div>
+                  <div class="text-sm text-gray-500 dark:text-slate-400">
+                    {{ $t('planning.pricing.stopSaleHint') }}
+                  </div>
                 </div>
-                <div class="w-12 h-7 rounded-full transition-colors" :class="form.stopSale ? 'bg-red-500' : 'bg-gray-300 dark:bg-slate-600'">
+                <div
+                  class="w-12 h-7 rounded-full transition-colors"
+                  :class="form.stopSale ? 'bg-red-500' : 'bg-gray-300 dark:bg-slate-600'"
+                >
                   <div
                     class="w-5 h-5 mt-1 rounded-full bg-white shadow-md transition-transform"
                     :class="form.stopSale ? 'translate-x-6' : 'translate-x-1'"
@@ -469,25 +585,39 @@
             <!-- Single Stop -->
             <div
               class="p-5 rounded-xl border-2 cursor-pointer transition-all"
-              :class="form.singleStop
-                ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
-                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+              :class="
+                form.singleStop
+                  ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
+                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+              "
               @click="form.singleStop = !form.singleStop"
             >
               <div class="flex items-center gap-4">
                 <div
                   class="w-14 h-14 rounded-full flex items-center justify-center transition-colors"
-                  :class="form.singleStop ? 'bg-pink-500 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-500'"
+                  :class="
+                    form.singleStop
+                      ? 'bg-pink-500 text-white'
+                      : 'bg-gray-200 dark:bg-slate-600 text-gray-500'
+                  "
                 >
                   <span class="material-icons text-2xl">person_off</span>
                 </div>
                 <div class="flex-1">
-                  <div class="font-bold text-lg" :class="form.singleStop ? 'text-pink-600' : 'text-gray-700 dark:text-slate-300'">
+                  <div
+                    class="font-bold text-lg"
+                    :class="form.singleStop ? 'text-pink-600' : 'text-gray-700 dark:text-slate-300'"
+                  >
                     {{ $t('planning.pricing.singleStop') }}
                   </div>
-                  <div class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.singleStopHint') }}</div>
+                  <div class="text-sm text-gray-500 dark:text-slate-400">
+                    {{ $t('planning.pricing.singleStopHint') }}
+                  </div>
                 </div>
-                <div class="w-12 h-7 rounded-full transition-colors" :class="form.singleStop ? 'bg-pink-500' : 'bg-gray-300 dark:bg-slate-600'">
+                <div
+                  class="w-12 h-7 rounded-full transition-colors"
+                  :class="form.singleStop ? 'bg-pink-500' : 'bg-gray-300 dark:bg-slate-600'"
+                >
                   <div
                     class="w-5 h-5 mt-1 rounded-full bg-white shadow-md transition-transform"
                     :class="form.singleStop ? 'translate-x-6' : 'translate-x-1'"
@@ -500,46 +630,76 @@
             <div class="grid grid-cols-2 gap-4">
               <div
                 class="p-4 rounded-xl border-2 cursor-pointer transition-all"
-                :class="form.closedToArrival
-                  ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                :class="
+                  form.closedToArrival
+                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                "
                 @click="form.closedToArrival = !form.closedToArrival"
               >
                 <div class="flex items-center gap-3">
                   <div
                     class="w-10 h-10 rounded-full flex items-center justify-center"
-                    :class="form.closedToArrival ? 'bg-orange-500 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-500'"
+                    :class="
+                      form.closedToArrival
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-gray-200 dark:bg-slate-600 text-gray-500'
+                    "
                   >
                     <span class="material-icons">no_meeting_room</span>
                   </div>
                   <div>
-                    <div class="font-medium" :class="form.closedToArrival ? 'text-orange-600' : 'text-gray-700 dark:text-slate-300'">
+                    <div
+                      class="font-medium"
+                      :class="
+                        form.closedToArrival
+                          ? 'text-orange-600'
+                          : 'text-gray-700 dark:text-slate-300'
+                      "
+                    >
                       CTA
                     </div>
-                    <div class="text-xs text-gray-500">{{ $t('planning.pricing.closedToArrival') }}</div>
+                    <div class="text-xs text-gray-500">
+                      {{ $t('planning.pricing.closedToArrival') }}
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div
                 class="p-4 rounded-xl border-2 cursor-pointer transition-all"
-                :class="form.closedToDeparture
-                  ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+                :class="
+                  form.closedToDeparture
+                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+                "
                 @click="form.closedToDeparture = !form.closedToDeparture"
               >
                 <div class="flex items-center gap-3">
                   <div
                     class="w-10 h-10 rounded-full flex items-center justify-center"
-                    :class="form.closedToDeparture ? 'bg-orange-500 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-500'"
+                    :class="
+                      form.closedToDeparture
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-gray-200 dark:bg-slate-600 text-gray-500'
+                    "
                   >
                     <span class="material-icons">logout</span>
                   </div>
                   <div>
-                    <div class="font-medium" :class="form.closedToDeparture ? 'text-orange-600' : 'text-gray-700 dark:text-slate-300'">
+                    <div
+                      class="font-medium"
+                      :class="
+                        form.closedToDeparture
+                          ? 'text-orange-600'
+                          : 'text-gray-700 dark:text-slate-300'
+                      "
+                    >
                       CTD
                     </div>
-                    <div class="text-xs text-gray-500">{{ $t('planning.pricing.closedToDeparture') }}</div>
+                    <div class="text-xs text-gray-500">
+                      {{ $t('planning.pricing.closedToDeparture') }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -554,7 +714,9 @@
             class="absolute inset-0 bg-white dark:bg-slate-800 z-10 flex flex-col"
           >
             <!-- Preview Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-emerald-500 to-teal-600">
+            <div
+              class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gradient-to-r from-emerald-500 to-teal-600"
+            >
               <div class="text-white">
                 <h3 class="text-lg font-bold flex items-center gap-2">
                   <span class="material-icons">preview</span>
@@ -565,8 +727,8 @@
                 </p>
               </div>
               <button
-                @click="showPreview = false"
                 class="p-2 rounded-lg hover:bg-white/20 text-white transition-colors"
+                @click="showPreview = false"
               >
                 <span class="material-icons">arrow_back</span>
               </button>
@@ -575,9 +737,13 @@
             <!-- Preview Content -->
             <div class="flex-1 overflow-y-auto p-6">
               <!-- Impact Summary -->
-              <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+              <div
+                class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800"
+              >
                 <div class="flex items-center gap-3 mb-3">
-                  <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                  <div
+                    class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center"
+                  >
                     <span class="material-icons text-2xl">info</span>
                   </div>
                   <div>
@@ -585,18 +751,23 @@
                       {{ $t('planning.pricing.impactSummary') }}
                     </div>
                     <div class="text-sm text-gray-600 dark:text-gray-400">
-                      {{ previewSummary.totalCells }} {{ $t('planning.pricing.cellsWillBeUpdated') }}
+                      {{ previewSummary.totalCells }}
+                      {{ $t('planning.pricing.cellsWillBeUpdated') }}
                     </div>
                   </div>
                 </div>
 
                 <div class="grid grid-cols-3 gap-4 mt-4">
                   <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
-                    <div class="text-2xl font-bold text-purple-600">{{ previewSummary.roomTypes }}</div>
+                    <div class="text-2xl font-bold text-purple-600">
+                      {{ previewSummary.roomTypes }}
+                    </div>
                     <div class="text-xs text-gray-500">{{ $t('planning.pricing.roomTypes') }}</div>
                   </div>
                   <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
-                    <div class="text-2xl font-bold text-orange-600">{{ previewSummary.mealPlans }}</div>
+                    <div class="text-2xl font-bold text-orange-600">
+                      {{ previewSummary.mealPlans }}
+                    </div>
                     <div class="text-xs text-gray-500">{{ $t('planning.pricing.mealPlans') }}</div>
                   </div>
                   <div class="text-center p-3 bg-white dark:bg-slate-700 rounded-lg">
@@ -614,7 +785,10 @@
                 </h4>
 
                 <!-- Price Changes -->
-                <div v-if="activeTab === 'price' && previewChanges.prices.length > 0" class="space-y-2">
+                <div
+                  v-if="activeTab === 'price' && previewChanges.prices.length > 0"
+                  class="space-y-2"
+                >
                   <div
                     v-for="(change, idx) in previewChanges.prices"
                     :key="'price-' + idx"
@@ -622,33 +796,55 @@
                   >
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-2">
-                        <span class="px-2 py-0.5 rounded bg-purple-500 text-white text-xs font-bold">{{ change.roomCode }}</span>
-                        <span class="px-2 py-0.5 rounded text-xs font-medium" :class="getMealPlanColor(change.mealPlanCode)">{{ change.mealPlanCode }}</span>
+                        <span
+                          class="px-2 py-0.5 rounded bg-purple-500 text-white text-xs font-bold"
+                          >{{ change.roomCode }}</span
+                        >
+                        <span
+                          class="px-2 py-0.5 rounded text-xs font-medium"
+                          :class="getMealPlanColor(change.mealPlanCode)"
+                          >{{ change.mealPlanCode }}</span
+                        >
                       </div>
-                      <span class="text-xs text-gray-500">{{ change.pricingType === 'per_person' ? 'OBP' : 'Unit' }}</span>
+                      <span class="text-xs text-gray-500">{{
+                        change.pricingType === 'per_person' ? 'OBP' : 'Unit'
+                      }}</span>
                     </div>
                     <div class="mt-2 text-sm text-gray-700 dark:text-gray-300">
                       <template v-if="change.pricingType === 'unit'">
                         <div v-if="change.pricePerNight !== null" class="flex items-center gap-2">
                           <span class="material-icons text-sm text-green-500">payments</span>
-                          {{ $t('planning.pricing.pricePerNight') }}: <strong>{{ change.pricePerNight }} {{ currency }}</strong>
+                          {{ $t('planning.pricing.pricePerNight') }}:
+                          <strong>{{ change.pricePerNight }} {{ currency }}</strong>
                         </div>
                         <div v-if="change.extraAdult !== null" class="flex items-center gap-2">
                           <span class="material-icons text-sm text-blue-500">person_add</span>
-                          {{ $t('planning.pricing.extraAdultShort') }}: <strong>{{ change.extraAdult }} {{ currency }}</strong>
+                          {{ $t('planning.pricing.extraAdultShort') }}:
+                          <strong>{{ change.extraAdult }} {{ currency }}</strong>
                         </div>
-                        <div v-if="change.singleSupplement !== null" class="flex items-center gap-2">
+                        <div
+                          v-if="change.singleSupplement !== null"
+                          class="flex items-center gap-2"
+                        >
                           <span class="material-icons text-sm text-indigo-500">person</span>
-                          {{ $t('planning.pricing.singleSupplement') }}: <strong>-{{ change.singleSupplement }} {{ currency }}</strong>
+                          {{ $t('planning.pricing.singleSupplement') }}:
+                          <strong>-{{ change.singleSupplement }} {{ currency }}</strong>
                         </div>
                       </template>
                       <template v-else>
-                        <div v-for="(price, pax) in change.occupancyPricing" :key="pax" class="inline-flex items-center gap-1 mr-3">
+                        <div
+                          v-for="(price, pax) in change.occupancyPricing"
+                          :key="pax"
+                          class="inline-flex items-center gap-1 mr-3"
+                        >
                           <span class="text-xs font-bold text-indigo-600">{{ pax }}P:</span>
                           <strong>{{ price }} {{ currency }}</strong>
                         </div>
                       </template>
-                      <div v-if="change.childPrices?.length > 0" class="flex items-center gap-2 mt-1">
+                      <div
+                        v-if="change.childPrices?.length > 0"
+                        class="flex items-center gap-2 mt-1"
+                      >
                         <span class="material-icons text-sm text-pink-500">child_care</span>
                         {{ $t('planning.pricing.childPrices') }}:
                         <span v-for="(cp, ci) in change.childPrices" :key="ci" class="mr-2">
@@ -656,8 +852,11 @@
                         </span>
                       </div>
                       <div v-if="change.extraInfant !== null" class="flex items-center gap-2 mt-1">
-                        <span class="material-icons text-sm text-rose-500">baby_changing_station</span>
-                        {{ $t('planning.pricing.infant') }}: <strong>{{ change.extraInfant }} {{ currency }}</strong>
+                        <span class="material-icons text-sm text-rose-500"
+                          >baby_changing_station</span
+                        >
+                        {{ $t('planning.pricing.infant') }}:
+                        <strong>{{ change.extraInfant }} {{ currency }}</strong>
                       </div>
                     </div>
                   </div>
@@ -665,7 +864,9 @@
 
                 <!-- Inventory Changes -->
                 <div v-if="activeTab === 'inventory'" class="space-y-2">
-                  <div class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                  <div
+                    class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
+                  >
                     <div v-if="form.allotmentValue > 0" class="flex items-center gap-2 mb-2">
                       <span class="material-icons text-blue-500">inventory_2</span>
                       <span class="text-sm text-gray-700 dark:text-gray-300">
@@ -676,13 +877,15 @@
                     <div v-if="form.minStay > 1" class="flex items-center gap-2 mb-2">
                       <span class="material-icons text-purple-500">nights_stay</span>
                       <span class="text-sm text-gray-700 dark:text-gray-300">
-                        {{ $t('planning.pricing.minStay') }}: <strong>{{ form.minStay }} {{ $t('planning.pricing.nights') }}</strong>
+                        {{ $t('planning.pricing.minStay') }}:
+                        <strong>{{ form.minStay }} {{ $t('planning.pricing.nights') }}</strong>
                       </span>
                     </div>
                     <div v-if="form.releaseDays > 0" class="flex items-center gap-2">
                       <span class="material-icons text-orange-500">schedule</span>
                       <span class="text-sm text-gray-700 dark:text-gray-300">
-                        {{ $t('planning.pricing.releaseDays') }}: <strong>{{ form.releaseDays }} {{ $t('planning.pricing.days') }}</strong>
+                        {{ $t('planning.pricing.releaseDays') }}:
+                        <strong>{{ form.releaseDays }} {{ $t('planning.pricing.days') }}</strong>
                       </span>
                     </div>
                   </div>
@@ -690,24 +893,42 @@
 
                 <!-- Restriction Changes -->
                 <div v-if="activeTab === 'restrictions'" class="space-y-2">
-                  <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700">
+                  <div
+                    class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-700"
+                  >
                     <div v-if="form.stopSale" class="flex items-center gap-2 mb-2">
                       <span class="material-icons text-red-500">block</span>
-                      <span class="text-sm font-medium text-red-600">{{ $t('planning.pricing.stopSale') }}: {{ $t('common.enabled') }}</span>
+                      <span class="text-sm font-medium text-red-600"
+                        >{{ $t('planning.pricing.stopSale') }}: {{ $t('common.enabled') }}</span
+                      >
                     </div>
                     <div v-if="form.singleStop" class="flex items-center gap-2 mb-2">
                       <span class="material-icons text-pink-500">person_off</span>
-                      <span class="text-sm font-medium text-pink-600">{{ $t('planning.pricing.singleStop') }}: {{ $t('common.enabled') }}</span>
+                      <span class="text-sm font-medium text-pink-600"
+                        >{{ $t('planning.pricing.singleStop') }}: {{ $t('common.enabled') }}</span
+                      >
                     </div>
                     <div v-if="form.closedToArrival" class="flex items-center gap-2 mb-2">
                       <span class="material-icons text-orange-500">no_meeting_room</span>
-                      <span class="text-sm font-medium text-orange-600">CTA: {{ $t('common.enabled') }}</span>
+                      <span class="text-sm font-medium text-orange-600"
+                        >CTA: {{ $t('common.enabled') }}</span
+                      >
                     </div>
                     <div v-if="form.closedToDeparture" class="flex items-center gap-2">
                       <span class="material-icons text-orange-500">logout</span>
-                      <span class="text-sm font-medium text-orange-600">CTD: {{ $t('common.enabled') }}</span>
+                      <span class="text-sm font-medium text-orange-600"
+                        >CTD: {{ $t('common.enabled') }}</span
+                      >
                     </div>
-                    <div v-if="!form.stopSale && !form.singleStop && !form.closedToArrival && !form.closedToDeparture" class="text-sm text-gray-500">
+                    <div
+                      v-if="
+                        !form.stopSale &&
+                        !form.singleStop &&
+                        !form.closedToArrival &&
+                        !form.closedToDeparture
+                      "
+                      class="text-sm text-gray-500"
+                    >
                       {{ $t('planning.pricing.noRestrictionsSet') }}
                     </div>
                   </div>
@@ -720,15 +941,21 @@
                 >
                   <span class="material-icons text-amber-500 text-2xl">warning</span>
                   <div>
-                    <div class="font-medium text-amber-700 dark:text-amber-300">{{ $t('planning.pricing.noChangesDetected') }}</div>
-                    <div class="text-sm text-amber-600 dark:text-amber-400">{{ $t('planning.pricing.pleaseEnterValues') }}</div>
+                    <div class="font-medium text-amber-700 dark:text-amber-300">
+                      {{ $t('planning.pricing.noChangesDetected') }}
+                    </div>
+                    <div class="text-sm text-amber-600 dark:text-amber-400">
+                      {{ $t('planning.pricing.pleaseEnterValues') }}
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- Date Range Preview -->
               <div class="mt-6 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
-                <h4 class="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-3">
+                <h4
+                  class="font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2 mb-3"
+                >
                   <span class="material-icons text-blue-500">date_range</span>
                   {{ $t('planning.pricing.dateRange') }}
                 </h4>
@@ -739,21 +966,23 @@
             </div>
 
             <!-- Preview Footer -->
-            <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+            <div
+              class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
+            >
               <button
-                @click="showPreview = false"
                 class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors flex items-center gap-2"
+                @click="showPreview = false"
               >
                 <span class="material-icons text-sm">arrow_back</span>
                 {{ $t('planning.pricing.backToEdit') }}
               </button>
               <button
-                @click="confirmSave"
                 :disabled="saving || !hasAnyChanges"
                 class="px-6 py-2.5 text-sm font-medium bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-emerald-500/25"
+                @click="confirmSave"
               >
                 <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
-                <span class="material-icons text-sm" v-else>check_circle</span>
+                <span v-else class="material-icons text-sm">check_circle</span>
                 {{ saving ? $t('common.saving') : $t('planning.pricing.confirmAndApply') }}
               </button>
             </div>
@@ -761,22 +990,24 @@
         </Transition>
 
         <!-- Footer -->
-        <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50">
+        <div
+          class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
+        >
           <div class="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-1">
             <span class="material-icons text-sm">info</span>
             {{ $t('planning.pricing.bulkEditHint') }}
           </div>
           <div class="flex gap-3">
             <button
-              @click="close"
               class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
+              @click="close"
             >
               {{ $t('common.cancel') }}
             </button>
             <button
-              @click="showPreviewPanel"
               :disabled="saving"
               class="px-6 py-2.5 text-sm font-medium bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-purple-500/25"
+              @click="showPreviewPanel"
             >
               <span class="material-icons text-sm">preview</span>
               {{ $t('planning.pricing.previewChanges') }}
@@ -868,7 +1099,7 @@ const currentRoomId = computed(() => {
 })
 
 // Get effective pricing type considering Market overrides
-const getEffectivePricingType = (roomTypeId) => {
+const getEffectivePricingType = roomTypeId => {
   const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
   if (!roomType) return 'unit'
 
@@ -920,7 +1151,7 @@ const currentRoomCombinations = computed(() => {
 })
 
 // Format combination key with age ranges: "1+3 (0-2, 3-6, 3-6)"
-const formatCombinationKey = (combo) => {
+const formatCombinationKey = combo => {
   const adults = combo.adults
   const children = combo.children || []
 
@@ -931,17 +1162,17 @@ const formatCombinationKey = (combo) => {
   // Get age ranges from childAgeGroups prop
   const ageGroups = props.childAgeGroups || []
 
-  const getAgeRange = (ageGroupCode) => {
+  const getAgeRange = ageGroupCode => {
     const group = ageGroups.find(g => g.code === ageGroupCode)
     if (group) {
       return `${group.minAge}-${group.maxAge}`
     }
     // Fallback if not found
     const fallbacks = {
-      'infant': '0-2',
-      'first': '3-6',
-      'second': '7-11',
-      'third': '12-17'
+      infant: '0-2',
+      first: '3-6',
+      second: '7-11',
+      third: '12-17'
     }
     return fallbacks[ageGroupCode] || ageGroupCode
   }
@@ -958,7 +1189,7 @@ const currentRoomTypeName = computed(() => {
   return getRoomTypeName(rt)
 })
 
-const hasRoomPrice = (roomTypeId) => {
+const hasRoomPrice = roomTypeId => {
   const prices = roomPrices[roomTypeId]
   if (!prices) return false
   const pricingType = getEffectivePricingType(roomTypeId)
@@ -979,25 +1210,14 @@ const hasRoomPrice = (roomTypeId) => {
   })
 }
 
-const getRoomTypeName = (rt) => {
+const getRoomTypeName = rt => {
   if (!rt) return ''
   return rt.name?.[locale.value] || rt.name?.en || rt.name?.tr || ''
 }
 
-const getMealPlanName = (mp) => {
+const getMealPlanName = mp => {
   if (!mp) return ''
   return mp.name?.[locale.value] || mp.name?.en || mp.name?.tr || ''
-}
-
-// Meal plan expand/collapse
-const toggleMealPlanExpand = (mpId) => {
-  expandedMealPlans[mpId] = !expandedMealPlans[mpId]
-}
-
-const expandAllMealPlans = () => {
-  for (const mp of uniqueMealPlans.value) {
-    expandedMealPlans[mp._id] = true
-  }
 }
 
 // Get max children for current room type
@@ -1007,34 +1227,6 @@ const currentRoomMaxChildren = computed(() => {
   const roomType = props.roomTypes.find(rt => rt._id === roomId)
   return roomType?.occupancy?.maxChildren ?? 2 // Default 2 if not set
 })
-
-// Check if can add more children for a meal plan
-const canAddChildForMealPlan = (mpId) => {
-  const currentRoom = currentRoomId.value
-  if (!currentRoom || !roomPrices[currentRoom]?.[mpId]) return false
-  const currentCount = roomPrices[currentRoom][mpId].childOrderPricing?.length || 0
-  return currentCount < currentRoomMaxChildren.value
-}
-
-// Child pricing per meal plan
-const addChildPriceForMealPlan = (mpId) => {
-  const currentRoom = currentRoomId.value
-  if (!currentRoom || !roomPrices[currentRoom]?.[mpId]) return
-
-  // Check max children limit
-  if (!canAddChildForMealPlan(mpId)) return
-
-  if (!roomPrices[currentRoom][mpId].childOrderPricing) {
-    roomPrices[currentRoom][mpId].childOrderPricing = []
-  }
-  roomPrices[currentRoom][mpId].childOrderPricing.push(0)
-}
-
-const removeChildPriceForMealPlan = (mpId, index) => {
-  const currentRoom = currentRoomId.value
-  if (!currentRoom || !roomPrices[currentRoom]?.[mpId]?.childOrderPricing) return
-  roomPrices[currentRoom][mpId].childOrderPricing.splice(index, 1)
-}
 
 const copyFirstMealPlanToAll = () => {
   const currentRoom = currentRoomId.value
@@ -1112,7 +1304,7 @@ const initRoomPrices = () => {
 
         roomPrices[rt._id][mp._id] = {
           pricingType,
-          pricePerNight: '',  // Empty = don't update
+          pricePerNight: '', // Empty = don't update
           extraAdult: '',
           extraInfant: '',
           singleSupplement: '',
@@ -1128,21 +1320,15 @@ const initRoomPrices = () => {
   }
 }
 
-// Child pricing helpers
-const addChildPrice = () => {
-  form.childOrderPricing.push(0)
-}
-
-const removeChildPrice = (index) => {
-  form.childOrderPricing.splice(index, 1)
-}
-
 const currency = computed(() => props.market?.currency || 'EUR')
 
 // Get child age groups from market (or defaults if inheriting from hotel)
 const marketChildAgeGroups = computed(() => {
   const market = props.market
-  if (market?.childAgeSettings?.inheritFromHotel === false && market?.childAgeSettings?.childAgeGroups?.length) {
+  if (
+    market?.childAgeSettings?.inheritFromHotel === false &&
+    market?.childAgeSettings?.childAgeGroups?.length
+  ) {
     return market.childAgeSettings.childAgeGroups
   }
   return []
@@ -1169,8 +1355,14 @@ const infantAgeRange = computed(() => {
   return { min: 0, max: 2 } // Default infant age
 })
 
-const childAgeLabel = computed(() => `(${childAgeRange.value.min}-${childAgeRange.value.max} ${t('planning.markets.yearsShort')})`)
-const infantAgeLabel = computed(() => `(${infantAgeRange.value.min}-${infantAgeRange.value.max} ${t('planning.markets.yearsShort')})`)
+const childAgeLabel = computed(
+  () =>
+    `(${childAgeRange.value.min}-${childAgeRange.value.max} ${t('planning.markets.yearsShort')})`
+)
+const infantAgeLabel = computed(
+  () =>
+    `(${infantAgeRange.value.min}-${infantAgeRange.value.max} ${t('planning.markets.yearsShort')})`
+)
 
 const uniqueRoomTypes = computed(() => {
   const ids = [...new Set(props.selectedCells.map(c => c.roomTypeId))]
@@ -1197,14 +1389,14 @@ const dateRangeSummary = computed(() => {
   return `${formatDisplayDate(first)} - ${formatDisplayDate(last)} (${dayCount} ${locale.value === 'tr' ? 'gün' : 'days'})`
 })
 
-const getMealPlanColor = (code) => {
+const getMealPlanColor = code => {
   const colors = {
-    'RO': 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-    'BB': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-    'HB': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-    'FB': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-    'AI': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-    'UAI': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+    RO: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+    BB: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
+    HB: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+    FB: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+    AI: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+    UAI: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
   }
   return colors[code] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
 }
@@ -1239,7 +1431,7 @@ const save = async () => {
     if (activeTab.value === 'price') {
       // Check if we have any prices set (empty string = don't update, 0 = free, >0 = set price)
       // A value is "set" if it's not an empty string
-      const isValueSet = (val) => val !== '' && val !== null && val !== undefined
+      const isValueSet = val => val !== '' && val !== null && val !== undefined
 
       let hasAnyPrice = false
       const roomKeys = Object.keys(roomPrices)
@@ -1263,7 +1455,9 @@ const save = async () => {
             }
           } else if (pricingType === 'per_person') {
             // Standard OBP: Check occupancy pricing
-            const hasOccupancyPrice = Object.values(priceData?.occupancyPricing || {}).some(p => isValueSet(p))
+            const hasOccupancyPrice = Object.values(priceData?.occupancyPricing || {}).some(p =>
+              isValueSet(p)
+            )
             if (hasOccupancyPrice) {
               hasAnyPrice = true
               break
@@ -1311,7 +1505,8 @@ const save = async () => {
             let hasValues = false
             const roomType = props.roomTypes.find(r => r._id === rtId)
             // Use effective pricing type for multiplier check
-            const usesMultipliers = pricingType === 'per_person' && roomType?.useMultipliers === true
+            const usesMultipliers =
+              pricingType === 'per_person' && roomType?.useMultipliers === true
 
             if (pricingType === 'per_person' && usesMultipliers) {
               // Multiplier OBP: Check base price only
@@ -1319,11 +1514,20 @@ const save = async () => {
             } else if (pricingType === 'per_person') {
               // Standard OBP: Check occupancy pricing
               hasValues = Object.values(priceData?.occupancyPricing || {}).some(p => isValueSet(p))
-              hasValues = hasValues || isValueSet(priceData?.extraInfant) || priceData?.childOrderPricing?.some(p => isValueSet(p))
+              hasValues =
+                hasValues ||
+                isValueSet(priceData?.extraInfant) ||
+                priceData?.childOrderPricing?.some(p => isValueSet(p))
             } else {
               // Unit pricing
-              hasValues = isValueSet(priceData?.pricePerNight) || isValueSet(priceData?.extraAdult) || isValueSet(priceData?.singleSupplement)
-              hasValues = hasValues || isValueSet(priceData?.extraInfant) || priceData?.childOrderPricing?.some(p => isValueSet(p))
+              hasValues =
+                isValueSet(priceData?.pricePerNight) ||
+                isValueSet(priceData?.extraAdult) ||
+                isValueSet(priceData?.singleSupplement)
+              hasValues =
+                hasValues ||
+                isValueSet(priceData?.extraInfant) ||
+                priceData?.childOrderPricing?.some(p => isValueSet(p))
             }
 
             if (hasValues) {
@@ -1408,9 +1612,17 @@ const save = async () => {
                   priceUpdateFields,
                   props.market?._id
                 )
-                totalUpdates += (result?.data?.created || 0) + (result?.data?.updated || 0) + (result?.data?.split || 0)
+                totalUpdates +=
+                  (result?.data?.created || 0) +
+                  (result?.data?.updated || 0) +
+                  (result?.data?.split || 0)
               } catch (err) {
-                console.error('API error for RT/MP:', rtId.slice(-6), mpId.slice(-6), err.message || err)
+                console.error(
+                  'API error for RT/MP:',
+                  rtId.slice(-6),
+                  mpId.slice(-6),
+                  err.message || err
+                )
                 toast.error(`Error: ${err.message || 'Unknown error'}`)
               }
             }
@@ -1434,7 +1646,8 @@ const save = async () => {
         updateFields,
         props.market?._id
       )
-      const count = (result?.data?.created || 0) + (result?.data?.updated || 0) + (result?.data?.split || 0)
+      const count =
+        (result?.data?.created || 0) + (result?.data?.updated || 0) + (result?.data?.split || 0)
       toast.success(t('planning.pricing.bulkUpdateSuccess') + ` (${count})`)
       emit('saved')
       close()
@@ -1451,26 +1664,7 @@ const save = async () => {
   }
 }
 
-const calculatePriceValue = (currentValue) => {
-  const value = form.priceValue || 0
-
-  switch (form.priceMode) {
-    case 'set':
-      return value
-    case 'increase':
-      return currentValue + value
-    case 'decrease':
-      return Math.max(0, currentValue - value)
-    case 'percent_increase':
-      return Math.round(currentValue * (1 + value / 100))
-    case 'percent_decrease':
-      return Math.max(0, Math.round(currentValue * (1 - value / 100)))
-    default:
-      return value
-  }
-}
-
-const calculateAllotmentValue = (currentValue) => {
+const calculateAllotmentValue = currentValue => {
   const value = form.allotmentValue || 0
 
   switch (form.allotmentMode) {
@@ -1490,7 +1684,7 @@ const showPreviewPanel = () => {
   showPreview.value = true
 }
 
-const isValueSet = (val) => val !== '' && val !== null && val !== undefined
+const isValueSet = val => val !== '' && val !== null && val !== undefined
 
 // Preview summary computed
 const previewSummary = computed(() => {
@@ -1569,7 +1763,9 @@ const previewChanges = computed(() => {
 
         // Child pricing
         if (priceData?.childOrderPricing?.some(p => isValueSet(p))) {
-          change.childPrices = priceData.childOrderPricing.filter(p => isValueSet(p)).map(p => Number(p))
+          change.childPrices = priceData.childOrderPricing
+            .filter(p => isValueSet(p))
+            .map(p => Number(p))
           hasValues = true
         }
 
@@ -1608,40 +1804,43 @@ const confirmSave = async () => {
 }
 
 // Reset form when modal opens
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    activeTab.value = 'price'
-    showPreview.value = false
-    form.priceMode = 'set'
-    form.priceValue = 0
-    form.updateExtras = false
-    form.extraAdult = 0
-    form.childOrderPricing = []
-    form.extraInfant = 0
-    form.allotmentMode = 'set'
-    form.allotmentValue = 10
-    form.minStay = 1
-    form.releaseDays = 0
-    form.stopSale = false
-    form.singleStop = false
-    form.closedToArrival = false
-    form.closedToDeparture = false
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      activeTab.value = 'price'
+      showPreview.value = false
+      form.priceMode = 'set'
+      form.priceValue = 0
+      form.updateExtras = false
+      form.extraAdult = 0
+      form.childOrderPricing = []
+      form.extraInfant = 0
+      form.allotmentMode = 'set'
+      form.allotmentValue = 10
+      form.minStay = 1
+      form.releaseDays = 0
+      form.stopSale = false
+      form.singleStop = false
+      form.closedToArrival = false
+      form.closedToDeparture = false
 
-    // Reset room prices and expanded state
-    selectedRoomTab.value = null
-    for (const key of Object.keys(roomPrices)) {
-      delete roomPrices[key]
-    }
-    for (const key of Object.keys(expandedMealPlans)) {
-      delete expandedMealPlans[key]
-    }
+      // Reset room prices and expanded state
+      selectedRoomTab.value = null
+      for (const key of Object.keys(roomPrices)) {
+        delete roomPrices[key]
+      }
+      for (const key of Object.keys(expandedMealPlans)) {
+        delete expandedMealPlans[key]
+      }
 
-    // Initialize room prices after nextTick
-    nextTick(() => {
-      initRoomPrices()
-    })
+      // Initialize room prices after nextTick
+      nextTick(() => {
+        initRoomPrices()
+      })
+    }
   }
-})
+)
 </script>
 
 <style scoped>

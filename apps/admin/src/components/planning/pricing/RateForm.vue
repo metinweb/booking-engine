@@ -3,20 +3,22 @@
     <!-- Step Indicator -->
     <div class="flex items-center justify-center mb-6">
       <div class="flex items-center gap-2">
-        <div
-          v-for="(step, idx) in steps"
-          :key="idx"
-          class="flex items-center"
-        >
+        <div v-for="(step, idx) in steps" :key="idx" class="flex items-center">
           <div
             class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
-            :class="currentStep >= idx
-              ? 'bg-purple-600 text-white'
-              : 'bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-400'"
+            :class="
+              currentStep >= idx
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-400'
+            "
           >
             {{ idx + 1 }}
           </div>
-          <div v-if="idx < steps.length - 1" class="w-12 h-0.5 mx-1" :class="currentStep > idx ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'"></div>
+          <div
+            v-if="idx < steps.length - 1"
+            class="w-12 h-0.5 mx-1"
+            :class="currentStep > idx ? 'bg-purple-600' : 'bg-gray-200 dark:bg-slate-600'"
+          ></div>
         </div>
       </div>
     </div>
@@ -24,15 +26,23 @@
     <!-- Step 1: Period Selection -->
     <div v-show="currentStep === 0" class="space-y-5">
       <div class="text-center mb-6">
-        <h3 class="text-lg font-bold text-gray-800 dark:text-white">{{ $t('planning.pricing.step1Title') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.step1Desc') }}</p>
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+          {{ $t('planning.pricing.step1Title') }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400">
+          {{ $t('planning.pricing.step1Desc') }}
+        </p>
       </div>
 
       <!-- Selected Market Info -->
-      <div class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+      <div
+        class="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800"
+      >
         <span class="material-icons text-green-600">payments</span>
         <div>
-          <div class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.market') }}</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400">
+            {{ $t('planning.pricing.market') }}
+          </div>
           <div class="font-semibold text-gray-800 dark:text-white">
             {{ market?.code }} <span class="text-green-600">({{ currency }})</span>
           </div>
@@ -40,23 +50,37 @@
       </div>
 
       <!-- No meal plans warning -->
-      <div v-if="mealPlans.length === 0" class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+      <div
+        v-if="mealPlans.length === 0"
+        class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl"
+      >
         <div class="flex items-start gap-3">
           <span class="material-icons text-red-500">error</span>
           <div>
-            <div class="font-medium text-red-700 dark:text-red-400">{{ $t('planning.pricing.noMealPlansWarning') }}</div>
-            <p class="text-sm text-red-600 dark:text-red-300 mt-1">{{ $t('planning.pricing.noMealPlansHint') }}</p>
+            <div class="font-medium text-red-700 dark:text-red-400">
+              {{ $t('planning.pricing.noMealPlansWarning') }}
+            </div>
+            <p class="text-sm text-red-600 dark:text-red-300 mt-1">
+              {{ $t('planning.pricing.noMealPlansHint') }}
+            </p>
           </div>
         </div>
       </div>
 
       <!-- No seasons warning -->
-      <div v-else-if="seasons.length === 0" class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+      <div
+        v-else-if="seasons.length === 0"
+        class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl"
+      >
         <div class="flex items-start gap-3">
           <span class="material-icons text-amber-500">warning</span>
           <div>
-            <div class="font-medium text-amber-700 dark:text-amber-400">{{ $t('planning.pricing.noSeasonsWarning') }}</div>
-            <p class="text-sm text-amber-600 dark:text-amber-300 mt-1">{{ $t('planning.pricing.noSeasonsHint') }}</p>
+            <div class="font-medium text-amber-700 dark:text-amber-400">
+              {{ $t('planning.pricing.noSeasonsWarning') }}
+            </div>
+            <p class="text-sm text-amber-600 dark:text-amber-300 mt-1">
+              {{ $t('planning.pricing.noSeasonsHint') }}
+            </p>
           </div>
         </div>
       </div>
@@ -70,15 +94,19 @@
 
         <!-- Available Seasons Legend -->
         <div class="mb-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-          <div class="text-xs text-gray-500 dark:text-slate-400 mb-2">{{ $t('planning.pricing.availableSeasons') }}:</div>
+          <div class="text-xs text-gray-500 dark:text-slate-400 mb-2">
+            {{ $t('planning.pricing.availableSeasons') }}:
+          </div>
           <div class="flex flex-wrap gap-2">
             <div
               v-for="s in seasons"
               :key="s._id"
               class="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs"
-              :class="detectedSeason?._id === s._id
-                ? 'bg-purple-100 dark:bg-purple-900/30 ring-2 ring-purple-500'
-                : 'bg-white dark:bg-slate-600'"
+              :class="
+                detectedSeason?._id === s._id
+                  ? 'bg-purple-100 dark:bg-purple-900/30 ring-2 ring-purple-500'
+                  : 'bg-white dark:bg-slate-600'
+              "
             >
               <div class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: s.color }"></div>
               <span class="font-medium">{{ s.code }}</span>
@@ -96,19 +124,30 @@
         />
 
         <!-- Detected Season Info -->
-        <div v-if="detectedSeason" class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+        <div
+          v-if="detectedSeason"
+          class="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800"
+        >
           <div class="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
-            <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: detectedSeason.color }"></div>
+            <div
+              class="w-3 h-3 rounded-full"
+              :style="{ backgroundColor: detectedSeason.color }"
+            ></div>
             <span class="font-medium">{{ detectedSeason.code }}</span>
             <span class="text-purple-500">{{ $t('planning.pricing.seasonAutoDetected') }}</span>
           </div>
         </div>
 
         <!-- No season for selected dates -->
-        <div v-else-if="dateRange.start && dateRange.end && !detectedSeason" class="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+        <div
+          v-else-if="dateRange.start && dateRange.end && !detectedSeason"
+          class="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
+        >
           <div class="flex items-start gap-2">
             <span class="material-icons text-red-500 text-sm">error</span>
-            <div class="text-sm text-red-700 dark:text-red-300">{{ $t('planning.pricing.noSeasonForDates') }}</div>
+            <div class="text-sm text-red-700 dark:text-red-300">
+              {{ $t('planning.pricing.noSeasonForDates') }}
+            </div>
           </div>
         </div>
       </div>
@@ -117,8 +156,12 @@
     <!-- Step 2: Pricing by Room Type Tabs -->
     <div v-show="currentStep === 1" class="space-y-4">
       <div class="text-center mb-4">
-        <h3 class="text-lg font-bold text-gray-800 dark:text-white">{{ $t('planning.pricing.step2Title') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.step2Desc') }}</p>
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+          {{ $t('planning.pricing.step2Title') }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400">
+          {{ $t('planning.pricing.step2Desc') }}
+        </p>
       </div>
 
       <!-- Period Summary -->
@@ -130,7 +173,9 @@
               {{ formatDisplayDate(dateRange.start) }} - {{ formatDisplayDate(dateRange.end) }}
             </span>
           </div>
-          <div class="px-2 py-0.5 bg-blue-200 dark:bg-blue-800 rounded-full text-xs font-bold text-blue-800 dark:text-blue-200">
+          <div
+            class="px-2 py-0.5 bg-blue-200 dark:bg-blue-800 rounded-full text-xs font-bold text-blue-800 dark:text-blue-200"
+          >
             {{ calculateNights }} {{ $t('planning.pricing.nights') }}
           </div>
           <div class="flex items-center gap-1">
@@ -138,66 +183,128 @@
             <span class="text-sm font-bold text-green-600">{{ currency }}</span>
           </div>
         </div>
-        <button @click="currentStep = 0" class="text-purple-600 hover:text-purple-800 text-sm flex items-center gap-1">
+        <button
+          class="text-purple-600 hover:text-purple-800 text-sm flex items-center gap-1"
+          @click="currentStep = 0"
+        >
           <span class="material-icons text-sm">edit</span>
           {{ $t('common.edit') }}
         </button>
       </div>
 
       <!-- Pricing Type Info (read-only, from room type) -->
-      <div class="rounded-xl p-4 border" :class="currentRoomUsesMultipliers ? 'bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-900/20 dark:to-fuchsia-900/20 border-purple-200 dark:border-purple-800' : currentRoomPricingType === 'per_person' ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800'">
+      <div
+        class="rounded-xl p-4 border"
+        :class="
+          currentRoomUsesMultipliers
+            ? 'bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-900/20 dark:to-fuchsia-900/20 border-purple-200 dark:border-purple-800'
+            : currentRoomPricingType === 'per_person'
+              ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-indigo-200 dark:border-indigo-800'
+              : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800'
+        "
+      >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="material-icons" :class="currentRoomUsesMultipliers ? 'text-purple-600' : currentRoomPricingType === 'per_person' ? 'text-indigo-600' : 'text-green-600'">sell</span>
+            <span
+              class="material-icons"
+              :class="
+                currentRoomUsesMultipliers
+                  ? 'text-purple-600'
+                  : currentRoomPricingType === 'per_person'
+                    ? 'text-indigo-600'
+                    : 'text-green-600'
+              "
+              >sell</span
+            >
             <div>
               <div class="font-medium text-gray-800 dark:text-white">Fiyatlandırma Tipi</div>
-              <div class="text-xs text-gray-500 dark:text-slate-400">Oda tipi ayarlarından alınır</div>
+              <div class="text-xs text-gray-500 dark:text-slate-400">
+                Oda tipi ayarlarından alınır
+              </div>
             </div>
           </div>
-          <div class="flex items-center gap-2 px-4 py-2 rounded-lg" :class="currentRoomUsesMultipliers ? 'bg-purple-500 text-white' : currentRoomPricingType === 'per_person' ? 'bg-indigo-500 text-white' : 'bg-green-500 text-white'">
-            <span class="material-icons text-sm">{{ currentRoomUsesMultipliers ? 'calculate' : currentRoomPricingType === 'per_person' ? 'groups' : 'hotel' }}</span>
-            <span class="font-medium">{{ currentRoomUsesMultipliers ? 'Çarpanlı OBP' : currentRoomPricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}</span>
+          <div
+            class="flex items-center gap-2 px-4 py-2 rounded-lg"
+            :class="
+              currentRoomUsesMultipliers
+                ? 'bg-purple-500 text-white'
+                : currentRoomPricingType === 'per_person'
+                  ? 'bg-indigo-500 text-white'
+                  : 'bg-green-500 text-white'
+            "
+          >
+            <span class="material-icons text-sm">{{
+              currentRoomUsesMultipliers
+                ? 'calculate'
+                : currentRoomPricingType === 'per_person'
+                  ? 'groups'
+                  : 'hotel'
+            }}</span>
+            <span class="font-medium">{{
+              currentRoomUsesMultipliers
+                ? 'Çarpanlı OBP'
+                : currentRoomPricingType === 'per_person'
+                  ? 'Kişi Bazlı (OBP)'
+                  : 'Ünite Bazlı'
+            }}</span>
           </div>
         </div>
         <!-- Multiplier OBP Info -->
-        <div v-if="currentRoomUsesMultipliers" class="mt-3 p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-sm text-purple-700 dark:text-purple-300">
+        <div
+          v-if="currentRoomUsesMultipliers"
+          class="mt-3 p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg text-sm text-purple-700 dark:text-purple-300"
+        >
           <span class="material-icons text-sm align-middle mr-1">info</span>
-          Çarpanlı OBP modunda sadece baz fiyat girilir. Tüm kombinasyon fiyatları çarpanlarla hesaplanır.
+          Çarpanlı OBP modunda sadece baz fiyat girilir. Tüm kombinasyon fiyatları çarpanlarla
+          hesaplanır.
         </div>
         <!-- Standard OBP Info -->
-        <div v-else-if="currentRoomPricingType === 'per_person'" class="mt-3 p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-sm text-indigo-700 dark:text-indigo-300">
+        <div
+          v-else-if="currentRoomPricingType === 'per_person'"
+          class="mt-3 p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg text-sm text-indigo-700 dark:text-indigo-300"
+        >
           <span class="material-icons text-sm align-middle mr-1">info</span>
-          OBP modunda her yetişkin sayısı için ayrı fiyat girilir. Ekstra yetişkin ve tek kişi indirimi kullanılmaz.
+          OBP modunda her yetişkin sayısı için ayrı fiyat girilir. Ekstra yetişkin ve tek kişi
+          indirimi kullanılmaz.
         </div>
         <!-- Unit Info -->
-        <div v-else class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-700 dark:text-green-300">
+        <div
+          v-else
+          class="mt-3 p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-sm text-green-700 dark:text-green-300"
+        >
           <span class="material-icons text-sm align-middle mr-1">info</span>
           Ünite bazlı modda oda başı fiyat + ekstra kişi ücreti kullanılır.
         </div>
       </div>
 
       <!-- Room Type Tabs (Sticky) -->
-      <div class="sticky -top-6 z-10 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm pt-6 pb-0">
+      <div
+        class="sticky -top-6 z-10 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-sm pt-6 pb-0"
+      >
         <div class="flex gap-1 overflow-x-auto pb-px">
           <button
             v-for="rt in filteredRoomTypes"
             :key="rt._id"
             type="button"
-            @click="selectedRoomTab = rt._id"
             class="px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all border-b-2 -mb-px"
             :class="[
               selectedRoomTab === rt._id
                 ? 'border-purple-500 text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20'
                 : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 hover:border-gray-300',
               rt.isBaseRoom ? 'ring-2 ring-yellow-400 ring-offset-1' : '',
-              !hasExplicitBaseRoom && !hasRoomPrices(rt._id) ? 'ring-2 ring-red-300 dark:ring-red-700 ring-offset-1' : ''
+              !hasExplicitBaseRoom && !hasRoomPrices(rt._id)
+                ? 'ring-2 ring-red-300 dark:ring-red-700 ring-offset-1'
+                : ''
             ]"
+            @click="selectedRoomTab = rt._id"
           >
             <div class="flex items-center gap-1.5">
               <!-- Base room star -->
               <span v-if="rt.isBaseRoom" class="material-icons text-yellow-500 text-sm">star</span>
               <!-- Calculated icon for non-base rooms -->
-              <span v-else-if="hasExplicitBaseRoom" class="text-green-500 text-xs font-bold italic">fx</span>
+              <span v-else-if="hasExplicitBaseRoom" class="text-green-500 text-xs font-bold italic"
+                >fx</span
+              >
               <span class="font-bold">{{ rt.code }}</span>
               <!-- Price indicator (only show when NOT using base room pricing) -->
               <template v-if="!hasExplicitBaseRoom">
@@ -210,10 +317,15 @@
       </div>
 
       <!-- Missing Prices Warning -->
-      <div v-if="roomsMissingPrices.length > 0" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 flex items-start gap-3">
+      <div
+        v-if="roomsMissingPrices.length > 0"
+        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 flex items-start gap-3"
+      >
         <span class="material-icons text-red-500">warning</span>
         <div>
-          <div class="font-medium text-red-700 dark:text-red-400">{{ $t('planning.pricing.allRoomsPriceRequired') }}</div>
+          <div class="font-medium text-red-700 dark:text-red-400">
+            {{ $t('planning.pricing.allRoomsPriceRequired') }}
+          </div>
           <div class="text-sm text-red-600 dark:text-red-300 mt-1">
             {{ $t('planning.pricing.missingPricesFor') }}:
             <span class="font-bold">{{ roomsMissingPrices.map(r => r.code).join(', ') }}</span>
@@ -228,13 +340,19 @@
           <div class="flex items-center justify-between flex-wrap gap-4">
             <!-- Room Info -->
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+              <div
+                class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm"
+              >
                 {{ currentRoomType?.code }}
               </div>
               <div>
-                <div class="font-medium text-gray-800 dark:text-white text-sm">{{ getRoomTypeName(currentRoomType) }}</div>
+                <div class="font-medium text-gray-800 dark:text-white text-sm">
+                  {{ getRoomTypeName(currentRoomType) }}
+                </div>
                 <div class="text-xs text-gray-500 dark:text-slate-400">
-                  {{ currentRoomType?.occupancy?.maxAdults || 2 }}+{{ currentRoomType?.occupancy?.maxChildren || 2 }}
+                  {{ currentRoomType?.occupancy?.maxAdults || 2 }}+{{
+                    currentRoomType?.occupancy?.maxChildren || 2
+                  }}
                 </div>
               </div>
             </div>
@@ -243,12 +361,19 @@
             <div class="flex items-center gap-6">
               <!-- Allotment -->
               <div class="flex flex-col items-center">
-                <span class="text-[10px] text-gray-400 dark:text-slate-500 uppercase mb-1">{{ $t('planning.pricing.allotment') }}</span>
+                <span class="text-[10px] text-gray-400 dark:text-slate-500 uppercase mb-1">{{
+                  $t('planning.pricing.allotment')
+                }}</span>
                 <div class="flex items-center gap-1">
                   <button
                     type="button"
-                    @click="roomRestrictions[selectedRoomTab].allotment = Math.max(0, roomRestrictions[selectedRoomTab].allotment - 1)"
                     class="w-7 h-7 rounded bg-gray-200 dark:bg-slate-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors"
+                    @click="
+                      roomRestrictions[selectedRoomTab].allotment = Math.max(
+                        0,
+                        roomRestrictions[selectedRoomTab].allotment - 1
+                      )
+                    "
                   >
                     <span class="material-icons text-sm">remove</span>
                   </button>
@@ -260,8 +385,8 @@
                   />
                   <button
                     type="button"
-                    @click="roomRestrictions[selectedRoomTab].allotment++"
                     class="w-7 h-7 rounded bg-gray-200 dark:bg-slate-600 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-slate-500 transition-colors"
+                    @click="roomRestrictions[selectedRoomTab].allotment++"
                   >
                     <span class="material-icons text-sm">add</span>
                   </button>
@@ -270,7 +395,9 @@
 
               <!-- MinStay -->
               <div class="flex flex-col items-center">
-                <span class="text-[10px] text-gray-400 dark:text-slate-500 uppercase mb-1">{{ $t('planning.pricing.minStay') }}</span>
+                <span class="text-[10px] text-gray-400 dark:text-slate-500 uppercase mb-1">{{
+                  $t('planning.pricing.minStay')
+                }}</span>
                 <div class="flex items-center gap-1">
                   <input
                     v-model.number="roomRestrictions[selectedRoomTab].minStay"
@@ -279,13 +406,17 @@
                     max="30"
                     class="w-14 text-center text-sm font-bold border-2 border-purple-300 dark:border-purple-700 rounded-lg py-1.5 bg-white dark:bg-slate-800"
                   />
-                  <span class="text-xs text-gray-400">{{ $t('planning.pricing.nightsShort') }}</span>
+                  <span class="text-xs text-gray-400">{{
+                    $t('planning.pricing.nightsShort')
+                  }}</span>
                 </div>
               </div>
 
               <!-- Release Days -->
               <div class="flex flex-col items-center">
-                <span class="text-[10px] text-gray-400 dark:text-slate-500 uppercase mb-1">Release</span>
+                <span class="text-[10px] text-gray-400 dark:text-slate-500 uppercase mb-1"
+                  >Release</span
+                >
                 <div class="flex items-center gap-1">
                   <input
                     v-model.number="roomRestrictions[selectedRoomTab].releaseDays"
@@ -301,35 +432,52 @@
         </div>
 
         <!-- Base Room Pricing Info (when base room is explicitly set) -->
-        <div v-if="hasExplicitBaseRoom" class="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800 mb-4">
+        <div
+          v-if="hasExplicitBaseRoom"
+          class="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800 mb-4"
+        >
           <div class="flex items-start gap-3">
             <span class="material-icons text-yellow-600 text-2xl">auto_fix_high</span>
             <div class="flex-1">
-              <div class="font-medium text-yellow-800 dark:text-yellow-300 mb-1">{{ $t('planning.pricing.baseRoomPricingActive') }}</div>
+              <div class="font-medium text-yellow-800 dark:text-yellow-300 mb-1">
+                {{ $t('planning.pricing.baseRoomPricingActive') }}
+              </div>
               <p class="text-sm text-yellow-700 dark:text-yellow-400">
                 {{ $t('planning.pricing.baseRoomPricingInfo') }}
               </p>
               <!-- Show which room is base -->
               <div class="mt-2 flex items-center gap-2 flex-wrap">
-                <span class="text-xs text-yellow-600 dark:text-yellow-400">{{ $t('planning.pricing.baseRoom') }}:</span>
-                <span class="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-800 rounded text-sm font-bold text-yellow-800 dark:text-yellow-200">
+                <span class="text-xs text-yellow-600 dark:text-yellow-400"
+                  >{{ $t('planning.pricing.baseRoom') }}:</span
+                >
+                <span
+                  class="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-800 rounded text-sm font-bold text-yellow-800 dark:text-yellow-200"
+                >
                   {{ baseRoom?.code }}
                 </span>
-                <span v-if="baseMealPlan" class="text-xs text-yellow-600 dark:text-yellow-400 ml-2">{{ $t('planning.pricing.baseMealPlan') }}:</span>
-                <span v-if="baseMealPlan" class="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-800 rounded text-sm font-bold text-yellow-800 dark:text-yellow-200">
+                <span v-if="baseMealPlan" class="text-xs text-yellow-600 dark:text-yellow-400 ml-2"
+                  >{{ $t('planning.pricing.baseMealPlan') }}:</span
+                >
+                <span
+                  v-if="baseMealPlan"
+                  class="px-2 py-0.5 bg-yellow-200 dark:bg-yellow-800 rounded text-sm font-bold text-yellow-800 dark:text-yellow-200"
+                >
                   {{ baseMealPlan?.code }}
                 </span>
               </div>
               <!-- Current room indicator -->
-              <div v-if="!isCurrentRoomBase" class="mt-2 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+              <div
+                v-if="!isCurrentRoomBase"
+                class="mt-2 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400"
+              >
                 <span class="material-icons text-sm">info</span>
                 {{ $t('planning.pricing.viewingCalculatedRoom', { room: currentRoomType?.code }) }}
               </div>
               <!-- Allow edit calculated checkbox -->
               <label class="mt-3 flex items-center gap-2 cursor-pointer">
                 <input
-                  type="checkbox"
                   v-model="allowEditCalculated"
+                  type="checkbox"
                   class="w-4 h-4 rounded border-yellow-400 text-yellow-600 focus:ring-yellow-500"
                 />
                 <span class="text-sm text-yellow-700 dark:text-yellow-400">
@@ -341,30 +489,41 @@
         </div>
 
         <!-- Meal Plan Pricing Table -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+        >
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
               <!-- Header: Meal Plan Codes -->
               <thead>
-                <tr class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600">
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 w-60 min-w-[240px]">
+                <tr
+                  class="bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-600"
+                >
+                  <th
+                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 w-60 min-w-[240px]"
+                  >
                     {{ currency }}
                   </th>
-                  <th
-                    v-for="mp in filteredMealPlans"
-                    :key="mp._id"
-                    class="px-2 py-3 text-center"
-                  >
+                  <th v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-3 text-center">
                     <div
                       class="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold"
                       :class="[
                         getMealPlanBg(mp.code),
-                        mp.isBaseMealPlan || (baseMealPlan && baseMealPlan._id === mp._id) ? 'ring-2 ring-yellow-400' : ''
+                        mp.isBaseMealPlan || (baseMealPlan && baseMealPlan._id === mp._id)
+                          ? 'ring-2 ring-yellow-400'
+                          : ''
                       ]"
                     >
-                      <span v-if="mp.isBaseMealPlan || (baseMealPlan && baseMealPlan._id === mp._id)" class="material-icons text-yellow-500 text-sm">star</span>
+                      <span
+                        v-if="mp.isBaseMealPlan || (baseMealPlan && baseMealPlan._id === mp._id)"
+                        class="material-icons text-yellow-500 text-sm"
+                        >star</span
+                      >
                       {{ mp.code }}
-                      <span v-if="mp.priceAdjustment && mp.priceAdjustment !== 0" class="text-xs opacity-70">
+                      <span
+                        v-if="mp.priceAdjustment && mp.priceAdjustment !== 0"
+                        class="text-xs opacity-70"
+                      >
                         {{ mp.priceAdjustment > 0 ? '+' : '' }}{{ mp.priceAdjustment }}%
                       </span>
                     </div>
@@ -373,14 +532,22 @@
               </thead>
               <tbody>
                 <!-- UNIT PRICING: Base Price Row -->
-                <tr v-if="currentRoomPricingType === 'unit'" class="border-b border-gray-100 dark:border-slate-700 bg-green-50/50 dark:bg-green-900/10">
+                <tr
+                  v-if="currentRoomPricingType === 'unit'"
+                  class="border-b border-gray-100 dark:border-slate-700 bg-green-50/50 dark:bg-green-900/10"
+                >
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-2">
                       <span class="material-icons text-green-600 text-lg">hotel</span>
-                      <span class="font-medium text-gray-700 dark:text-slate-300">{{ $t('planning.pricing.basePrice') }}</span>
+                      <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                        $t('planning.pricing.basePrice')
+                      }}</span>
                       <!-- Show base room indicator if this is the base room -->
                       <span
-                        v-if="currentRoomType?.isBaseRoom || (baseRoom && baseRoom._id === selectedRoomTab)"
+                        v-if="
+                          currentRoomType?.isBaseRoom ||
+                          (baseRoom && baseRoom._id === selectedRoomTab)
+                        "
                         class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded"
                       >
                         <span class="material-icons text-xs">star</span>
@@ -388,19 +555,22 @@
                       </span>
                       <!-- Show adjustment if not base room -->
                       <span
-                        v-else-if="currentRoomType?.priceAdjustment && currentRoomType.priceAdjustment !== 0"
+                        v-else-if="
+                          currentRoomType?.priceAdjustment && currentRoomType.priceAdjustment !== 0
+                        "
                         class="text-xs px-1.5 py-0.5 rounded"
-                        :class="currentRoomType.priceAdjustment > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'"
+                        :class="
+                          currentRoomType.priceAdjustment > 0
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        "
                       >
-                        {{ currentRoomType.priceAdjustment > 0 ? '+' : '' }}{{ currentRoomType.priceAdjustment }}%
+                        {{ currentRoomType.priceAdjustment > 0 ? '+' : ''
+                        }}{{ currentRoomType.priceAdjustment }}%
                       </span>
                     </div>
                   </td>
-                  <td
-                    v-for="mp in filteredMealPlans"
-                    :key="mp._id"
-                    class="px-2 py-3 text-center"
-                  >
+                  <td v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-3 text-center">
                     <div class="relative">
                       <input
                         v-if="roomPrices[selectedRoomTab]?.[mp._id]"
@@ -410,12 +580,17 @@
                         step="1"
                         class="w-24 text-center text-lg font-bold border-2 rounded-lg px-2 py-1.5 transition-colors"
                         :class="[
-                          isBaseCell(selectedRoomTab, mp._id) ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 ring-2 ring-yellow-400 shadow-lg' :
-                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500' :
-                          roomPrices[selectedRoomTab][mp._id]?.pricePerNight > 0 ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20' :
-                          'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+                          isBaseCell(selectedRoomTab, mp._id)
+                            ? 'border-yellow-400 dark:border-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 ring-2 ring-yellow-400 shadow-lg'
+                            : isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                              ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
+                              : roomPrices[selectedRoomTab][mp._id]?.pricePerNight > 0
+                                ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
+                                : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
                         ]"
-                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
+                        :readonly="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                        "
                         placeholder="0"
                       />
                       <!-- Star icon for base cell -->
@@ -428,7 +603,9 @@
                       </span>
                       <!-- Lock icon for calculated cells -->
                       <span
-                        v-else-if="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
+                        v-else-if="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                        "
                         class="absolute -top-1 -right-1 text-amber-500"
                         :title="$t('planning.pricing.autoCalculated')"
                       >
@@ -439,18 +616,19 @@
                 </tr>
 
                 <!-- UNIT PRICING: Extra Adult Row -->
-                <tr v-if="currentRoomPricingType === 'unit'" class="border-b border-gray-100 dark:border-slate-700">
+                <tr
+                  v-if="currentRoomPricingType === 'unit'"
+                  class="border-b border-gray-100 dark:border-slate-700"
+                >
                   <td class="px-4 py-2">
                     <div class="flex items-center gap-2">
                       <span class="material-icons text-amber-500 text-sm">person_add</span>
-                      <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.extraAdultShort') }}</span>
+                      <span class="text-gray-600 dark:text-slate-400">{{
+                        $t('planning.pricing.extraAdultShort')
+                      }}</span>
                     </div>
                   </td>
-                  <td
-                    v-for="mp in filteredMealPlans"
-                    :key="mp._id"
-                    class="px-2 py-2 text-center"
-                  >
+                  <td v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-2 text-center">
                     <div class="flex items-center justify-center gap-1">
                       <span class="text-xs text-gray-400">+</span>
                       <input
@@ -459,10 +637,14 @@
                         type="number"
                         min="0"
                         class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
-                          ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
-                          : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
+                        :class="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                            ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
+                            : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+                        "
+                        :readonly="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                        "
                         placeholder="0"
                       />
                     </div>
@@ -471,19 +653,20 @@
 
                 <!-- OBP WITH MULTIPLIERS: Base Price Row -->
                 <template v-if="currentRoomUsesMultipliers">
-                  <tr class="border-b border-gray-100 dark:border-slate-700 bg-purple-50/50 dark:bg-purple-900/10">
+                  <tr
+                    class="border-b border-gray-100 dark:border-slate-700 bg-purple-50/50 dark:bg-purple-900/10"
+                  >
                     <td class="px-4 py-3">
                       <div class="flex items-center gap-2">
                         <span class="material-icons text-purple-600 text-lg">calculate</span>
                         <span class="font-medium text-gray-700 dark:text-slate-300">Baz Fiyat</span>
-                        <span class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded">Zorunlu</span>
+                        <span
+                          class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded"
+                          >Zorunlu</span
+                        >
                       </div>
                     </td>
-                    <td
-                      v-for="mp in filteredMealPlans"
-                      :key="mp._id"
-                      class="px-2 py-3 text-center"
-                    >
+                    <td v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-3 text-center">
                       <input
                         v-if="roomPrices[selectedRoomTab]?.[mp._id]"
                         v-model.number="roomPrices[selectedRoomTab][mp._id].pricePerNight"
@@ -492,8 +675,9 @@
                         step="1"
                         class="w-24 text-center text-lg font-bold border-2 rounded-lg px-2 py-1.5 transition-colors"
                         :class="[
-                          !roomPrices[selectedRoomTab][mp._id].pricePerNight ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' :
-                          'border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20'
+                          !roomPrices[selectedRoomTab][mp._id].pricePerNight
+                            ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
+                            : 'border-purple-300 dark:border-purple-700 bg-purple-50 dark:bg-purple-900/20'
                         ]"
                         placeholder="0"
                       />
@@ -503,7 +687,9 @@
                   <tr class="border-b border-gray-100 dark:border-slate-700">
                     <td colspan="100%" class="px-4 py-3">
                       <div class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-                        <div class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1">
+                        <div
+                          class="text-xs font-medium text-indigo-700 dark:text-indigo-300 mb-2 flex items-center gap-1"
+                        >
                           <span class="material-icons text-sm">table_chart</span>
                           Tüm Kombinasyonlar (Çarpan × Baz Fiyat)
                         </div>
@@ -515,18 +701,38 @@
                           >
                             <span class="text-indigo-600 dark:text-indigo-400">
                               {{ formatCombinationKey(combo) }}
-                              <span class="text-gray-400">(×{{ combo.overrideMultiplier || combo.calculatedMultiplier }})</span>
+                              <span class="text-gray-400"
+                                >(×{{
+                                  combo.overrideMultiplier || combo.calculatedMultiplier
+                                }})</span
+                              >
                             </span>
-                            <span class="font-bold" :class="roomPrices[selectedRoomTab]?.[filteredMealPlans[0]?._id]?.pricePerNight ? 'text-green-600' : 'text-gray-400'">
-                              {{ roomPrices[selectedRoomTab]?.[filteredMealPlans[0]?._id]?.pricePerNight
-                                ? Math.round(roomPrices[selectedRoomTab][filteredMealPlans[0]._id].pricePerNight * (combo.overrideMultiplier || combo.calculatedMultiplier)).toLocaleString()
-                                : '-' }}
+                            <span
+                              class="font-bold"
+                              :class="
+                                roomPrices[selectedRoomTab]?.[filteredMealPlans[0]?._id]
+                                  ?.pricePerNight
+                                  ? 'text-green-600'
+                                  : 'text-gray-400'
+                              "
+                            >
+                              {{
+                                roomPrices[selectedRoomTab]?.[filteredMealPlans[0]?._id]
+                                  ?.pricePerNight
+                                  ? Math.round(
+                                      roomPrices[selectedRoomTab][filteredMealPlans[0]._id]
+                                        .pricePerNight *
+                                        (combo.overrideMultiplier || combo.calculatedMultiplier)
+                                    ).toLocaleString()
+                                  : '-'
+                              }}
                             </span>
                           </div>
                         </div>
                         <div class="mt-2 text-xs text-gray-500 dark:text-slate-400">
                           <span class="material-icons text-xs align-middle mr-1">info</span>
-                          Bu fiyatlar ilk pansiyon için gösterilmektedir. Diğer pansiyonlar için baz fiyatları ayrı girin.
+                          Bu fiyatlar ilk pansiyon için gösterilmektedir. Diğer pansiyonlar için baz
+                          fiyatları ayrı girin.
                         </div>
                       </div>
                     </td>
@@ -539,20 +745,28 @@
                     v-for="pax in adultsRangeForCurrentRoom"
                     :key="'obp-' + pax"
                     class="border-b border-gray-100 dark:border-slate-700"
-                    :class="pax <= minAdultsForCurrentRoom + 1 ? 'bg-indigo-50/50 dark:bg-indigo-900/10' : ''"
+                    :class="
+                      pax <= minAdultsForCurrentRoom + 1
+                        ? 'bg-indigo-50/50 dark:bg-indigo-900/10'
+                        : ''
+                    "
                   >
                     <td class="px-4 py-2">
                       <div class="flex items-center gap-2">
-                        <span class="material-icons text-indigo-500 text-sm">{{ pax === 1 ? 'person' : 'group' }}</span>
-                        <span class="font-medium text-gray-700 dark:text-slate-300">{{ pax }} Yetişkin</span>
-                        <span v-if="pax <= minAdultsForCurrentRoom + 1" class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded">Zorunlu</span>
+                        <span class="material-icons text-indigo-500 text-sm">{{
+                          pax === 1 ? 'person' : 'group'
+                        }}</span>
+                        <span class="font-medium text-gray-700 dark:text-slate-300"
+                          >{{ pax }} Yetişkin</span
+                        >
+                        <span
+                          v-if="pax <= minAdultsForCurrentRoom + 1"
+                          class="text-xs px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded"
+                          >Zorunlu</span
+                        >
                       </div>
                     </td>
-                    <td
-                      v-for="mp in filteredMealPlans"
-                      :key="mp._id"
-                      class="px-2 py-2 text-center"
-                    >
+                    <td v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-2 text-center">
                       <input
                         v-if="roomPrices[selectedRoomTab]?.[mp._id]?.occupancyPricing"
                         v-model.number="roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax]"
@@ -560,9 +774,11 @@
                         min="0"
                         class="w-24 text-center font-bold border-2 rounded-lg px-2 py-1.5 transition-colors"
                         :class="[
-                          pax <= 2 && !roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax] ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20' :
-                          roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax] > 0 ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20' :
-                          'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+                          pax <= 2 && !roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax]
+                            ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
+                            : roomPrices[selectedRoomTab][mp._id].occupancyPricing[pax] > 0
+                              ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50 dark:bg-indigo-900/20'
+                              : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
                         ]"
                         placeholder="0"
                       />
@@ -572,85 +788,108 @@
 
                 <!-- Child Order Pricing Rows - NOT shown for multiplier OBP -->
                 <template v-if="!currentRoomUsesMultipliers">
+                  <tr
+                    v-for="childIndex in maxChildrenForCurrentRoom"
+                    :key="'child-' + childIndex"
+                    class="border-b border-gray-100 dark:border-slate-700"
+                  >
+                    <td class="px-4 py-2">
+                      <div class="flex flex-col gap-0.5">
+                        <div class="flex items-center gap-2">
+                          <span class="material-icons text-pink-500 text-sm">child_care</span>
+                          <span class="text-gray-600 dark:text-slate-400"
+                            >{{ childIndex }}. {{ $t('planning.pricing.child') }}</span
+                          >
+                        </div>
+                        <!-- Age source indicator - only show on first child row, on new line -->
+                        <span
+                          v-if="childIndex === 1"
+                          class="text-xs px-1.5 py-0.5 rounded w-fit ml-6"
+                          :class="{
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':
+                              ageSettings.childSource === 'hotel',
+                            'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                              ageSettings.childSource === 'market',
+                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400':
+                              ageSettings.childSource === 'season'
+                          }"
+                          :title="
+                            $t('planning.pricing.ageSourceTooltip.' + ageSettings.childSource)
+                          "
+                        >
+                          0-{{ ageSettings.childMaxAge }} {{ $t('planning.pricing.age') }}
+                          <span class="opacity-70"
+                            >({{
+                              $t('planning.pricing.ageSource.' + ageSettings.childSource)
+                            }})</span
+                          >
+                        </span>
+                      </div>
+                    </td>
+                    <td v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-2 text-center">
+                      <div class="flex items-center justify-center gap-1">
+                        <span class="text-xs text-gray-400">+</span>
+                        <input
+                          v-if="roomPrices[selectedRoomTab]?.[mp._id]?.childOrderPricing"
+                          v-model.number="
+                            roomPrices[selectedRoomTab][mp._id].childOrderPricing[childIndex - 1]
+                          "
+                          type="number"
+                          min="0"
+                          class="w-20 text-center text-sm border rounded-lg px-2 py-1"
+                          :class="
+                            isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                              ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
+                              : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+                          "
+                          :readonly="
+                            isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                          "
+                          placeholder="0"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                </template>
+
+                <!-- Extra Infant Row - NOT shown for multiplier OBP -->
                 <tr
-                  v-for="childIndex in maxChildrenForCurrentRoom"
-                  :key="'child-' + childIndex"
+                  v-if="!currentRoomUsesMultipliers"
                   class="border-b border-gray-100 dark:border-slate-700"
                 >
                   <td class="px-4 py-2">
                     <div class="flex flex-col gap-0.5">
                       <div class="flex items-center gap-2">
-                        <span class="material-icons text-pink-500 text-sm">child_care</span>
-                        <span class="text-gray-600 dark:text-slate-400">{{ childIndex }}. {{ $t('planning.pricing.child') }}</span>
-                      </div>
-                      <!-- Age source indicator - only show on first child row, on new line -->
-                      <span
-                        v-if="childIndex === 1"
-                        class="text-xs px-1.5 py-0.5 rounded w-fit ml-6"
-                        :class="{
-                          'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': ageSettings.childSource === 'hotel',
-                          'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': ageSettings.childSource === 'market',
-                          'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400': ageSettings.childSource === 'season'
-                        }"
-                        :title="$t('planning.pricing.ageSourceTooltip.' + ageSettings.childSource)"
-                      >
-                        0-{{ ageSettings.childMaxAge }} {{ $t('planning.pricing.age') }}
-                        <span class="opacity-70">({{ $t('planning.pricing.ageSource.' + ageSettings.childSource) }})</span>
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    v-for="mp in filteredMealPlans"
-                    :key="mp._id"
-                    class="px-2 py-2 text-center"
-                  >
-                    <div class="flex items-center justify-center gap-1">
-                      <span class="text-xs text-gray-400">+</span>
-                      <input
-                        v-if="roomPrices[selectedRoomTab]?.[mp._id]?.childOrderPricing"
-                        v-model.number="roomPrices[selectedRoomTab][mp._id].childOrderPricing[childIndex - 1]"
-                        type="number"
-                        min="0"
-                        class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
-                          ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
-                          : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
-                        placeholder="0"
-                      />
-                    </div>
-                  </td>
-                </tr>
-                </template>
-
-                <!-- Extra Infant Row - NOT shown for multiplier OBP -->
-                <tr v-if="!currentRoomUsesMultipliers" class="border-b border-gray-100 dark:border-slate-700">
-                  <td class="px-4 py-2">
-                    <div class="flex flex-col gap-0.5">
-                      <div class="flex items-center gap-2">
-                        <span class="material-icons text-purple-500 text-sm">baby_changing_station</span>
-                        <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.extraInfantShort') }}</span>
+                        <span class="material-icons text-purple-500 text-sm"
+                          >baby_changing_station</span
+                        >
+                        <span class="text-gray-600 dark:text-slate-400">{{
+                          $t('planning.pricing.extraInfantShort')
+                        }}</span>
                       </div>
                       <!-- Age source indicator on new line -->
                       <span
                         class="text-xs px-1.5 py-0.5 rounded w-fit ml-6"
                         :class="{
-                          'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400': ageSettings.infantSource === 'hotel',
-                          'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': ageSettings.infantSource === 'market',
-                          'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400': ageSettings.infantSource === 'season'
+                          'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':
+                            ageSettings.infantSource === 'hotel',
+                          'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                            ageSettings.infantSource === 'market',
+                          'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400':
+                            ageSettings.infantSource === 'season'
                         }"
                         :title="$t('planning.pricing.ageSourceTooltip.' + ageSettings.infantSource)"
                       >
                         0-{{ ageSettings.infantMaxAge }} {{ $t('planning.pricing.age') }}
-                        <span class="opacity-70">({{ $t('planning.pricing.ageSource.' + ageSettings.infantSource) }})</span>
+                        <span class="opacity-70"
+                          >({{
+                            $t('planning.pricing.ageSource.' + ageSettings.infantSource)
+                          }})</span
+                        >
                       </span>
                     </div>
                   </td>
-                  <td
-                    v-for="mp in filteredMealPlans"
-                    :key="mp._id"
-                    class="px-2 py-2 text-center"
-                  >
+                  <td v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-2 text-center">
                     <div class="flex items-center justify-center gap-1">
                       <span class="text-xs text-gray-400">+</span>
                       <input
@@ -659,10 +898,14 @@
                         type="number"
                         min="0"
                         class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
-                          ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
-                          : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
+                        :class="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                            ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
+                            : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+                        "
+                        :readonly="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                        "
                         placeholder="0"
                       />
                     </div>
@@ -670,18 +913,19 @@
                 </tr>
 
                 <!-- Single Occupancy Discount Row (only for unit pricing) -->
-                <tr v-if="currentRoomPricingType === 'unit'" class="bg-blue-50/50 dark:bg-blue-900/10">
+                <tr
+                  v-if="currentRoomPricingType === 'unit'"
+                  class="bg-blue-50/50 dark:bg-blue-900/10"
+                >
                   <td class="px-4 py-2">
                     <div class="flex items-center gap-2">
                       <span class="material-icons text-blue-500 text-sm">person</span>
-                      <span class="text-gray-600 dark:text-slate-400">{{ $t('planning.pricing.singleOccupancy') }}</span>
+                      <span class="text-gray-600 dark:text-slate-400">{{
+                        $t('planning.pricing.singleOccupancy')
+                      }}</span>
                     </div>
                   </td>
-                  <td
-                    v-for="mp in filteredMealPlans"
-                    :key="mp._id"
-                    class="px-2 py-2 text-center"
-                  >
+                  <td v-for="mp in filteredMealPlans" :key="mp._id" class="px-2 py-2 text-center">
                     <div class="flex items-center justify-center gap-1">
                       <span class="text-xs text-gray-400">−</span>
                       <input
@@ -690,10 +934,14 @@
                         type="number"
                         min="0"
                         class="w-20 text-center text-sm border rounded-lg px-2 py-1"
-                        :class="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
-                          ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
-                          : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'"
-                        :readonly="isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated"
+                        :class="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                            ? 'border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 cursor-not-allowed text-gray-500'
+                            : 'border-gray-200 dark:border-slate-600 bg-white dark:bg-slate-800'
+                        "
+                        :readonly="
+                          isCalculatedCell(selectedRoomTab, mp._id) && !allowEditCalculated
+                        "
                         placeholder="0"
                       />
                     </div>
@@ -706,33 +954,36 @@
 
         <!-- Quick Actions for Current Room -->
         <div class="flex items-center gap-3">
-          <span class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.quickFill') }}:</span>
+          <span class="text-sm text-gray-500 dark:text-slate-400"
+            >{{ $t('planning.pricing.quickFill') }}:</span
+          >
           <button
             type="button"
-            @click="copyFirstPriceToAllMealPlans"
             class="text-sm px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg hover:bg-purple-200 transition-colors"
+            @click="copyFirstPriceToAllMealPlans"
           >
             {{ $t('planning.pricing.copyToAllMealPlans') }}
           </button>
           <button
             type="button"
-            @click="copyCurrentRoomToAll"
             class="text-sm px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-200 transition-colors"
+            @click="copyCurrentRoomToAll"
           >
             {{ $t('planning.pricing.copyToAllRooms') }}
           </button>
         </div>
-
       </div>
     </div>
 
     <!-- Navigation Buttons -->
-    <div class="flex items-center justify-between pt-6 mt-6 border-t border-gray-200 dark:border-slate-700">
+    <div
+      class="flex items-center justify-between pt-6 mt-6 border-t border-gray-200 dark:border-slate-700"
+    >
       <button
         v-if="currentStep > 0"
         type="button"
-        @click="currentStep--"
         class="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-white transition-colors"
+        @click="currentStep--"
       >
         <span class="material-icons">arrow_back</span>
         {{ $t('common.back') }}
@@ -740,20 +991,16 @@
       <div v-else></div>
 
       <div class="flex gap-3">
-        <button
-          type="button"
-          @click="$emit('cancel')"
-          class="btn-secondary"
-        >
+        <button type="button" class="btn-secondary" @click="$emit('cancel')">
           {{ $t('common.cancel') }}
         </button>
 
         <button
           v-if="currentStep < steps.length - 1"
           type="button"
-          @click="nextStep"
           class="btn-primary flex items-center gap-2"
           :disabled="!canProceed"
+          @click="nextStep"
         >
           {{ $t('common.next') }}
           <span class="material-icons">arrow_forward</span>
@@ -762,12 +1009,12 @@
         <button
           v-else
           type="button"
-          @click="handleSave"
           class="btn-primary flex items-center gap-2"
           :disabled="saving"
+          @click="handleSave"
         >
           <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
-          <span class="material-icons" v-else>check</span>
+          <span v-else class="material-icons">check</span>
           {{ saving ? $t('common.saving') : $t('common.save') }}
         </button>
       </div>
@@ -822,7 +1069,7 @@ const roomPrices = reactive({})
 const roomRestrictions = reactive({})
 
 // Relative pricing settings
-const enableRelativeCalculation = ref(true)
+// enableRelativeCalculation removed - was unused
 const allowEditCalculated = ref(false)
 
 // Currency from selected market
@@ -837,13 +1084,13 @@ const filteredRoomTypes = computed(() => {
 
   // If season has activeRoomTypes defined, filter by them
   if (season.activeRoomTypes?.length > 0) {
-    const activeIds = season.activeRoomTypes.map(rt => typeof rt === 'object' ? rt._id : rt)
+    const activeIds = season.activeRoomTypes.map(rt => (typeof rt === 'object' ? rt._id : rt))
     return props.roomTypes.filter(rt => activeIds.includes(rt._id))
   }
 
   // Otherwise, check market's activeRoomTypes
   if (props.market?.activeRoomTypes?.length > 0) {
-    const activeIds = props.market.activeRoomTypes.map(rt => typeof rt === 'object' ? rt._id : rt)
+    const activeIds = props.market.activeRoomTypes.map(rt => (typeof rt === 'object' ? rt._id : rt))
     return props.roomTypes.filter(rt => activeIds.includes(rt._id))
   }
 
@@ -858,13 +1105,13 @@ const filteredMealPlans = computed(() => {
 
   // If season has activeMealPlans defined, filter by them
   if (season.activeMealPlans?.length > 0) {
-    const activeIds = season.activeMealPlans.map(mp => typeof mp === 'object' ? mp._id : mp)
+    const activeIds = season.activeMealPlans.map(mp => (typeof mp === 'object' ? mp._id : mp))
     return props.mealPlans.filter(mp => activeIds.includes(mp._id))
   }
 
   // Otherwise, check market's activeMealPlans
   if (props.market?.activeMealPlans?.length > 0) {
-    const activeIds = props.market.activeMealPlans.map(mp => typeof mp === 'object' ? mp._id : mp)
+    const activeIds = props.market.activeMealPlans.map(mp => (typeof mp === 'object' ? mp._id : mp))
     return props.mealPlans.filter(mp => activeIds.includes(mp._id))
   }
 
@@ -877,15 +1124,12 @@ const mealPlansRef = computed(() => props.mealPlans)
 const {
   baseRoom,
   baseMealPlan,
-  isBaseCell,
-  isBaseRoom: isBaseRoomFn,
-  calculatePrice: calcRelativePrice,
-  isRelativePricingEnabled
+  isBaseCell
 } = useRelativePricing(roomTypesRef, mealPlansRef)
 
 // Check if explicit base room is set (user clicked the star)
 const hasExplicitBaseRoom = computed(() => props.roomTypes.some(rt => rt.isBaseRoom === true))
-const hasExplicitBaseMealPlan = computed(() => props.mealPlans.some(mp => mp.isBaseMealPlan === true))
+// hasExplicitBaseMealPlan removed - was unused
 
 // Is current tab the base room?
 const isCurrentRoomBase = computed(() => {
@@ -948,40 +1192,62 @@ const calculateRelativePrices = () => {
       const mealAdj = meal.priceAdjustment || 0
 
       // Calculate relative price
-      roomPrices[room._id][meal._id].pricePerNight = applyAdjustments(baseCellPrice, roomAdj, mealAdj)
+      roomPrices[room._id][meal._id].pricePerNight = applyAdjustments(
+        baseCellPrice,
+        roomAdj,
+        mealAdj
+      )
 
       // Also calculate extra adult if base has it
       if (baseCellData.extraAdult > 0) {
-        roomPrices[room._id][meal._id].extraAdult = applyAdjustments(baseCellData.extraAdult, roomAdj, mealAdj)
+        roomPrices[room._id][meal._id].extraAdult = applyAdjustments(
+          baseCellData.extraAdult,
+          roomAdj,
+          mealAdj
+        )
       }
 
       // Calculate child prices
       if (baseCellData.childOrderPricing?.length > 0) {
         baseCellData.childOrderPricing.forEach((childPrice, idx) => {
           if (childPrice > 0 && roomPrices[room._id][meal._id].childOrderPricing) {
-            roomPrices[room._id][meal._id].childOrderPricing[idx] = applyAdjustments(childPrice, roomAdj, mealAdj)
+            roomPrices[room._id][meal._id].childOrderPricing[idx] = applyAdjustments(
+              childPrice,
+              roomAdj,
+              mealAdj
+            )
           }
         })
       }
 
       // Calculate infant price
       if (baseCellData.extraInfant > 0) {
-        roomPrices[room._id][meal._id].extraInfant = applyAdjustments(baseCellData.extraInfant, roomAdj, mealAdj)
+        roomPrices[room._id][meal._id].extraInfant = applyAdjustments(
+          baseCellData.extraInfant,
+          roomAdj,
+          mealAdj
+        )
       }
 
       // Calculate single supplement
       if (baseCellData.singleSupplement > 0) {
-        roomPrices[room._id][meal._id].singleSupplement = applyAdjustments(baseCellData.singleSupplement, roomAdj, mealAdj)
+        roomPrices[room._id][meal._id].singleSupplement = applyAdjustments(
+          baseCellData.singleSupplement,
+          roomAdj,
+          mealAdj
+        )
       }
     })
   })
 }
 
 // Current room type
-const currentRoomType = computed(() => filteredRoomTypes.value.find(rt => rt._id === selectedRoomTab.value))
+const currentRoomType = computed(() =>
+  filteredRoomTypes.value.find(rt => rt._id === selectedRoomTab.value)
+)
 
 // Helper to get child age bounds from childAgeGroups
-const getAgeRangesFromGroups = (groups) => {
+const getAgeRangesFromGroups = groups => {
   if (!groups || groups.length === 0) return null
   const infant = groups.find(g => g.code === 'infant')
   const childGroups = groups.filter(g => g.code !== 'infant')
@@ -1007,7 +1273,10 @@ const ageSettings = computed(() => {
   let infantSource = 'hotel'
 
   // Override from market if not inheriting from hotel
-  if (market?.childAgeSettings?.inheritFromHotel === false && market?.childAgeSettings?.childAgeGroups?.length) {
+  if (
+    market?.childAgeSettings?.inheritFromHotel === false &&
+    market?.childAgeSettings?.childAgeGroups?.length
+  ) {
     const marketAges = getAgeRangesFromGroups(market.childAgeSettings.childAgeGroups)
     if (marketAges?.childMaxAge != null) {
       childMaxAge = marketAges.childMaxAge
@@ -1020,7 +1289,10 @@ const ageSettings = computed(() => {
   }
 
   // Override from season if not inheriting from market
-  if (season?.childAgeSettings?.inheritFromMarket === false && season?.childAgeSettings?.childAgeGroups?.length) {
+  if (
+    season?.childAgeSettings?.inheritFromMarket === false &&
+    season?.childAgeSettings?.childAgeGroups?.length
+  ) {
     const seasonAges = getAgeRangesFromGroups(season.childAgeSettings.childAgeGroups)
     if (seasonAges?.childMaxAge != null) {
       childMaxAge = seasonAges.childMaxAge
@@ -1052,7 +1324,7 @@ const maxAdultsForCurrentRoom = computed(() => {
 
 // Get effective minAdults for a room considering override hierarchy:
 // RoomType (base) → Market (override) → Season (override)
-const getEffectiveMinAdults = (roomTypeId) => {
+const getEffectiveMinAdults = roomTypeId => {
   const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
   if (!roomType) return 1
 
@@ -1106,7 +1378,7 @@ const adultsRangeForCurrentRoom = computed(() => {
 
 // Get effective pricing type for a room considering override hierarchy:
 // RoomType (base) → Market (override) → Season (override)
-const getEffectivePricingType = (roomTypeId) => {
+const getEffectivePricingType = roomTypeId => {
   const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
   if (!roomType) return 'unit'
 
@@ -1168,7 +1440,7 @@ const currentRoomCombinations = computed(() => {
 })
 
 // Format combination key with age ranges: "1+3 (0-2, 3-6, 3-6)"
-const formatCombinationKey = (combo) => {
+const formatCombinationKey = combo => {
   const adults = combo.adults
   const children = combo.children || []
 
@@ -1179,17 +1451,17 @@ const formatCombinationKey = (combo) => {
   // Get age ranges from hotel's childAgeGroups
   const ageGroups = props.hotel?.childAgeGroups || []
 
-  const getAgeRange = (ageGroupCode) => {
+  const getAgeRange = ageGroupCode => {
     const group = ageGroups.find(g => g.code === ageGroupCode)
     if (group) {
       return `${group.minAge}-${group.maxAge}`
     }
     // Fallback if not found
     const fallbacks = {
-      'infant': '0-2',
-      'first': '3-6',
-      'second': '7-11',
-      'third': '12-17'
+      infant: '0-2',
+      first: '3-6',
+      second: '7-11',
+      third: '12-17'
     }
     return fallbacks[ageGroupCode] || ageGroupCode
   }
@@ -1209,7 +1481,7 @@ const calculateNights = computed(() => {
 })
 
 // Check if a room has any prices set (handles unit, standard OBP, and multiplier OBP)
-const hasRoomPrices = (roomTypeId) => {
+const hasRoomPrices = roomTypeId => {
   const prices = roomPrices[roomTypeId]
   if (!prices) return false
 
@@ -1276,35 +1548,33 @@ const canProceed = computed(() => {
 })
 
 // Methods
-const getRoomTypeName = (roomType) => {
+const getRoomTypeName = roomType => {
   if (!roomType) return ''
   return roomType.name?.[locale.value] || roomType.name?.tr || roomType.name?.en || ''
 }
 
-const getMealPlanName = (mealPlan) => {
-  return mealPlan.name?.[locale.value] || mealPlan.name?.tr || mealPlan.name?.en || ''
-}
+// getMealPlanName removed - was unused
 
-const getMealPlanBg = (code) => {
+const getMealPlanBg = code => {
   const colors = {
-    'RO': 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-    'BB': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-    'HB': 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-    'FB': 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-    'AI': 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-    'UAI': 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+    RO: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+    BB: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
+    HB: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
+    FB: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+    AI: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
+    UAI: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
   }
   return colors[code] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
 }
 
-const formatDisplayDate = (dateStr) => {
+const formatDisplayDate = dateStr => {
   if (!dateStr) return ''
   const [year, month, day] = dateStr.split('-')
   return `${day}.${month}.${year}`
 }
 
 // Get max children for a room type
-const getMaxChildrenForRoom = (roomTypeId) => {
+const getMaxChildrenForRoom = roomTypeId => {
   const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
   return roomType?.occupancy?.maxChildren ?? 2
 }
@@ -1313,7 +1583,6 @@ const getMaxChildrenForRoom = (roomTypeId) => {
 const initializeRoomData = () => {
   props.roomTypes.forEach(rt => {
     const maxChildren = getMaxChildrenForRoom(rt._id)
-    const maxAdults = rt.occupancy?.maxAdults ?? 4
 
     // Get pricing type from room type (set in room type form)
     const roomPricingType = rt.pricingType || 'unit'
@@ -1394,9 +1663,13 @@ const updateSelectedRoomTab = () => {
 }
 
 // Watch for data changes
-watch([() => props.roomTypes, () => props.mealPlans], () => {
-  initializeRoomData()
-}, { immediate: true, deep: true })
+watch(
+  [() => props.roomTypes, () => props.mealPlans],
+  () => {
+    initializeRoomData()
+  },
+  { immediate: true, deep: true }
+)
 
 // Watch base cell (base room + base meal plan) prices and trigger relative calculation
 watch(
@@ -1414,33 +1687,14 @@ watch(
 )
 
 // Watch for season change to update filtered room types
-watch(() => form.season, () => {
-  updateSelectedRoomTab()
-})
-
-// Selected season info
-const selectedSeasonInfo = computed(() => {
-  if (!form.season) return null
-  const season = props.seasons.find(s => s._id === form.season)
-  if (!season?.dateRanges?.length) return null
-
-  // Find the overall min start and max end from all date ranges
-  let minStart = null
-  let maxEnd = null
-
-  season.dateRanges.forEach(range => {
-    const start = new Date(range.startDate)
-    const end = new Date(range.endDate)
-    if (!minStart || start < minStart) minStart = start
-    if (!maxEnd || end > maxEnd) maxEnd = end
-  })
-
-  return {
-    startDate: minStart?.toISOString().split('T')[0],
-    endDate: maxEnd?.toISOString().split('T')[0],
-    dateRanges: season.dateRanges
+watch(
+  () => form.season,
+  () => {
+    updateSelectedRoomTab()
   }
-})
+)
+
+// selectedSeasonInfo removed - was unused
 
 // Get all seasons' combined min/max dates for DateRangePicker bounds
 const allSeasonsMinDate = computed(() => {
@@ -1465,21 +1719,7 @@ const allSeasonsMaxDate = computed(() => {
   return maxDate
 })
 
-// Build array of all valid season date ranges for checking
-const allSeasonDateRanges = computed(() => {
-  const ranges = []
-  props.seasons.forEach(season => {
-    season.dateRanges?.forEach(range => {
-      ranges.push({
-        seasonId: season._id,
-        season: season,
-        start: new Date(range.startDate),
-        end: new Date(range.endDate)
-      })
-    })
-  })
-  return ranges
-})
+// allSeasonDateRanges removed - was unused
 
 // Disabled dates (dates outside any season) - for DateRangePickerInline
 const disabledDates = computed(() => {
@@ -1512,7 +1752,7 @@ const detectedSeason = computed(() => {
 })
 
 // Auto-update form.season when detectedSeason changes
-watch(detectedSeason, (newSeason) => {
+watch(detectedSeason, newSeason => {
   if (newSeason) {
     form.season = newSeason._id
   } else {
@@ -1521,7 +1761,7 @@ watch(detectedSeason, (newSeason) => {
 })
 
 // Format season dates for display in legend
-const formatSeasonDates = (season) => {
+const formatSeasonDates = season => {
   if (!season?.dateRanges?.length) return ''
   const range = season.dateRanges[0]
   const start = new Date(range.startDate)
@@ -1571,7 +1811,6 @@ const copyCurrentRoomToAll = () => {
   toast.success(t('planning.pricing.copiedToRooms'))
 }
 
-
 const nextStep = () => {
   if (canProceed.value && currentStep.value < steps.length - 1) {
     currentStep.value++
@@ -1613,7 +1852,8 @@ const handleSave = async () => {
           hasValidPrice = mealPlanPrice?.pricePerNight > 0
         } else if (pricingType === 'per_person') {
           // Standard OBP: need at least 1 and 2 person prices
-          hasValidPrice = mealPlanPrice?.occupancyPricing?.[1] > 0 && mealPlanPrice?.occupancyPricing?.[2] > 0
+          hasValidPrice =
+            mealPlanPrice?.occupancyPricing?.[1] > 0 && mealPlanPrice?.occupancyPricing?.[2] > 0
         } else {
           // Unit: need pricePerNight
           hasValidPrice = mealPlanPrice?.pricePerNight > 0
@@ -1732,7 +1972,7 @@ const fetchLastRateAndSetDates = async () => {
       nextEndDate.setDate(nextEndDate.getDate() + 29)
 
       // Format dates as YYYY-MM-DD
-      const formatDate = (date) => {
+      const formatDate = date => {
         const year = date.getFullYear()
         const month = String(date.getMonth() + 1).padStart(2, '0')
         const day = String(date.getDate()).padStart(2, '0')
@@ -1743,7 +1983,7 @@ const fetchLastRateAndSetDates = async () => {
       dateRange.value.end = formatDate(nextEndDate)
     } else {
       // No existing rates - start from first day of last season
-      const formatDate = (date) => {
+      const formatDate = date => {
         const year = date.getFullYear()
         const month = String(date.getMonth() + 1).padStart(2, '0')
         const day = String(date.getDate()).padStart(2, '0')
@@ -1788,7 +2028,7 @@ const fetchLastRateAndSetDates = async () => {
     const endDate = new Date(today)
     endDate.setDate(endDate.getDate() + 30)
 
-    const formatDate = (date) => {
+    const formatDate = date => {
       const year = date.getFullYear()
       const month = String(date.getMonth() + 1).padStart(2, '0')
       const day = String(date.getDate()).padStart(2, '0')

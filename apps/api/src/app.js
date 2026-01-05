@@ -17,15 +17,17 @@ const app = express()
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 // Security
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  contentSecurityPolicy: {
-    directives: {
-      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-      "img-src": ["'self'", "data:", "http://localhost:4000", "http://localhost:5174"],
-    },
-  },
-}))
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'img-src': ["'self'", 'data:', 'http://localhost:4000', 'http://localhost:5174']
+      }
+    }
+  })
+)
 
 // CORS - Dynamic origin validation for multi-tenant domains
 const corsOptions = {
@@ -35,28 +37,38 @@ const corsOptions = {
       return callback(null, true)
     }
 
-    // In development, allow all origins
+    // Development: Allow localhost origins only
     if (config.isDev) {
-      return callback(null, true)
+      try {
+        const url = new URL(origin)
+        if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+          return callback(null, true)
+        }
+      } catch (_e) {
+        // Invalid URL, reject
+      }
     }
 
-    // Check against static allowed origins
+    // Check against static allowed origins from env
     const allowedOrigins = config.cors.origin || []
     if (allowedOrigins.includes(origin)) {
       return callback(null, true)
     }
 
-    // Extract hostname from origin
+    // Extract hostname from origin for dynamic partner domain validation
     try {
       const url = new URL(origin)
       const hostname = url.hostname
 
-      // Dynamic check: Allow any subdomain pattern (partner domains)
-      // In production, we trust partner-configured domains
-      // The actual domain validation happens at the API level
-      // For CORS, we allow the request but auth will validate the domain
-      return callback(null, true)
-    } catch (e) {
+      // Allow localhost in development
+      if (config.isDev && (hostname === 'localhost' || hostname === '127.0.0.1')) {
+        return callback(null, true)
+      }
+
+      // Production: Only allow configured origins
+      // Partner domains should be added to CORS_ORIGIN env variable
+      return callback(new Error('Origin not allowed by CORS'), false)
+    } catch (_e) {
       return callback(new Error('Invalid origin'), false)
     }
   },
@@ -64,9 +76,9 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 
-// Body parser (increased limit for base64 file uploads like contract PDFs)
-app.use(express.json({ limit: '50mb' }))
-app.use(express.urlencoded({ extended: true, limit: '50mb' }))
+// Body parser (10MB limit - sufficient for most uploads, prevents DoS)
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // i18n
 app.use(i18nMiddleware)
@@ -97,6 +109,7 @@ import authRoutes from './modules/auth/auth.routes.js'
 import partnerRoutes from './modules/partner/partner.routes.js'
 import agencyRoutes from './modules/agency/agency.routes.js'
 import userRoutes from './modules/user/user.routes.js'
+import sessionRoutes from './modules/session/session.routes.js'
 import siteSettingsRoutes from './modules/siteSettings/siteSettings.routes.js'
 import translationRoutes from './modules/translation/translation.routes.js'
 import hotelRoutes from './modules/hotel/hotel.routes.js'
@@ -113,12 +126,13 @@ import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
 import exchangeRoutes from './modules/exchange/exchange.routes.js'
 import notificationRoutes from './modules/notification/notification.routes.js'
 import paximumRoutes from './modules/paximum/paximum.routes.js'
-import validationRoutes from './validation/validation.routes.js'
+// Validation API removed - now using @booking-engine/validation shared package
 
 app.use('/api/auth', authRoutes)
 app.use('/api/partners', partnerRoutes)
 app.use('/api/agencies', agencyRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/sessions', sessionRoutes)
 app.use('/api/site-settings', siteSettingsRoutes)
 app.use('/api/translation', translationRoutes)
 app.use('/api/hotels', hotelRoutes)
@@ -135,7 +149,6 @@ app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/exchange', exchangeRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/paximum', paximumRoutes)
-app.use('/api/validation', validationRoutes)
 
 // 404 handler
 app.use(notFoundHandler)

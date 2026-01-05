@@ -154,37 +154,53 @@ const reservationService = {
 
   // Update reservation
   async update(hotelId, reservationId, data) {
-    const response = await pmsApiClient.put(`/pms/hotels/${hotelId}/reservations/${reservationId}`, data)
+    const response = await pmsApiClient.put(
+      `/pms/hotels/${hotelId}/reservations/${reservationId}`,
+      data
+    )
     return response.data
   },
 
   // Confirm reservation
   async confirm(hotelId, reservationId) {
-    const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/reservations/${reservationId}/confirm`)
+    const response = await pmsApiClient.post(
+      `/pms/hotels/${hotelId}/reservations/${reservationId}/confirm`
+    )
     return response.data
   },
 
   // Cancel reservation
   async cancel(hotelId, reservationId, data) {
-    const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/reservations/${reservationId}/cancel`, data)
+    const response = await pmsApiClient.post(
+      `/pms/hotels/${hotelId}/reservations/${reservationId}/cancel`,
+      data
+    )
     return response.data
   },
 
   // Mark as no-show
   async markNoShow(hotelId, reservationId) {
-    const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/reservations/${reservationId}/no-show`)
+    const response = await pmsApiClient.post(
+      `/pms/hotels/${hotelId}/reservations/${reservationId}/no-show`
+    )
     return response.data
   },
 
   // Add note
   async addNote(hotelId, reservationId, data) {
-    const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/reservations/${reservationId}/notes`, data)
+    const response = await pmsApiClient.post(
+      `/pms/hotels/${hotelId}/reservations/${reservationId}/notes`,
+      data
+    )
     return response.data
   },
 
   // Add payment
   async addPayment(hotelId, reservationId, data) {
-    const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/reservations/${reservationId}/payments`, data)
+    const response = await pmsApiClient.post(
+      `/pms/hotels/${hotelId}/reservations/${reservationId}/payments`,
+      data
+    )
     return response.data
   }
 }

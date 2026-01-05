@@ -79,11 +79,11 @@ function formatDNSRecords(domain, dkimTokens) {
  */
 function translateDkimStatus(status) {
   const statusMap = {
-    'PENDING': 'pending',
-    'SUCCESS': 'verified',
-    'FAILED': 'failed',
-    'TEMPORARY_FAILURE': 'pending',
-    'NOT_STARTED': 'none'
+    PENDING: 'pending',
+    SUCCESS: 'verified',
+    FAILED: 'failed',
+    TEMPORARY_FAILURE: 'pending',
+    NOT_STARTED: 'none'
   }
   return statusMap[status] || 'none'
 }

@@ -2,7 +2,9 @@
   <div class="p-6">
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+      <div
+        class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+      >
         <span class="material-icons text-2xl text-indigo-600 dark:text-indigo-400">checklist</span>
       </div>
       <div>
@@ -32,7 +34,10 @@
             class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
             :class="getIconClass(checks.arrivals)"
           >
-            <span class="material-icons text-lg" :class="{ 'animate-spin': checks.arrivals?.status === 'loading' }">
+            <span
+              class="material-icons text-lg"
+              :class="{ 'animate-spin': checks.arrivals?.status === 'loading' }"
+            >
               {{ getCheckIcon(checks.arrivals) }}
             </span>
           </div>
@@ -41,8 +46,13 @@
             <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
               <template v-if="checks.arrivals?.data">
                 {{ checks.arrivals.data.total }} rezervasyon -
-                <span class="text-green-600 dark:text-green-400">{{ checks.arrivals.data.checkedIn }} giris yapti</span>
-                <span v-if="checks.arrivals.data.pending > 0" class="text-amber-600 dark:text-amber-400">
+                <span class="text-green-600 dark:text-green-400"
+                  >{{ checks.arrivals.data.checkedIn }} giris yapti</span
+                >
+                <span
+                  v-if="checks.arrivals.data.pending > 0"
+                  class="text-amber-600 dark:text-amber-400"
+                >
                   , {{ checks.arrivals.data.pending }} bekliyor
                 </span>
               </template>
@@ -50,7 +60,9 @@
             </p>
           </div>
           <div v-if="checks.arrivals?.data?.pending > 0" class="flex-shrink-0">
-            <span class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">
+            <span
+              class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full"
+            >
               {{ checks.arrivals.data.pending }} bekliyor
             </span>
           </div>
@@ -67,7 +79,10 @@
             class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
             :class="getIconClass(checks.departures)"
           >
-            <span class="material-icons text-lg" :class="{ 'animate-spin': checks.departures?.status === 'loading' }">
+            <span
+              class="material-icons text-lg"
+              :class="{ 'animate-spin': checks.departures?.status === 'loading' }"
+            >
               {{ getCheckIcon(checks.departures) }}
             </span>
           </div>
@@ -76,8 +91,13 @@
             <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
               <template v-if="checks.departures?.data">
                 {{ checks.departures.data.total }} cikis -
-                <span class="text-green-600 dark:text-green-400">{{ checks.departures.data.checkedOut }} cikis yapti</span>
-                <span v-if="checks.departures.data.pending > 0" class="text-amber-600 dark:text-amber-400">
+                <span class="text-green-600 dark:text-green-400"
+                  >{{ checks.departures.data.checkedOut }} cikis yapti</span
+                >
+                <span
+                  v-if="checks.departures.data.pending > 0"
+                  class="text-amber-600 dark:text-amber-400"
+                >
                   , {{ checks.departures.data.pending }} bekliyor
                 </span>
               </template>
@@ -85,7 +105,9 @@
             </p>
           </div>
           <div v-if="checks.departures?.data?.pending > 0" class="flex-shrink-0">
-            <span class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">
+            <span
+              class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full"
+            >
               {{ checks.departures.data.pending }} bekliyor
             </span>
           </div>
@@ -102,7 +124,10 @@
             class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
             :class="getIconClass(checks.balances)"
           >
-            <span class="material-icons text-lg" :class="{ 'animate-spin': checks.balances?.status === 'loading' }">
+            <span
+              class="material-icons text-lg"
+              :class="{ 'animate-spin': checks.balances?.status === 'loading' }"
+            >
               {{ getCheckIcon(checks.balances) }}
             </span>
           </div>
@@ -110,11 +135,15 @@
             <h4 class="font-medium text-gray-900 dark:text-white">Odenmemis Bakiyeler</h4>
             <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
               <template v-if="checks.balances?.data">
-                <span v-if="checks.balances.data.count === 0" class="text-green-600 dark:text-green-400">
+                <span
+                  v-if="checks.balances.data.count === 0"
+                  class="text-green-600 dark:text-green-400"
+                >
                   Tum bakiyeler odenmis
                 </span>
                 <span v-else class="text-amber-600 dark:text-amber-400">
-                  {{ checks.balances.data.count }} odada {{ formatCurrency(checks.balances.data.total) }} bakiye
+                  {{ checks.balances.data.count }} odada
+                  {{ formatCurrency(checks.balances.data.total) }} bakiye
                 </span>
               </template>
               <template v-else>Kontrol ediliyor...</template>
@@ -126,20 +155,26 @@
                 :key="item.roomNumber"
                 class="flex items-center justify-between text-sm py-1 px-2 bg-amber-50 dark:bg-amber-900/20 rounded"
               >
-                <span class="text-gray-700 dark:text-gray-300">Oda {{ item.roomNumber }} - {{ item.guestName }}</span>
-                <span class="font-medium text-amber-700 dark:text-amber-400">{{ formatCurrency(item.balance) }}</span>
+                <span class="text-gray-700 dark:text-gray-300"
+                  >Oda {{ item.roomNumber }} - {{ item.guestName }}</span
+                >
+                <span class="font-medium text-amber-700 dark:text-amber-400">{{
+                  formatCurrency(item.balance)
+                }}</span>
               </div>
               <button
                 v-if="checks.balances.data.items.length > 3"
-                @click="showAllBalances = true"
                 class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+                @click="showAllBalances = true"
               >
                 +{{ checks.balances.data.items.length - 3 }} daha
               </button>
             </div>
           </div>
           <div v-if="checks.balances?.data?.count > 0" class="flex-shrink-0">
-            <span class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">
+            <span
+              class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full"
+            >
               {{ formatCurrency(checks.balances.data.total) }}
             </span>
           </div>
@@ -156,7 +191,10 @@
             class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
             :class="getIconClass(checks.housekeeping)"
           >
-            <span class="material-icons text-lg" :class="{ 'animate-spin': checks.housekeeping?.status === 'loading' }">
+            <span
+              class="material-icons text-lg"
+              :class="{ 'animate-spin': checks.housekeeping?.status === 'loading' }"
+            >
               {{ getCheckIcon(checks.housekeeping) }}
             </span>
           </div>
@@ -164,7 +202,10 @@
             <h4 class="font-medium text-gray-900 dark:text-white">Housekeeping Durumu</h4>
             <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
               <template v-if="checks.housekeeping?.data">
-                <span v-if="checks.housekeeping.data.dirty === 0" class="text-green-600 dark:text-green-400">
+                <span
+                  v-if="checks.housekeeping.data.dirty === 0"
+                  class="text-green-600 dark:text-green-400"
+                >
                   Tum odalar temiz
                 </span>
                 <span v-else class="text-amber-600 dark:text-amber-400">
@@ -175,7 +216,9 @@
             </p>
           </div>
           <div v-if="checks.housekeeping?.data?.dirty > 0" class="flex-shrink-0">
-            <span class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full">
+            <span
+              class="px-2 py-1 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full"
+            >
               {{ checks.housekeeping.data.dirty }} kirli
             </span>
           </div>
@@ -192,7 +235,10 @@
             class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
             :class="getIconClass(checks.shifts)"
           >
-            <span class="material-icons text-lg" :class="{ 'animate-spin': checks.shifts?.status === 'loading' }">
+            <span
+              class="material-icons text-lg"
+              :class="{ 'animate-spin': checks.shifts?.status === 'loading' }"
+            >
               {{ getCheckIcon(checks.shifts) }}
             </span>
           </div>
@@ -200,7 +246,10 @@
             <h4 class="font-medium text-gray-900 dark:text-white">Acik Kasalar</h4>
             <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
               <template v-if="checks.shifts?.data">
-                <span v-if="checks.shifts.data.count === 0" class="text-green-600 dark:text-green-400">
+                <span
+                  v-if="checks.shifts.data.count === 0"
+                  class="text-green-600 dark:text-green-400"
+                >
                   Tum kasalar kapali
                 </span>
                 <span v-else>
@@ -214,7 +263,9 @@
             </p>
           </div>
           <div v-if="checks.shifts?.data?.count > 0" class="flex-shrink-0">
-            <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full">
+            <span
+              class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full"
+            >
               {{ checks.shifts.data.count }} acik
             </span>
           </div>
@@ -226,11 +277,17 @@
     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-slate-700">
       <div class="flex items-center justify-between">
         <div>
-          <p v-if="warningCount > 0" class="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
+          <p
+            v-if="warningCount > 0"
+            class="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1"
+          >
             <span class="material-icons text-lg">warning</span>
             {{ warningCount }} uyari var - devam edebilirsiniz
           </p>
-          <p v-else-if="errorCount > 0" class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+          <p
+            v-else-if="errorCount > 0"
+            class="text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
+          >
             <span class="material-icons text-lg">error</span>
             {{ errorCount }} hata var - cozulmeden devam edilemez
           </p>
@@ -242,18 +299,18 @@
 
         <div class="flex items-center gap-3">
           <button
-            @click="runChecks"
             :disabled="loading"
             class="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="runChecks"
           >
             <span class="material-icons text-lg" :class="{ 'animate-spin': loading }">refresh</span>
             Yenile
           </button>
 
           <button
-            @click="handleContinue"
             :disabled="loading || errorCount > 0 || completing"
             class="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-lg transition-colors"
+            @click="handleContinue"
           >
             <span v-if="completing" class="material-icons animate-spin">refresh</span>
             {{ completing ? 'Kaydediliyor...' : 'Devam Et' }}
@@ -308,11 +365,11 @@ const errorCount = computed(() => {
 })
 
 // Methods
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return nightAuditService.formatCurrency(amount)
 }
 
-const getCheckClass = (check) => {
+const getCheckClass = check => {
   if (!check || check.status === 'loading') {
     return 'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-700'
   }
@@ -328,7 +385,7 @@ const getCheckClass = (check) => {
   }
 }
 
-const getIconClass = (check) => {
+const getIconClass = check => {
   if (!check || check.status === 'loading') {
     return 'bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-400'
   }
@@ -344,7 +401,7 @@ const getIconClass = (check) => {
   }
 }
 
-const getCheckIcon = (check) => {
+const getCheckIcon = check => {
   if (!check || check.status === 'loading') {
     return 'refresh'
   }

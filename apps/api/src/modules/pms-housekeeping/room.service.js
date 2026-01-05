@@ -4,6 +4,7 @@ import { asyncHandler } from '../../helpers/asyncHandler.js'
 import { BadRequestError, NotFoundError } from '../../core/errors.js'
 import { emitRoomStatusChange, emitHousekeepingUpdate } from '../pms/pmsSocket.js'
 import { notifyHotelUsers } from '../notification/notification.service.js'
+import logger from '../../core/logger.js'
 
 /**
  * Get all rooms for a hotel
@@ -101,8 +102,7 @@ export const createRoom = asyncHandler(async (req, res) => {
     notes
   })
 
-  const populatedRoom = await Room.findById(room._id)
-    .populate('roomType', 'name code')
+  const populatedRoom = await Room.findById(room._id).populate('roomType', 'name code')
 
   res.status(201).json({
     success: true,
@@ -217,8 +217,7 @@ export const updateRoom = asyncHandler(async (req, res) => {
 
   await room.save()
 
-  const updatedRoom = await Room.findById(roomId)
-    .populate('roomType', 'name code')
+  const updatedRoom = await Room.findById(roomId).populate('roomType', 'name code')
 
   res.json({
     success: true,
@@ -302,8 +301,7 @@ export const updateRoomStatus = asyncHandler(async (req, res) => {
 
   await room.save()
 
-  const updatedRoom = await Room.findById(roomId)
-    .populate('roomType', 'name code')
+  const updatedRoom = await Room.findById(roomId).populate('roomType', 'name code')
 
   // Emit socket event for real-time updates
   emitRoomStatusChange(hotelId, roomId, {
@@ -320,16 +318,16 @@ export const updateRoomStatus = asyncHandler(async (req, res) => {
       title: 'Oda Kirli',
       message: `Oda ${room.roomNumber} temizlik bekliyor`,
       reference: { model: 'Room', id: roomId },
-      actionUrl: `/pms/housekeeping`
-    }).catch(err => console.error('[Notification] Room dirty notification error:', err.message))
+      actionUrl: '/pms/housekeeping'
+    }).catch(err => logger.error('[Notification] Room dirty notification error:', err.message))
   } else if (status === ROOM_STATUS.VACANT_CLEAN || status === ROOM_STATUS.INSPECTED) {
     notifyHotelUsers(hotelId, req.user._id, {
       type: 'pms:room_ready',
       title: 'Oda Hazır',
       message: `Oda ${room.roomNumber} temizlendi ve hazır`,
       reference: { model: 'Room', id: roomId },
-      actionUrl: `/pms/front-desk`
-    }).catch(err => console.error('[Notification] Room ready notification error:', err.message))
+      actionUrl: '/pms/front-desk'
+    }).catch(err => logger.error('[Notification] Room ready notification error:', err.message))
   }
 
   res.json({
@@ -409,16 +407,16 @@ export const updateHousekeepingStatus = asyncHandler(async (req, res) => {
       title: 'Oda Hazır',
       message: `Oda ${room.roomNumber} temizlendi ve hazır`,
       reference: { model: 'Room', id: roomId },
-      actionUrl: `/pms/front-desk`
-    }).catch(err => console.error('[Notification] Room ready notification error:', err.message))
+      actionUrl: '/pms/front-desk'
+    }).catch(err => logger.error('[Notification] Room ready notification error:', err.message))
   } else if (currentStatus === HOUSEKEEPING_STATUS.DIRTY) {
     notifyHotelUsers(hotelId, req.user._id, {
       type: 'pms:room_dirty',
       title: 'Oda Kirli',
       message: `Oda ${room.roomNumber} temizlik bekliyor`,
       reference: { model: 'Room', id: roomId },
-      actionUrl: `/pms/housekeeping`
-    }).catch(err => console.error('[Notification] Room dirty notification error:', err.message))
+      actionUrl: '/pms/housekeeping'
+    }).catch(err => logger.error('[Notification] Room dirty notification error:', err.message))
   }
 
   res.json({

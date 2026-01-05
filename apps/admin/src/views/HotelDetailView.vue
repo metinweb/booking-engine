@@ -16,7 +16,10 @@
 
     <!-- Header with back button and save button -->
     <div class="mb-6 flex items-center justify-between">
-      <router-link to="/hotels" class="inline-flex items-center text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400">
+      <router-link
+        to="/hotels"
+        class="inline-flex items-center text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400"
+      >
         <span class="material-icons mr-1">arrow_back</span>
         {{ $t('common.back') }}
       </router-link>
@@ -26,25 +29,32 @@
         <button
           v-if="isLinkedHotel && !isNew"
           type="button"
-          @click="handleUnlink"
           :disabled="unlinking"
           class="px-4 py-2 border border-orange-500 text-orange-600 dark:text-orange-400 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors flex items-center gap-2"
+          @click="handleUnlink"
         >
           <span v-if="unlinking" class="animate-spin material-icons text-lg">refresh</span>
-          <span class="material-icons text-lg" v-else>link_off</span>
+          <span v-else class="material-icons text-lg">link_off</span>
           {{ $t('hotels.hotelBase.unlinkFromBase') }}
         </button>
 
         <!-- Save button -->
-        <button
-          @click="handleSave"
-          class="btn-primary"
-          :disabled="saving"
-        >
+        <button class="btn-primary" :disabled="saving" @click="handleSave">
           <span v-if="saving" class="flex items-center">
             <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             {{ $t('common.loading') }}
           </span>
@@ -61,7 +71,9 @@
       <div class="flex items-start gap-3">
         <span class="material-icons text-purple-600 dark:text-purple-400 mt-0.5">link</span>
         <div>
-          <h4 class="font-medium text-purple-800 dark:text-purple-300">{{ $t('hotels.linkedHotel.notice') }}</h4>
+          <h4 class="font-medium text-purple-800 dark:text-purple-300">
+            {{ $t('hotels.linkedHotel.notice') }}
+          </h4>
           <p class="text-sm text-purple-600 dark:text-purple-400 mt-1">
             {{ $t('hotels.linkedHotel.settingsEditable') }}
           </p>
@@ -94,8 +106,8 @@
             <div class="flex items-center">
               <label class="flex items-center cursor-pointer">
                 <input
-                  type="checkbox"
                   v-model="form.featured"
+                  type="checkbox"
                   class="w-5 h-5 text-amber-500 bg-gray-100 border-gray-300 rounded focus:ring-amber-500 dark:focus:ring-amber-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
                 />
                 <span class="ml-3 text-sm text-gray-700 dark:text-slate-300">
@@ -110,12 +122,7 @@
             <!-- Display Order -->
             <div>
               <label class="form-label">{{ $t('hotels.displayOrder') }}</label>
-              <input
-                v-model.number="form.displayOrder"
-                type="number"
-                min="0"
-                class="form-input"
-              />
+              <input v-model.number="form.displayOrder" type="number" min="0" class="form-input" />
             </div>
 
             <!-- Spacer -->
@@ -154,7 +161,7 @@
         </div>
 
         <!-- Tab Content -->
-        <form @submit.prevent="handleSave" class="p-6">
+        <form class="p-6" @submit.prevent="handleSave">
           <!-- Basic Info Tab -->
           <div v-show="activeTab === 'basic'">
             <HotelBasicForm
@@ -163,7 +170,7 @@
               :saving="saving"
               :is-new="isNew"
               :external-errors="tabErrors.basic"
-              @validation-change="(errors) => updateTabErrors('basic', errors)"
+              @validation-change="errors => updateTabErrors('basic', errors)"
             />
           </div>
 
@@ -174,7 +181,7 @@
               :hotel="hotel"
               :saving="saving"
               :external-errors="tabErrors.contact"
-              @validation-change="(errors) => updateTabErrors('contact', errors)"
+              @validation-change="errors => updateTabErrors('contact', errors)"
             />
           </div>
 
@@ -185,17 +192,13 @@
               :hotel="hotel"
               :saving="saving"
               :external-errors="tabErrors.address"
-              @validation-change="(errors) => updateTabErrors('address', errors)"
+              @validation-change="errors => updateTabErrors('address', errors)"
             />
           </div>
 
           <!-- Profile Tab -->
           <div v-show="activeTab === 'profile'">
-            <HotelProfile
-              ref="profileFormRef"
-              :hotel="hotel"
-              :saving="saving"
-            />
+            <HotelProfile ref="profileFormRef" :hotel="hotel" :saving="saving" />
           </div>
 
           <!-- Gallery Tab -->
@@ -211,29 +214,17 @@
 
           <!-- Amenities Tab -->
           <div v-show="activeTab === 'amenities'">
-            <HotelAmenities
-              ref="amenitiesFormRef"
-              :hotel="hotel"
-              :saving="saving"
-            />
+            <HotelAmenities ref="amenitiesFormRef" :hotel="hotel" :saving="saving" />
           </div>
 
           <!-- Policies Tab -->
           <div v-show="activeTab === 'policies'">
-            <HotelPolicies
-              ref="policiesFormRef"
-              :hotel="hotel"
-              :saving="saving"
-            />
+            <HotelPolicies ref="policiesFormRef" :hotel="hotel" :saving="saving" />
           </div>
 
           <!-- SEO Tab -->
           <div v-show="activeTab === 'seo'">
-            <HotelSeoForm
-              ref="seoFormRef"
-              :hotel="hotel"
-              :saving="saving"
-            />
+            <HotelSeoForm ref="seoFormRef" :hotel="hotel" :saving="saving" />
           </div>
         </form>
       </div>
@@ -264,16 +255,39 @@ import { useUIStore } from '@/stores/ui'
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const uiStore = useUIStore()
 
 // All supported languages for multilingual fields
-const SUPPORTED_LANGUAGES = ['tr', 'en', 'ru', 'el', 'de', 'es', 'it', 'fr', 'ro', 'bg', 'pt', 'da', 'zh', 'ar', 'fa', 'he', 'sq', 'uk', 'pl', 'az']
+const SUPPORTED_LANGUAGES = [
+  'tr',
+  'en',
+  'ru',
+  'el',
+  'de',
+  'es',
+  'it',
+  'fr',
+  'ro',
+  'bg',
+  'pt',
+  'da',
+  'zh',
+  'ar',
+  'fa',
+  'he',
+  'sq',
+  'uk',
+  'pl',
+  'az'
+]
 
 // Helper to create empty multilingual object
 const createMultiLangObject = () => {
   const obj = {}
-  SUPPORTED_LANGUAGES.forEach(lang => { obj[lang] = '' })
+  SUPPORTED_LANGUAGES.forEach(lang => {
+    obj[lang] = ''
+  })
   return obj
 }
 
@@ -346,13 +360,27 @@ function getEmptyHotel() {
       hasElevator: false
     },
     profile: {
-      overview: { content: createMultiLangObject(), establishedYear: null, renovationYear: null, chainBrand: '', officialRating: '' },
+      overview: {
+        content: createMultiLangObject(),
+        establishedYear: null,
+        renovationYear: null,
+        chainBrand: '',
+        officialRating: ''
+      },
       facilities: { content: createMultiLangObject(), features: [] },
       dining: { content: createMultiLangObject(), features: [] },
       sportsEntertainment: { content: createMultiLangObject(), features: [] },
       spaWellness: { content: createMultiLangObject(), features: [], spaDetails: { area: null } },
-      familyKids: { content: createMultiLangObject(), features: [], kidsClubAges: { min: null, max: null } },
-      beachPool: { content: createMultiLangObject(), features: [], beachDetails: { distance: null, type: '', length: null } },
+      familyKids: {
+        content: createMultiLangObject(),
+        features: [],
+        kidsClubAges: { min: null, max: null }
+      },
+      beachPool: {
+        content: createMultiLangObject(),
+        features: [],
+        beachDetails: { distance: null, type: '', length: null }
+      },
       honeymoon: { content: createMultiLangObject(), features: [], available: false },
       importantInfo: { content: createMultiLangObject() },
       location: { content: createMultiLangObject(), distances: [] }
@@ -424,7 +452,7 @@ const tabFields = {
 // Combine all errors for FormTabs
 const allErrors = computed(() => {
   const errors = {}
-  Object.entries(tabErrors).forEach(([tab, tabErrs]) => {
+  Object.entries(tabErrors).forEach(([, tabErrs]) => {
     Object.entries(tabErrs).forEach(([field, error]) => {
       errors[field] = error
     })
@@ -461,7 +489,7 @@ const validateAllForms = () => {
   }
 
   // Find first tab with errors
-  const firstErrorTab = Object.entries(validationResults).find(([_, isValid]) => !isValid)?.[0]
+  const firstErrorTab = Object.entries(validationResults).find(([, isValid]) => !isValid)?.[0]
 
   return {
     isValid: Object.values(validationResults).every(v => v),
@@ -526,7 +554,7 @@ const tabsWithDisabled = computed(() => {
   }))
 })
 
-const handleTabChange = (tab) => {
+const handleTabChange = tab => {
   // When switching to address tab, invalidate map size
   if (tab.id === 'address' && addressFormRef.value?.invalidateMapSize) {
     // Use nextTick to ensure the tab content is visible
@@ -545,7 +573,7 @@ const handleSourceSelectorClose = () => {
   }
 }
 
-const handleSourceSelect = (source) => {
+const handleSourceSelect = source => {
   showSourceSelector.value = false
 
   if (source === 'base') {
@@ -557,7 +585,7 @@ const handleSourceSelect = (source) => {
   }
 }
 
-const handleBaseLinked = (linkedHotel) => {
+const handleBaseLinked = linkedHotel => {
   showBaseSelector.value = false
   toast.success(t('hotels.hotelBase.linkSuccess'))
   // Navigate to the newly created linked hotel
@@ -578,7 +606,7 @@ const handleUnlink = async () => {
       // Refresh hotel data
       await fetchHotel()
     }
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   } finally {
     unlinking.value = false
@@ -619,9 +647,15 @@ const fetchHotel = async () => {
           useBaseDefaults: data.policies?.useBaseDefaults ?? true,
           childPolicy: { ...emptyHotel.policies.childPolicy, ...data.policies?.childPolicy },
           petPolicy: { ...emptyHotel.policies.petPolicy, ...data.policies?.petPolicy },
-          additionalInfo: { ...emptyHotel.policies.additionalInfo, ...data.policies?.additionalInfo },
+          additionalInfo: {
+            ...emptyHotel.policies.additionalInfo,
+            ...data.policies?.additionalInfo
+          },
           cancellationRules: data.policies?.cancellationRules || [],
-          freeCancellation: { ...emptyHotel.policies.freeCancellation, ...data.policies?.freeCancellation }
+          freeCancellation: {
+            ...emptyHotel.policies.freeCancellation,
+            ...data.policies?.freeCancellation
+          }
         },
         seo: {
           title: { ...emptyHotel.seo.title, ...data.seo?.title },
@@ -639,7 +673,10 @@ const fetchHotel = async () => {
           facilities: {
             ...emptyHotel.profile.facilities,
             ...data.profile?.facilities,
-            content: { ...emptyHotel.profile.facilities.content, ...data.profile?.facilities?.content }
+            content: {
+              ...emptyHotel.profile.facilities.content,
+              ...data.profile?.facilities?.content
+            }
           },
           dining: {
             ...emptyHotel.profile.dining,
@@ -649,35 +686,62 @@ const fetchHotel = async () => {
           sportsEntertainment: {
             ...emptyHotel.profile.sportsEntertainment,
             ...data.profile?.sportsEntertainment,
-            content: { ...emptyHotel.profile.sportsEntertainment.content, ...data.profile?.sportsEntertainment?.content }
+            content: {
+              ...emptyHotel.profile.sportsEntertainment.content,
+              ...data.profile?.sportsEntertainment?.content
+            }
           },
           spaWellness: {
             ...emptyHotel.profile.spaWellness,
             ...data.profile?.spaWellness,
-            content: { ...emptyHotel.profile.spaWellness.content, ...data.profile?.spaWellness?.content },
-            spaDetails: { ...emptyHotel.profile.spaWellness.spaDetails, ...data.profile?.spaWellness?.spaDetails }
+            content: {
+              ...emptyHotel.profile.spaWellness.content,
+              ...data.profile?.spaWellness?.content
+            },
+            spaDetails: {
+              ...emptyHotel.profile.spaWellness.spaDetails,
+              ...data.profile?.spaWellness?.spaDetails
+            }
           },
           familyKids: {
             ...emptyHotel.profile.familyKids,
             ...data.profile?.familyKids,
-            content: { ...emptyHotel.profile.familyKids.content, ...data.profile?.familyKids?.content },
-            kidsClubAges: { ...emptyHotel.profile.familyKids.kidsClubAges, ...data.profile?.familyKids?.kidsClubAges }
+            content: {
+              ...emptyHotel.profile.familyKids.content,
+              ...data.profile?.familyKids?.content
+            },
+            kidsClubAges: {
+              ...emptyHotel.profile.familyKids.kidsClubAges,
+              ...data.profile?.familyKids?.kidsClubAges
+            }
           },
           beachPool: {
             ...emptyHotel.profile.beachPool,
             ...data.profile?.beachPool,
-            content: { ...emptyHotel.profile.beachPool.content, ...data.profile?.beachPool?.content },
-            beachDetails: { ...emptyHotel.profile.beachPool.beachDetails, ...data.profile?.beachPool?.beachDetails }
+            content: {
+              ...emptyHotel.profile.beachPool.content,
+              ...data.profile?.beachPool?.content
+            },
+            beachDetails: {
+              ...emptyHotel.profile.beachPool.beachDetails,
+              ...data.profile?.beachPool?.beachDetails
+            }
           },
           honeymoon: {
             ...emptyHotel.profile.honeymoon,
             ...data.profile?.honeymoon,
-            content: { ...emptyHotel.profile.honeymoon.content, ...data.profile?.honeymoon?.content }
+            content: {
+              ...emptyHotel.profile.honeymoon.content,
+              ...data.profile?.honeymoon?.content
+            }
           },
           importantInfo: {
             ...emptyHotel.profile.importantInfo,
             ...data.profile?.importantInfo,
-            content: { ...emptyHotel.profile.importantInfo.content, ...data.profile?.importantInfo?.content }
+            content: {
+              ...emptyHotel.profile.importantInfo.content,
+              ...data.profile?.importantInfo?.content
+            }
           },
           location: {
             ...emptyHotel.profile.location,
@@ -761,19 +825,19 @@ const handleSave = async () => {
   }
 }
 
-const handleImageUploaded = (newImage) => {
+const handleImageUploaded = newImage => {
   hotel.value.images.push(newImage)
 }
 
-const handleImageDeleted = (imageId) => {
+const handleImageDeleted = imageId => {
   hotel.value.images = hotel.value.images.filter(img => img._id !== imageId)
 }
 
-const handleImagesReordered = (images) => {
+const handleImagesReordered = images => {
   hotel.value.images = images
 }
 
-const handleMainImageSet = (imageId) => {
+const handleMainImageSet = imageId => {
   hotel.value.images = hotel.value.images.map(img => ({
     ...img,
     isMain: img._id === imageId
@@ -781,28 +845,32 @@ const handleMainImageSet = (imageId) => {
 }
 
 // Watch for route changes
-watch(() => route.params.id, (newId) => {
-  // Clear all errors when route changes
-  clearAllTabErrors()
+watch(
+  () => route.params.id,
+  newId => {
+    // Clear all errors when route changes
+    clearAllTabErrors()
 
-  if (newId) {
-    // Existing hotel - fetch data
-    showSourceSelector.value = false
-    showBaseSelector.value = false
-    fetchHotel()
-  } else {
-    // New hotel - show source selector
-    hotel.value = getEmptyHotel()
-    form.value = {
-      status: 'draft',
-      featured: false,
-      displayOrder: 0
+    if (newId) {
+      // Existing hotel - fetch data
+      showSourceSelector.value = false
+      showBaseSelector.value = false
+      fetchHotel()
+    } else {
+      // New hotel - show source selector
+      hotel.value = getEmptyHotel()
+      form.value = {
+        status: 'draft',
+        featured: false,
+        displayOrder: 0
+      }
+      activeTab.value = 'basic'
+      showSourceSelector.value = true
+      uiStore.setPageTitleSuffix(t('hotels.newHotel'))
     }
-    activeTab.value = 'basic'
-    showSourceSelector.value = true
-    uiStore.setPageTitleSuffix(t('hotels.newHotel'))
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
 onMounted(() => {
   // Initial setup is handled by the watch with immediate: true

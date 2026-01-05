@@ -3,11 +3,16 @@
     <!-- Header with Back Button -->
     <div class="mb-6">
       <button
-        @click="router.push('/agencies')"
         class="flex items-center text-gray-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors mb-4"
+        @click="router.push('/agencies')"
       >
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          />
         </svg>
         {{ $t('common.back') }}
       </button>
@@ -20,11 +25,18 @@
             <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
               {{ agency?.name }} - {{ $t('agencies.users') }}
             </h2>
-            <p class="text-gray-600 dark:text-slate-400 mt-1">{{ $t('agencies.usersDescription') }}</p>
+            <p class="text-gray-600 dark:text-slate-400 mt-1">
+              {{ $t('agencies.usersDescription') }}
+            </p>
           </div>
-          <button @click="openCreateModal" class="btn-primary flex items-center">
+          <button class="btn-primary flex items-center" @click="openCreateModal">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             {{ $t('agencies.addUser') }}
           </button>
@@ -32,11 +44,7 @@
       </div>
 
       <div class="p-6">
-        <DataTable
-          :columns="columns"
-          :data="users"
-          :loading="loading"
-        >
+        <DataTable :columns="columns" :data="users" :loading="loading">
           <template #cell-status="{ value }">
             <span
               class="badge"
@@ -56,21 +64,31 @@
           <template #actions="{ item }">
             <div class="flex items-center justify-end gap-2">
               <button
-                @click="openEditModal(item)"
                 class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                 :title="$t('common.edit')"
+                @click="openEditModal(item)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
                 </svg>
               </button>
               <button
-                @click="confirmDelete(item)"
                 class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 :title="$t('common.delete')"
+                @click="confirmDelete(item)"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
               </button>
             </div>
@@ -86,25 +104,15 @@
       size="md"
       :close-on-overlay="false"
     >
-      <form @submit.prevent="handleSubmit" class="space-y-4">
+      <form class="space-y-4" @submit.prevent="handleSubmit">
         <div>
           <label class="form-label">{{ $t('agencies.userName') }} *</label>
-          <input
-            v-model="form.name"
-            type="text"
-            class="form-input"
-            required
-          />
+          <input v-model="form.name" type="text" class="form-input" required />
         </div>
 
         <div>
           <label class="form-label">{{ $t('agencies.userEmail') }} *</label>
-          <input
-            v-model="form.email"
-            type="email"
-            class="form-input"
-            required
-          />
+          <input v-model="form.email" type="email" class="form-input" required />
         </div>
 
         <div v-if="!isEditing">
@@ -120,11 +128,7 @@
 
         <div>
           <label class="form-label">{{ $t('agencies.userPhone') }}</label>
-          <input
-            v-model="form.phone"
-            type="text"
-            class="form-input"
-          />
+          <input v-model="form.phone" type="text" class="form-input" />
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -147,23 +151,25 @@
       </form>
 
       <template #footer>
-        <button
-          @click="showModal = false"
-          type="button"
-          class="btn-secondary"
-        >
+        <button type="button" class="btn-secondary" @click="showModal = false">
           {{ $t('common.cancel') }}
         </button>
-        <button
-          @click="handleSubmit"
-          type="submit"
-          class="btn-primary"
-          :disabled="submitting"
-        >
+        <button type="submit" class="btn-primary" :disabled="submitting" @click="handleSubmit">
           <span v-if="submitting" class="flex items-center">
             <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             {{ $t('common.loading') }}
           </span>
@@ -173,29 +179,16 @@
     </Modal>
 
     <!-- Delete Confirmation Modal -->
-    <Modal
-      v-model="showDeleteModal"
-      :title="$t('agencies.deleteUser')"
-      size="sm"
-    >
+    <Modal v-model="showDeleteModal" :title="$t('agencies.deleteUser')" size="sm">
       <p class="text-gray-600 dark:text-slate-400">
         {{ $t('agencies.deleteUserConfirm') }}
       </p>
 
       <template #footer>
-        <button
-          @click="showDeleteModal = false"
-          type="button"
-          class="btn-secondary"
-        >
+        <button type="button" class="btn-secondary" @click="showDeleteModal = false">
           {{ $t('common.no') }}
         </button>
-        <button
-          @click="handleDelete"
-          type="button"
-          class="btn-danger"
-          :disabled="deleting"
-        >
+        <button type="button" class="btn-danger" :disabled="deleting" @click="handleDelete">
           <span v-if="deleting">{{ $t('common.loading') }}</span>
           <span v-else>{{ $t('common.yes') }}</span>
         </button>
@@ -275,7 +268,7 @@ const openCreateModal = () => {
   showModal.value = true
 }
 
-const openEditModal = (user) => {
+const openEditModal = user => {
   isEditing.value = true
   selectedUser.value = user
   form.value = {
@@ -295,7 +288,11 @@ const handleSubmit = async () => {
     if (isEditing.value) {
       const updateData = { ...form.value }
       delete updateData.password
-      const response = await agencyService.updateAgencyUser(agencyId, selectedUser.value._id, updateData)
+      const response = await agencyService.updateAgencyUser(
+        agencyId,
+        selectedUser.value._id,
+        updateData
+      )
       if (response.success) {
         toast.success(t('agencies.userUpdateSuccess'))
         await fetchAgencyAndUsers()
@@ -316,7 +313,7 @@ const handleSubmit = async () => {
   }
 }
 
-const confirmDelete = (user) => {
+const confirmDelete = user => {
   selectedUser.value = user
   showDeleteModal.value = true
 }
@@ -341,7 +338,7 @@ const handleDelete = async () => {
 // (current agency may not belong to new partner)
 let isInitialLoad = true
 usePartnerContext({
-  onPartnerChange: (partner) => {
+  onPartnerChange: partner => {
     if (isInitialLoad) {
       isInitialLoad = false
       fetchAgencyAndUsers()

@@ -1,11 +1,6 @@
 <template>
-  <Modal
-    v-model="isOpen"
-    title="Kullaniciyi Duzenle"
-    size="lg"
-    :close-on-overlay="false"
-  >
-    <form @submit.prevent="handleSubmit" class="space-y-4">
+  <Modal v-model="isOpen" title="Kullaniciyi Duzenle" size="lg" :close-on-overlay="false">
+    <form class="space-y-4" @submit.prevent="handleSubmit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- First Name -->
         <div>
@@ -35,7 +30,9 @@
 
         <!-- Email -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-posta</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >E-posta</label
+          >
           <input
             v-model="form.email"
             type="email"
@@ -45,27 +42,29 @@
 
         <!-- Phone -->
         <div>
-          <PhoneInput
-            v-model="form.phone"
-            label="Telefon"
-            country="TR"
-          />
+          <PhoneInput v-model="form.phone" label="Telefon" country="TR" />
         </div>
 
         <!-- Department -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Departman</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >Departman</label
+          >
           <select
             v-model="form.department"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
           >
-            <option v-for="dept in departments" :key="dept.value" :value="dept.value">{{ dept.label }}</option>
+            <option v-for="dept in departments" :key="dept.value" :value="dept.value">
+              {{ dept.label }}
+            </option>
           </select>
         </div>
 
         <!-- Position -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pozisyon</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >Pozisyon</label
+          >
           <input
             v-model="form.position"
             type="text"
@@ -91,17 +90,22 @@
         <!-- Active Status -->
         <div class="flex items-center gap-2 pt-6">
           <input
+            id="editIsActive"
             v-model="form.isActive"
             type="checkbox"
-            id="editIsActive"
             class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
           />
-          <label for="editIsActive" class="text-sm text-gray-700 dark:text-gray-300">Aktif kullanici</label>
+          <label for="editIsActive" class="text-sm text-gray-700 dark:text-gray-300"
+            >Aktif kullanici</label
+          >
         </div>
       </div>
 
       <!-- Assigned Hotels Info -->
-      <div v-if="user?.assignedHotels?.length > 0" class="border-t border-gray-200 dark:border-slate-700 pt-4 mt-4">
+      <div
+        v-if="user?.assignedHotels?.length > 0"
+        class="border-t border-gray-200 dark:border-slate-700 pt-4 mt-4"
+      >
         <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Atanan Oteller</h4>
         <div class="space-y-2">
           <div
@@ -110,13 +114,17 @@
             class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
           >
             <div>
-              <p class="font-medium text-gray-900 dark:text-white">{{ assignment.hotel?.name || 'Otel' }}</p>
-              <p class="text-sm text-gray-500 dark:text-slate-400">{{ getRoleLabel(assignment.role) }}</p>
+              <p class="font-medium text-gray-900 dark:text-white">
+                {{ assignment.hotel?.name || 'Otel' }}
+              </p>
+              <p class="text-sm text-gray-500 dark:text-slate-400">
+                {{ getRoleLabel(assignment.role) }}
+              </p>
             </div>
             <button
               type="button"
-              @click="removeHotel(assignment.hotel?._id || assignment.hotel)"
               class="p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded"
+              @click="removeHotel(assignment.hotel?._id || assignment.hotel)"
             >
               <span class="material-icons text-lg">close</span>
             </button>
@@ -131,16 +139,16 @@
     <template #footer>
       <div class="flex justify-end gap-3">
         <button
-          @click="isOpen = false"
           type="button"
           class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+          @click="isOpen = false"
         >
           Iptal
         </button>
         <button
-          @click="handleSubmit"
           :disabled="saving"
           class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
+          @click="handleSubmit"
         >
           <span v-if="saving" class="animate-spin material-icons text-lg">refresh</span>
           {{ saving ? 'Kaydediliyor...' : 'Kaydet' }}
@@ -170,7 +178,7 @@ const roles = pmsAdminUserService.getRoles()
 
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const saving = ref(false)
@@ -187,26 +195,29 @@ const form = ref({
 })
 
 // Load user data when modal opens
-watch(() => props.modelValue, (val) => {
-  if (val && props.user) {
-    form.value = {
-      firstName: props.user.firstName || '',
-      lastName: props.user.lastName || '',
-      email: props.user.email || '',
-      phone: props.user.phone || '',
-      department: props.user.department || 'front_office',
-      position: props.user.position || '',
-      language: props.user.language || 'tr',
-      isActive: props.user.isActive ?? true
+watch(
+  () => props.modelValue,
+  val => {
+    if (val && props.user) {
+      form.value = {
+        firstName: props.user.firstName || '',
+        lastName: props.user.lastName || '',
+        email: props.user.email || '',
+        phone: props.user.phone || '',
+        department: props.user.department || 'front_office',
+        position: props.user.position || '',
+        language: props.user.language || 'tr',
+        isActive: props.user.isActive ?? true
+      }
     }
   }
-})
+)
 
-const getRoleLabel = (role) => {
+const getRoleLabel = role => {
   return roles.find(r => r.value === role)?.label || role
 }
 
-const removeHotel = async (hotelId) => {
+const removeHotel = async hotelId => {
   if (!hotelId || !props.user?._id) return
 
   try {

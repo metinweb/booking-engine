@@ -3,18 +3,30 @@
     <!-- Accordion Header -->
     <button
       type="button"
-      @click="isOpen = !isOpen"
       class="w-full flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+      @click="isOpen = !isOpen"
     >
       <div class="flex items-center gap-3">
-        <span v-if="icon" class="material-icons text-purple-600 dark:text-purple-400">{{ icon }}</span>
+        <span v-if="icon" class="material-icons text-purple-600 dark:text-purple-400">{{
+          icon
+        }}</span>
         <span class="font-medium text-gray-800 dark:text-slate-200">{{ title }}</span>
-        <span v-if="featureCount > 0" class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-full">
+        <span
+          v-if="featureCount > 0"
+          class="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-full"
+        >
           {{ selectedFeatures.length }}/{{ featureCount }}
         </span>
-        <span v-if="hasContent" class="w-2 h-2 bg-green-500 rounded-full" :title="$t('hotels.profile.hasContent')"></span>
+        <span
+          v-if="hasContent"
+          class="w-2 h-2 bg-green-500 rounded-full"
+          :title="$t('hotels.profile.hasContent')"
+        ></span>
       </div>
-      <span class="material-icons text-gray-500 transition-transform" :class="{ 'rotate-180': isOpen }">
+      <span
+        class="material-icons text-gray-500 transition-transform"
+        :class="{ 'rotate-180': isOpen }"
+      >
         expand_more
       </span>
     </button>
@@ -49,11 +61,14 @@
                 <input
                   type="checkbox"
                   :checked="isFeatureSelected(feature.value)"
-                  @change="toggleFeature(feature.value)"
                   :disabled="readonly"
                   class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                  @change="toggleFeature(feature.value)"
                 />
-                <span class="text-sm text-gray-700 dark:text-slate-300 truncate" :title="feature.label">
+                <span
+                  class="text-sm text-gray-700 dark:text-slate-300 truncate"
+                  :title="feature.label"
+                >
                   {{ feature.label }}
                 </span>
               </label>
@@ -80,7 +95,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import RichTextEditor from '@/components/common/RichTextEditor.vue'
 
 const props = defineProps({
@@ -133,7 +148,7 @@ const isOpen = ref(props.defaultOpen)
 // Local content for v-model binding
 const localContent = computed({
   get: () => props.content,
-  set: (value) => emit('update:content', value)
+  set: value => emit('update:content', value)
 })
 
 // Feature count
@@ -141,16 +156,18 @@ const featureCount = computed(() => props.features.length)
 
 // Check if content has any value
 const hasContent = computed(() => {
-  return Object.values(props.content || {}).some(val => val && val.trim && val.trim() !== '' && val !== '<p></p>')
+  return Object.values(props.content || {}).some(
+    val => val && val.trim && val.trim() !== '' && val !== '<p></p>'
+  )
 })
 
 // Check if a feature is selected
-const isFeatureSelected = (value) => {
+const isFeatureSelected = value => {
   return props.selectedFeatures.includes(value)
 }
 
 // Toggle feature selection
-const toggleFeature = (value) => {
+const toggleFeature = value => {
   const newFeatures = [...props.selectedFeatures]
   const index = newFeatures.indexOf(value)
 

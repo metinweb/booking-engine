@@ -22,13 +22,14 @@
           <div class="flex flex-col items-center">
             <div
               class="flex items-center justify-center rounded-full font-semibold transition-all"
-              :class="[
-                stepSizeClasses,
-                getStepColorClasses(index)
-              ]"
+              :class="[stepSizeClasses, getStepColorClasses(index)]"
             >
               <!-- Completed icon -->
-              <span v-if="isCompleted(index) && !step.error" class="material-icons" :class="iconSizeClasses">
+              <span
+                v-if="isCompleted(index) && !step.error"
+                class="material-icons"
+                :class="iconSizeClasses"
+              >
                 check
               </span>
               <!-- Error icon -->
@@ -49,10 +50,7 @@
               class="mt-2 text-center"
               :class="labelWidthClasses"
             >
-              <p
-                class="font-medium text-sm"
-                :class="getLabelColorClasses(index)"
-              >
+              <p class="font-medium text-sm" :class="getLabelColorClasses(index)">
                 {{ step.label }}
               </p>
               <p v-if="step.description" class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
@@ -62,14 +60,8 @@
           </div>
 
           <!-- Label (horizontal layout) -->
-          <div
-            v-if="orientation === 'vertical'"
-            class="ml-4"
-          >
-            <p
-              class="font-medium"
-              :class="getLabelColorClasses(index)"
-            >
+          <div v-if="orientation === 'vertical'" class="ml-4">
+            <p class="font-medium" :class="getLabelColorClasses(index)">
               {{ step.label }}
             </p>
             <p v-if="step.description" class="text-sm text-gray-500 dark:text-slate-400">
@@ -86,26 +78,21 @@
             orientation === 'horizontal' ? 'h-0.5' : 'w-0.5 h-8'
           ]"
         >
-          <div
-            class="h-full w-full transition-colors"
-            :class="getConnectorClasses(index)"
-          ></div>
+          <div class="h-full w-full transition-colors" :class="getConnectorClasses(index)"></div>
         </div>
       </template>
     </div>
 
     <!-- Content area -->
     <div v-if="$slots.default" class="mt-6">
-      <slot :currentStep="modelValue" :step="currentStepData"></slot>
+      <slot :current-step="modelValue" :step="currentStepData"></slot>
     </div>
 
     <!-- Navigation buttons -->
     <div v-if="showNavigation" class="flex items-center justify-between mt-6">
       <button
         type="button"
-        class="px-4 py-2 text-sm font-medium rounded-lg transition-colors
-               text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700
-               disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-2 text-sm font-medium rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="modelValue === 0"
         @click="prev"
       >
@@ -115,14 +102,16 @@
 
       <button
         type="button"
-        class="px-4 py-2 text-sm font-medium rounded-lg transition-colors
-               bg-indigo-600 text-white hover:bg-indigo-700
-               disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-2 text-sm font-medium rounded-lg transition-colors bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="modelValue === steps.length - 1 && !finishable"
         @click="next"
       >
         {{ modelValue === steps.length - 1 ? finishLabel : nextLabel }}
-        <span v-if="modelValue !== steps.length - 1" class="material-icons text-sm align-middle ml-1">arrow_forward</span>
+        <span
+          v-if="modelValue !== steps.length - 1"
+          class="material-icons text-sm align-middle ml-1"
+          >arrow_forward</span
+        >
       </button>
     </div>
   </div>
@@ -146,19 +135,19 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Orientation
   orientation: {
     type: String,
     default: 'horizontal',
-    validator: (v) => ['horizontal', 'vertical'].includes(v)
+    validator: v => ['horizontal', 'vertical'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'blue', 'green', 'purple', 'amber'].includes(v)
+    validator: v => ['indigo', 'blue', 'green', 'purple', 'amber'].includes(v)
   },
   // Clickable steps
   clickable: {
@@ -206,17 +195,17 @@ const emit = defineEmits(['update:modelValue', 'step-click', 'finish'])
 const currentStepData = computed(() => props.steps[props.modelValue] || null)
 
 // Check if step is completed
-const isCompleted = (index) => {
+const isCompleted = index => {
   return index < props.modelValue
 }
 
 // Check if step is active
-const isActive = (index) => {
+const isActive = index => {
   return index === props.modelValue
 }
 
 // Handle step click
-const handleStepClick = (index) => {
+const handleStepClick = index => {
   if (!props.clickable) return
   if (props.steps[index]?.disabled) return
 
@@ -273,7 +262,7 @@ const labelWidthClasses = computed(() => {
 })
 
 // Get step color classes
-const getStepColorClasses = (index) => {
+const getStepColorClasses = index => {
   const step = props.steps[index]
 
   if (step?.error) {
@@ -293,11 +282,15 @@ const getStepColorClasses = (index) => {
 
   if (isActive(index)) {
     const colors = {
-      indigo: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400',
+      indigo:
+        'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400',
       blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-400',
-      green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-2 border-green-600 dark:border-green-400',
-      purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-2 border-purple-600 dark:border-purple-400',
-      amber: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-2 border-amber-600 dark:border-amber-400'
+      green:
+        'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-2 border-green-600 dark:border-green-400',
+      purple:
+        'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-2 border-purple-600 dark:border-purple-400',
+      amber:
+        'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border-2 border-amber-600 dark:border-amber-400'
     }
     return colors[props.color]
   }
@@ -306,7 +299,7 @@ const getStepColorClasses = (index) => {
 }
 
 // Get label color classes
-const getLabelColorClasses = (index) => {
+const getLabelColorClasses = index => {
   const step = props.steps[index]
 
   if (step?.error) {
@@ -321,7 +314,7 @@ const getLabelColorClasses = (index) => {
 }
 
 // Get connector classes
-const getConnectorClasses = (index) => {
+const getConnectorClasses = index => {
   if (isCompleted(index)) {
     const colors = {
       indigo: 'bg-indigo-600 dark:bg-indigo-500',

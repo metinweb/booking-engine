@@ -130,7 +130,7 @@ export default class IletiMerkeziProvider extends ISMSProvider {
     if (!phone) return null
 
     // Remove all non-numeric characters
-    let cleaned = phone.replace(/[^0-9]/g, '')
+    const cleaned = phone.replace(/[^0-9]/g, '')
 
     // Handle different formats
     if (cleaned.startsWith('90') && cleaned.length === 12) {
@@ -176,17 +176,17 @@ export default class IletiMerkeziProvider extends ISMSProvider {
    */
   getErrorMessage(code) {
     const errorMessages = {
-      '400': 'İstek formatı hatalı',
-      '401': 'Kimlik doğrulama hatası',
-      '402': 'Bakiye yetersiz',
-      '403': 'Erişim engellendi',
-      '404': 'Kaynak bulunamadı',
-      '450': 'Gönderici adı onaylı değil',
-      '451': 'Tekrarlanan gönderi',
-      '452': 'Alıcı sayısı sınırı aşıldı',
-      '453': 'Mesaj boş veya çok uzun',
-      '454': 'Geçersiz telefon numarası',
-      '500': 'Sunucu hatası'
+      400: 'İstek formatı hatalı',
+      401: 'Kimlik doğrulama hatası',
+      402: 'Bakiye yetersiz',
+      403: 'Erişim engellendi',
+      404: 'Kaynak bulunamadı',
+      450: 'Gönderici adı onaylı değil',
+      451: 'Tekrarlanan gönderi',
+      452: 'Alıcı sayısı sınırı aşıldı',
+      453: 'Mesaj boş veya çok uzun',
+      454: 'Geçersiz telefon numarası',
+      500: 'Sunucu hatası'
     }
 
     return errorMessages[code]

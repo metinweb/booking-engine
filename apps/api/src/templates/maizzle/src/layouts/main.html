@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ LANG | default: 'tr' }}" xmlns:v="urn:schemas-microsoft-com:vml">
+<html lang="%% LANG %%" xmlns:v="urn:schemas-microsoft-com:vml">
 <head>
   <meta charset="utf-8">
   <meta name="x-apple-disable-message-reformatting">
@@ -19,7 +19,7 @@
     td,th,div,p,a,h1,h2,h3,h4,h5,h6 {font-family: "Segoe UI", sans-serif; mso-line-height-rule: exactly;}
   </style>
   <![endif]-->
-  <title>{{ TITLE }}</title>
+  <title>%% TITLE %%</title>
   <style>
     @media (max-width: 600px) {
       .sm-w-full { width: 100% !important; }
@@ -31,12 +31,12 @@
 <body class="m-0 p-0 w-full bg-slate-100" style="word-break: break-word; -webkit-font-smoothing: antialiased;">
   <!-- Preview Text -->
   <div class="hidden max-h-0 overflow-hidden" style="mso-hide: all;">
-    {{ PREVIEW_TEXT }}
+    %% PREVIEW_TEXT %%
     &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847;
   </div>
 
   <!-- Email Container -->
-  <div role="article" aria-roledescription="email" aria-label="{{ TITLE }}" lang="{{ LANG | default: 'tr' }}" style="font-size: 16px; font-size: 1rem;">
+  <div role="article" aria-roledescription="email" aria-label="%% TITLE %%" lang="%% LANG %%" style="font-size: 16px; font-size: 1rem;">
     <table class="w-full bg-slate-100 font-sans" cellpadding="0" cellspacing="0" role="presentation">
       <tr>
         <td align="center" class="sm-px-4 sm-py-8" style="padding: 48px 16px;">
@@ -44,8 +44,8 @@
           <table class="w-full" style="max-width: 600px;" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td align="center" class="pb-8">
-                <a href="{{ SITE_URL }}">
-                  <img src="{{ LOGO_URL }}" alt="{{ COMPANY_NAME }}" width="180" style="max-width: 180px; height: auto; border: 0;">
+                <a href="%% SITE_URL %%">
+                  <img src="%% LOGO_URL %%" alt="%% COMPANY_NAME %%" width="180" style="max-width: 180px; height: auto; border: 0;">
                 </a>
               </td>
             </tr>
@@ -55,7 +55,7 @@
           <table class="w-full sm-w-full bg-white rounded-lg shadow-sm" style="max-width: 600px;" cellpadding="0" cellspacing="0" role="presentation">
             <tr>
               <td class="p-8 sm-px-4">
-                <yield />
+                <content />
               </td>
             </tr>
           </table>
@@ -65,22 +65,22 @@
             <tr>
               <td class="pt-8 pb-4 text-center">
                 <p class="m-0 text-sm text-slate-500">
-                  {{ FOOTER_TEXT }}
+                  %% FOOTER_TEXT %%
                 </p>
               </td>
             </tr>
             <tr>
               <td class="pb-8 text-center">
                 <p class="m-0 text-xs text-slate-400">
-                  {{ COMPANY_NAME }}<br>
-                  {{ COMPANY_ADDRESS }}
+                  %% COMPANY_NAME %%<br>
+                  %% COMPANY_ADDRESS %%
                 </p>
               </td>
             </tr>
             <tr>
               <td class="text-center">
                 <p class="m-0 text-xs text-slate-400">
-                  <a href="{{ UNSUBSCRIBE_URL }}" class="text-slate-400 underline">{{ UNSUBSCRIBE_TEXT }}</a>
+                  <a href="%% UNSUBSCRIBE_URL %%" class="text-slate-400 underline">%% UNSUBSCRIBE_TEXT %%</a>
                 </p>
               </td>
             </tr>

@@ -1,5 +1,5 @@
 /** @type {import('@maizzle/framework').Config} */
-export default {
+module.exports = {
   build: {
     templates: {
       source: 'src/templates',
@@ -11,16 +11,17 @@ export default {
 
   // Default variables available in all templates
   company: {
-    name: '{{ COMPANY_NAME }}',
-    address: '{{ COMPANY_ADDRESS }}',
-    logo: '{{ COMPANY_LOGO }}'
+    name: '%% COMPANY_NAME %%',
+    address: '%% COMPANY_ADDRESS %%',
+    logo: '%% COMPANY_LOGO %%'
   },
 
   // Production-specific settings
   inlineCSS: true,
   removeUnusedCSS: true,
 
-  // Prevent escaping template variables
+  // Use different delimiters for Maizzle processing (build-time)
+  // Runtime variables use %% VARIABLE %% syntax
   expressions: {
     delimiters: ['{{', '}}'],
     unescapeDelimiters: ['{{{', '}}}']

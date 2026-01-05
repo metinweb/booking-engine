@@ -1,7 +1,11 @@
 <template>
   <div class="ui-password-input">
     <!-- Label -->
-    <label v-if="label" :for="inputId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      v-if="label"
+      :for="inputId"
+      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+    >
       {{ label }}
       <span v-if="required" class="text-red-500 ml-0.5">*</span>
     </label>
@@ -13,9 +17,6 @@
         ref="inputRef"
         :type="showPassword ? 'text' : 'password'"
         :value="modelValue"
-        @input="handleInput"
-        @focus="handleFocus"
-        @blur="handleBlur"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="readonly"
@@ -28,6 +29,9 @@
             : 'border-gray-300 dark:border-slate-600',
           disabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-slate-800' : ''
         ]"
+        @input="handleInput"
+        @focus="handleFocus"
+        @blur="handleBlur"
       />
 
       <!-- Lock Icon -->
@@ -41,9 +45,9 @@
         <button
           v-if="showCopy && modelValue"
           type="button"
-          @click="copyPassword"
           class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600 rounded transition-colors"
           :title="copied ? $t('common.copied') : $t('common.copy')"
+          @click="copyPassword"
         >
           <span class="material-icons text-lg">{{ copied ? 'check' : 'content_copy' }}</span>
         </button>
@@ -52,9 +56,9 @@
         <button
           v-if="showGenerator && !disabled"
           type="button"
-          @click="generatePassword"
           class="p-1.5 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
           :title="$t('common.generatePassword')"
+          @click="generatePassword"
         >
           <span class="material-icons text-lg">auto_awesome</span>
         </button>
@@ -62,11 +66,13 @@
         <!-- Toggle Visibility -->
         <button
           type="button"
-          @click="toggleVisibility"
           class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600 rounded transition-colors"
           :title="showPassword ? $t('common.hidePassword') : $t('common.showPassword')"
+          @click="toggleVisibility"
         >
-          <span class="material-icons text-lg">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+          <span class="material-icons text-lg">{{
+            showPassword ? 'visibility_off' : 'visibility'
+          }}</span>
         </button>
       </div>
     </div>
@@ -92,9 +98,13 @@
           v-for="req in requirements"
           :key="req.key"
           class="flex items-center gap-2 text-xs"
-          :class="req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'"
+          :class="
+            req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
+          "
         >
-          <span class="material-icons text-sm">{{ req.met ? 'check_circle' : 'radio_button_unchecked' }}</span>
+          <span class="material-icons text-sm">{{
+            req.met ? 'check_circle' : 'radio_button_unchecked'
+          }}</span>
           {{ req.label }}
         </div>
       </div>
@@ -207,7 +217,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur', 'generate', 'strength-change'])
+const emit = defineEmits([
+  'update:modelValue',
+  'change',
+  'focus',
+  'blur',
+  'generate',
+  'strength-change'
+])
 
 const { t } = useI18n()
 
@@ -223,8 +240,8 @@ const inputId = `password-${Math.random().toString(36).substr(2, 9)}`
 // Character sets for generator
 const CHAR_SETS = {
   uppercase: 'ABCDEFGHJKLMNPQRSTUVWXYZ', // I ve O hariç (karışıklık önleme)
-  lowercase: 'abcdefghjkmnpqrstuvwxyz',   // l hariç
-  numbers: '23456789',                      // 0, 1 hariç
+  lowercase: 'abcdefghjkmnpqrstuvwxyz', // l hariç
+  numbers: '23456789', // 0, 1 hariç
   special: '!@#$%^&*()_+-=[]{}|;:,.<>?'
 }
 
@@ -269,13 +286,7 @@ const strengthLabel = computed(() => {
 })
 
 const strengthBarClass = computed(() => {
-  const classes = [
-    'bg-red-500',
-    'bg-orange-500',
-    'bg-yellow-500',
-    'bg-lime-500',
-    'bg-green-500'
-  ]
+  const classes = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-lime-500', 'bg-green-500']
   return classes[strength.value]
 })
 
@@ -392,7 +403,10 @@ function generatePassword() {
   }
 
   // Karakterleri karıştır
-  password = password.split('').sort(() => Math.random() - 0.5).join('')
+  password = password
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('')
 
   // Şifreyi göster
   showPassword.value = true
@@ -418,7 +432,7 @@ async function copyPassword() {
 }
 
 // Strength değiştiğinde emit et
-watch(strength, (newStrength) => {
+watch(strength, newStrength => {
   emit('strength-change', newStrength)
 })
 

@@ -1,16 +1,22 @@
 <template>
   <div class="space-y-6">
     <div>
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('planning.roomTypes.gallery.title') }}</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.roomTypes.gallery.description') }}</p>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+        {{ $t('planning.roomTypes.gallery.title') }}
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-slate-400">
+        {{ $t('planning.roomTypes.gallery.description') }}
+      </p>
     </div>
 
     <!-- Upload Area -->
     <div
       class="border-2 border-dashed rounded-lg p-8 text-center transition-colors"
-      :class="isDragging
-        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-        : 'border-gray-300 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500'"
+      :class="
+        isDragging
+          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+          : 'border-gray-300 dark:border-slate-600 hover:border-indigo-400 dark:hover:border-indigo-500'
+      "
       @dragover.prevent="isDragging = true"
       @dragleave.prevent="isDragging = false"
       @drop.prevent="handleDrop"
@@ -42,11 +48,7 @@
         <p class="text-xs text-gray-500 dark:text-slate-500 mt-1">
           {{ $t('planning.roomTypes.gallery.multipleImagesHint') }}
         </p>
-        <button
-          type="button"
-          @click="$refs.fileInput.click()"
-          class="mt-4 btn-primary"
-        >
+        <button type="button" class="mt-4 btn-primary" @click="$refs.fileInput.click()">
           {{ $t('planning.roomTypes.gallery.uploadImages') }}
         </button>
       </div>
@@ -54,9 +56,13 @@
 
     <!-- Image Grid -->
     <div v-if="images.length > 0">
-      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('planning.roomTypes.gallery.reorderHelp') }}</p>
+      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+        {{ $t('planning.roomTypes.gallery.reorderHelp') }}
+      </p>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+      <div
+        class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4"
+      >
         <div
           v-for="(image, index) in images"
           :key="image._id"
@@ -77,19 +83,21 @@
           </div>
 
           <!-- Image Actions Overlay -->
-          <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <div
+            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
+          >
             <button
               v-if="!image.isMain"
-              @click="setMainImage(image._id)"
               class="p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-colors"
               :title="$t('planning.roomTypes.gallery.setMain')"
+              @click="setMainImage(image._id)"
             >
               <span class="material-icons">star</span>
             </button>
             <button
-              @click="confirmDeleteImage(image)"
               class="p-2 bg-white/20 hover:bg-red-500/50 rounded-full text-white transition-colors"
               :title="$t('common.delete')"
+              @click="confirmDeleteImage(image)"
             >
               <span class="material-icons">delete</span>
             </button>
@@ -106,24 +114,20 @@
     <!-- Empty State -->
     <div v-else class="text-center py-8">
       <span class="material-icons text-4xl text-gray-300 dark:text-slate-600">photo_library</span>
-      <p class="mt-2 text-gray-500 dark:text-slate-400">{{ $t('planning.roomTypes.gallery.noImages') }}</p>
+      <p class="mt-2 text-gray-500 dark:text-slate-400">
+        {{ $t('planning.roomTypes.gallery.noImages') }}
+      </p>
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <Modal
-      v-model="showDeleteModal"
-      :title="$t('common.delete')"
-      size="sm"
-    >
-      <p class="text-gray-600 dark:text-slate-400">
-        {{ $t('common.confirm') }}?
-      </p>
+    <Modal v-model="showDeleteModal" :title="$t('common.delete')" size="sm">
+      <p class="text-gray-600 dark:text-slate-400">{{ $t('common.confirm') }}?</p>
 
       <template #footer>
-        <button @click="showDeleteModal = false" type="button" class="btn-secondary">
+        <button type="button" class="btn-secondary" @click="showDeleteModal = false">
           {{ $t('common.no') }}
         </button>
-        <button @click="deleteImage" type="button" class="btn-danger" :disabled="deleting">
+        <button type="button" class="btn-danger" :disabled="deleting" @click="deleteImage">
           <span v-if="deleting">{{ $t('common.loading') }}</span>
           <span v-else>{{ $t('common.yes') }}</span>
         </button>
@@ -172,12 +176,12 @@ const images = computed(() => props.roomType?.images || [])
 
 // getImageUrl imported from @/utils/imageUrl
 
-const getCaption = (image) => {
+const getCaption = image => {
   const lang = locale.value
   return image.caption?.[lang] || image.caption?.tr || image.caption?.en || ''
 }
 
-const handleDrop = (e) => {
+const handleDrop = e => {
   isDragging.value = false
   const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
   if (files.length > 0) {
@@ -185,7 +189,7 @@ const handleDrop = (e) => {
   }
 }
 
-const handleFileSelect = (e) => {
+const handleFileSelect = e => {
   const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'))
   if (files.length > 0) {
     uploadImages(files)
@@ -194,7 +198,7 @@ const handleFileSelect = (e) => {
 }
 
 // Upload multiple images
-const uploadImages = async (files) => {
+const uploadImages = async files => {
   if (files.length === 0) {
     toast.error(t('planning.roomTypes.gallery.selectImages'))
     return
@@ -210,7 +214,11 @@ const uploadImages = async (files) => {
   for (const file of files) {
     uploadProgress.current++
     try {
-      const response = await planningService.uploadRoomTypeImage(props.hotelId, props.roomType._id, file)
+      const response = await planningService.uploadRoomTypeImage(
+        props.hotelId,
+        props.roomType._id,
+        file
+      )
       if (response.success) {
         emit('image-uploaded', response.data)
         successCount++
@@ -231,7 +239,7 @@ const uploadImages = async (files) => {
   }
 }
 
-const confirmDeleteImage = (image) => {
+const confirmDeleteImage = image => {
   selectedImage.value = image
   showDeleteModal.value = true
 }
@@ -239,7 +247,11 @@ const confirmDeleteImage = (image) => {
 const deleteImage = async () => {
   deleting.value = true
   try {
-    const response = await planningService.deleteRoomTypeImage(props.hotelId, props.roomType._id, selectedImage.value._id)
+    const response = await planningService.deleteRoomTypeImage(
+      props.hotelId,
+      props.roomType._id,
+      selectedImage.value._id
+    )
     if (response.success) {
       emit('image-deleted', selectedImage.value._id)
       toast.success(t('planning.roomTypes.gallery.imageDeleted'))
@@ -252,9 +264,13 @@ const deleteImage = async () => {
   }
 }
 
-const setMainImage = async (imageId) => {
+const setMainImage = async imageId => {
   try {
-    const response = await planningService.setRoomTypeMainImage(props.hotelId, props.roomType._id, imageId)
+    const response = await planningService.setRoomTypeMainImage(
+      props.hotelId,
+      props.roomType._id,
+      imageId
+    )
     if (response.success) {
       emit('main-image-set', imageId)
       toast.success(t('planning.roomTypes.gallery.mainImageSet'))

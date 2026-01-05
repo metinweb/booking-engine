@@ -2,10 +2,14 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('hotels.roomTemplates.title') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">{{ $t('hotels.roomTemplates.description') }}</p>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+          {{ $t('hotels.roomTemplates.title') }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
+          {{ $t('hotels.roomTemplates.description') }}
+        </p>
       </div>
-      <button @click="openCreateModal" class="btn-primary flex items-center gap-2">
+      <button class="btn-primary flex items-center gap-2" @click="openCreateModal">
         <span class="material-icons text-lg">add</span>
         {{ $t('hotels.roomTemplates.addRoom') }}
       </button>
@@ -17,10 +21,13 @@
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="roomTemplates.length === 0" class="text-center py-12 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+    <div
+      v-else-if="roomTemplates.length === 0"
+      class="text-center py-12 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
+    >
       <span class="material-icons text-5xl text-gray-400 dark:text-slate-500">bedroom_parent</span>
       <p class="mt-3 text-gray-600 dark:text-slate-400">{{ $t('hotels.roomTemplates.noRooms') }}</p>
-      <button @click="openCreateModal" class="mt-4 btn-secondary">
+      <button class="mt-4 btn-secondary" @click="openCreateModal">
         {{ $t('hotels.roomTemplates.addFirstRoom') }}
       </button>
     </div>
@@ -45,11 +52,15 @@
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div v-else class="w-full h-full flex items-center justify-center">
-              <span class="material-icons text-4xl text-gray-400 dark:text-slate-500">bedroom_parent</span>
+              <span class="material-icons text-4xl text-gray-400 dark:text-slate-500"
+                >bedroom_parent</span
+              >
             </div>
 
             <!-- Room Code Badge -->
-            <div class="absolute top-2 left-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded shadow">
+            <div
+              class="absolute top-2 left-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded shadow"
+            >
               {{ template.code }}
             </div>
 
@@ -67,7 +78,9 @@
               v-if="template.images?.length"
               class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center"
             >
-              <span class="material-icons text-white opacity-0 group-hover:opacity-100 transition-opacity text-3xl drop-shadow-lg">
+              <span
+                class="material-icons text-white opacity-0 group-hover:opacity-100 transition-opacity text-3xl drop-shadow-lg"
+              >
                 zoom_in
               </span>
             </div>
@@ -78,19 +91,21 @@
             <div>
               <!-- Header -->
               <div class="flex items-start justify-between gap-2">
-                <h4 class="font-semibold text-gray-800 dark:text-white truncate">{{ getRoomName(template) }}</h4>
+                <h4 class="font-semibold text-gray-800 dark:text-white truncate">
+                  {{ getRoomName(template) }}
+                </h4>
                 <div class="flex items-center gap-1 flex-shrink-0">
                   <button
-                    @click="openEditModal(template)"
                     class="p-1.5 text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                     :title="$t('common.edit')"
+                    @click="openEditModal(template)"
                   >
                     <span class="material-icons text-lg">edit</span>
                   </button>
                   <button
-                    @click="confirmDelete(template)"
                     class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                     :title="$t('common.delete')"
+                    @click="confirmDelete(template)"
                   >
                     <span class="material-icons text-lg">delete</span>
                   </button>
@@ -98,7 +113,9 @@
               </div>
 
               <!-- Meta Info -->
-              <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-slate-400">
+              <div
+                class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-slate-400"
+              >
                 <span v-if="template.size" class="flex items-center gap-1">
                   <span class="material-icons text-sm">square_foot</span>
                   {{ template.size }}m²
@@ -152,14 +169,25 @@
       </p>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <button @click="showDeleteModal = false" class="btn-secondary">
+          <button class="btn-secondary" @click="showDeleteModal = false">
             {{ $t('common.cancel') }}
           </button>
-          <button @click="deleteTemplate" class="btn-danger" :disabled="deleting">
+          <button class="btn-danger" :disabled="deleting" @click="deleteTemplate">
             <span v-if="deleting" class="flex items-center gap-2">
               <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
               </svg>
               {{ $t('common.deleting') }}
             </span>
@@ -186,8 +214,8 @@
         >
           <!-- Close Button -->
           <button
-            @click="closeGallery"
             class="absolute top-4 right-4 p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors z-10"
+            @click="closeGallery"
           >
             <span class="material-icons text-2xl">close</span>
           </button>
@@ -195,8 +223,8 @@
           <!-- Previous Button -->
           <button
             v-if="galleryImages.length > 1"
-            @click="prevImage"
             class="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
+            @click="prevImage"
           >
             <span class="material-icons text-3xl">chevron_left</span>
           </button>
@@ -204,8 +232,8 @@
           <!-- Next Button -->
           <button
             v-if="galleryImages.length > 1"
-            @click="nextImage"
             class="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/80 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10"
+            @click="nextImage"
           >
             <span class="material-icons text-3xl">chevron_right</span>
           </button>
@@ -222,7 +250,9 @@
           </div>
 
           <!-- Bottom Info Bar -->
-          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+          <div
+            class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6"
+          >
             <div class="max-w-4xl mx-auto flex items-center justify-between">
               <!-- Room & Caption Info -->
               <div class="text-white">
@@ -233,23 +263,29 @@
               </div>
 
               <!-- Image Counter -->
-              <div v-if="galleryImages.length > 1" class="text-white/80 text-sm bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm">
+              <div
+                v-if="galleryImages.length > 1"
+                class="text-white/80 text-sm bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm"
+              >
                 {{ currentImageIndex + 1 }} / {{ galleryImages.length }}
               </div>
             </div>
 
             <!-- Thumbnail Strip -->
-            <div v-if="galleryImages.length > 1" class="mt-4 flex justify-center gap-2 overflow-x-auto pb-2">
+            <div
+              v-if="galleryImages.length > 1"
+              class="mt-4 flex justify-center gap-2 overflow-x-auto pb-2"
+            >
               <button
                 v-for="(img, index) in galleryImages"
                 :key="index"
-                @click="selectImage(index)"
                 :class="[
                   'w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 transition-all border-2',
                   index === currentImageIndex
                     ? 'border-white ring-2 ring-white/30 scale-110'
                     : 'border-transparent opacity-60 hover:opacity-100'
                 ]"
+                @click="selectImage(index)"
               >
                 <img
                   :src="getImageUrl(img.url)"
@@ -301,27 +337,29 @@ const currentImageIndex = ref(0)
 
 // getImageUrl imported from @/utils/imageUrl
 
-const getMainImage = (template) => {
+const getMainImage = template => {
   if (!template.images?.length) return null
   return template.images.find(img => img.isMain) || template.images[0]
 }
 
-const getRoomName = (template) => {
+const getRoomName = template => {
   if (!template.name) return template.code
   return template.name[locale.value] || template.name.tr || template.name.en || template.code
 }
 
-const getImageCaption = (image) => {
+const getImageCaption = image => {
   if (!image?.caption) return ''
   return image.caption[locale.value] || image.caption.tr || image.caption.en || ''
 }
 
-const formatBeds = (beds) => {
+const formatBeds = beds => {
   if (!beds?.length) return ''
-  return beds.map(bed => {
-    const bedName = t(`hotels.bedTypes.${bed.type}`)
-    return bed.count > 1 ? `${bed.count}x ${bedName}` : bedName
-  }).join(', ')
+  return beds
+    .map(bed => {
+      const bedName = t(`hotels.bedTypes.${bed.type}`)
+      return bed.count > 1 ? `${bed.count}x ${bedName}` : bedName
+    })
+    .join(', ')
 }
 
 const currentGalleryImage = ref(null)
@@ -334,7 +372,7 @@ const updateCurrentImage = () => {
 }
 
 // Gallery functions
-const openGallery = (template) => {
+const openGallery = template => {
   if (!template.images?.length) return
 
   galleryImages.value = [...template.images].sort((a, b) => {
@@ -372,17 +410,18 @@ const nextImage = () => {
   updateCurrentImage()
 }
 
-const selectImage = (index) => {
+const selectImage = index => {
   currentImageIndex.value = index
   updateCurrentImage()
 }
 
-const handleImageError = (e) => {
-  e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23999"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>'
+const handleImageError = e => {
+  e.target.src =
+    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23999"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>'
 }
 
 // Keyboard navigation
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (!showGallery.value) return
 
   if (e.key === 'Escape') {
@@ -401,7 +440,7 @@ const fetchRoomTemplates = async () => {
     if (response.success) {
       roomTemplates.value = response.data || []
     }
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   } finally {
     loading.value = false
@@ -414,7 +453,7 @@ const openCreateModal = () => {
   showFormModal.value = true
 }
 
-const openEditModal = (template) => {
+const openEditModal = template => {
   selectedTemplate.value = { ...template }
   isEditMode.value = true
   showFormModal.value = true
@@ -430,7 +469,7 @@ const handleSaved = () => {
   fetchRoomTemplates()
 }
 
-const confirmDelete = (template) => {
+const confirmDelete = template => {
   templateToDelete.value = template
   showDeleteModal.value = true
 }

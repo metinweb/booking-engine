@@ -67,19 +67,20 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'gray',
-    validator: (v) => ['gray', 'indigo', 'blue', 'green', 'red', 'amber', 'purple', 'pink', 'teal'].includes(v)
+    validator: v =>
+      ['gray', 'indigo', 'blue', 'green', 'red', 'amber', 'purple', 'pink', 'teal'].includes(v)
   },
   // Variant
   variant: {
     type: String,
     default: 'light',
-    validator: (v) => ['light', 'solid', 'outline'].includes(v)
+    validator: v => ['light', 'solid', 'outline'].includes(v)
   },
   // Removable
   removable: {
@@ -126,12 +127,16 @@ const colorMaps = {
   },
   outline: {
     gray: 'border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-transparent',
-    indigo: 'border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 bg-transparent',
+    indigo:
+      'border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 bg-transparent',
     blue: 'border border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 bg-transparent',
-    green: 'border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 bg-transparent',
+    green:
+      'border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 bg-transparent',
     red: 'border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 bg-transparent',
-    amber: 'border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 bg-transparent',
-    purple: 'border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 bg-transparent',
+    amber:
+      'border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 bg-transparent',
+    purple:
+      'border border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 bg-transparent',
     pink: 'border border-pink-300 dark:border-pink-700 text-pink-700 dark:text-pink-300 bg-transparent',
     teal: 'border border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-300 bg-transparent'
   }

@@ -3,12 +3,16 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('settings.agencies.title') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('settings.agencies.description') }}</p>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          {{ $t('settings.agencies.title') }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400">
+          {{ $t('settings.agencies.description') }}
+        </p>
       </div>
       <button
-        @click="showCreateModal = true"
         class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        @click="showCreateModal = true"
       >
         <span class="material-icons text-sm">add</span>
         {{ $t('settings.agencies.addAgency') }}
@@ -27,18 +31,24 @@
         :key="agency._id"
         class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-slate-700/50 rounded-xl border border-gray-200 dark:border-slate-600"
       >
-        <div class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+        <div
+          class="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0"
+        >
           <span class="material-icons text-indigo-600 dark:text-indigo-400 text-xl">business</span>
         </div>
 
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
-            <h4 class="font-semibold text-gray-900 dark:text-white truncate">{{ agency.companyName }}</h4>
+            <h4 class="font-semibold text-gray-900 dark:text-white truncate">
+              {{ agency.companyName }}
+            </h4>
             <span
               class="px-2 py-0.5 text-xs font-medium rounded-full"
-              :class="agency.status === 'active'
-                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                : 'bg-gray-100 text-gray-600 dark:bg-slate-600 dark:text-slate-400'"
+              :class="
+                agency.status === 'active'
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-600 dark:bg-slate-600 dark:text-slate-400'
+              "
             >
               {{ agency.status === 'active' ? $t('common.active') : $t('common.inactive') }}
             </span>
@@ -57,14 +67,14 @@
 
         <div class="flex items-center gap-2">
           <button
-            @click="editAgency(agency)"
             class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+            @click="editAgency(agency)"
           >
             <span class="material-icons text-lg">edit</span>
           </button>
           <button
-            @click="confirmDelete(agency)"
             class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+            @click="confirmDelete(agency)"
           >
             <span class="material-icons text-lg">delete</span>
           </button>
@@ -74,11 +84,15 @@
       <!-- Empty State -->
       <div v-if="agencies.length === 0" class="text-center py-12">
         <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">business</span>
-        <h4 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">{{ $t('settings.agencies.noAgencies') }}</h4>
-        <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">{{ $t('settings.agencies.noAgenciesDesc') }}</p>
+        <h4 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">
+          {{ $t('settings.agencies.noAgencies') }}
+        </h4>
+        <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">
+          {{ $t('settings.agencies.noAgenciesDesc') }}
+        </p>
         <button
-          @click="showCreateModal = true"
           class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          @click="showCreateModal = true"
         >
           <span class="material-icons text-sm">add</span>
           {{ $t('settings.agencies.addFirst') }}
@@ -92,17 +106,28 @@
         v-if="showCreateModal || showEditModal"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
       >
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+        >
+          <div
+            class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700"
+          >
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-              {{ showEditModal ? $t('settings.agencies.editAgency') : $t('settings.agencies.newAgency') }}
+              {{
+                showEditModal
+                  ? $t('settings.agencies.editAgency')
+                  : $t('settings.agencies.newAgency')
+              }}
             </h3>
-            <button @click="closeModals" class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg">
+            <button
+              class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+              @click="closeModals"
+            >
               <span class="material-icons text-gray-500">close</span>
             </button>
           </div>
 
-          <form @submit.prevent="saveAgency" class="p-6 space-y-4">
+          <form class="p-6 space-y-4" @submit.prevent="saveAgency">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 {{ $t('settings.agencies.companyName') }} *
@@ -162,15 +187,18 @@
               </select>
             </div>
 
-            <div v-if="formError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div
+              v-if="formError"
+              class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+            >
               <p class="text-sm text-red-600 dark:text-red-400">{{ formError }}</p>
             </div>
 
             <div class="flex items-center gap-3 pt-2">
               <button
                 type="button"
-                @click="closeModals"
                 class="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700"
+                @click="closeModals"
               >
                 {{ $t('common.cancel') }}
               </button>
@@ -196,25 +224,29 @@
       >
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6">
           <div class="text-center">
-            <div class="w-12 h-12 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <div
+              class="w-12 h-12 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+            >
               <span class="material-icons text-red-600 dark:text-red-400">delete</span>
             </div>
-            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">{{ $t('settings.agencies.deleteTitle') }}</h3>
+            <h3 class="mt-4 text-lg font-semibold text-gray-900 dark:text-white">
+              {{ $t('settings.agencies.deleteTitle') }}
+            </h3>
             <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">
               {{ $t('settings.agencies.deleteConfirm', { name: agencyToDelete?.companyName }) }}
             </p>
           </div>
           <div class="flex items-center gap-3 mt-6">
             <button
-              @click="showDeleteModal = false"
               class="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700"
+              @click="showDeleteModal = false"
             >
               {{ $t('common.cancel') }}
             </button>
             <button
-              @click="deleteAgencyConfirm"
               :disabled="deleting"
               class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              @click="deleteAgencyConfirm"
             >
               <span v-if="deleting" class="material-icons animate-spin text-sm">refresh</span>
               {{ $t('common.delete') }}
@@ -267,7 +299,7 @@ const fetchAgencies = async () => {
   }
 }
 
-const editAgency = (agency) => {
+const editAgency = agency => {
   editingAgency.value = agency
   form.value = {
     companyName: agency.companyName || '',
@@ -279,7 +311,7 @@ const editAgency = (agency) => {
   showEditModal.value = true
 }
 
-const confirmDelete = (agency) => {
+const confirmDelete = agency => {
   agencyToDelete.value = agency
   showDeleteModal.value = true
 }

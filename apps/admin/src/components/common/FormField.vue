@@ -47,7 +47,7 @@
         @input="handleInput"
         @blur="handleBlur"
         @focus="handleFocus"
-      />
+      ></textarea>
 
       <!-- Select -->
       <select
@@ -171,19 +171,19 @@ const errorMessage = computed(() => props.error || localError.value)
 const hasError = computed(() => !!errorMessage.value)
 
 // Input CSS classes
-const inputClasses = computed(() => [
-  props.icon ? 'pl-10' : '',
-  hasError.value ? 'has-error' : ''
-])
+const inputClasses = computed(() => [props.icon ? 'pl-10' : '', hasError.value ? 'has-error' : ''])
 
 // Validate value against rules
-const validateValue = (value) => {
+const validateValue = value => {
   if (!props.rules || props.rules.length === 0) return null
 
   for (const rule of props.rules) {
     // Required check
     if (rule.required) {
-      const isEmpty = value === undefined || value === null || value === '' ||
+      const isEmpty =
+        value === undefined ||
+        value === null ||
+        value === '' ||
         (Array.isArray(value) && value.length === 0)
       if (isEmpty) {
         return rule.message || 'Bu alan zorunludur'
@@ -278,7 +278,7 @@ const reset = () => {
 }
 
 // Handle input event
-const handleInput = (event) => {
+const handleInput = event => {
   const value = event.target.value
   emit('update:modelValue', value)
 
@@ -296,7 +296,7 @@ const handleInput = (event) => {
 }
 
 // Handle select change
-const handleSelect = (event) => {
+const handleSelect = event => {
   const value = event.target.value
   emit('update:modelValue', value)
 
@@ -308,31 +308,37 @@ const handleSelect = (event) => {
 }
 
 // Handle blur event
-const handleBlur = (event) => {
+const handleBlur = event => {
   touched.value = true
   validate()
   emit('blur', event)
 }
 
 // Handle focus event
-const handleFocus = (event) => {
+const handleFocus = event => {
   emit('focus', event)
 }
 
 // Watch for external value changes (e.g., form reset or data load)
-watch(() => props.modelValue, (newValue, oldValue) => {
-  // If value was set externally (not empty), clear any existing error
-  if (newValue && newValue !== oldValue && localError.value) {
-    clearError()
+watch(
+  () => props.modelValue,
+  (newValue, oldValue) => {
+    // If value was set externally (not empty), clear any existing error
+    if (newValue && newValue !== oldValue && localError.value) {
+      clearError()
+    }
   }
-})
+)
 
 // Watch for external error prop changes
-watch(() => props.error, (newError) => {
-  if (newError) {
-    touched.value = true
+watch(
+  () => props.error,
+  newError => {
+    if (newError) {
+      touched.value = true
+    }
   }
-})
+)
 
 // Expose methods for parent component
 defineExpose({

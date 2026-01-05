@@ -10,11 +10,13 @@
           v-for="currency in availableCurrencies"
           :key="currency"
           type="button"
-          @click="toggleCurrency(currency)"
           class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-          :class="selectedCurrencies.includes(currency)
-            ? 'bg-indigo-600 text-white'
-            : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'"
+          :class="
+            selectedCurrencies.includes(currency)
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+          "
+          @click="toggleCurrency(currency)"
         >
           {{ getCurrencySymbol(currency) }} {{ currency }}
         </button>
@@ -42,8 +44,8 @@
           <button
             v-if="currency !== 'TRY'"
             type="button"
-            @click="removeCurrency(currency)"
             class="text-gray-400 hover:text-red-500"
+            @click="removeCurrency(currency)"
           >
             <span class="material-icons text-sm">close</span>
           </button>
@@ -62,11 +64,11 @@
               <input
                 type="number"
                 :value="getBalance(currency, 'cash')"
-                @input="updateBalance(currency, 'cash', $event.target.value)"
                 min="0"
                 step="0.01"
                 class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
                 placeholder="0.00"
+                @input="updateBalance(currency, 'cash', $event.target.value)"
               />
             </div>
           </div>
@@ -83,11 +85,11 @@
               <input
                 type="number"
                 :value="getBalance(currency, 'card')"
-                @input="updateBalance(currency, 'card', $event.target.value)"
                 min="0"
                 step="0.01"
                 class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
                 placeholder="0.00"
+                @input="updateBalance(currency, 'card', $event.target.value)"
               />
             </div>
           </div>
@@ -104,19 +106,23 @@
               <input
                 type="number"
                 :value="getBalance(currency, 'other')"
-                @input="updateBalance(currency, 'other', $event.target.value)"
                 min="0"
                 step="0.01"
                 class="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
                 placeholder="0.00"
+                @input="updateBalance(currency, 'other', $event.target.value)"
               />
             </div>
           </div>
         </div>
 
         <!-- Currency Total -->
-        <div class="mt-3 pt-3 border-t border-gray-200 dark:border-slate-600 flex justify-between items-center">
-          <span class="text-sm text-gray-500 dark:text-slate-400">{{ $t('pms.currency.total') }}</span>
+        <div
+          class="mt-3 pt-3 border-t border-gray-200 dark:border-slate-600 flex justify-between items-center"
+        >
+          <span class="text-sm text-gray-500 dark:text-slate-400">{{
+            $t('pms.currency.total')
+          }}</span>
           <span class="text-lg font-bold" :class="getCurrencyColor(currency)">
             {{ formatCurrency(getCurrencyTotal(currency), currency) }}
           </span>
@@ -125,7 +131,10 @@
     </div>
 
     <!-- Grand Total in TRY -->
-    <div v-if="selectedCurrencies.length > 1 || !selectedCurrencies.includes('TRY')" class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+    <div
+      v-if="selectedCurrencies.length > 1 || !selectedCurrencies.includes('TRY')"
+      class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg"
+    >
       <div class="flex justify-between items-center">
         <span class="text-sm font-medium text-indigo-700 dark:text-indigo-300">
           {{ $t('pms.currency.totalInTRY') }}
@@ -143,9 +152,6 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
 
 const props = defineProps({
   currencies: {
@@ -201,16 +207,24 @@ const currencyColors = {
 }
 
 // Watch for prop changes
-watch(() => props.currencies, (val) => {
-  selectedCurrencies.value = [...val]
-}, { deep: true })
+watch(
+  () => props.currencies,
+  val => {
+    selectedCurrencies.value = [...val]
+  },
+  { deep: true }
+)
 
-watch(() => props.balances, (val) => {
-  localBalances.value = [...val]
-}, { deep: true })
+watch(
+  () => props.balances,
+  val => {
+    localBalances.value = [...val]
+  },
+  { deep: true }
+)
 
 // Toggle currency selection
-const toggleCurrency = (currency) => {
+const toggleCurrency = currency => {
   const index = selectedCurrencies.value.indexOf(currency)
   if (index > -1) {
     // Don't allow removing TRY if it's the only currency
@@ -235,7 +249,7 @@ const toggleCurrency = (currency) => {
 }
 
 // Remove currency
-const removeCurrency = (currency) => {
+const removeCurrency = currency => {
   const index = selectedCurrencies.value.indexOf(currency)
   if (index > -1) {
     selectedCurrencies.value.splice(index, 1)
@@ -265,7 +279,7 @@ const updateBalance = (currency, type, value) => {
 }
 
 // Get currency total
-const getCurrencyTotal = (currency) => {
+const getCurrencyTotal = currency => {
   const balance = localBalances.value.find(b => b.currency === currency)
   if (!balance) return 0
   return (balance.cash || 0) + (balance.card || 0) + (balance.other || 0)
@@ -286,10 +300,10 @@ const grandTotalInTRY = computed(() => {
 })
 
 // Get currency symbol
-const getCurrencySymbol = (currency) => currencySymbols[currency] || currency
+const getCurrencySymbol = currency => currencySymbols[currency] || currency
 
 // Get currency color
-const getCurrencyColor = (currency) => currencyColors[currency] || 'text-gray-700 dark:text-gray-300'
+const getCurrencyColor = currency => currencyColors[currency] || 'text-gray-700 dark:text-gray-300'
 
 // Format currency
 const formatCurrency = (amount, currency) => {

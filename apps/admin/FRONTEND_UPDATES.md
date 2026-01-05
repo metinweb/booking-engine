@@ -5,6 +5,7 @@ Bu dokümantasyon, FireDetector projesinin modern UI'a dönüştürülmüş fron
 ## 🎨 Yeni Özellikler
 
 ### UI/UX İyileştirmeleri
+
 - **Modern Tasarım**: Tailwind CSS ile tamamen yeniden tasarlandı
 - **Responsive Layout**: Tüm cihazlarda mükemmel görünüm
 - **Dark Mode Ready**: Karanlık mod için hazır altyapı
@@ -12,6 +13,7 @@ Bu dokümantasyon, FireDetector projesinin modern UI'a dönüştürülmüş fron
 - **Material Icons**: Google Material Icons entegrasyonu
 
 ### Yeni Sayfalar
+
 - **Dashboard**: Özet istatistikler ve gerçek zamanlı bilgiler
 - **Kameralar**: Kamera yönetimi ve canlı görüntüleme
 - **Alarmlar**: Alarm listesi ve yönetimi
@@ -19,6 +21,7 @@ Bu dokümantasyon, FireDetector projesinin modern UI'a dönüştürülmüş fron
 - **Ayarlar**: Sistem ve kullanıcı ayarları
 
 ### Teknik İyileştirmeler
+
 - **SPA Routing Fix**: F5 yenileme sorunu çözüldü
 - **Auth Guards**: Route koruması aktif
 - **Lazy Loading**: Performans optimizasyonu
@@ -27,12 +30,14 @@ Bu dokümantasyon, FireDetector projesinin modern UI'a dönüştürülmüş fron
 ## 🚀 Kurulum
 
 ### 1. Dependencies Kurulumu
+
 ```bash
 cd frontend
 npm install
 ```
 
 ### 2. Tailwind CSS Build
+
 ```bash
 # Development
 npm run dev
@@ -42,7 +47,9 @@ npm run build
 ```
 
 ### 3. Environment Variables
+
 `.env` dosyasını düzenleyin:
+
 ```env
 VITE_API_URL=http://localhost:3020/api/v1
 VITE_APP_TITLE=FireDetector
@@ -51,12 +58,15 @@ VITE_APP_TITLE=FireDetector
 ## 🛠️ Development
 
 ### Geliştirme Sunucusu
+
 ```bash
 npm run dev
 ```
+
 Tarayıcıda `http://localhost:5173` adresine gidin.
 
 ### Production Build
+
 ```bash
 npm run build
 npm run preview
@@ -92,17 +102,20 @@ frontend/
 ## 🎯 Önemli Değişiklikler
 
 ### 1. Bootstrap'tan Tailwind'e Geçiş
+
 - Tüm Bootstrap class'ları Tailwind utility class'larına dönüştürüldü
 - Custom component class'ları eklendi (btn-primary, card, vb.)
 - Responsive grid sistemi Tailwind ile yeniden yapılandırıldı
 
 ### 2. Router Yapısı
+
 - Nested routing with layouts
 - Auth guard implementation
 - Role-based access control
 - 404 catch-all route
 
 ### 3. Component Architecture
+
 - Composition API kullanımı
 - Reusable components
 - Props ve emit pattern
@@ -121,12 +134,15 @@ location / {
 ## 🐛 Bilinen Sorunlar ve Çözümler
 
 ### F5 404 Hatası
+
 ✅ **Çözüldü**: Vue Router history mode için nginx/apache konfigürasyonu eklendi
 
 ### Auth Persistence
+
 ✅ **Çözüldü**: Token localStorage'da saklanıyor, sayfa yenilemede kontrol ediliyor
 
 ### API CORS
+
 ✅ **Çözüldü**: Vite proxy konfigürasyonu ile development'ta CORS sorunu bypass ediliyor
 
 ## 📱 Responsive Breakpoints
@@ -160,6 +176,7 @@ info: blue-600
 ## 📊 State Management
 
 Pinia store yapısı:
+
 - `auth.js`: Authentication state
 - `camera.js`: Camera management
 - `alert.js`: Alert management

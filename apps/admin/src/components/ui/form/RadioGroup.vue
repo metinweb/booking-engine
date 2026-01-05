@@ -83,7 +83,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Color
   color: {
@@ -112,14 +112,11 @@ const containerClasses = computed(() => {
     lg: props.inline ? 'gap-8' : 'gap-4'
   }
 
-  return [
-    props.inline ? 'flex flex-wrap items-center' : 'flex flex-col',
-    gapSizes[props.size]
-  ]
+  return [props.inline ? 'flex flex-wrap items-center' : 'flex flex-col', gapSizes[props.size]]
 })
 
 // Handle change
-const handleChange = (value) => {
+const handleChange = value => {
   emit('update:modelValue', value)
   emit('change', value)
 }

@@ -20,7 +20,7 @@ export const getTags = async (params = {}) => {
  * Get single tag
  * @param {string} id - Tag ID
  */
-export const getTag = async (id) => {
+export const getTag = async id => {
   const response = await apiClient.get(`/tags/${id}`)
   return response.data
 }
@@ -45,7 +45,7 @@ export const searchTags = async (query, lang = 'tr', limit = 10) => {
  * @param {string} data.color - Tag color (hex)
  * @param {string} data.sourceLang - Source language for translation
  */
-export const createTag = async (data) => {
+export const createTag = async data => {
   const response = await apiClient.post('/tags', data)
   return response.data
 }
@@ -64,7 +64,7 @@ export const updateTag = async (id, data) => {
  * Delete tag
  * @param {string} id - Tag ID
  */
-export const deleteTag = async (id) => {
+export const deleteTag = async id => {
   const response = await apiClient.delete(`/tags/${id}`)
   return response.data
 }

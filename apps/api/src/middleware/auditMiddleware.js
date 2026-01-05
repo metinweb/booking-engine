@@ -1,4 +1,5 @@
 import AuditLog from '../modules/audit/audit.model.js'
+import logger from '../core/logger.js'
 
 /**
  * Audit edilecek endpoint'ler ve konfigürasyonları
@@ -19,38 +20,132 @@ const AUDITABLE_ROUTES = {
   'POST /api/partners': { module: 'partner', action: 'create', collection: 'partners' },
   'PUT /api/partners/:id': { module: 'partner', action: 'update', collection: 'partners' },
   'DELETE /api/partners/:id': { module: 'partner', action: 'delete', collection: 'partners' },
-  'POST /api/partners/:id/approve': { module: 'partner', action: 'approve', collection: 'partners' },
-  'POST /api/partners/:id/upload': { module: 'partner', action: 'upload', subModule: 'document', collection: 'partners' },
+  'POST /api/partners/:id/approve': {
+    module: 'partner',
+    action: 'approve',
+    collection: 'partners'
+  },
+  'POST /api/partners/:id/upload': {
+    module: 'partner',
+    action: 'upload',
+    subModule: 'document',
+    collection: 'partners'
+  },
 
   // Hotels (Base)
-  'POST /api/hotels/base': { module: 'hotel', action: 'create', subModule: 'base', collection: 'hotels' },
-  'PUT /api/hotels/base/:id': { module: 'hotel', action: 'update', subModule: 'base', collection: 'hotels' },
-  'DELETE /api/hotels/base/:id': { module: 'hotel', action: 'delete', subModule: 'base', collection: 'hotels' },
-  'POST /api/hotels/base/:id/room-templates': { module: 'hotel', action: 'create', subModule: 'room_template', collection: 'hotels' },
-  'PUT /api/hotels/base/:id/room-templates/:code': { module: 'hotel', action: 'update', subModule: 'room_template', collection: 'hotels' },
-  'DELETE /api/hotels/base/:id/room-templates/:code': { module: 'hotel', action: 'delete', subModule: 'room_template', collection: 'hotels' },
+  'POST /api/hotels/base': {
+    module: 'hotel',
+    action: 'create',
+    subModule: 'base',
+    collection: 'hotels'
+  },
+  'PUT /api/hotels/base/:id': {
+    module: 'hotel',
+    action: 'update',
+    subModule: 'base',
+    collection: 'hotels'
+  },
+  'DELETE /api/hotels/base/:id': {
+    module: 'hotel',
+    action: 'delete',
+    subModule: 'base',
+    collection: 'hotels'
+  },
+  'POST /api/hotels/base/:id/room-templates': {
+    module: 'hotel',
+    action: 'create',
+    subModule: 'room_template',
+    collection: 'hotels'
+  },
+  'PUT /api/hotels/base/:id/room-templates/:code': {
+    module: 'hotel',
+    action: 'update',
+    subModule: 'room_template',
+    collection: 'hotels'
+  },
+  'DELETE /api/hotels/base/:id/room-templates/:code': {
+    module: 'hotel',
+    action: 'delete',
+    subModule: 'room_template',
+    collection: 'hotels'
+  },
 
   // Hotels (Partner)
   'POST /api/hotels': { module: 'hotel', action: 'create', collection: 'hotels' },
   'PUT /api/hotels/:id': { module: 'hotel', action: 'update', collection: 'hotels' },
   'DELETE /api/hotels/:id': { module: 'hotel', action: 'delete', collection: 'hotels' },
-  'POST /api/hotels/:id/link-base': { module: 'hotel', action: 'link', subModule: 'base', collection: 'hotels' },
-  'POST /api/hotels/:id/images': { module: 'hotel', action: 'upload', subModule: 'image', collection: 'hotels' },
+  'POST /api/hotels/:id/link-base': {
+    module: 'hotel',
+    action: 'link',
+    subModule: 'base',
+    collection: 'hotels'
+  },
+  'POST /api/hotels/:id/images': {
+    module: 'hotel',
+    action: 'upload',
+    subModule: 'image',
+    collection: 'hotels'
+  },
 
   // Planning - Room Types
-  'POST /api/planning/room-types': { module: 'planning', action: 'create', subModule: 'room_type', collection: 'roomtypes' },
-  'PUT /api/planning/room-types/:id': { module: 'planning', action: 'update', subModule: 'room_type', collection: 'roomtypes' },
-  'DELETE /api/planning/room-types/:id': { module: 'planning', action: 'delete', subModule: 'room_type', collection: 'roomtypes' },
+  'POST /api/planning/room-types': {
+    module: 'planning',
+    action: 'create',
+    subModule: 'room_type',
+    collection: 'roomtypes'
+  },
+  'PUT /api/planning/room-types/:id': {
+    module: 'planning',
+    action: 'update',
+    subModule: 'room_type',
+    collection: 'roomtypes'
+  },
+  'DELETE /api/planning/room-types/:id': {
+    module: 'planning',
+    action: 'delete',
+    subModule: 'room_type',
+    collection: 'roomtypes'
+  },
 
   // Planning - Rate Plans
-  'POST /api/planning/rate-plans': { module: 'planning', action: 'create', subModule: 'rate_plan', collection: 'rateplans' },
-  'PUT /api/planning/rate-plans/:id': { module: 'planning', action: 'update', subModule: 'rate_plan', collection: 'rateplans' },
-  'DELETE /api/planning/rate-plans/:id': { module: 'planning', action: 'delete', subModule: 'rate_plan', collection: 'rateplans' },
+  'POST /api/planning/rate-plans': {
+    module: 'planning',
+    action: 'create',
+    subModule: 'rate_plan',
+    collection: 'rateplans'
+  },
+  'PUT /api/planning/rate-plans/:id': {
+    module: 'planning',
+    action: 'update',
+    subModule: 'rate_plan',
+    collection: 'rateplans'
+  },
+  'DELETE /api/planning/rate-plans/:id': {
+    module: 'planning',
+    action: 'delete',
+    subModule: 'rate_plan',
+    collection: 'rateplans'
+  },
 
   // Planning - Contracts
-  'POST /api/planning/contracts': { module: 'planning', action: 'create', subModule: 'contract', collection: 'contracts' },
-  'PUT /api/planning/contracts/:id': { module: 'planning', action: 'update', subModule: 'contract', collection: 'contracts' },
-  'DELETE /api/planning/contracts/:id': { module: 'planning', action: 'delete', subModule: 'contract', collection: 'contracts' },
+  'POST /api/planning/contracts': {
+    module: 'planning',
+    action: 'create',
+    subModule: 'contract',
+    collection: 'contracts'
+  },
+  'PUT /api/planning/contracts/:id': {
+    module: 'planning',
+    action: 'update',
+    subModule: 'contract',
+    collection: 'contracts'
+  },
+  'DELETE /api/planning/contracts/:id': {
+    module: 'planning',
+    action: 'delete',
+    subModule: 'contract',
+    collection: 'contracts'
+  },
 
   // Agencies
   'POST /api/agencies': { module: 'agency', action: 'create', collection: 'agencies' },
@@ -94,8 +189,8 @@ const matchRoute = (method, path) => {
 
     // Pattern'i regex'e çevir
     const regexPattern = patternPath
-      .replace(/:[^/]+/g, '[^/]+')  // :id -> [^/]+
-      .replace(/\//g, '\\/')         // / -> \/
+      .replace(/:[^/]+/g, '[^/]+') // :id -> [^/]+
+      .replace(/\//g, '\\/') // / -> \/
 
     const regex = new RegExp(`^${regexPattern}$`)
     if (regex.test(path)) {
@@ -109,19 +204,21 @@ const matchRoute = (method, path) => {
 /**
  * IP adresini al
  */
-const getClientIp = (req) => {
-  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
-         req.headers['x-real-ip'] ||
-         req.connection?.remoteAddress ||
-         req.socket?.remoteAddress ||
-         req.ip ||
-         'unknown'
+const getClientIp = req => {
+  return (
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.headers['x-real-ip'] ||
+    req.connection?.remoteAddress ||
+    req.socket?.remoteAddress ||
+    req.ip ||
+    'unknown'
+  )
 }
 
 /**
  * User Agent'ı kısalt
  */
-const shortenUserAgent = (ua) => {
+const shortenUserAgent = ua => {
   if (!ua) return 'unknown'
   if (ua.length <= 200) return ua
   return ua.substring(0, 200) + '...'
@@ -139,7 +236,7 @@ export const auditMiddleware = (req, res, next) => {
   let responseBody = null
 
   // Response'u yakala
-  res.send = function(body) {
+  res.send = function (body) {
     responseBody = body
     return originalSend(body)
   }
@@ -192,7 +289,7 @@ export const auditMiddleware = (req, res, next) => {
           } else if (data?.data?.email) {
             target.documentName = data.data.email
           }
-        } catch (e) {
+        } catch (_e) {
           // JSON parse hatası, devam et
         }
       }
@@ -215,7 +312,7 @@ export const auditMiddleware = (req, res, next) => {
         errorMessage: !isSuccess ? `HTTP ${res.statusCode}` : undefined
       })
     } catch (error) {
-      console.error('Audit middleware error:', error.message)
+      logger.error('Audit middleware error:', error.message)
     }
   })
 
@@ -226,7 +323,7 @@ export const auditMiddleware = (req, res, next) => {
  * Audit context oluşturucu
  * Service fonksiyonlarında kullanmak için
  */
-export const createAuditContext = (req) => {
+export const createAuditContext = req => {
   if (!req || !req.user) return {}
 
   return {

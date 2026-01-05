@@ -18,45 +18,65 @@
         min="0"
         step="1"
         :value="inlineEditValue"
-        @input="$emit('inline-change', $event.target.value)"
-        @keydown.enter="$emit('inline-save')"
-        @keydown.tab="$emit('inline-next', $event)"
-        @keydown.up.prevent="$emit('inline-up')"
-        @keydown.down.prevent="$emit('inline-down')"
         class="inline-price-input w-full h-7 sm:h-8 text-center text-[10px] sm:text-xs font-semibold border rounded px-0.5 bg-white dark:bg-slate-800 transition-colors"
         :class="[
           inlineEditValue > 0
             ? 'border-green-300 dark:border-green-700 text-green-700 dark:text-green-400'
             : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400',
           isBaseCell ? 'ring-1 ring-yellow-400 bg-yellow-50 dark:bg-yellow-900/20' : '',
-          isCalculated && !allowEditCalculated ? 'bg-gray-100 dark:bg-slate-700 cursor-not-allowed' : ''
+          isCalculated && !allowEditCalculated
+            ? 'bg-gray-100 dark:bg-slate-700 cursor-not-allowed'
+            : ''
         ]"
         :readonly="isCalculated && !allowEditCalculated"
         placeholder="0"
+        @input="$emit('inline-change', $event.target.value)"
+        @keydown.enter="$emit('inline-save')"
+        @keydown.tab="$emit('inline-next', $event)"
+        @keydown.up.prevent="$emit('inline-up')"
+        @keydown.down.prevent="$emit('inline-down')"
       />
     </div>
 
     <!-- Normal Display Mode -->
     <template v-else>
       <!-- No Rate -->
-      <div v-if="!rate" class="flex flex-col items-center justify-center h-full text-gray-300 dark:text-slate-600">
+      <div
+        v-if="!rate"
+        class="flex flex-col items-center justify-center h-full text-gray-300 dark:text-slate-600"
+      >
         <span class="text-[10px] sm:text-xs">-</span>
       </div>
 
       <!-- Has Rate (stop sale or not - same display, just different colors) -->
       <div v-else class="flex flex-col items-center justify-center h-full">
         <!-- OBP Badge -->
-        <div v-if="isOBP" class="text-[6px] sm:text-[7px] px-0.5 sm:px-1 rounded font-semibold mb-0.5" :class="isMultiplierOBP ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300' : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300'">
+        <div
+          v-if="isOBP"
+          class="text-[6px] sm:text-[7px] px-0.5 sm:px-1 rounded font-semibold mb-0.5"
+          :class="
+            isMultiplierOBP
+              ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300'
+              : 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300'
+          "
+        >
           {{ isMultiplierOBP ? 'OBP×' : 'OBP' }}
         </div>
         <!-- Price - RED if stop sale, GREEN if normal -->
-        <div class="text-xs sm:text-sm font-bold" :class="rate.stopSale ? 'text-red-500' : 'text-green-600 dark:text-green-400'">
+        <div
+          class="text-xs sm:text-sm font-bold"
+          :class="rate.stopSale ? 'text-red-500' : 'text-green-600 dark:text-green-400'"
+        >
           {{ formattedPrice }}
         </div>
 
         <!-- Allotment - Always show, color changes based on level -->
         <div class="flex items-center gap-0.5 mt-0.5">
-          <span v-if="(rate.allotment ?? 0) <= 5" class="material-icons text-[10px]" :class="allotmentTextColor">
+          <span
+            v-if="(rate.allotment ?? 0) <= 5"
+            class="material-icons text-[10px]"
+            :class="allotmentTextColor"
+          >
             {{ (rate.allotment ?? 0) === 0 ? 'error' : 'warning' }}
           </span>
           <span class="text-[8px] sm:text-[10px] font-medium" :class="allotmentTextColor">
@@ -66,10 +86,30 @@
 
         <!-- Restrictions Icons (NO STOP text, just CTA/CTD/MinStay/SingleStop) -->
         <div v-if="hasVisibleRestrictions" class="flex gap-0.5 mt-0.5">
-          <span v-if="rate.singleStop" class="text-[6px] sm:text-[8px] text-pink-500 font-bold" title="Single Stop">1P</span>
-          <span v-if="rate.closedToArrival" class="text-[6px] sm:text-[8px] text-orange-500 font-bold" title="Closed to Arrival">CTA</span>
-          <span v-if="rate.closedToDeparture" class="text-[6px] sm:text-[8px] text-orange-500 font-bold" title="Closed to Departure">CTD</span>
-          <span v-if="rate.minStay > 1" class="text-[6px] sm:text-[8px] text-blue-500 font-medium" :title="`Min Stay: ${rate.minStay}`">{{ rate.minStay }}+</span>
+          <span
+            v-if="rate.singleStop"
+            class="text-[6px] sm:text-[8px] text-pink-500 font-bold"
+            title="Single Stop"
+            >1P</span
+          >
+          <span
+            v-if="rate.closedToArrival"
+            class="text-[6px] sm:text-[8px] text-orange-500 font-bold"
+            title="Closed to Arrival"
+            >CTA</span
+          >
+          <span
+            v-if="rate.closedToDeparture"
+            class="text-[6px] sm:text-[8px] text-orange-500 font-bold"
+            title="Closed to Departure"
+            >CTD</span
+          >
+          <span
+            v-if="rate.minStay > 1"
+            class="text-[6px] sm:text-[8px] text-blue-500 font-medium"
+            :title="`Min Stay: ${rate.minStay}`"
+            >{{ rate.minStay }}+</span
+          >
         </div>
       </div>
 
@@ -77,7 +117,11 @@
       <div
         v-if="isOBP || hasExtraPrices"
         class="absolute top-0 right-0 w-0 h-0 border-t-[6px] border-r-[6px] border-t-transparent"
-        :class="isOBP ? 'border-r-indigo-500 dark:border-r-indigo-400' : 'border-r-blue-500 dark:border-r-blue-400'"
+        :class="
+          isOBP
+            ? 'border-r-indigo-500 dark:border-r-indigo-400'
+            : 'border-r-blue-500 dark:border-r-blue-400'
+        "
         :title="isOBP ? 'Kişi Bazlı Fiyatlandırma (OBP)' : $t('planning.pricing.hasExtraPricing')"
       ></div>
     </template>
@@ -103,11 +147,33 @@
         class="fixed z-[9999] pointer-events-none"
         :style="popoverStyle"
       >
-        <div class="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 text-white rounded-xl shadow-xl border border-slate-600/50 overflow-hidden min-w-[140px]">
+        <div
+          class="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 text-white rounded-xl shadow-xl border border-slate-600/50 overflow-hidden min-w-[140px]"
+        >
           <!-- Header -->
-          <div class="px-3 py-1.5 border-b border-slate-600/30" :class="isOBP ? (isMultiplierOBP ? 'bg-purple-600/20' : 'bg-indigo-600/20') : 'bg-green-600/20'">
-            <span class="text-[10px] font-semibold uppercase tracking-wide" :class="isOBP ? (isMultiplierOBP ? 'text-purple-300' : 'text-indigo-300') : 'text-green-300'">
-              {{ isOBP ? (isMultiplierOBP ? 'Çarpanlı Kişi Bazlı Fiyat' : 'Kişi Bazlı Fiyat') : 'Ünite Bazlı Fiyat' }}
+          <div
+            class="px-3 py-1.5 border-b border-slate-600/30"
+            :class="
+              isOBP
+                ? isMultiplierOBP
+                  ? 'bg-purple-600/20'
+                  : 'bg-indigo-600/20'
+                : 'bg-green-600/20'
+            "
+          >
+            <span
+              class="text-[10px] font-semibold uppercase tracking-wide"
+              :class="
+                isOBP ? (isMultiplierOBP ? 'text-purple-300' : 'text-indigo-300') : 'text-green-300'
+              "
+            >
+              {{
+                isOBP
+                  ? isMultiplierOBP
+                    ? 'Çarpanlı Kişi Bazlı Fiyat'
+                    : 'Kişi Bazlı Fiyat'
+                  : 'Ünite Bazlı Fiyat'
+              }}
             </span>
           </div>
 
@@ -160,13 +226,23 @@
               </div>
 
               <!-- Extra Adult -->
-              <div v-if="typeof rate.extraAdult === 'number' && rate.extraAdult >= 0" class="flex items-center justify-between gap-3">
+              <div
+                v-if="typeof rate.extraAdult === 'number' && rate.extraAdult >= 0"
+                class="flex items-center justify-between gap-3"
+              >
                 <div class="flex items-center gap-1.5">
                   <span class="material-icons text-amber-400 text-xs">person_add</span>
-                  <span class="text-[10px] text-slate-300">{{ $t('planning.pricing.extraAdultShort') }}</span>
+                  <span class="text-[10px] text-slate-300">{{
+                    $t('planning.pricing.extraAdultShort')
+                  }}</span>
                 </div>
-                <span class="text-xs font-bold" :class="rate.extraAdult === 0 ? 'text-green-400' : 'text-white'">
-                  {{ rate.extraAdult === 0 ? $t('common.free') : `+${rate.extraAdult} ${currency}` }}
+                <span
+                  class="text-xs font-bold"
+                  :class="rate.extraAdult === 0 ? 'text-green-400' : 'text-white'"
+                >
+                  {{
+                    rate.extraAdult === 0 ? $t('common.free') : `+${rate.extraAdult} ${currency}`
+                  }}
                 </span>
               </div>
             </template>
@@ -180,30 +256,52 @@
               >
                 <div class="flex items-center gap-1.5">
                   <span class="material-icons text-pink-400 text-xs">child_care</span>
-                  <span class="text-[10px] text-slate-300">{{ child.index }}. {{ $t('planning.pricing.child') }}</span>
+                  <span class="text-[10px] text-slate-300"
+                    >{{ child.index }}. {{ $t('planning.pricing.child') }}</span
+                  >
                 </div>
-                <span class="text-xs font-bold" :class="child.price === 0 ? 'text-green-400' : 'text-white'">
+                <span
+                  class="text-xs font-bold"
+                  :class="child.price === 0 ? 'text-green-400' : 'text-white'"
+                >
                   {{ child.price === 0 ? $t('common.free') : `+${child.price} ${currency}` }}
                 </span>
               </div>
             </template>
 
             <!-- Extra Infant -->
-            <div v-if="typeof rate.extraInfant === 'number' && rate.extraInfant >= 0" class="flex items-center justify-between gap-3">
+            <div
+              v-if="typeof rate.extraInfant === 'number' && rate.extraInfant >= 0"
+              class="flex items-center justify-between gap-3"
+            >
               <div class="flex items-center gap-1.5">
                 <span class="material-icons text-purple-400 text-xs">baby_changing_station</span>
-                <span class="text-[10px] text-slate-300">{{ $t('planning.pricing.extraInfantShort') }}</span>
+                <span class="text-[10px] text-slate-300">{{
+                  $t('planning.pricing.extraInfantShort')
+                }}</span>
               </div>
-              <span class="text-xs font-bold" :class="rate.extraInfant === 0 ? 'text-green-400' : 'text-white'">
-                {{ rate.extraInfant === 0 ? $t('common.free') : `+${rate.extraInfant} ${currency}` }}
+              <span
+                class="text-xs font-bold"
+                :class="rate.extraInfant === 0 ? 'text-green-400' : 'text-white'"
+              >
+                {{
+                  rate.extraInfant === 0 ? $t('common.free') : `+${rate.extraInfant} ${currency}`
+                }}
               </span>
             </div>
 
             <!-- Single Occupancy Discount (only for unit-based) -->
-            <div v-if="!isOBP && typeof rate.singleSupplement === 'number' && rate.singleSupplement > 0" class="flex items-center justify-between gap-3 pt-1.5 border-t border-slate-600/30">
+            <div
+              v-if="
+                !isOBP && typeof rate.singleSupplement === 'number' && rate.singleSupplement > 0
+              "
+              class="flex items-center justify-between gap-3 pt-1.5 border-t border-slate-600/30"
+            >
               <div class="flex items-center gap-1.5">
                 <span class="material-icons text-blue-400 text-xs">person</span>
-                <span class="text-[10px] text-slate-300">{{ $t('planning.pricing.singleOccupancy') }}</span>
+                <span class="text-[10px] text-slate-300">{{
+                  $t('planning.pricing.singleOccupancy')
+                }}</span>
               </div>
               <span class="text-xs font-bold text-blue-300">
                 -{{ rate.singleSupplement }} {{ currency }}
@@ -235,7 +333,16 @@ const props = defineProps({
   allowEditCalculated: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['click', 'dblclick', 'contextmenu', 'inline-change', 'inline-save', 'inline-next', 'inline-up', 'inline-down'])
+const emit = defineEmits([
+  'click',
+  'dblclick',
+  'contextmenu',
+  'inline-change',
+  'inline-save',
+  'inline-next',
+  'inline-up',
+  'inline-down'
+])
 
 const inlineInput = ref(null)
 const cellRef = ref(null)
@@ -258,7 +365,7 @@ const showPopover = () => {
 
     // Position below the cell, centered
     let top = rect.bottom + 4
-    let left = rect.left + (rect.width / 2) - (popoverWidth / 2)
+    let left = rect.left + rect.width / 2 - popoverWidth / 2
 
     // If would go off bottom, show above
     if (top + popoverHeight > window.innerHeight) {
@@ -282,13 +389,13 @@ const hidePopover = () => {
   isHovered.value = false
 }
 
-const handleClick = (event) => {
+const handleClick = event => {
   if (!props.inlineEditMode) {
     emit('click', event)
   }
 }
 
-const handleContextMenu = (event) => {
+const handleContextMenu = event => {
   // Only emit in inline edit mode
   if (props.inlineEditMode) {
     emit('contextmenu', event)
@@ -331,7 +438,7 @@ const multiplierCombosForDisplay = computed(() => {
   // Get adult combinations (most important)
   if (template.adults) {
     const entries = Object.entries(template.adults)
-      .filter(([_, v]) => v !== null && v !== undefined)
+      .filter(([, v]) => v !== null && v !== undefined)
       .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
       .slice(0, 5) // First 5
 
@@ -373,21 +480,7 @@ const formattedPrice = computed(() => {
   return props.rate.pricePerNight?.toLocaleString() || '-'
 })
 
-const allotmentPercentage = computed(() => {
-  if (!props.rate) return 0
-  const allotment = props.rate.allotment ?? 0
-  // Assume max allotment is 20 for visualization
-  return Math.min((allotment / 20) * 100, 100)
-})
-
-const allotmentBarColor = computed(() => {
-  const allotment = props.rate?.allotment ?? 0
-
-  if (allotment === 0) return 'bg-red-500'
-  if (allotment <= 2) return 'bg-red-400'
-  if (allotment <= 5) return 'bg-amber-400'
-  return 'bg-green-400'
-})
+// allotmentPercentage and allotmentBarColor removed - were unused
 
 const allotmentTextColor = computed(() => {
   const allotment = props.rate?.allotment ?? 0
@@ -401,7 +494,12 @@ const allotmentTextColor = computed(() => {
 // Visible restrictions (excluding stopSale which is shown via red color)
 const hasVisibleRestrictions = computed(() => {
   if (!props.rate) return false
-  return props.rate.singleStop || props.rate.closedToArrival || props.rate.closedToDeparture || (props.rate.minStay && props.rate.minStay > 1)
+  return (
+    props.rate.singleStop ||
+    props.rate.closedToArrival ||
+    props.rate.closedToDeparture ||
+    (props.rate.minStay && props.rate.minStay > 1)
+  )
 })
 
 // Check if rate has any extra person pricing (with valid values)
@@ -410,7 +508,8 @@ const hasExtraPrices = computed(() => {
   const hasAdult = typeof props.rate.extraAdult === 'number' && props.rate.extraAdult >= 0
   const hasInfant = typeof props.rate.extraInfant === 'number' && props.rate.extraInfant >= 0
   const hasChild = props.rate.childOrderPricing?.some(p => typeof p === 'number' && p >= 0)
-  const hasSingle = typeof props.rate.singleSupplement === 'number' && props.rate.singleSupplement > 0
+  const hasSingle =
+    typeof props.rate.singleSupplement === 'number' && props.rate.singleSupplement > 0
   return hasAdult || hasInfant || hasChild || hasSingle
 })
 
@@ -452,7 +551,7 @@ const occupancyPricesForDisplay = computed(() => {
   -webkit-appearance: none;
   margin: 0;
 }
-.inline-price-input[type=number] {
+.inline-price-input[type='number'] {
   -moz-appearance: textfield;
 }
 

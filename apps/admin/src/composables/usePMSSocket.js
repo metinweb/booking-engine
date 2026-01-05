@@ -22,8 +22,9 @@
  *   onUnmounted(() => unsubscribe())
  */
 
-import { ref, readonly, computed } from 'vue'
+import { ref, readonly } from 'vue'
 import { useSocket } from './useSocket'
+import { socketLogger } from '@/utils/logger'
 
 // ============================================================================
 // PMS SOCKET EVENTS
@@ -63,7 +64,7 @@ const callbacks = {
 // ============================================================================
 
 export function usePMSSocket() {
-  const { join, leave, on, off, isConnected, connectionError, debug: socketDebug } = useSocket()
+  const { join, leave, on, isConnected, connectionError, debug: socketDebug } = useSocket()
 
   // ============================================================================
   // ROOM MANAGEMENT
@@ -72,28 +73,28 @@ export function usePMSSocket() {
   /**
    * Generate room name for hotel
    */
-  const getRoomName = (hotelId) => `pms:${hotelId}`
+  const getRoomName = hotelId => `pms:${hotelId}`
 
   /**
    * Join hotel room
    */
-  const joinHotelRoom = (hotelId) => {
+  const joinHotelRoom = hotelId => {
     if (!hotelId) {
-      console.warn('[PMS Socket] Cannot join: no hotelId')
+      socketLogger.warn('[PMS Socket] Cannot join: no hotelId')
       return
     }
 
     // Leave previous room if different
     if (currentHotelId.value && currentHotelId.value !== hotelId) {
       leave(getRoomName(currentHotelId.value))
-      console.log('[PMS Socket] Left previous room:', getRoomName(currentHotelId.value))
+      socketLogger.debug('[PMS Socket] Left previous room:', getRoomName(currentHotelId.value))
     }
 
     // Join new room
     if (currentHotelId.value !== hotelId) {
       join(getRoomName(hotelId))
       currentHotelId.value = hotelId
-      console.log('[PMS Socket] Joined room:', getRoomName(hotelId))
+      socketLogger.debug('[PMS Socket] Joined room:', getRoomName(hotelId))
     }
   }
 
@@ -103,7 +104,7 @@ export function usePMSSocket() {
   const leaveHotelRoom = () => {
     if (currentHotelId.value) {
       leave(getRoomName(currentHotelId.value))
-      console.log('[PMS Socket] Left room:', getRoomName(currentHotelId.value))
+      socketLogger.debug('[PMS Socket] Left room:', getRoomName(currentHotelId.value))
       currentHotelId.value = null
     }
   }
@@ -118,13 +119,13 @@ export function usePMSSocket() {
   const setupEventListeners = () => {
     // Room status changes
     eventUnsubscribers.push(
-      on(PMS_EVENTS.ROOM_STATUS, (data) => {
-        console.log('[PMS Socket] Room status:', data)
+      on(PMS_EVENTS.ROOM_STATUS, data => {
+        socketLogger.debug('[PMS Socket] Room status:', data)
         callbacks.roomStatus.forEach(cb => {
           try {
             cb(data)
           } catch (e) {
-            console.error('[PMS Socket] Callback error (roomStatus):', e)
+            socketLogger.error('[PMS Socket] Callback error (roomStatus):', e)
           }
         })
       })
@@ -132,13 +133,13 @@ export function usePMSSocket() {
 
     // Check-in events
     eventUnsubscribers.push(
-      on(PMS_EVENTS.CHECK_IN, (data) => {
-        console.log('[PMS Socket] Check-in:', data)
+      on(PMS_EVENTS.CHECK_IN, data => {
+        socketLogger.debug('[PMS Socket] Check-in:', data)
         callbacks.checkIn.forEach(cb => {
           try {
             cb(data)
           } catch (e) {
-            console.error('[PMS Socket] Callback error (checkIn):', e)
+            socketLogger.error('[PMS Socket] Callback error (checkIn):', e)
           }
         })
       })
@@ -146,13 +147,13 @@ export function usePMSSocket() {
 
     // Check-out events
     eventUnsubscribers.push(
-      on(PMS_EVENTS.CHECK_OUT, (data) => {
-        console.log('[PMS Socket] Check-out:', data)
+      on(PMS_EVENTS.CHECK_OUT, data => {
+        socketLogger.debug('[PMS Socket] Check-out:', data)
         callbacks.checkOut.forEach(cb => {
           try {
             cb(data)
           } catch (e) {
-            console.error('[PMS Socket] Callback error (checkOut):', e)
+            socketLogger.error('[PMS Socket] Callback error (checkOut):', e)
           }
         })
       })
@@ -160,13 +161,13 @@ export function usePMSSocket() {
 
     // Housekeeping events
     eventUnsubscribers.push(
-      on(PMS_EVENTS.HOUSEKEEPING, (data) => {
-        console.log('[PMS Socket] Housekeeping:', data)
+      on(PMS_EVENTS.HOUSEKEEPING, data => {
+        socketLogger.debug('[PMS Socket] Housekeeping:', data)
         callbacks.housekeeping.forEach(cb => {
           try {
             cb(data)
           } catch (e) {
-            console.error('[PMS Socket] Callback error (housekeeping):', e)
+            socketLogger.error('[PMS Socket] Callback error (housekeeping):', e)
           }
         })
       })
@@ -174,13 +175,13 @@ export function usePMSSocket() {
 
     // Reservation events
     eventUnsubscribers.push(
-      on(PMS_EVENTS.RESERVATION, (data) => {
-        console.log('[PMS Socket] Reservation:', data)
+      on(PMS_EVENTS.RESERVATION, data => {
+        socketLogger.debug('[PMS Socket] Reservation:', data)
         callbacks.reservation.forEach(cb => {
           try {
             cb(data)
           } catch (e) {
-            console.error('[PMS Socket] Callback error (reservation):', e)
+            socketLogger.error('[PMS Socket] Callback error (reservation):', e)
           }
         })
       })
@@ -188,13 +189,13 @@ export function usePMSSocket() {
 
     // Transaction events
     eventUnsubscribers.push(
-      on(PMS_EVENTS.TRANSACTION, (data) => {
-        console.log('[PMS Socket] Transaction:', data)
+      on(PMS_EVENTS.TRANSACTION, data => {
+        socketLogger.debug('[PMS Socket] Transaction:', data)
         callbacks.transaction.forEach(cb => {
           try {
             cb(data)
           } catch (e) {
-            console.error('[PMS Socket] Callback error (transaction):', e)
+            socketLogger.error('[PMS Socket] Callback error (transaction):', e)
           }
         })
       })
@@ -202,13 +203,13 @@ export function usePMSSocket() {
 
     // Notification events
     eventUnsubscribers.push(
-      on(PMS_EVENTS.NOTIFICATION, (data) => {
-        console.log('[PMS Socket] Notification:', data)
+      on(PMS_EVENTS.NOTIFICATION, data => {
+        socketLogger.debug('[PMS Socket] Notification:', data)
         callbacks.notification.forEach(cb => {
           try {
             cb(data)
           } catch (e) {
-            console.error('[PMS Socket] Callback error (notification):', e)
+            socketLogger.error('[PMS Socket] Callback error (notification):', e)
           }
         })
       })
@@ -234,7 +235,7 @@ export function usePMSSocket() {
   /**
    * Initialize PMS Socket (call once from PMSLayout)
    */
-  const initPMSSocket = (hotelId) => {
+  const initPMSSocket = hotelId => {
     if (isInitialized.value) {
       // Already initialized - just update room if needed
       const id = hotelId?.value || hotelId
@@ -244,7 +245,7 @@ export function usePMSSocket() {
       return
     }
 
-    console.log('[PMS Socket] Initializing...')
+    socketLogger.debug('[PMS Socket] Initializing...')
     setupEventListeners()
     isInitialized.value = true
 
@@ -253,7 +254,7 @@ export function usePMSSocket() {
       joinHotelRoom(id)
     }
 
-    console.log('[PMS Socket] Initialized')
+    socketLogger.debug('[PMS Socket] Initialized')
   }
 
   /**
@@ -262,7 +263,7 @@ export function usePMSSocket() {
   const cleanupPMSSocket = () => {
     if (!isInitialized.value) return
 
-    console.log('[PMS Socket] Cleaning up...')
+    socketLogger.debug('[PMS Socket] Cleaning up...')
 
     leaveHotelRoom()
     cleanupEventListeners()
@@ -271,7 +272,7 @@ export function usePMSSocket() {
     Object.values(callbacks).forEach(set => set.clear())
 
     isInitialized.value = false
-    console.log('[PMS Socket] Cleaned up')
+    socketLogger.debug('[PMS Socket] Cleaned up')
   }
 
   // ============================================================================
@@ -283,10 +284,10 @@ export function usePMSSocket() {
    * @param {Set} callbackSet - Callback set to add/remove from
    * @returns {Function} Registrar function
    */
-  const createCallbackRegistrar = (callbackSet) => {
-    return (callback) => {
+  const createCallbackRegistrar = callbackSet => {
+    return callback => {
       if (typeof callback !== 'function') {
-        console.warn('[PMS Socket] Callback must be a function')
+        socketLogger.warn('[PMS Socket] Callback must be a function')
         return () => {}
       }
 
@@ -313,11 +314,11 @@ export function usePMSSocket() {
   // ============================================================================
 
   const debug = () => {
-    console.group('[PMS Socket Debug]')
-    console.log('Initialized:', isInitialized.value)
-    console.log('Current Hotel ID:', currentHotelId.value)
-    console.log('Connected:', isConnected.value)
-    console.log('Callback counts:', {
+    socketLogger.debug('[PMS Socket Debug]')
+    socketLogger.debug('Initialized:', isInitialized.value)
+    socketLogger.debug('Current Hotel ID:', currentHotelId.value)
+    socketLogger.debug('Connected:', isConnected.value)
+    socketLogger.debug('Callback counts:', {
       roomStatus: callbacks.roomStatus.size,
       checkIn: callbacks.checkIn.size,
       checkOut: callbacks.checkOut.size,
@@ -326,7 +327,6 @@ export function usePMSSocket() {
       transaction: callbacks.transaction.size,
       notification: callbacks.notification.size
     })
-    console.groupEnd()
 
     // Also show base socket debug
     socketDebug()

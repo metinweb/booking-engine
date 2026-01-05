@@ -2,8 +2,14 @@
   <div>
     <!-- Export Button -->
     <div class="mb-6 flex justify-end">
-      <button @click="exportLogs" class="btn-secondary flex items-center gap-2" :disabled="exporting">
-        <span class="material-icons" :class="{ 'animate-spin': exporting }">{{ exporting ? 'sync' : 'download' }}</span>
+      <button
+        class="btn-secondary flex items-center gap-2"
+        :disabled="exporting"
+        @click="exportLogs"
+      >
+        <span class="material-icons" :class="{ 'animate-spin': exporting }">{{
+          exporting ? 'sync' : 'download'
+        }}</span>
         {{ $t('audit.export') }}
       </button>
     </div>
@@ -12,45 +18,65 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center"
+          >
             <span class="material-icons text-blue-600 dark:text-blue-400">history</span>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.totalLogs || 0 }}</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('audit.stats.totalLogs') }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ stats.totalLogs || 0 }}
+            </p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('audit.stats.totalLogs') }}
+            </p>
           </div>
         </div>
       </div>
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center"
+          >
             <span class="material-icons text-green-600 dark:text-green-400">check_circle</span>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.successCount || 0 }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ stats.successCount || 0 }}
+            </p>
             <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('audit.stats.success') }}</p>
           </div>
         </div>
       </div>
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center"
+          >
             <span class="material-icons text-red-600 dark:text-red-400">error</span>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.failureCount || 0 }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ stats.failureCount || 0 }}
+            </p>
             <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('audit.stats.failure') }}</p>
           </div>
         </div>
       </div>
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center"
+          >
             <span class="material-icons text-purple-600 dark:text-purple-400">people</span>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.uniqueUsers || 0 }}</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('audit.stats.activeUsers') }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ stats.uniqueUsers || 0 }}
+            </p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('audit.stats.activeUsers') }}
+            </p>
           </div>
         </div>
       </div>
@@ -161,41 +187,65 @@
         <table class="w-full">
           <thead class="bg-gray-50 dark:bg-slate-700">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('audit.timestamp') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('audit.user') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('audit.module') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('audit.action') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('audit.target') }}
               </th>
-              <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('audit.status.label') }}
               </th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('common.actions') }}
               </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
-            <tr v-for="log in logs" :key="log._id" class="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+            <tr
+              v-for="log in logs"
+              :key="log._id"
+              class="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+            >
               <!-- Timestamp -->
               <td class="px-4 py-3 whitespace-nowrap">
-                <div class="text-sm text-gray-900 dark:text-white">{{ formatDate(log.timestamp) }}</div>
-                <div class="text-xs text-gray-500 dark:text-slate-400">{{ formatTime(log.timestamp) }}</div>
+                <div class="text-sm text-gray-900 dark:text-white">
+                  {{ formatDate(log.timestamp) }}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-slate-400">
+                  {{ formatTime(log.timestamp) }}
+                </div>
               </td>
 
               <!-- User -->
               <td class="px-4 py-3">
                 <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center text-sm font-medium">
+                  <div
+                    class="w-8 h-8 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center text-sm font-medium"
+                  >
                     {{ getInitials(log.actor?.name || log.actor?.email) }}
                   </div>
                   <div class="ml-3">
@@ -211,8 +261,10 @@
 
               <!-- Module -->
               <td class="px-4 py-3 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                      :class="getModuleClass(log.module)">
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  :class="getModuleClass(log.module)"
+                >
                   {{ $t(`audit.modules.${log.module}`) }}
                 </span>
                 <div v-if="log.subModule" class="text-xs text-gray-500 dark:text-slate-400 mt-1">
@@ -222,7 +274,10 @@
 
               <!-- Action -->
               <td class="px-4 py-3 whitespace-nowrap">
-                <span class="inline-flex items-center gap-1 text-sm" :class="getActionClass(log.action)">
+                <span
+                  class="inline-flex items-center gap-1 text-sm"
+                  :class="getActionClass(log.action)"
+                >
                   <span class="material-icons text-base">{{ getActionIcon(log.action) }}</span>
                   {{ $t(`audit.actions.${log.action}`) }}
                 </span>
@@ -233,14 +288,20 @@
                 <div class="text-sm text-gray-900 dark:text-white max-w-xs truncate">
                   {{ log.target?.documentName || log.target?.documentId || '-' }}
                 </div>
-                <div v-if="log.target?.collection" class="text-xs text-gray-500 dark:text-slate-400">
+                <div
+                  v-if="log.target?.collection"
+                  class="text-xs text-gray-500 dark:text-slate-400"
+                >
                   {{ log.target.collection }}
                 </div>
               </td>
 
               <!-- Status -->
               <td class="px-4 py-3 text-center">
-                <span v-if="log.status === 'success'" class="inline-flex items-center text-green-600 dark:text-green-400">
+                <span
+                  v-if="log.status === 'success'"
+                  class="inline-flex items-center text-green-600 dark:text-green-400"
+                >
                   <span class="material-icons text-base">check_circle</span>
                 </span>
                 <span v-else class="inline-flex items-center text-red-600 dark:text-red-400">
@@ -250,7 +311,10 @@
 
               <!-- Actions -->
               <td class="px-4 py-3 text-right">
-                <button @click="openDetail(log)" class="text-gray-400 hover:text-gray-600 dark:hover:text-white">
+                <button
+                  class="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                  @click="openDetail(log)"
+                >
                   <span class="material-icons">visibility</span>
                 </button>
               </td>
@@ -260,22 +324,31 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="pagination.pages > 1" class="px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <div
+        v-if="pagination.pages > 1"
+        class="px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between"
+      >
         <div class="text-sm text-gray-500 dark:text-slate-400">
-          {{ $t('audit.showing', { from: (pagination.page - 1) * pagination.limit + 1, to: Math.min(pagination.page * pagination.limit, pagination.total), total: pagination.total }) }}
+          {{
+            $t('audit.showing', {
+              from: (pagination.page - 1) * pagination.limit + 1,
+              to: Math.min(pagination.page * pagination.limit, pagination.total),
+              total: pagination.total
+            })
+          }}
         </div>
         <div class="flex gap-2">
           <button
-            @click="changePage(pagination.page - 1)"
             :disabled="pagination.page === 1"
             class="px-3 py-1 rounded border border-gray-300 dark:border-slate-600 disabled:opacity-50"
+            @click="changePage(pagination.page - 1)"
           >
             <span class="material-icons">chevron_left</span>
           </button>
           <button
-            @click="changePage(pagination.page + 1)"
             :disabled="pagination.page === pagination.pages"
             class="px-3 py-1 rounded border border-gray-300 dark:border-slate-600 disabled:opacity-50"
+            @click="changePage(pagination.page + 1)"
           >
             <span class="material-icons">chevron_right</span>
           </button>
@@ -285,12 +358,25 @@
 
     <!-- Detail Modal -->
     <Teleport to="body">
-      <div v-if="showDetail" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @click.self="showDetail = false">
-        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+      <div
+        v-if="showDetail"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+        @click.self="showDetail = false"
+      >
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+        >
           <!-- Header -->
-          <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('audit.detail.title') }}</h3>
-            <button @click="showDetail = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-white">
+          <div
+            class="p-4 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between"
+          >
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+              {{ $t('audit.detail.title') }}
+            </h3>
+            <button
+              class="text-gray-400 hover:text-gray-600 dark:hover:text-white"
+              @click="showDetail = false"
+            >
               <span class="material-icons">close</span>
             </button>
           </div>
@@ -301,89 +387,161 @@
               <!-- Basic Info -->
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{ $t('audit.timestamp') }}</label>
-                  <p class="text-sm text-gray-900 dark:text-white">{{ formatDateTime(selectedLog.timestamp) }}</p>
+                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{
+                    $t('audit.timestamp')
+                  }}</label>
+                  <p class="text-sm text-gray-900 dark:text-white">
+                    {{ formatDateTime(selectedLog.timestamp) }}
+                  </p>
                 </div>
                 <div>
-                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{ $t('audit.status.label') }}</label>
+                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{
+                    $t('audit.status.label')
+                  }}</label>
                   <p class="text-sm">
-                    <span :class="selectedLog.status === 'success' ? 'text-green-600' : 'text-red-600'">
+                    <span
+                      :class="selectedLog.status === 'success' ? 'text-green-600' : 'text-red-600'"
+                    >
                       {{ $t(`audit.status.${selectedLog.status}`) }}
                     </span>
                   </p>
                 </div>
                 <div>
-                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{ $t('audit.module') }}</label>
+                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{
+                    $t('audit.module')
+                  }}</label>
                   <p class="text-sm text-gray-900 dark:text-white">
                     {{ $t(`audit.modules.${selectedLog.module}`) }}
-                    <span v-if="selectedLog.subModule" class="text-gray-500"> / {{ selectedLog.subModule }}</span>
+                    <span v-if="selectedLog.subModule" class="text-gray-500">
+                      / {{ selectedLog.subModule }}</span
+                    >
                   </p>
                 </div>
                 <div>
-                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{ $t('audit.action') }}</label>
-                  <p class="text-sm text-gray-900 dark:text-white">{{ $t(`audit.actions.${selectedLog.action}`) }}</p>
+                  <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{
+                    $t('audit.action')
+                  }}</label>
+                  <p class="text-sm text-gray-900 dark:text-white">
+                    {{ $t(`audit.actions.${selectedLog.action}`) }}
+                  </p>
                 </div>
               </div>
 
               <!-- Actor -->
               <div class="border-t border-gray-200 dark:border-slate-700 pt-4">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ $t('audit.detail.actor') }}</h4>
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                  {{ $t('audit.detail.actor') }}
+                </h4>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.email') }}</label>
-                    <p class="text-gray-900 dark:text-white">{{ selectedLog.actor?.email || '-' }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.email')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white">
+                      {{ selectedLog.actor?.email || '-' }}
+                    </p>
                   </div>
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.name') }}</label>
-                    <p class="text-gray-900 dark:text-white">{{ selectedLog.actor?.name || '-' }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.name')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white">
+                      {{ selectedLog.actor?.name || '-' }}
+                    </p>
                   </div>
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.role') }}</label>
-                    <p class="text-gray-900 dark:text-white">{{ getRoleBadge(selectedLog.actor?.role) }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.role')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white">
+                      {{ getRoleBadge(selectedLog.actor?.role) }}
+                    </p>
                   </div>
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.ip') }}</label>
-                    <p class="text-gray-900 dark:text-white font-mono text-xs">{{ selectedLog.actor?.ip || '-' }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.ip')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white font-mono text-xs">
+                      {{ selectedLog.actor?.ip || '-' }}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <!-- Target -->
-              <div v-if="selectedLog.target" class="border-t border-gray-200 dark:border-slate-700 pt-4">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ $t('audit.detail.target') }}</h4>
+              <div
+                v-if="selectedLog.target"
+                class="border-t border-gray-200 dark:border-slate-700 pt-4"
+              >
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                  {{ $t('audit.detail.target') }}
+                </h4>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.collection') }}</label>
-                    <p class="text-gray-900 dark:text-white">{{ selectedLog.target.collection || '-' }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.collection')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white">
+                      {{ selectedLog.target.collection || '-' }}
+                    </p>
                   </div>
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.documentName') }}</label>
-                    <p class="text-gray-900 dark:text-white">{{ selectedLog.target.documentName || '-' }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.documentName')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white">
+                      {{ selectedLog.target.documentName || '-' }}
+                    </p>
                   </div>
                   <div class="col-span-2">
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.documentId') }}</label>
-                    <p class="text-gray-900 dark:text-white font-mono text-xs">{{ selectedLog.target.documentId || '-' }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.documentId')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white font-mono text-xs">
+                      {{ selectedLog.target.documentId || '-' }}
+                    </p>
                   </div>
                 </div>
               </div>
 
               <!-- Changes -->
-              <div v-if="selectedLog.changes?.diff?.length" class="border-t border-gray-200 dark:border-slate-700 pt-4">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ $t('audit.detail.changes') }}</h4>
+              <div
+                v-if="selectedLog.changes?.diff?.length"
+                class="border-t border-gray-200 dark:border-slate-700 pt-4"
+              >
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                  {{ $t('audit.detail.changes') }}
+                </h4>
                 <div class="bg-gray-50 dark:bg-slate-900 rounded-lg overflow-hidden">
                   <table class="w-full text-sm">
                     <thead>
                       <tr class="border-b border-gray-200 dark:border-slate-700">
-                        <th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.field') }}</th>
-                        <th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.oldValue') }}</th>
-                        <th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.newValue') }}</th>
+                        <th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-slate-400">
+                          {{ $t('audit.detail.field') }}
+                        </th>
+                        <th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-slate-400">
+                          {{ $t('audit.detail.oldValue') }}
+                        </th>
+                        <th class="px-3 py-2 text-left text-xs text-gray-500 dark:text-slate-400">
+                          {{ $t('audit.detail.newValue') }}
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(change, idx) in selectedLog.changes.diff" :key="idx" class="border-b border-gray-200 dark:border-slate-700 last:border-0">
-                        <td class="px-3 py-2 font-medium text-gray-900 dark:text-white">{{ change.field }}</td>
-                        <td class="px-3 py-2 text-red-600 dark:text-red-400 max-w-xs truncate">{{ formatValue(change.from) }}</td>
-                        <td class="px-3 py-2 text-green-600 dark:text-green-400 max-w-xs truncate">{{ formatValue(change.to) }}</td>
+                      <tr
+                        v-for="(change, idx) in selectedLog.changes.diff"
+                        :key="idx"
+                        class="border-b border-gray-200 dark:border-slate-700 last:border-0"
+                      >
+                        <td class="px-3 py-2 font-medium text-gray-900 dark:text-white">
+                          {{ change.field }}
+                        </td>
+                        <td class="px-3 py-2 text-red-600 dark:text-red-400 max-w-xs truncate">
+                          {{ formatValue(change.from) }}
+                        </td>
+                        <td class="px-3 py-2 text-green-600 dark:text-green-400 max-w-xs truncate">
+                          {{ formatValue(change.to) }}
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -391,36 +549,66 @@
               </div>
 
               <!-- Request Info -->
-              <div v-if="selectedLog.request" class="border-t border-gray-200 dark:border-slate-700 pt-4">
-                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{{ $t('audit.detail.request') }}</h4>
+              <div
+                v-if="selectedLog.request"
+                class="border-t border-gray-200 dark:border-slate-700 pt-4"
+              >
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                  {{ $t('audit.detail.request') }}
+                </h4>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.method') }}</label>
-                    <p class="text-gray-900 dark:text-white font-mono">{{ selectedLog.request.method }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.method')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white font-mono">
+                      {{ selectedLog.request.method }}
+                    </p>
                   </div>
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.statusCode') }}</label>
-                    <p :class="selectedLog.request.statusCode < 400 ? 'text-green-600' : 'text-red-600'">
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.statusCode')
+                    }}</label>
+                    <p
+                      :class="
+                        selectedLog.request.statusCode < 400 ? 'text-green-600' : 'text-red-600'
+                      "
+                    >
                       {{ selectedLog.request.statusCode }}
                     </p>
                   </div>
                   <div class="col-span-2">
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.path') }}</label>
-                    <p class="text-gray-900 dark:text-white font-mono text-xs break-all">{{ selectedLog.request.path }}</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.path')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white font-mono text-xs break-all">
+                      {{ selectedLog.request.path }}
+                    </p>
                   </div>
                   <div>
-                    <label class="text-xs text-gray-500 dark:text-slate-400">{{ $t('audit.detail.duration') }}</label>
-                    <p class="text-gray-900 dark:text-white">{{ selectedLog.request.duration }}ms</p>
+                    <label class="text-xs text-gray-500 dark:text-slate-400">{{
+                      $t('audit.detail.duration')
+                    }}</label>
+                    <p class="text-gray-900 dark:text-white">
+                      {{ selectedLog.request.duration }}ms
+                    </p>
                   </div>
                 </div>
               </div>
 
               <!-- JSON Toggle -->
               <div class="border-t border-gray-200 dark:border-slate-700 pt-4">
-                <button @click="showJson = !showJson" class="text-sm text-purple-600 dark:text-purple-400 hover:underline">
+                <button
+                  class="text-sm text-purple-600 dark:text-purple-400 hover:underline"
+                  @click="showJson = !showJson"
+                >
                   {{ showJson ? $t('audit.detail.hideJson') : $t('audit.detail.showJson') }}
                 </button>
-                <pre v-if="showJson" class="mt-2 p-3 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto">{{ JSON.stringify(selectedLog, null, 2) }}</pre>
+                <pre
+                  v-if="showJson"
+                  class="mt-2 p-3 bg-gray-900 text-green-400 rounded-lg text-xs overflow-x-auto"
+                  >{{ JSON.stringify(selectedLog, null, 2) }}</pre
+                >
               </div>
             </div>
           </div>
@@ -431,7 +619,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import auditService from '@/services/auditService'
@@ -462,8 +650,34 @@ const selectedLog = ref(null)
 const showJson = ref(false)
 
 // Filter options
-const modules = ['auth', 'user', 'partner', 'hotel', 'planning', 'booking', 'content', 'settings', 'agency', 'location', 'tag']
-const actions = ['create', 'update', 'delete', 'login', 'logout', 'upload', 'import', 'export', 'approve', 'reject', 'activate', 'deactivate', 'link']
+const modules = [
+  'auth',
+  'user',
+  'partner',
+  'hotel',
+  'planning',
+  'booking',
+  'content',
+  'settings',
+  'agency',
+  'location',
+  'tag'
+]
+const actions = [
+  'create',
+  'update',
+  'delete',
+  'login',
+  'logout',
+  'upload',
+  'import',
+  'export',
+  'approve',
+  'reject',
+  'activate',
+  'deactivate',
+  'link'
+]
 
 // Debounced search
 let searchTimeout = null
@@ -521,7 +735,7 @@ const fetchLogs = async () => {
     const response = await auditService.getAuditLogs(params)
     logs.value = response.data.logs
     pagination.value = response.data.pagination
-  } catch (error) {
+  } catch {
     toast.error(t('audit.error.loadFailed'))
   } finally {
     loading.value = false
@@ -539,13 +753,13 @@ const fetchStats = async () => {
 }
 
 // Change page
-const changePage = (page) => {
+const changePage = page => {
   pagination.value.page = page
   fetchLogs()
 }
 
 // Open detail modal
-const openDetail = (log) => {
+const openDetail = log => {
   selectedLog.value = log
   showJson.value = false
   showDetail.value = true
@@ -571,7 +785,7 @@ const exportLogs = async () => {
     window.URL.revokeObjectURL(url)
 
     toast.success(t('audit.exportSuccess'))
-  } catch (error) {
+  } catch {
     toast.error(t('audit.error.exportFailed'))
   } finally {
     exporting.value = false
@@ -579,27 +793,36 @@ const exportLogs = async () => {
 }
 
 // Helpers
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR')
 }
 
-const formatTime = (date) => {
+const formatTime = date => {
   if (!date) return ''
-  return new Date(date).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  return new Date(date).toLocaleTimeString('tr-TR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
 }
 
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('tr-TR')
 }
 
-const getInitials = (name) => {
+const getInitials = name => {
   if (!name) return 'S'
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 
-const getRoleBadge = (role) => {
+const getRoleBadge = role => {
   const roles = {
     superadmin: 'SuperAdmin',
     admin: 'Admin',
@@ -610,7 +833,7 @@ const getRoleBadge = (role) => {
   return roles[role] || role || 'Unknown'
 }
 
-const getModuleClass = (module) => {
+const getModuleClass = module => {
   const classes = {
     auth: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     user: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -626,7 +849,7 @@ const getModuleClass = (module) => {
   return classes[module] || 'bg-gray-100 text-gray-800'
 }
 
-const getActionClass = (action) => {
+const getActionClass = action => {
   const classes = {
     create: 'text-green-600 dark:text-green-400',
     update: 'text-blue-600 dark:text-blue-400',
@@ -642,7 +865,7 @@ const getActionClass = (action) => {
   return classes[action] || 'text-gray-600'
 }
 
-const getActionIcon = (action) => {
+const getActionIcon = action => {
   const icons = {
     create: 'add_circle',
     update: 'edit',
@@ -661,7 +884,7 @@ const getActionIcon = (action) => {
   return icons[action] || 'radio_button_checked'
 }
 
-const formatValue = (value) => {
+const formatValue = value => {
   if (value === undefined || value === null) return '-'
   if (typeof value === 'object') return JSON.stringify(value)
   return String(value)

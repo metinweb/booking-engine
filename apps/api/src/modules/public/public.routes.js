@@ -8,10 +8,10 @@
 import express from 'express'
 import * as publicService from './public.service.js'
 import {
-	globalLimiter,
-	publicSearchLimiter,
-	publicBookingLimiter,
-	pricingLimiter
+  globalLimiter,
+  publicSearchLimiter,
+  publicBookingLimiter,
+  pricingLimiter
 } from '../../middleware/rateLimiter.js'
 import { validateBody, validateQuery } from '../../middleware/validation.js'
 
@@ -76,30 +76,32 @@ router.get('/hotels/:hotelCode/meal-plans', publicService.getMealPlans)
  * @body {string} countryCode - Guest country code for market detection
  * @body {string} currency - Preferred currency
  */
-router.post('/hotels/:hotelCode/search',
-	publicSearchLimiter,
-	validateBody({
-		checkIn: { type: 'date', required: true },
-		checkOut: { type: 'date', required: true },
-		adults: { type: 'integer', min: 1, max: 10 },
-		children: { type: 'array' }
-	}),
-	publicService.searchAvailability
+router.post(
+  '/hotels/:hotelCode/search',
+  publicSearchLimiter,
+  validateBody({
+    checkIn: { type: 'date', required: true },
+    checkOut: { type: 'date', required: true },
+    adults: { type: 'integer', min: 1, max: 10 },
+    children: { type: 'array' }
+  }),
+  publicService.searchAvailability
 )
 
 /**
  * @route GET /public/hotels/:hotelCode/availability
  * @desc Check availability for date range
  */
-router.get('/hotels/:hotelCode/availability',
-	publicSearchLimiter,
-	validateQuery({
-		startDate: { type: 'string', required: true },
-		endDate: { type: 'string', required: true },
-		roomTypeId: { type: 'string' },
-		marketId: { type: 'string' }
-	}),
-	publicService.checkAvailability
+router.get(
+  '/hotels/:hotelCode/availability',
+  publicSearchLimiter,
+  validateQuery({
+    startDate: { type: 'string', required: true },
+    endDate: { type: 'string', required: true },
+    roomTypeId: { type: 'string' },
+    marketId: { type: 'string' }
+  }),
+  publicService.checkAvailability
 )
 
 // ==================== PRICING ====================
@@ -108,17 +110,18 @@ router.get('/hotels/:hotelCode/availability',
  * @route POST /public/hotels/:hotelCode/price-quote
  * @desc Get detailed price quote
  */
-router.post('/hotels/:hotelCode/price-quote',
-	pricingLimiter,
-	validateBody({
-		checkIn: { type: 'date', required: true },
-		checkOut: { type: 'date', required: true },
-		roomTypeCode: { type: 'string', required: true },
-		mealPlanCode: { type: 'string', required: true },
-		adults: { type: 'integer', min: 1, max: 10 },
-		children: { type: 'array' }
-	}),
-	publicService.getPriceQuote
+router.post(
+  '/hotels/:hotelCode/price-quote',
+  pricingLimiter,
+  validateBody({
+    checkIn: { type: 'date', required: true },
+    checkOut: { type: 'date', required: true },
+    roomTypeCode: { type: 'string', required: true },
+    mealPlanCode: { type: 'string', required: true },
+    adults: { type: 'integer', min: 1, max: 10 },
+    children: { type: 'array' }
+  }),
+  publicService.getPriceQuote
 )
 
 /**
@@ -133,40 +136,43 @@ router.get('/hotels/:hotelCode/campaigns', publicService.getActiveCampaigns)
  * @route POST /public/bookings
  * @desc Create a new booking
  */
-router.post('/bookings',
-	publicBookingLimiter,
-	validateBody({
-		hotelCode: { type: 'string', required: true },
-		checkIn: { type: 'date', required: true },
-		checkOut: { type: 'date', required: true },
-		rooms: { type: 'array', required: true },
-		contact: { type: 'object', required: true }
-	}),
-	publicService.createBooking
+router.post(
+  '/bookings',
+  publicBookingLimiter,
+  validateBody({
+    hotelCode: { type: 'string', required: true },
+    checkIn: { type: 'date', required: true },
+    checkOut: { type: 'date', required: true },
+    rooms: { type: 'array', required: true },
+    contact: { type: 'object', required: true }
+  }),
+  publicService.createBooking
 )
 
 /**
  * @route GET /public/bookings/:bookingNumber
  * @desc Get booking by reference number
  */
-router.get('/bookings/:bookingNumber',
-	validateQuery({
-		email: { type: 'string', required: true }
-	}),
-	publicService.getBooking
+router.get(
+  '/bookings/:bookingNumber',
+  validateQuery({
+    email: { type: 'string', required: true }
+  }),
+  publicService.getBooking
 )
 
 /**
  * @route POST /public/bookings/:bookingNumber/cancel
  * @desc Request booking cancellation
  */
-router.post('/bookings/:bookingNumber/cancel',
-	publicBookingLimiter,
-	validateBody({
-		email: { type: 'string', required: true },
-		reason: { type: 'string' }
-	}),
-	publicService.cancelBooking
+router.post(
+  '/bookings/:bookingNumber/cancel',
+  publicBookingLimiter,
+  validateBody({
+    email: { type: 'string', required: true },
+    reason: { type: 'string' }
+  }),
+  publicService.cancelBooking
 )
 
 export default router

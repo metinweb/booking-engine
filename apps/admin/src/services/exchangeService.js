@@ -109,7 +109,7 @@ export function formatCurrency(amount, currency, locale = 'tr-TR') {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     }).format(amount)
-  } catch (error) {
+  } catch {
     return `${amount?.toFixed(2)} ${getCurrencySymbol(currency)}`
   }
 }

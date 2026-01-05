@@ -1,6 +1,8 @@
 <template>
   <div class="star-selector">
-    <label v-if="label" class="form-label">{{ label }} <span v-if="required" class="text-red-500">*</span></label>
+    <label v-if="label" class="form-label"
+      >{{ label }} <span v-if="required" class="text-red-500">*</span></label
+    >
     <div class="flex items-center gap-1">
       <button
         v-for="n in maxStars"
@@ -13,10 +15,10 @@
             : 'text-gray-300 dark:text-slate-600 hover:text-yellow-300',
           { 'scale-110': n === hoverValue }
         ]"
+        :disabled="disabled"
         @click="selectStar(n)"
         @mouseenter="hoverValue = n"
         @mouseleave="hoverValue = 0"
-        :disabled="disabled"
       >
         <span class="material-icons text-2xl">
           {{ n <= (hoverValue || modelValue) ? 'star' : 'star_outline' }}
@@ -68,7 +70,7 @@ const emit = defineEmits(['update:modelValue'])
 
 const hoverValue = ref(0)
 
-const selectStar = (n) => {
+const selectStar = n => {
   if (!props.disabled) {
     emit('update:modelValue', n)
   }

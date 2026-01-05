@@ -19,7 +19,9 @@
 
       <!-- Dates Section -->
       <div>
-        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-4">
+        <h4
+          class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-4"
+        >
           <span class="material-icons text-indigo-500 text-lg">event</span>
           {{ $t('pms.reservation.dates') }}
         </h4>
@@ -46,10 +48,16 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
               {{ $t('pms.reservation.nights') }}
             </label>
-            <div class="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg">
+            <div
+              class="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg"
+            >
               <span class="material-icons text-indigo-600 dark:text-indigo-400">nightlight</span>
-              <span class="text-lg font-bold text-indigo-700 dark:text-indigo-300">{{ nights }}</span>
-              <span class="text-sm text-indigo-600 dark:text-indigo-400">{{ $t('pms.reservation.nightsLabel') }}</span>
+              <span class="text-lg font-bold text-indigo-700 dark:text-indigo-300">{{
+                nights
+              }}</span>
+              <span class="text-sm text-indigo-600 dark:text-indigo-400">{{
+                $t('pms.reservation.nightsLabel')
+              }}</span>
             </div>
           </div>
         </div>
@@ -77,7 +85,9 @@
 
       <!-- Guest Info Section -->
       <div>
-        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-4">
+        <h4
+          class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-4"
+        >
           <span class="material-icons text-indigo-500 text-lg">person</span>
           {{ $t('pms.reservation.guestInfo') }}
         </h4>
@@ -89,7 +99,9 @@
               {{ $t('pms.reservation.firstName') }} *
             </label>
             <div class="relative">
-              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">badge</span>
+              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >badge</span
+              >
               <input
                 v-model="form.leadGuest.firstName"
                 type="text"
@@ -99,7 +111,10 @@
                 @blur="touchField('firstName')"
               />
             </div>
-            <p v-if="getError('firstName')" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+            <p
+              v-if="getError('firstName')"
+              class="mt-1 text-xs text-red-500 flex items-center gap-1"
+            >
               <span class="material-icons text-xs">error</span>
               {{ getError('firstName') }}
             </p>
@@ -111,7 +126,9 @@
               {{ $t('pms.reservation.lastName') }} *
             </label>
             <div class="relative">
-              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">badge</span>
+              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >badge</span
+              >
               <input
                 v-model="form.leadGuest.lastName"
                 type="text"
@@ -121,7 +138,10 @@
                 @blur="touchField('lastName')"
               />
             </div>
-            <p v-if="getError('lastName')" class="mt-1 text-xs text-red-500 flex items-center gap-1">
+            <p
+              v-if="getError('lastName')"
+              class="mt-1 text-xs text-red-500 flex items-center gap-1"
+            >
               <span class="material-icons text-xs">error</span>
               {{ getError('lastName') }}
             </p>
@@ -133,7 +153,9 @@
               {{ $t('common.email') }}
             </label>
             <div class="relative">
-              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">email</span>
+              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >email</span
+              >
               <input
                 v-model="form.contact.email"
                 type="email"
@@ -165,7 +187,9 @@
               {{ $t('pms.reservation.idNumber') }}
             </label>
             <div class="relative">
-              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">credit_card</span>
+              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >credit_card</span
+              >
               <input
                 v-model="form.leadGuest.idNumber"
                 type="text"
@@ -190,7 +214,9 @@
 
       <!-- Occupancy Section -->
       <div>
-        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-3">
+        <h4
+          class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-3"
+        >
           <span class="material-icons text-indigo-500 text-lg">groups</span>
           {{ $t('pms.reservation.occupancy') }}
         </h4>
@@ -208,7 +234,9 @@
 
       <!-- Pricing Section -->
       <div>
-        <h4 class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-4">
+        <h4
+          class="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white mb-4"
+        >
           <span class="material-icons text-indigo-500 text-lg">payments</span>
           {{ $t('pms.reservation.pricing') }}
         </h4>
@@ -223,7 +251,9 @@
               <select
                 v-model="form.pricing.currency"
                 class="w-20 px-2 py-2 border border-r-0 rounded-l-lg bg-gray-50 dark:bg-slate-600 text-gray-700 dark:text-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                :class="getError('total') ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'"
+                :class="
+                  getError('total') ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
+                "
               >
                 <option value="TRY">₺</option>
                 <option value="USD">$</option>
@@ -236,7 +266,11 @@
                 min="0"
                 step="0.01"
                 class="flex-1 min-w-0 px-3 py-2 border rounded-r-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                :class="getError('total') ? 'border-red-500 bg-red-50 dark:bg-red-900/10' : 'border-gray-300 dark:border-slate-600'"
+                :class="
+                  getError('total')
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900/10'
+                    : 'border-gray-300 dark:border-slate-600'
+                "
                 @blur="touchField('total')"
               />
             </div>
@@ -252,7 +286,9 @@
               {{ $t('pms.reservation.deposit') }}
             </label>
             <div class="flex">
-              <span class="w-10 flex items-center justify-center border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg bg-gray-50 dark:bg-slate-600 text-gray-500 dark:text-slate-400 text-sm">
+              <span
+                class="w-10 flex items-center justify-center border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg bg-gray-50 dark:bg-slate-600 text-gray-500 dark:text-slate-400 text-sm"
+              >
                 {{ getCurrencySymbol(form.pricing.currency) }}
               </span>
               <input
@@ -299,7 +335,9 @@
         <div class="flex items-start gap-3">
           <span class="material-icons text-red-500">warning</span>
           <div>
-            <h5 class="font-medium text-red-700 dark:text-red-400">{{ $t('pms.reservation.validationErrors') }}</h5>
+            <h5 class="font-medium text-red-700 dark:text-red-400">
+              {{ $t('pms.reservation.validationErrors') }}
+            </h5>
             <ul class="mt-2 space-y-1 text-sm text-red-600 dark:text-red-400">
               <li v-for="(error, key) in errors" :key="key" class="flex items-center gap-1">
                 <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
@@ -318,26 +356,27 @@
           <span v-if="form.pricing.total > 0">
             {{ $t('pms.reservation.total') }}:
             <span class="font-semibold text-gray-900 dark:text-white">
-              {{ getCurrencySymbol(form.pricing.currency) }}{{ form.pricing.total.toLocaleString() }}
+              {{ getCurrencySymbol(form.pricing.currency)
+              }}{{ form.pricing.total.toLocaleString() }}
             </span>
           </span>
         </div>
 
         <div class="flex items-center gap-3">
           <button
-            @click="close"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             :disabled="loading"
+            @click="close"
           >
             {{ $t('common.cancel') }}
           </button>
           <button
-            @click="submit"
             class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
             :disabled="loading"
+            @click="submit"
           >
             <span v-if="loading" class="material-icons animate-spin text-sm">refresh</span>
-            <span class="material-icons text-sm" v-else>add</span>
+            <span v-else class="material-icons text-sm">add</span>
             {{ $t('pms.reservation.createReservation') }}
           </button>
         </div>
@@ -390,7 +429,7 @@ const today = new Date().toISOString().split('T')[0]
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const defaultForm = () => ({
@@ -447,13 +486,16 @@ const errors = computed(() => {
   if (nights.value <= 0) errs.checkOut = t('pms.reservation.errors.invalidDates')
   if (!form.value.roomTypeId) errs.roomTypeId = t('pms.reservation.errors.roomTypeRequired')
   if (!form.value.mealPlanId) errs.mealPlanId = t('pms.reservation.errors.mealPlanRequired')
-  if (!form.value.leadGuest.firstName?.trim()) errs.firstName = t('pms.reservation.errors.firstNameRequired')
-  if (!form.value.leadGuest.lastName?.trim()) errs.lastName = t('pms.reservation.errors.lastNameRequired')
+  if (!form.value.leadGuest.firstName?.trim())
+    errs.firstName = t('pms.reservation.errors.firstNameRequired')
+  if (!form.value.leadGuest.lastName?.trim())
+    errs.lastName = t('pms.reservation.errors.lastNameRequired')
   // Email and phone are optional - only validate format if provided
   if (form.value.contact.email?.trim() && !isValidEmail(form.value.contact.email)) {
     errs.email = t('pms.reservation.errors.emailInvalid')
   }
-  if (!form.value.pricing.total || form.value.pricing.total <= 0) errs.total = t('pms.reservation.errors.totalRequired')
+  if (!form.value.pricing.total || form.value.pricing.total <= 0)
+    errs.total = t('pms.reservation.errors.totalRequired')
 
   return errs
 })
@@ -461,19 +503,19 @@ const errors = computed(() => {
 const isValid = computed(() => Object.keys(errors.value).length === 0)
 
 // Helper functions
-const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+const isValidEmail = email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
-const getCurrencySymbol = (currency) => {
+const getCurrencySymbol = currency => {
   const symbols = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }
   return symbols[currency] || currency
 }
 
-const getError = (field) => {
+const getError = field => {
   if (!touchedFields[field] && !showValidationSummary.value) return ''
   return errors.value[field] || ''
 }
 
-const getInputClass = (field) => {
+const getInputClass = field => {
   const hasError = getError(field)
   if (hasError) {
     return 'border-red-500 bg-red-50 dark:bg-red-900/10 focus:ring-red-500 focus:border-red-500'
@@ -481,7 +523,7 @@ const getInputClass = (field) => {
   return 'border-gray-300 dark:border-slate-600 focus:ring-indigo-500 focus:border-indigo-500'
 }
 
-const touchField = (field) => {
+const touchField = field => {
   touchedFields[field] = true
 }
 
@@ -495,19 +537,19 @@ const handleCheckInChange = () => {
   }
 }
 
-const handleRoomTypeSelect = (roomType) => {
+const handleRoomTypeSelect = roomType => {
   // Could update pricing suggestions based on room type
   console.log('Selected room type:', roomType)
 }
 
-const handleAgencyCreated = (agency) => {
+const handleAgencyCreated = agency => {
   console.log('New agency created:', agency)
 }
 
 const submit = async () => {
   showValidationSummary.value = true
   // Touch all fields
-  Object.keys(errors.value).forEach(key => touchedFields[key] = true)
+  Object.keys(errors.value).forEach(key => (touchedFields[key] = true))
 
   if (!isValid.value) return
 
@@ -532,11 +574,14 @@ const close = () => {
 }
 
 // Reset form when modal opens
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    form.value = defaultForm()
-    showValidationSummary.value = false
-    Object.keys(touchedFields).forEach(key => delete touchedFields[key])
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      form.value = defaultForm()
+      showValidationSummary.value = false
+      Object.keys(touchedFields).forEach(key => delete touchedFields[key])
+    }
   }
-})
+)
 </script>

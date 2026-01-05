@@ -14,7 +14,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'text',
-    validator: (v) => ['text', 'circle', 'rect', 'avatar', 'button', 'card', 'image'].includes(v)
+    validator: v => ['text', 'circle', 'rect', 'avatar', 'button', 'card', 'image'].includes(v)
   },
   // Custom dimensions
   width: {
@@ -29,13 +29,13 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
+    validator: v => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
   },
   // Animation
   animation: {
     type: String,
     default: 'pulse',
-    validator: (v) => ['pulse', 'wave', 'none'].includes(v)
+    validator: v => ['pulse', 'wave', 'none'].includes(v)
   }
 })
 

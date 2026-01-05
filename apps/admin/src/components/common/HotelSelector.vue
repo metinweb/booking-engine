@@ -1,20 +1,28 @@
 <template>
-  <div class="relative" ref="dropdownRef">
+  <div ref="dropdownRef" class="relative">
     <button
-      @click="toggleDropdown"
       class="flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors w-full"
       :class="{
         'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400': hasSelectedHotel
       }"
+      @click="toggleDropdown"
     >
       <span class="material-icons text-xl">apartment</span>
       <div class="text-left flex-1 min-w-0">
-        <div class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.selectHotel') }}</div>
+        <div class="text-xs text-gray-500 dark:text-slate-400">
+          {{ $t('planning.selectHotel') }}
+        </div>
         <div class="text-sm font-medium truncate">
           {{ selectedHotel?.name || $t('planning.noHotelSelected') }}
         </div>
       </div>
-      <svg class="w-4 h-4 transition-transform flex-shrink-0" :class="{ 'rotate-180': isOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg
+        class="w-4 h-4 transition-transform flex-shrink-0"
+        :class="{ 'rotate-180': isOpen }"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
       </svg>
     </button>
@@ -35,7 +43,10 @@
         <!-- Search Input -->
         <div class="p-2 border-b border-gray-200 dark:border-slate-700">
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">search</span>
+            <span
+              class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg"
+              >search</span
+            >
             <input
               ref="searchInputRef"
               v-model="searchQuery"
@@ -46,8 +57,8 @@
             />
             <button
               v-if="searchQuery"
-              @click="clearSearch"
               class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              @click="clearSearch"
             >
               <span class="material-icons text-sm">close</span>
             </button>
@@ -58,7 +69,9 @@
         <div class="max-h-64 overflow-y-auto">
           <!-- Loading State -->
           <div v-if="loading" class="px-4 py-8 text-center text-gray-500 dark:text-slate-400">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+            <div
+              class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"
+            ></div>
             <span class="text-sm">{{ $t('common.loading') }}</span>
           </div>
 
@@ -67,21 +80,28 @@
             <button
               v-for="hotel in hotels"
               :key="hotel._id"
-              @click="selectHotel(hotel)"
               class="w-full px-4 py-3 text-left text-sm hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-3 border-b border-gray-100 dark:border-slate-700 last:border-b-0"
               :class="{
-                'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400': selectedHotel?._id === hotel._id
+                'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400':
+                  selectedHotel?._id === hotel._id
               }"
+              @click="selectHotel(hotel)"
             >
               <!-- Hotel Logo/Thumbnail -->
-              <div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-slate-600 flex-shrink-0 overflow-hidden">
+              <div
+                class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-slate-600 flex-shrink-0 overflow-hidden"
+              >
                 <img
                   v-if="hotel.logo || getMainImage(hotel)"
                   :src="getImageUrl(hotel.logo || getMainImage(hotel))"
                   :alt="hotel.name"
                   class="w-full h-full object-cover"
                 />
-                <span v-else class="material-icons text-2xl text-gray-400 dark:text-slate-500 flex items-center justify-center w-full h-full">hotel</span>
+                <span
+                  v-else
+                  class="material-icons text-2xl text-gray-400 dark:text-slate-500 flex items-center justify-center w-full h-full"
+                  >hotel</span
+                >
               </div>
 
               <div class="flex-1 min-w-0">
@@ -95,9 +115,12 @@
                   <span
                     class="px-1.5 py-0.5 rounded text-xs"
                     :class="{
-                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': hotel.status === 'active',
-                      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400': hotel.status === 'draft',
-                      'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400': hotel.status === 'inactive'
+                      'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                        hotel.status === 'active',
+                      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400':
+                        hotel.status === 'draft',
+                      'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400':
+                        hotel.status === 'inactive'
                     }"
                   >
                     {{ $t(`hotels.statuses.${hotel.status}`) }}
@@ -105,7 +128,11 @@
                 </div>
               </div>
 
-              <span v-if="selectedHotel?._id === hotel._id" class="material-icons text-indigo-600 dark:text-indigo-400">check</span>
+              <span
+                v-if="selectedHotel?._id === hotel._id"
+                class="material-icons text-indigo-600 dark:text-indigo-400"
+                >check</span
+              >
             </button>
           </div>
 
@@ -117,7 +144,10 @@
         </div>
 
         <!-- Results Info -->
-        <div v-if="!loading && totalCount > 0" class="px-4 py-2 text-xs text-gray-500 dark:text-slate-400 border-t border-gray-200 dark:border-slate-700">
+        <div
+          v-if="!loading && totalCount > 0"
+          class="px-4 py-2 text-xs text-gray-500 dark:text-slate-400 border-t border-gray-200 dark:border-slate-700"
+        >
           {{ $t('planning.showingHotels', { count: hotels.length, total: totalCount }) }}
         </div>
       </div>
@@ -126,8 +156,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import hotelService from '@/services/hotelService'
 import { usePartnerContext } from '@/composables/usePartnerContext'
 import { useHotelStore } from '@/stores/hotel'
@@ -142,7 +171,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-const { t } = useI18n()
 const hotelStore = useHotelStore()
 
 const isOpen = ref(false)
@@ -160,7 +188,7 @@ const hasSelectedHotel = computed(() => !!selectedHotel.value)
 
 // Partner context for reactivity
 const { currentPartnerId } = usePartnerContext({
-  onPartnerChange: (partner) => {
+  onPartnerChange: partner => {
     // Load saved hotel for this partner (or clear if no partner)
     hotelStore.setPartner(partner?._id || null)
     // Emit the loaded hotel (could be null or saved hotel)
@@ -173,10 +201,9 @@ const { currentPartnerId } = usePartnerContext({
   immediate: false // Don't trigger on mount, only on actual partner change
 })
 
-
 // getImageUrl imported from @/utils/imageUrl
 
-const getMainImage = (hotel) => {
+const getMainImage = hotel => {
   const mainImage = hotel.images?.find(img => img.isMain)
   return mainImage?.url || hotel.images?.[0]?.url || null
 }
@@ -227,7 +254,7 @@ const clearSearch = () => {
   searchInputRef.value?.focus()
 }
 
-const selectHotel = (hotel) => {
+const selectHotel = hotel => {
   emit('update:modelValue', hotel)
   emit('change', hotel)
   isOpen.value = false
@@ -235,7 +262,7 @@ const selectHotel = (hotel) => {
 }
 
 // Close dropdown when clicking outside
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
     isOpen.value = false
   }

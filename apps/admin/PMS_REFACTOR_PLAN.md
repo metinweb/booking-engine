@@ -1,7 +1,9 @@
 # PMS Tam Refactoring Planı
 
 ## Hedef
+
 Tüm PMS modülünü yeniden yapılandırarak:
+
 - State duplication'ı ortadan kaldır
 - API client tutarlılığı sağla
 - Socket lifecycle'ı düzelt
@@ -14,9 +16,11 @@ Tüm PMS modülünü yeniden yapılandırarak:
 ## PHASE 1: Unified PMS Context (Frontend Core)
 
 ### 1.1 Yeni Composable: usePmsContext.js
+
 **Dosya:** `/admin/src/composables/usePmsContext.js`
 
 Tek bir context tüm PMS state'ini yönetecek:
+
 - currentHotel
 - currentUser (PMS user)
 - permissions
@@ -24,15 +28,19 @@ Tek bir context tüm PMS state'ini yönetecek:
 - Socket connection state
 
 ### 1.2 Yeni API Client: pmsApiClient.js (Güncelleme)
+
 **Dosya:** `/admin/src/services/pms/pmsApi.js`
 
 Tüm PMS service'leri bu client'ı kullanacak.
 
 ### 1.3 Store Consolidation
+
 **Silinecekler:**
+
 - `/admin/src/stores/pms/pmsStore.js` (hotel.js ile birleşecek)
 
 **Güncellenecekler:**
+
 - `/admin/src/stores/pms/pmsAuth.js` - Sadece PMS auth için
 - `/admin/src/stores/hotel.js` - Unified hotel state
 
@@ -41,7 +49,9 @@ Tüm PMS service'leri bu client'ı kullanacak.
 ## PHASE 2: Service Layer Refactoring
 
 ### 2.1 Utility Module
+
 **Yeni Dosya:** `/admin/src/utils/pmsUtils.js`
+
 - formatCurrency()
 - formatDate()
 - formatTime()
@@ -49,7 +59,9 @@ Tüm PMS service'leri bu client'ı kullanacak.
 - PAYMENT_METHODS (tek kaynak)
 
 ### 2.2 Tüm Service'leri Güncelle
+
 12 service dosyası güncellenecek:
+
 - apiClient → pmsApiClient (veya context-aware client)
 - Duplicate utility fonksiyonları kaldır
 - Tutarlı error handling ekle
@@ -59,13 +71,17 @@ Tüm PMS service'leri bu client'ı kullanacak.
 ## PHASE 3: Socket Refactoring
 
 ### 3.1 Socket Lifecycle Management
+
 **Dosya:** `/admin/src/composables/useSocket.js`
+
 - Logout'ta socket.disconnect()
 - Reconnect strategy
 - Connection state management
 
 ### 3.2 PMS Socket Improvements
+
 **Dosya:** `/admin/src/composables/usePMSSocket.js`
+
 - Callback cleanup guarantee
 - Room subscription tracking
 - Debug logging
@@ -75,9 +91,11 @@ Tüm PMS service'leri bu client'ı kullanacak.
 ## PHASE 4: Backend Modularization
 
 ### 4.1 Route Splitting
+
 **Mevcut:** `pms.routes.js` (566 satır)
 
 **Yeni yapı:**
+
 ```
 /api/src/modules/pms/routes/
 ├── index.js (ana router)
@@ -93,7 +111,9 @@ Tüm PMS service'leri bu client'ı kullanacak.
 ```
 
 ### 4.2 Transaction Pattern
+
 **Dosya:** `/api/src/modules/pms/stay.service.js`
+
 - walkInCheckIn → transaction ile wrap
 - checkOut → transaction ile wrap
 
@@ -102,16 +122,21 @@ Tüm PMS service'leri bu client'ı kullanacak.
 ## PHASE 5: Component Updates
 
 ### 5.1 Provider Component
+
 **Yeni:** `/admin/src/components/pms/PmsProvider.vue`
+
 - usePmsContext provide eder
 - Tüm child component'ler inject ile alır
 
 ### 5.2 Layout Update
+
 **Dosya:** `/admin/src/layouts/PMSLayout.vue`
+
 - PmsProvider'ı wrap et
 - Socket initialization burada
 
 ### 5.3 Component Updates
+
 - hotelId prop → inject('pmsContext')
 - Duplicate formatCurrency → import from utils
 
@@ -120,6 +145,7 @@ Tüm PMS service'leri bu client'ı kullanacak.
 ## PHASE 6: Deep Testing
 
 ### 6.1 Test Scenarios
+
 1. **Auth Flow**
    - PMS Login
    - PMS Logout
@@ -154,6 +180,7 @@ Tüm PMS service'leri bu client'ı kullanacak.
 ## Dosya Listesi
 
 ### Yeni Dosyalar
+
 1. `/admin/src/composables/usePmsContext.js`
 2. `/admin/src/utils/pmsUtils.js`
 3. `/admin/src/components/pms/PmsProvider.vue`
@@ -169,6 +196,7 @@ Tüm PMS service'leri bu client'ı kullanacak.
 13. `/api/src/modules/pms/routes/settings.routes.js`
 
 ### Güncellenecek Dosyalar
+
 1. `/admin/src/stores/hotel.js`
 2. `/admin/src/stores/pms/pmsAuth.js`
 3. `/admin/src/composables/useSocket.js`
@@ -191,6 +219,7 @@ Tüm PMS service'leri bu client'ı kullanacak.
 20. `/api/src/modules/pms/pms.routes.js` (deprecated, yeni routes'a yönlendir)
 
 ### Silinecek Dosyalar
+
 1. `/admin/src/stores/pms/pmsStore.js` (hotel.js ile birleşti)
 
 ---

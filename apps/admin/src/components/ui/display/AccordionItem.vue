@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="ui-accordion-item"
-    :class="itemClasses"
-  >
+  <div class="ui-accordion-item" :class="itemClasses">
     <!-- Header -->
     <button
       type="button"
@@ -46,12 +43,7 @@
     </button>
 
     <!-- Content -->
-    <Transition
-      name="accordion"
-      @enter="onEnter"
-      @after-enter="onAfterEnter"
-      @leave="onLeave"
-    >
+    <Transition name="accordion" @enter="onEnter" @after-enter="onAfterEnter" @leave="onLeave">
       <div v-if="isOpen" class="overflow-hidden">
         <div class="px-4 pb-4" :class="contentClasses">
           <slot></slot>
@@ -144,17 +136,17 @@ const contentClasses = computed(() => {
 })
 
 // Animation handlers
-const onEnter = (el) => {
+const onEnter = el => {
   el.style.height = '0'
   el.offsetHeight // Force reflow
   el.style.height = el.scrollHeight + 'px'
 }
 
-const onAfterEnter = (el) => {
+const onAfterEnter = el => {
   el.style.height = 'auto'
 }
 
-const onLeave = (el) => {
+const onLeave = el => {
   el.style.height = el.scrollHeight + 'px'
   el.offsetHeight // Force reflow
   el.style.height = '0'

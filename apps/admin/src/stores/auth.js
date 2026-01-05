@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import authService from '@/services/authService'
 import router from '@/router'
+import { storeLogger } from '@/utils/logger'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -19,7 +20,9 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = computed(() => user.value?.email || '')
   const accountType = computed(() => user.value?.accountType || '')
   const isAdmin = computed(() => userRole.value === 'admin')
-  const isPlatformAdmin = computed(() => accountType.value === 'platform' && userRole.value === 'admin')
+  const isPlatformAdmin = computed(
+    () => accountType.value === 'platform' && userRole.value === 'admin'
+  )
 
   // Actions
   async function login(credentials) {
@@ -44,7 +47,10 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('token', response.data.accessToken)
         localStorage.setItem('refreshToken', response.data.refreshToken)
         localStorage.setItem('user', JSON.stringify(response.data.user))
-        localStorage.setItem('forcePasswordChange', JSON.stringify(response.data.forcePasswordChange || false))
+        localStorage.setItem(
+          'forcePasswordChange',
+          JSON.stringify(response.data.forcePasswordChange || false)
+        )
 
         // Return forcePasswordChange status along with success
         return { success: true, forcePasswordChange: response.data.forcePasswordChange || false }
@@ -52,7 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error(response.message || 'Login failed')
       }
     } catch (error) {
-      console.error('Login failed:', error)
+      storeLogger.error('Login failed:', error)
       throw error
     }
   }
@@ -78,7 +84,10 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('token', response.data.accessToken)
         localStorage.setItem('refreshToken', response.data.refreshToken)
         localStorage.setItem('user', JSON.stringify(response.data.user))
-        localStorage.setItem('forcePasswordChange', JSON.stringify(response.data.forcePasswordChange || false))
+        localStorage.setItem(
+          'forcePasswordChange',
+          JSON.stringify(response.data.forcePasswordChange || false)
+        )
 
         // Clear temp data
         tempCredentials.value = null
@@ -89,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error(response.message || '2FA verification failed')
       }
     } catch (error) {
-      console.error('2FA verification failed:', error)
+      storeLogger.error('2FA verification failed:', error)
       throw error
     }
   }
@@ -117,7 +126,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function refreshAccessToken() {
     if (isRefreshing.value) {
       // Wait for ongoing refresh to complete
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const checkRefresh = setInterval(() => {
           if (!isRefreshing.value) {
             clearInterval(checkRefresh)
@@ -145,7 +154,7 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('Token refresh failed')
       }
     } catch (error) {
-      console.error('Token refresh failed:', error)
+      storeLogger.error('Token refresh failed:', error)
       logout()
       return null
     } finally {
@@ -165,7 +174,7 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('Token verification failed')
       }
     } catch (error) {
-      console.error('Auth check failed:', error)
+      storeLogger.error('Auth check failed:', error)
       logout()
     }
   }

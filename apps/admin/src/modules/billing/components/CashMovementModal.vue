@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Kasa Hareketi Ekle"
-    size="md"
-    @close="close"
-  >
+  <Modal v-model="show" title="Kasa Hareketi Ekle" size="md" @close="close">
     <div class="space-y-4">
       <div>
         <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Hareket Tipi *</label>
@@ -46,7 +41,9 @@
       </div>
 
       <div>
-        <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Referans (Opsiyonel)</label>
+        <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+          >Referans (Opsiyonel)</label
+        >
         <input
           v-model="form.reference"
           type="text"
@@ -66,19 +63,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !isValid"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>add</span>
+        <span v-else class="material-icons text-sm">add</span>
         Hareket Ekle
       </button>
     </template>
@@ -113,7 +110,7 @@ const loading = ref(false)
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const defaultForm = () => ({
@@ -193,9 +190,12 @@ const close = () => {
   form.value = defaultForm()
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    form.value = defaultForm()
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      form.value = defaultForm()
+    }
   }
-})
+)
 </script>

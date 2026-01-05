@@ -1,22 +1,60 @@
-<h2>Welcome, {{NAME}}!</h2>
-
-<p>Your {{ACCOUNT_TYPE}} account has been created successfully. We're excited to have you on board!</p>
-
-<div class="credentials-box">
-  <h3 style="margin: 0 0 12px; font-size: 16px; color: #2d3748;">Your Login Credentials</h3>
-  <p><strong>Email:</strong> {{EMAIL}}</p>
-  <p><strong>Temporary Password:</strong> <code style="background: #e2e8f0; padding: 4px 8px; border-radius: 3px; font-family: monospace;">{{PASSWORD}}</code></p>
-  <p><strong>Account Type:</strong> {{ACCOUNT_TYPE}}</p>
-</div>
-
-<div class="alert">
-  <p><strong>⚠️ Important:</strong> Please change your password after your first login for security reasons.</p>
-</div>
-
-<a href="{{LOGIN_URL}}" class="button">Login to Your Account</a>
-
-<p>If you have any questions or need assistance, our support team is here to help.</p>
-
-<p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #718096;">
-  This is an automated message. Please do not reply to this email.
-</p>
+<!doctype html>
+<html lang="%% LANG %%" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<meta charset="utf-8">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<!--[if mso]> <noscript><xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office"><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+<style>td,th,div,p,a,h1,h2,h3,h4,h5,h6{font-family:"Segoe UI",sans-serif;mso-line-height-rule:exactly;}
+</style>
+<![endif]-->
+<title>%% TITLE %%</title>
+<style>
+@media (max-width:600px){.sm-w-full{width:100%!important;}.sm-px-4{padding-left:16px!important;padding-right:16px!important;}.sm-py-8{padding-top:32px!important;padding-bottom:32px!important;}}
+</style>
+</head>
+<body style="word-break:break-word;-webkit-font-smoothing:antialiased;"><div style="mso-hide:all;"> %% PREVIEW_TEXT %% &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; </div><div role="article" aria-roledescription="email" aria-label="%% TITLE %%" lang="%% LANG %%" style="font-size:16px;font-size:1rem;">
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" class="sm-px-4 sm-py-8" style="padding:48px 16px">
+<table style="max-width:600px;" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center"> <a href="%% SITE_URL %%"> <img src="%% LOGO_URL %%" alt="%% COMPANY_NAME %%" width="180" style="max-width:180px;height:auto;border:0;"></a>
+</td></tr></table>
+<table class="sm-w-full" style="max-width:600px" cellpadding="0" cellspacing="0" role="presentation"><tr><td class="sm-px-4">
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center"><div> <img src="https://cdn-icons-png.flaticon.com/512/3588/3588614.png" alt="Welcome" width="48" height="48" style="display:block;"></div>
+</td></tr></table><h1> %% GREETING %%, %% USER_NAME %%! </h1><p> %% WELCOME_TEXT %% </p>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td><h3>%% ACCOUNT_INFO_TITLE %%</h3>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td style="width:35%;">%% EMAIL_LABEL %%
+</td><td>%% USER_EMAIL %%
+</td></tr><tr><td>%% ACCOUNT_TYPE_LABEL %%
+</td><td>%% ACCOUNT_TYPE %%
+</td></tr><tr if="%% COMPANY_NAME %%"><td>%% COMPANY_LABEL %%
+</td><td>%% COMPANY_NAME %%
+</td></tr></table>
+</td></tr></table>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td><h3>%% FEATURES_TITLE %%</h3>
+</td></tr><tr><td>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td style="width:24px;vertical-align:top;"> <span>✓</span>
+</td><td>%% FEATURE_1 %%
+</td></tr><tr><td style="width:24px;vertical-align:top;"> <span>✓</span>
+</td><td>%% FEATURE_2 %%
+</td></tr><tr><td style="width:24px;vertical-align:top;"> <span>✓</span>
+</td><td>%% FEATURE_3 %%
+</td></tr><tr><td style="width:24px;vertical-align:top;"> <span>✓</span>
+</td><td>%% FEATURE_4 %%
+</td></tr></table>
+</td></tr></table>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center">
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td style="mso-padding-alt:12px 32px;"> <a href="%% DASHBOARD_URL %%" style="mso-text-raise:3px;"> %% GET_STARTED_BUTTON %% </a>
+</td></tr></table>
+</td></tr></table>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td><p>%% HELP_TITLE %%</p><p>%% HELP_TEXT %%</p><p> <a href="mailto:%% SUPPORT_EMAIL %%">%% SUPPORT_EMAIL %%</a></p>
+</td></tr></table>
+</td></tr></table>
+<table style="max-width:600px;" cellpadding="0" cellspacing="0" role="presentation"><tr><td><p> %% FOOTER_TEXT %% </p>
+</td></tr><tr><td><p> %% COMPANY_NAME %%<br> %% COMPANY_ADDRESS %% </p>
+</td></tr><tr><td><p> <a href="%% UNSUBSCRIBE_URL %%">%% UNSUBSCRIBE_TEXT %%</a></p>
+</td></tr></table>
+</td></tr></table></div>
+</body>
+</html>

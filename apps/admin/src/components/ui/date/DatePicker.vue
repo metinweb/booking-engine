@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-date-picker" ref="containerRef">
+  <div ref="containerRef" class="ui-date-picker">
     <!-- Label -->
     <label
       v-if="label"
@@ -46,8 +46,7 @@
           v-if="isOpen"
           ref="calendarRef"
           :style="calendarStyle"
-          class="fixed z-50 bg-white dark:bg-slate-800 rounded-xl shadow-2xl
-                 border border-gray-200 dark:border-slate-700 p-4"
+          class="fixed z-50 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-4"
         >
           <!-- Header -->
           <div class="flex items-center justify-between mb-4">
@@ -63,8 +62,7 @@
               <!-- Month Selector -->
               <select
                 v-model="viewMonth"
-                class="text-sm font-semibold text-gray-800 dark:text-white bg-transparent
-                       border-none focus:ring-0 cursor-pointer"
+                class="text-sm font-semibold text-gray-800 dark:text-white bg-transparent border-none focus:ring-0 cursor-pointer"
               >
                 <option v-for="(month, index) in monthNames" :key="index" :value="index">
                   {{ month }}
@@ -74,8 +72,7 @@
               <!-- Year Selector -->
               <select
                 v-model="viewYear"
-                class="text-sm font-semibold text-gray-800 dark:text-white bg-transparent
-                       border-none focus:ring-0 cursor-pointer"
+                class="text-sm font-semibold text-gray-800 dark:text-white bg-transparent border-none focus:ring-0 cursor-pointer"
               >
                 <option v-for="year in yearRange" :key="year" :value="year">
                   {{ year }}
@@ -118,11 +115,12 @@
           </div>
 
           <!-- Footer -->
-          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+          <div
+            class="mt-4 pt-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between"
+          >
             <button
               type="button"
-              class="text-xs px-3 py-1.5 rounded-lg font-medium
-                     text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+              class="text-xs px-3 py-1.5 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
               @click="goToToday"
             >
               {{ todayLabel }}
@@ -130,8 +128,7 @@
             <button
               v-if="clearable && modelValue"
               type="button"
-              class="text-xs px-3 py-1.5 rounded-lg font-medium
-                     text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+              class="text-xs px-3 py-1.5 rounded-lg font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
               @click="clear"
             >
               {{ clearLabel }}
@@ -142,11 +139,7 @@
     </Teleport>
 
     <!-- Backdrop -->
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-40"
-      @click="close"
-    ></div>
+    <div v-if="isOpen" class="fixed inset-0 z-40" @click="close"></div>
 
     <!-- Error Message -->
     <p v-if="error" class="mt-1 text-sm text-red-500 flex items-center gap-1">
@@ -162,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
@@ -340,21 +333,18 @@ const inputClasses = computed(() => [
 ])
 
 // Format date
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
 
   const day = String(date.getDate()).padStart(2, '0')
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const year = date.getFullYear()
 
-  return props.format
-    .replace('DD', day)
-    .replace('MM', month)
-    .replace('YYYY', year)
+  return props.format.replace('DD', day).replace('MM', month).replace('YYYY', year)
 }
 
 // Check if date is disabled
-const isDateDisabled = (date) => {
+const isDateDisabled = date => {
   if (!date) return true
 
   // Min date check
@@ -374,22 +364,24 @@ const isDateDisabled = (date) => {
 
   // Disabled specific dates
   const dateStr = date.toISOString().split('T')[0]
-  if (props.disabledDates.some(d => {
-    const disabledStr = d instanceof Date ? d.toISOString().split('T')[0] : d
-    return dateStr === disabledStr
-  })) return true
+  if (
+    props.disabledDates.some(d => {
+      const disabledStr = d instanceof Date ? d.toISOString().split('T')[0] : d
+      return dateStr === disabledStr
+    })
+  )
+    return true
 
   return false
 }
 
 // Get day button classes
-const getDayClasses = (date) => {
+const getDayClasses = date => {
   if (!date) {
     return 'w-9 h-9'
   }
 
-  const isSelected = parsedValue.value &&
-    date.toDateString() === parsedValue.value.toDateString()
+  const isSelected = parsedValue.value && date.toDateString() === parsedValue.value.toDateString()
   const isToday = date.toDateString() === new Date().toDateString()
   const isDisabled = isDateDisabled(date)
 
@@ -467,7 +459,7 @@ const toggle = () => {
 }
 
 // Select date
-const selectDate = (date) => {
+const selectDate = date => {
   if (isDateDisabled(date)) return
 
   const isoDate = date.toISOString().split('T')[0]
@@ -520,7 +512,7 @@ const handleResize = () => {
 }
 
 // Handle escape key
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (e.key === 'Escape' && isOpen.value) {
     close()
   }
@@ -543,7 +535,9 @@ defineExpose({ open, close, toggle, clear })
 <style scoped>
 .calendar-enter-active,
 .calendar-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .calendar-enter-from,

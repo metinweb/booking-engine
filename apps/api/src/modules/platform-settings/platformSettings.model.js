@@ -1,191 +1,202 @@
 import mongoose from 'mongoose'
 import { encrypt, decrypt, isEncrypted } from '../../helpers/encryption.js'
 
-const platformSettingsSchema = new mongoose.Schema({
-  // Singleton pattern - single document with fixed _id
-  _id: {
-    type: String,
-    default: 'platform'
-  },
+const platformSettingsSchema = new mongoose.Schema(
+  {
+    // Singleton pattern - single document with fixed _id
+    _id: {
+      type: String,
+      default: 'platform'
+    },
 
-  // AWS SES Configuration (Platform Default)
-  aws: {
-    ses: {
+    // AWS SES Configuration (Platform Default)
+    aws: {
+      ses: {
+        enabled: {
+          type: Boolean,
+          default: false
+        },
+        region: {
+          type: String,
+          default: 'eu-west-1',
+          enum: [
+            'us-east-1',
+            'us-west-2',
+            'eu-west-1',
+            'eu-central-1',
+            'ap-south-1',
+            'ap-southeast-1',
+            'ap-southeast-2',
+            'ap-northeast-1'
+          ]
+        },
+        accessKeyId: {
+          type: String,
+          set: function (val) {
+            if (!val) return val
+            return isEncrypted(val) ? val : encrypt(val)
+          }
+        },
+        secretAccessKey: {
+          type: String,
+          set: function (val) {
+            if (!val) return val
+            return isEncrypted(val) ? val : encrypt(val)
+          }
+        },
+        fromEmail: {
+          type: String,
+          lowercase: true,
+          trim: true
+        },
+        fromName: {
+          type: String,
+          default: 'Booking Platform',
+          trim: true
+        }
+      }
+    },
+
+    // NetGSM SMS Configuration
+    netgsm: {
       enabled: {
         type: Boolean,
         default: false
       },
-      region: {
+      usercode: {
         type: String,
-        default: 'eu-west-1',
-        enum: ['us-east-1', 'us-west-2', 'eu-west-1', 'eu-central-1', 'ap-south-1', 'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1']
-      },
-      accessKeyId: {
-        type: String,
-        set: function(val) {
+        set: function (val) {
           if (!val) return val
           return isEncrypted(val) ? val : encrypt(val)
         }
       },
-      secretAccessKey: {
+      password: {
         type: String,
-        set: function(val) {
+        set: function (val) {
           if (!val) return val
           return isEncrypted(val) ? val : encrypt(val)
         }
       },
-      fromEmail: {
+      msgheader: {
+        type: String,
+        trim: true,
+        maxlength: 11 // NetGSM sender ID limit
+      },
+      apiUrl: {
+        type: String,
+        default: 'https://api.netgsm.com.tr/sms/send/get'
+      }
+    },
+
+    // Web Push (VAPID) Configuration
+    webPush: {
+      enabled: {
+        type: Boolean,
+        default: false
+      },
+      publicKey: {
+        type: String
+      },
+      privateKey: {
+        type: String,
+        set: function (val) {
+          if (!val) return val
+          return isEncrypted(val) ? val : encrypt(val)
+        }
+      },
+      contactEmail: {
         type: String,
         lowercase: true,
         trim: true
+      }
+    },
+
+    // Gemini AI Configuration (for translations)
+    gemini: {
+      enabled: {
+        type: Boolean,
+        default: false
       },
-      fromName: {
+      apiKey: {
         type: String,
-        default: 'Booking Platform',
+        set: function (val) {
+          if (!val) return val
+          return isEncrypted(val) ? val : encrypt(val)
+        }
+      }
+    },
+
+    // Firecrawl Web Scraping Configuration
+    firecrawl: {
+      enabled: {
+        type: Boolean,
+        default: false
+      },
+      apiKey: {
+        type: String,
+        set: function (val) {
+          if (!val) return val
+          return isEncrypted(val) ? val : encrypt(val)
+        }
+      }
+    },
+
+    // Paximum OTA Integration
+    paximum: {
+      enabled: {
+        type: Boolean,
+        default: false
+      },
+      endpoint: {
+        type: String,
+        default: 'https://service.paximum.com/v2',
         trim: true
+      },
+      agency: {
+        type: String,
+        set: function (val) {
+          if (!val) return val
+          return isEncrypted(val) ? val : encrypt(val)
+        }
+      },
+      user: {
+        type: String,
+        set: function (val) {
+          if (!val) return val
+          return isEncrypted(val) ? val : encrypt(val)
+        }
+      },
+      password: {
+        type: String,
+        set: function (val) {
+          if (!val) return val
+          return isEncrypted(val) ? val : encrypt(val)
+        }
+      },
+      // Token cache - updated automatically by service
+      token: {
+        type: String
+      },
+      tokenExpiresOn: {
+        type: Date
+      },
+      // Default markup percentage for Paximum hotels
+      defaultMarkup: {
+        type: Number,
+        default: 10,
+        min: 0,
+        max: 100
       }
     }
   },
-
-  // NetGSM SMS Configuration
-  netgsm: {
-    enabled: {
-      type: Boolean,
-      default: false
-    },
-    usercode: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    },
-    password: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    },
-    msgheader: {
-      type: String,
-      trim: true,
-      maxlength: 11 // NetGSM sender ID limit
-    },
-    apiUrl: {
-      type: String,
-      default: 'https://api.netgsm.com.tr/sms/send/get'
-    }
-  },
-
-  // Web Push (VAPID) Configuration
-  webPush: {
-    enabled: {
-      type: Boolean,
-      default: false
-    },
-    publicKey: {
-      type: String
-    },
-    privateKey: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    },
-    contactEmail: {
-      type: String,
-      lowercase: true,
-      trim: true
-    }
-  },
-
-  // Gemini AI Configuration (for translations)
-  gemini: {
-    enabled: {
-      type: Boolean,
-      default: false
-    },
-    apiKey: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    }
-  },
-
-  // Firecrawl Web Scraping Configuration
-  firecrawl: {
-    enabled: {
-      type: Boolean,
-      default: false
-    },
-    apiKey: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    }
-  },
-
-  // Paximum OTA Integration
-  paximum: {
-    enabled: {
-      type: Boolean,
-      default: false
-    },
-    endpoint: {
-      type: String,
-      default: 'https://service.paximum.com/v2',
-      trim: true
-    },
-    agency: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    },
-    user: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    },
-    password: {
-      type: String,
-      set: function(val) {
-        if (!val) return val
-        return isEncrypted(val) ? val : encrypt(val)
-      }
-    },
-    // Token cache - updated automatically by service
-    token: {
-      type: String
-    },
-    tokenExpiresOn: {
-      type: Date
-    },
-    // Default markup percentage for Paximum hotels
-    defaultMarkup: {
-      type: Number,
-      default: 10,
-      min: 0,
-      max: 100
-    }
+  {
+    timestamps: true,
+    collection: 'platform_settings'
   }
-
-}, {
-  timestamps: true,
-  collection: 'platform_settings'
-})
+)
 
 // Static method to get settings (creates if not exists)
-platformSettingsSchema.statics.getSettings = async function() {
+platformSettingsSchema.statics.getSettings = async function () {
   let settings = await this.findById('platform')
 
   if (!settings) {
@@ -196,7 +207,7 @@ platformSettingsSchema.statics.getSettings = async function() {
 }
 
 // Instance method to get decrypted AWS credentials
-platformSettingsSchema.methods.getAWSCredentials = function() {
+platformSettingsSchema.methods.getAWSCredentials = function () {
   if (!this.aws?.ses?.enabled) {
     return null
   }
@@ -211,7 +222,7 @@ platformSettingsSchema.methods.getAWSCredentials = function() {
 }
 
 // Instance method to get decrypted NetGSM credentials
-platformSettingsSchema.methods.getNetGSMCredentials = function() {
+platformSettingsSchema.methods.getNetGSMCredentials = function () {
   if (!this.netgsm?.enabled) {
     return null
   }
@@ -225,7 +236,7 @@ platformSettingsSchema.methods.getNetGSMCredentials = function() {
 }
 
 // Instance method to get decrypted VAPID keys
-platformSettingsSchema.methods.getVAPIDKeys = function() {
+platformSettingsSchema.methods.getVAPIDKeys = function () {
   if (!this.webPush?.enabled) {
     return null
   }
@@ -238,7 +249,7 @@ platformSettingsSchema.methods.getVAPIDKeys = function() {
 }
 
 // Instance method to get decrypted Gemini API key
-platformSettingsSchema.methods.getGeminiCredentials = function() {
+platformSettingsSchema.methods.getGeminiCredentials = function () {
   if (!this.gemini?.enabled) {
     return null
   }
@@ -249,7 +260,7 @@ platformSettingsSchema.methods.getGeminiCredentials = function() {
 }
 
 // Instance method to get decrypted Firecrawl API key
-platformSettingsSchema.methods.getFirecrawlCredentials = function() {
+platformSettingsSchema.methods.getFirecrawlCredentials = function () {
   if (!this.firecrawl?.enabled) {
     return null
   }
@@ -260,7 +271,7 @@ platformSettingsSchema.methods.getFirecrawlCredentials = function() {
 }
 
 // Instance method to get decrypted Paximum credentials
-platformSettingsSchema.methods.getPaximumCredentials = function() {
+platformSettingsSchema.methods.getPaximumCredentials = function () {
   if (!this.paximum?.enabled) {
     return null
   }
@@ -277,14 +288,14 @@ platformSettingsSchema.methods.getPaximumCredentials = function() {
 }
 
 // Instance method to update Paximum token cache
-platformSettingsSchema.methods.updatePaximumToken = async function(token, expiresOn) {
+platformSettingsSchema.methods.updatePaximumToken = async function (token, expiresOn) {
   this.paximum.token = token
   this.paximum.tokenExpiresOn = expiresOn
   await this.save()
 }
 
 // Transform output - mask sensitive fields
-platformSettingsSchema.methods.toSafeJSON = function() {
+platformSettingsSchema.methods.toSafeJSON = function () {
   const obj = this.toObject()
 
   // Mask AWS credentials

@@ -1,7 +1,9 @@
 <template>
   <div class="border border-indigo-200 dark:border-indigo-800 rounded-xl overflow-hidden">
     <!-- Header -->
-    <div class="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border-b border-indigo-200 dark:border-indigo-800">
+    <div
+      class="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 border-b border-indigo-200 dark:border-indigo-800"
+    >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-lg bg-indigo-500 flex items-center justify-center">
@@ -9,19 +11,26 @@
           </div>
           <div>
             <h4 class="font-semibold text-gray-900 dark:text-white">Fiyat Çarpanları Şablonu</h4>
-            <p class="text-xs text-gray-500 dark:text-slate-400">Kişi bazlı fiyatlandırma için çarpan oranlarını tanımlayın</p>
+            <p class="text-xs text-gray-500 dark:text-slate-400">
+              Kişi bazlı fiyatlandırma için çarpan oranlarını tanımlayın
+            </p>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <!-- Enable/Disable Toggle -->
           <label class="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              v-model="isEnabled"
-              class="sr-only peer"
-            />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
-            <span class="ms-2 text-sm font-medium" :class="isEnabled ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-slate-400'">
+            <input v-model="isEnabled" type="checkbox" class="sr-only peer" />
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
+            <span
+              class="ms-2 text-sm font-medium"
+              :class="
+                isEnabled
+                  ? 'text-indigo-600 dark:text-indigo-400'
+                  : 'text-gray-500 dark:text-slate-400'
+              "
+            >
               {{ isEnabled ? 'Aktif' : 'Pasif' }}
             </span>
           </label>
@@ -42,27 +51,29 @@
               Yetişkin Çarpanları
             </h5>
             <div class="space-y-2">
-              <div
-                v-for="i in adultsRange"
-                :key="'adult-' + i"
-                class="flex items-center gap-3"
-              >
+              <div v-for="i in adultsRange" :key="'adult-' + i" class="flex items-center gap-3">
                 <span class="w-20 text-sm text-gray-600 dark:text-slate-400">
                   {{ i }} Yetişkin
                 </span>
                 <input
                   type="number"
                   :value="getAdultMultiplier(i)"
-                  @input="setAdultMultiplier(i, $event)"
                   step="0.1"
                   min="0"
                   class="w-24 px-3 py-1.5 text-center border rounded-lg text-sm font-medium"
-                  :class="i === baseOccupancy
-                    ? 'border-green-400 bg-green-50 dark:bg-green-900/30 dark:border-green-600 text-green-700 dark:text-green-300'
-                    : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white'"
+                  :class="
+                    i === baseOccupancy
+                      ? 'border-green-400 bg-green-50 dark:bg-green-900/30 dark:border-green-600 text-green-700 dark:text-green-300'
+                      : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white'
+                  "
+                  @input="setAdultMultiplier(i, $event)"
                   @change="recalculateCombinations"
                 />
-                <span v-if="i === baseOccupancy" class="text-xs text-green-600 dark:text-green-400 font-medium">(Baz)</span>
+                <span
+                  v-if="i === baseOccupancy"
+                  class="text-xs text-green-600 dark:text-green-400 font-medium"
+                  >(Baz)</span
+                >
                 <span v-if="previewPrice" class="text-xs text-gray-500 dark:text-slate-400">
                   → {{ calculatePreviewPrice(getAdultMultiplier(i)) }}{{ currencySymbol }}
                 </span>
@@ -71,28 +82,41 @@
           </div>
 
           <!-- Child Age Groups Warning -->
-          <div v-if="maxChildren > 0 && childAgeGroups.length === 0" class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-200 dark:border-orange-800">
+          <div
+            v-if="maxChildren > 0 && childAgeGroups.length === 0"
+            class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-200 dark:border-orange-800"
+          >
             <div class="flex items-start gap-3">
               <span class="material-icons text-orange-500 text-xl">warning</span>
               <div>
-                <h5 class="font-medium text-orange-800 dark:text-orange-300 mb-1">Çocuk Yaş Grupları Tanımlı Değil</h5>
+                <h5 class="font-medium text-orange-800 dark:text-orange-300 mb-1">
+                  Çocuk Yaş Grupları Tanımlı Değil
+                </h5>
                 <p class="text-sm text-orange-700 dark:text-orange-400">
-                  Çocuk çarpanları için önce otel ayarlarından çocuk yaş gruplarını (bebek, 1. çocuk tipi vb.) tanımlamanız gerekiyor.
+                  Çocuk çarpanları için önce otel ayarlarından çocuk yaş gruplarını (bebek, 1. çocuk
+                  tipi vb.) tanımlamanız gerekiyor.
                 </p>
               </div>
             </div>
           </div>
 
           <!-- Child Multipliers -->
-          <div v-if="maxChildren > 0 && childAgeGroups.length > 0" class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4">
+          <div
+            v-if="maxChildren > 0 && childAgeGroups.length > 0"
+            class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4"
+          >
             <h5 class="font-medium text-amber-800 dark:text-amber-300 mb-3 flex items-center gap-2">
               <span class="material-icons text-sm">child_care</span>
               Çocuk Çarpanları
-              <span class="text-xs font-normal text-amber-600 dark:text-amber-400">(Yaş grubuna göre)</span>
+              <span class="text-xs font-normal text-amber-600 dark:text-amber-400"
+                >(Yaş grubuna göre)</span
+              >
             </h5>
 
             <!-- Age Group Headers -->
-            <div class="flex items-center gap-3 mb-2 pb-2 border-b border-amber-200 dark:border-amber-800">
+            <div
+              class="flex items-center gap-3 mb-2 pb-2 border-b border-amber-200 dark:border-amber-800"
+            >
               <span class="w-20 text-xs text-gray-500 dark:text-slate-400"></span>
               <template v-for="ageGroup in childAgeGroups" :key="ageGroup.code">
                 <div class="w-24 text-center">
@@ -120,10 +144,10 @@
                   <input
                     type="number"
                     :value="getChildMultiplier(childOrder, ageGroup.code)"
-                    @input="setChildMultiplier(childOrder, ageGroup.code, $event)"
                     step="0.1"
                     min="0"
                     class="w-24 px-3 py-1.5 text-center border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium bg-white dark:bg-slate-800 text-gray-800 dark:text-white"
+                    @input="setChildMultiplier(childOrder, ageGroup.code, $event)"
                     @change="recalculateCombinations"
                   />
                 </template>
@@ -163,20 +187,26 @@
             </h5>
             <div class="flex items-center gap-3">
               <input
-                type="number"
                 v-model.number="previewPrice"
+                type="number"
                 min="0"
                 class="w-32 px-3 py-2 border border-green-300 dark:border-green-600 rounded-lg bg-white dark:bg-slate-800 text-gray-800 dark:text-white text-sm"
                 placeholder="100"
               />
-              <span class="text-sm text-gray-500 dark:text-slate-400">{{ currencySymbol }} (Örnek baz fiyat)</span>
+              <span class="text-sm text-gray-500 dark:text-slate-400"
+                >{{ currencySymbol }} (Örnek baz fiyat)</span
+              >
             </div>
           </div>
         </div>
 
         <!-- Right: Combination Table -->
-        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
-          <div class="px-4 py-3 bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+        >
+          <div
+            class="px-4 py-3 bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600"
+          >
             <div class="flex items-center justify-between">
               <h5 class="font-medium text-gray-800 dark:text-white flex items-center gap-2">
                 <span class="material-icons text-sm">table_chart</span>
@@ -184,8 +214,8 @@
               </h5>
               <button
                 type="button"
-                @click="regenerateCombinations"
                 class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900 transition-colors flex items-center gap-1"
+                @click="regenerateCombinations"
               >
                 <span class="material-icons text-xs">refresh</span>
                 Yeniden Hesapla
@@ -197,10 +227,27 @@
             <table class="w-full text-sm">
               <thead class="sticky top-0 bg-gray-100 dark:bg-slate-700">
                 <tr>
-                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400">Kombinasyon</th>
-                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-slate-400 w-24">Çarpan</th>
-                  <th v-if="previewPrice" class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-slate-400 w-20">Fiyat</th>
-                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-slate-400 w-16">Aktif</th>
+                  <th
+                    class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-slate-400"
+                  >
+                    Kombinasyon
+                  </th>
+                  <th
+                    class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-slate-400 w-24"
+                  >
+                    Çarpan
+                  </th>
+                  <th
+                    v-if="previewPrice"
+                    class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-slate-400 w-20"
+                  >
+                    Fiyat
+                  </th>
+                  <th
+                    class="px-3 py-2 text-center text-xs font-medium text-gray-500 dark:text-slate-400 w-16"
+                  >
+                    Aktif
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -219,13 +266,15 @@
                     <input
                       type="number"
                       :value="getEffectiveMultiplier(combo)"
-                      @change="updateMultiplier(combo, $event)"
                       step="0.1"
                       min="0"
                       class="w-full px-2 py-1 text-center border rounded text-xs font-medium"
-                      :class="combo.overrideMultiplier !== null
-                        ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300'
-                        : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white'"
+                      :class="
+                        combo.overrideMultiplier !== null
+                          ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300'
+                          : 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-gray-800 dark:text-white'
+                      "
+                      @change="updateMultiplier(combo, $event)"
                     />
                   </td>
                   <td v-if="previewPrice" class="px-3 py-2 text-center">
@@ -236,11 +285,13 @@
                   <td class="px-3 py-2 text-center">
                     <button
                       type="button"
-                      @click="combo.isActive = !combo.isActive"
                       class="w-6 h-6 rounded flex items-center justify-center transition-colors"
-                      :class="combo.isActive
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'"
+                      :class="
+                        combo.isActive
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                      "
+                      @click="combo.isActive = !combo.isActive"
                     >
                       <span class="material-icons text-sm">
                         {{ combo.isActive ? 'check' : 'close' }}
@@ -253,7 +304,9 @@
           </div>
 
           <!-- Legend -->
-          <div class="px-4 py-2 bg-gray-50 dark:bg-slate-700 border-t border-gray-200 dark:border-slate-600 text-xs text-gray-500 dark:text-slate-400">
+          <div
+            class="px-4 py-2 bg-gray-50 dark:bg-slate-700 border-t border-gray-200 dark:border-slate-600 text-xs text-gray-500 dark:text-slate-400"
+          >
             <span class="inline-flex items-center gap-1 mr-4">
               <span class="w-3 h-3 rounded bg-indigo-200 dark:bg-indigo-800"></span>
               Override edilmiş
@@ -269,13 +322,16 @@
 
     <!-- Disabled State -->
     <div v-else class="p-8 text-center">
-      <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+      <div
+        class="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4"
+      >
         <span class="material-icons text-3xl text-gray-400 dark:text-slate-500">calculate</span>
       </div>
       <h5 class="font-medium text-gray-600 dark:text-slate-400 mb-2">Çarpan Sistemi Pasif</h5>
       <p class="text-sm text-gray-500 dark:text-slate-500 max-w-md mx-auto">
         OBP fiyatlandırmada çarpan sistemini kullanmak için yukarıdaki toggle'ı aktif hale getirin.
-        Çarpan sistemi, baz fiyat üzerinden tüm kombinasyonlar için otomatik fiyat hesaplaması sağlar.
+        Çarpan sistemi, baz fiyat üzerinden tüm kombinasyonlar için otomatik fiyat hesaplaması
+        sağlar.
       </p>
     </div>
   </div>
@@ -308,16 +364,16 @@ const props = defineProps({
 // Currency symbol mapping
 const currencySymbol = computed(() => {
   const symbols = {
-    'TRY': '₺',
-    'USD': '$',
-    'EUR': '€',
-    'GBP': '£',
-    'RUB': '₽',
-    'SAR': '﷼',
-    'AED': 'د.إ',
-    'CHF': 'CHF',
-    'JPY': '¥',
-    'CNY': '¥'
+    TRY: '₺',
+    USD: '$',
+    EUR: '€',
+    GBP: '£',
+    RUB: '₽',
+    SAR: '﷼',
+    AED: 'د.إ',
+    CHF: 'CHF',
+    JPY: '¥',
+    CNY: '¥'
   }
   return symbols[props.currency] || props.currency
 })
@@ -354,26 +410,26 @@ const initializeAdultMultipliers = () => {
   for (let i = minAdults.value; i <= maxAdults.value; i++) {
     if (adultMultipliers[i] === undefined) {
       if (i < baseOccupancy.value) {
-        adultMultipliers[i] = Math.round((1 - ((baseOccupancy.value - i) * 0.2)) * 100) / 100
+        adultMultipliers[i] = Math.round((1 - (baseOccupancy.value - i) * 0.2) * 100) / 100
       } else if (i === baseOccupancy.value) {
         adultMultipliers[i] = 1.0
       } else {
-        adultMultipliers[i] = Math.round((1 + ((i - baseOccupancy.value) * 0.2)) * 100) / 100
+        adultMultipliers[i] = Math.round((1 + (i - baseOccupancy.value) * 0.2) * 100) / 100
       }
     }
   }
 }
 
 // Safe getter for adult multiplier
-const getAdultMultiplier = (i) => {
+const getAdultMultiplier = i => {
   if (adultMultipliers[i] === undefined) {
     // Initialize with default value
     if (i < baseOccupancy.value) {
-      adultMultipliers[i] = Math.round((1 - ((baseOccupancy.value - i) * 0.2)) * 100) / 100
+      adultMultipliers[i] = Math.round((1 - (baseOccupancy.value - i) * 0.2) * 100) / 100
     } else if (i === baseOccupancy.value) {
       adultMultipliers[i] = 1.0
     } else {
-      adultMultipliers[i] = Math.round((1 + ((i - baseOccupancy.value) * 0.2)) * 100) / 100
+      adultMultipliers[i] = Math.round((1 + (i - baseOccupancy.value) * 0.2) * 100) / 100
     }
   }
   return adultMultipliers[i]
@@ -432,7 +488,7 @@ const generateCombinationKey = (adults, children = []) => {
 }
 
 // Get combination name for display
-const getCombinationName = (combo) => {
+const getCombinationName = combo => {
   if (combo.children.length === 0) {
     if (combo.adults === 1) return 'Tek Kişilik'
     if (combo.adults === 2) return 'Çift Kişilik'
@@ -545,7 +601,7 @@ const regenerateCombinations = () => {
 }
 
 // Get effective multiplier
-const getEffectiveMultiplier = (combo) => {
+const getEffectiveMultiplier = combo => {
   if (combo.overrideMultiplier !== null && combo.overrideMultiplier !== undefined) {
     return combo.overrideMultiplier
   }
@@ -570,7 +626,7 @@ const updateMultiplier = (combo, event) => {
 }
 
 // Calculate preview price
-const calculatePreviewPrice = (multiplier) => {
+const calculatePreviewPrice = multiplier => {
   if (!previewPrice.value) return '-'
   let price = previewPrice.value * multiplier
 
@@ -606,7 +662,7 @@ const emitUpdate = () => {
 }
 
 // Watch for enable toggle
-watch(isEnabled, (newVal) => {
+watch(isEnabled, newVal => {
   if (newVal && combinationTable.value.length === 0) {
     initializeAdultMultipliers()
     initializeChildMultipliers()
@@ -616,85 +672,97 @@ watch(isEnabled, (newVal) => {
 })
 
 // Watch for occupancy changes
-watch(() => props.occupancy, (newVal, oldVal) => {
-  // Don't regenerate if loading from saved data or if it's the initial load
-  if (isLoadingFromSaved.value) return
-  if (!isEnabled.value) return
+watch(
+  () => props.occupancy,
+  (newVal, oldVal) => {
+    // Don't regenerate if loading from saved data or if it's the initial load
+    if (isLoadingFromSaved.value) return
+    if (!isEnabled.value) return
 
-  // Only regenerate if minAdults, maxAdults or baseOccupancy actually changed
-  // (not just a new object reference)
-  const minChanged = newVal?.minAdults !== oldVal?.minAdults
-  const maxChanged = newVal?.maxAdults !== oldVal?.maxAdults
-  const baseChanged = newVal?.baseOccupancy !== oldVal?.baseOccupancy
-  const maxChildrenChanged = newVal?.maxChildren !== oldVal?.maxChildren
-  const totalChanged = newVal?.totalMaxGuests !== oldVal?.totalMaxGuests
+    // Only regenerate if minAdults, maxAdults or baseOccupancy actually changed
+    // (not just a new object reference)
+    const minChanged = newVal?.minAdults !== oldVal?.minAdults
+    const maxChanged = newVal?.maxAdults !== oldVal?.maxAdults
+    const baseChanged = newVal?.baseOccupancy !== oldVal?.baseOccupancy
+    const maxChildrenChanged = newVal?.maxChildren !== oldVal?.maxChildren
+    const totalChanged = newVal?.totalMaxGuests !== oldVal?.totalMaxGuests
 
-  if (minChanged || maxChanged || baseChanged || maxChildrenChanged || totalChanged) {
-    initializeAdultMultipliers()
-    initializeChildMultipliers()
-    generateCombinations()
-  }
-}, { deep: true })
+    if (minChanged || maxChanged || baseChanged || maxChildrenChanged || totalChanged) {
+      initializeAdultMultipliers()
+      initializeChildMultipliers()
+      generateCombinations()
+    }
+  },
+  { deep: true }
+)
 
 // Watch for childAgeGroups changes
-watch(() => props.childAgeGroups, (newVal, oldVal) => {
-  // Don't regenerate if loading from saved data
-  if (isLoadingFromSaved.value) return
-  if (!isEnabled.value) return
+watch(
+  () => props.childAgeGroups,
+  (newVal, oldVal) => {
+    // Don't regenerate if loading from saved data
+    if (isLoadingFromSaved.value) return
+    if (!isEnabled.value) return
 
-  // Only regenerate if the actual age groups changed (not just reference)
-  const newCodes = (newVal || []).map(g => g.code).join(',')
-  const oldCodes = (oldVal || []).map(g => g.code).join(',')
+    // Only regenerate if the actual age groups changed (not just reference)
+    const newCodes = (newVal || []).map(g => g.code).join(',')
+    const oldCodes = (oldVal || []).map(g => g.code).join(',')
 
-  if (newCodes !== oldCodes) {
-    initializeChildMultipliers()
-    generateCombinations()
-  }
-}, { deep: true })
+    if (newCodes !== oldCodes) {
+      initializeChildMultipliers()
+      generateCombinations()
+    }
+  },
+  { deep: true }
+)
 
 // Watch for model value changes (from parent)
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    // Set flag to prevent regenerating combinations
-    isLoadingFromSaved.value = true
-    isEnabled.value = true
+watch(
+  () => props.modelValue,
+  newVal => {
+    if (newVal) {
+      // Set flag to prevent regenerating combinations
+      isLoadingFromSaved.value = true
+      isEnabled.value = true
 
-    // Load adult multipliers - convert string keys to numbers
-    if (newVal.adultMultipliers) {
-      Object.keys(newVal.adultMultipliers).forEach(key => {
-        const numKey = parseInt(key, 10)
-        adultMultipliers[numKey] = newVal.adultMultipliers[key]
-      })
+      // Load adult multipliers - convert string keys to numbers
+      if (newVal.adultMultipliers) {
+        Object.keys(newVal.adultMultipliers).forEach(key => {
+          const numKey = parseInt(key, 10)
+          adultMultipliers[numKey] = newVal.adultMultipliers[key]
+        })
+      }
+
+      // Load child multipliers - convert string keys to numbers
+      if (newVal.childMultipliers) {
+        Object.keys(newVal.childMultipliers).forEach(order => {
+          const numOrder = parseInt(order, 10)
+          if (!childMultipliers[numOrder]) childMultipliers[numOrder] = {}
+          Object.assign(childMultipliers[numOrder], newVal.childMultipliers[order])
+        })
+      }
+
+      // Load combination table
+      if (newVal.combinationTable && newVal.combinationTable.length > 0) {
+        combinationTable.value = newVal.combinationTable.map(c => ({
+          ...c,
+          children: [...(c.children || [])]
+        }))
+      }
+
+      // Load rounding rule
+      if (newVal.roundingRule) {
+        roundingRule.value = newVal.roundingRule
+      }
+
+      // Clear flag after next tick to allow future changes
+      setTimeout(() => {
+        isLoadingFromSaved.value = false
+      }, 100)
     }
-
-    // Load child multipliers - convert string keys to numbers
-    if (newVal.childMultipliers) {
-      Object.keys(newVal.childMultipliers).forEach(order => {
-        const numOrder = parseInt(order, 10)
-        if (!childMultipliers[numOrder]) childMultipliers[numOrder] = {}
-        Object.assign(childMultipliers[numOrder], newVal.childMultipliers[order])
-      })
-    }
-
-    // Load combination table
-    if (newVal.combinationTable && newVal.combinationTable.length > 0) {
-      combinationTable.value = newVal.combinationTable.map(c => ({
-        ...c,
-        children: [...(c.children || [])]
-      }))
-    }
-
-    // Load rounding rule
-    if (newVal.roundingRule) {
-      roundingRule.value = newVal.roundingRule
-    }
-
-    // Clear flag after next tick to allow future changes
-    setTimeout(() => {
-      isLoadingFromSaved.value = false
-    }, 100)
-  }
-}, { immediate: true, deep: true })
+  },
+  { immediate: true, deep: true }
+)
 
 // Initialize on mount
 onMounted(() => {
@@ -710,11 +778,14 @@ onMounted(() => {
 // Expose for parent
 defineExpose({
   isEnabled,
-  getData: () => isEnabled.value ? {
-    adultMultipliers: { ...adultMultipliers },
-    childMultipliers: JSON.parse(JSON.stringify(childMultipliers)),
-    combinationTable: combinationTable.value,
-    roundingRule: roundingRule.value
-  } : null
+  getData: () =>
+    isEnabled.value
+      ? {
+          adultMultipliers: { ...adultMultipliers },
+          childMultipliers: JSON.parse(JSON.stringify(childMultipliers)),
+          combinationTable: combinationTable.value,
+          roundingRule: roundingRule.value
+        }
+      : null
 })
 </script>

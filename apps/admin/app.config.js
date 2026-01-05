@@ -6,6 +6,6 @@ const config = {
   // featureFlags: {
   //   newDashboard: true,
   // },
-};
+}
 
-export default config;
+export default config

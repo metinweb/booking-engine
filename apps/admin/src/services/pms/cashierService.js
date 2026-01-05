@@ -17,9 +17,21 @@ export const SHIFT_STATUS = {
 }
 
 export const SHIFT_STATUS_INFO = {
-  open: { label: 'Acik', color: 'green', bgClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  closed: { label: 'Kapali', color: 'gray', bgClass: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
-  suspended: { label: 'Askida', color: 'yellow', bgClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' }
+  open: {
+    label: 'Acik',
+    color: 'green',
+    bgClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+  },
+  closed: {
+    label: 'Kapali',
+    color: 'gray',
+    bgClass: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+  },
+  suspended: {
+    label: 'Askida',
+    color: 'yellow',
+    bgClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+  }
 }
 
 // Cash movement types
@@ -73,7 +85,12 @@ export const TRANSACTION_TYPES = {
 
 export const TRANSACTION_TYPE_INFO = {
   room_charge: { label: 'Oda Ucreti', icon: 'hotel', color: 'blue', category: 'income' },
-  extra_charge: { label: 'Ekstra Ucret', icon: 'add_shopping_cart', color: 'blue', category: 'income' },
+  extra_charge: {
+    label: 'Ekstra Ucret',
+    icon: 'add_shopping_cart',
+    color: 'blue',
+    category: 'income'
+  },
   restaurant: { label: 'Restoran', icon: 'restaurant', color: 'orange', category: 'income' },
   bar: { label: 'Bar', icon: 'local_bar', color: 'purple', category: 'income' },
   minibar: { label: 'Minibar', icon: 'kitchen', color: 'indigo', category: 'income' },
@@ -145,10 +162,26 @@ export const TRANSACTION_STATUS = {
 }
 
 export const TRANSACTION_STATUS_INFO = {
-  pending: { label: 'Beklemede', color: 'yellow', bgClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
-  completed: { label: 'Tamamlandi', color: 'green', bgClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  cancelled: { label: 'Iptal Edildi', color: 'red', bgClass: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
-  refunded: { label: 'Iade Edildi', color: 'orange', bgClass: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' }
+  pending: {
+    label: 'Beklemede',
+    color: 'yellow',
+    bgClass: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+  },
+  completed: {
+    label: 'Tamamlandi',
+    color: 'green',
+    bgClass: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+  },
+  cancelled: {
+    label: 'Iptal Edildi',
+    color: 'red',
+    bgClass: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+  },
+  refunded: {
+    label: 'Iade Edildi',
+    color: 'orange',
+    bgClass: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+  }
 }
 
 // Quick charge items (common charges)
@@ -170,7 +203,7 @@ export const QUICK_CHARGE_ITEMS = [
 /**
  * Get cashier statistics dashboard
  */
-export const getStats = async (hotelId) => {
+export const getStats = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/cashier/stats`)
   return response.data
 }
@@ -178,7 +211,7 @@ export const getStats = async (hotelId) => {
 /**
  * Get transaction types and categories
  */
-export const getTypes = async (hotelId) => {
+export const getTypes = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/cashier/types`)
   return response.data
 }
@@ -188,7 +221,9 @@ export const getTypes = async (hotelId) => {
  */
 export const getDailySummary = async (hotelId, date = null) => {
   const params = date ? { date } : {}
-  const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/cashier/daily-summary`, { params })
+  const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/cashier/daily-summary`, {
+    params
+  })
   return response.data
 }
 
@@ -197,14 +232,17 @@ export const getDailySummary = async (hotelId, date = null) => {
  */
 export const getDailySummaryByCurrency = async (hotelId, date = null) => {
   const params = date ? { date } : {}
-  const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/cashier/daily-summary-by-currency`, { params })
+  const response = await pmsApiClient.get(
+    `/pms/hotels/${hotelId}/cashier/daily-summary-by-currency`,
+    { params }
+  )
   return response.data
 }
 
 /**
  * Get available currencies and exchange rates
  */
-export const getCurrencies = async (hotelId) => {
+export const getCurrencies = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/cashier/currencies`)
   return response.data
 }
@@ -212,7 +250,7 @@ export const getCurrencies = async (hotelId) => {
 /**
  * Get active shift
  */
-export const getActiveShift = async (hotelId) => {
+export const getActiveShift = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/cashier/shifts/active`)
   return response.data
 }
@@ -245,7 +283,10 @@ export const openShift = async (hotelId, data) => {
  * Close shift
  */
 export const closeShift = async (hotelId, shiftId, data) => {
-  const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/cashier/shifts/${shiftId}/close`, data)
+  const response = await pmsApiClient.post(
+    `/pms/hotels/${hotelId}/cashier/shifts/${shiftId}/close`,
+    data
+  )
   return response.data
 }
 
@@ -253,7 +294,10 @@ export const closeShift = async (hotelId, shiftId, data) => {
  * Add cash movement to shift
  */
 export const addCashMovement = async (hotelId, shiftId, data) => {
-  const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/cashier/shifts/${shiftId}/movements`, data)
+  const response = await pmsApiClient.post(
+    `/pms/hotels/${hotelId}/cashier/shifts/${shiftId}/movements`,
+    data
+  )
   return response.data
 }
 
@@ -281,7 +325,10 @@ export const createTransaction = async (hotelId, data) => {
  * Void transaction
  */
 export const voidTransaction = async (hotelId, transactionId, reason) => {
-  const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/cashier/transactions/${transactionId}/void`, { reason })
+  const response = await pmsApiClient.post(
+    `/pms/hotels/${hotelId}/cashier/transactions/${transactionId}/void`,
+    { reason }
+  )
   return response.data
 }
 
@@ -289,7 +336,10 @@ export const voidTransaction = async (hotelId, transactionId, reason) => {
  * Refund transaction
  */
 export const refundTransaction = async (hotelId, transactionId, data) => {
-  const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/cashier/transactions/${transactionId}/refund`, data)
+  const response = await pmsApiClient.post(
+    `/pms/hotels/${hotelId}/cashier/transactions/${transactionId}/refund`,
+    data
+  )
   return response.data
 }
 

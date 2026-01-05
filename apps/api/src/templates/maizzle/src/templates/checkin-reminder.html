@@ -17,19 +17,19 @@ previewText: "Yarın check-in! Rezervasyon detaylarınız"
 
   <!-- Heading -->
   <h1 class="m-0 mb-2 text-center text-2xl font-bold text-slate-800">
-    {{ TITLE }}
+    %% TITLE %%
   </h1>
   <p class="m-0 mb-6 text-center text-slate-600">
-    {{ SUBTITLE }}
+    %% SUBTITLE %%
   </p>
 
   <!-- Countdown -->
   <table class="w-full rounded-lg bg-primary-50" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td class="p-6 text-center">
-        <p class="m-0 text-sm text-primary-600">{{ COUNTDOWN_LABEL }}</p>
-        <p class="m-0 text-4xl font-bold text-primary-700">{{ DAYS_LEFT }}</p>
-        <p class="m-0 text-sm text-primary-600">{{ DAYS_TEXT }}</p>
+        <p class="m-0 text-sm text-primary-600">%% COUNTDOWN_LABEL %%</p>
+        <p class="m-0 text-4xl font-bold text-primary-700">%% DAYS_LEFT %%</p>
+        <p class="m-0 text-sm text-primary-600">%% DAYS_TEXT %%</p>
       </td>
     </tr>
   </table>
@@ -38,29 +38,29 @@ previewText: "Yarın check-in! Rezervasyon detaylarınız"
   <table class="mt-6 w-full rounded-lg bg-slate-50" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td class="p-6">
-        <h3 class="m-0 mb-4 text-lg font-bold text-slate-800">{{ HOTEL_NAME }}</h3>
-        <p class="m-0 mb-4 text-sm text-slate-600">{{ HOTEL_ADDRESS }}</p>
+        <h3 class="m-0 mb-4 text-lg font-bold text-slate-800">%% HOTEL_NAME %%</h3>
+        <p class="m-0 mb-4 text-sm text-slate-600">%% HOTEL_ADDRESS %%</p>
 
         <table class="w-full text-sm" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
-            <td class="py-2 text-slate-500" style="width: 40%;">{{ BOOKING_NUMBER_LABEL }}</td>
-            <td class="py-2 font-semibold text-primary-600">{{ BOOKING_NUMBER }}</td>
+            <td class="py-2 text-slate-500" style="width: 40%;">%% BOOKING_NUMBER_LABEL %%</td>
+            <td class="py-2 font-semibold text-primary-600">%% BOOKING_NUMBER %%</td>
           </tr>
           <tr>
-            <td class="py-2 text-slate-500">{{ CHECKIN_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800">{{ CHECKIN_DATE }} ({{ CHECKIN_TIME }})</td>
+            <td class="py-2 text-slate-500">%% CHECKIN_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800">%% CHECKIN_DATE %% (%% CHECKIN_TIME %%)</td>
           </tr>
           <tr>
-            <td class="py-2 text-slate-500">{{ CHECKOUT_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800">{{ CHECKOUT_DATE }} ({{ CHECKOUT_TIME }})</td>
+            <td class="py-2 text-slate-500">%% CHECKOUT_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800">%% CHECKOUT_DATE %% (%% CHECKOUT_TIME %%)</td>
           </tr>
           <tr>
-            <td class="py-2 text-slate-500">{{ ROOM_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800">{{ ROOM_TYPE }}</td>
+            <td class="py-2 text-slate-500">%% ROOM_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800">%% ROOM_TYPE %%</td>
           </tr>
           <tr>
-            <td class="py-2 text-slate-500">{{ GUESTS_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800">{{ GUESTS }}</td>
+            <td class="py-2 text-slate-500">%% GUESTS_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800">%% GUESTS %%</td>
           </tr>
         </table>
       </td>
@@ -71,19 +71,19 @@ previewText: "Yarın check-in! Rezervasyon detaylarınız"
   <table class="mt-6 w-full" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td>
-        <h3 class="m-0 mb-3 text-base font-bold text-slate-800">{{ IMPORTANT_INFO_TITLE }}</h3>
+        <h3 class="m-0 mb-3 text-base font-bold text-slate-800">%% IMPORTANT_INFO_TITLE %%</h3>
         <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
-          <tr if="{{ PARKING_INFO }}">
-            <td class="pb-2 text-sm text-slate-600">🚗 {{ PARKING_INFO }}</td>
+          <tr if="%% PARKING_INFO %%">
+            <td class="pb-2 text-sm text-slate-600">🚗 %% PARKING_INFO %%</td>
           </tr>
-          <tr if="{{ WIFI_INFO }}">
-            <td class="pb-2 text-sm text-slate-600">📶 {{ WIFI_INFO }}</td>
+          <tr if="%% WIFI_INFO %%">
+            <td class="pb-2 text-sm text-slate-600">📶 %% WIFI_INFO %%</td>
           </tr>
-          <tr if="{{ BREAKFAST_INFO }}">
-            <td class="pb-2 text-sm text-slate-600">🍳 {{ BREAKFAST_INFO }}</td>
+          <tr if="%% BREAKFAST_INFO %%">
+            <td class="pb-2 text-sm text-slate-600">🍳 %% BREAKFAST_INFO %%</td>
           </tr>
-          <tr if="{{ SPECIAL_REQUESTS }}">
-            <td class="pb-2 text-sm text-slate-600">📝 {{ SPECIAL_REQUESTS }}</td>
+          <tr if="%% SPECIAL_REQUESTS %%">
+            <td class="pb-2 text-sm text-slate-600">📝 %% SPECIAL_REQUESTS %%</td>
           </tr>
         </table>
       </td>
@@ -97,8 +97,8 @@ previewText: "Yarın check-in! Rezervasyon detaylarınız"
         <table cellpadding="0" cellspacing="0" role="presentation">
           <tr>
             <td class="rounded-lg bg-primary-600" style="mso-padding-alt: 12px 32px;">
-              <a href="{{ MAP_URL }}" class="block px-8 py-3 text-base font-semibold text-white no-underline" style="mso-text-raise: 3px;">
-                📍 {{ DIRECTIONS_BUTTON }}
+              <a href="%% MAP_URL %%" class="block px-8 py-3 text-base font-semibold text-white no-underline" style="mso-text-raise: 3px;">
+                📍 %% DIRECTIONS_BUTTON %%
               </a>
             </td>
           </tr>
@@ -113,9 +113,9 @@ previewText: "Yarın check-in! Rezervasyon detaylarınız"
       <td class="p-4">
         <table class="w-full text-sm" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
-            <td class="text-slate-600">{{ HOTEL_CONTACT_LABEL }}</td>
+            <td class="text-slate-600">%% HOTEL_CONTACT_LABEL %%</td>
             <td align="right">
-              <a href="tel:{{ HOTEL_PHONE }}" class="text-primary-600 font-semibold">{{ HOTEL_PHONE }}</a>
+              <a href="tel:%% HOTEL_PHONE %%" class="text-primary-600 font-semibold">%% HOTEL_PHONE %%</a>
             </td>
           </tr>
         </table>
@@ -125,7 +125,7 @@ previewText: "Yarın check-in! Rezervasyon detaylarınız"
 
   <!-- Help -->
   <p class="mt-8 text-center text-sm text-slate-500">
-    {{ HELP_TEXT }}<br>
-    <a href="mailto:{{ SUPPORT_EMAIL }}" class="text-primary-600">{{ SUPPORT_EMAIL }}</a>
+    %% HELP_TEXT %%<br>
+    <a href="mailto:%% SUPPORT_EMAIL %%" class="text-primary-600">%% SUPPORT_EMAIL %%</a>
   </p>
 </x-main>

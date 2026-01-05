@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 
 /**
  * Keyboard Shortcuts Composable
@@ -14,7 +14,7 @@ const globalShortcuts = new Map()
 const isEnabled = ref(true)
 
 // Parse shortcut string to key combo
-const parseShortcut = (shortcut) => {
+const parseShortcut = shortcut => {
   const parts = shortcut.toLowerCase().split('+')
   return {
     ctrl: parts.includes('ctrl') || parts.includes('control'),
@@ -27,7 +27,8 @@ const parseShortcut = (shortcut) => {
 
 // Check if event matches shortcut
 const matchesShortcut = (event, combo) => {
-  const keyMatch = event.key.toLowerCase() === combo.key ||
+  const keyMatch =
+    event.key.toLowerCase() === combo.key ||
     event.code.toLowerCase() === combo.key ||
     event.code.toLowerCase() === `key${combo.key}`
 
@@ -41,13 +42,27 @@ const matchesShortcut = (event, combo) => {
 }
 
 // Check if user is typing in an input
-const isTyping = (event) => {
+const isTyping = event => {
   const target = event.target
   const tagName = target.tagName.toLowerCase()
   const isContentEditable = target.isContentEditable
 
   // Allow shortcuts even in inputs for specific keys
-  const allowedInInputs = ['escape', 'f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10', 'f11', 'f12']
+  const allowedInInputs = [
+    'escape',
+    'f1',
+    'f2',
+    'f3',
+    'f4',
+    'f5',
+    'f6',
+    'f7',
+    'f8',
+    'f9',
+    'f10',
+    'f11',
+    'f12'
+  ]
   const key = event.key.toLowerCase()
 
   if (allowedInInputs.includes(key)) {
@@ -63,7 +78,7 @@ const isTyping = (event) => {
 }
 
 // Global keyboard event handler
-const handleKeyDown = (event) => {
+const handleKeyDown = event => {
   if (!isEnabled.value) return
   if (isTyping(event)) return
 
@@ -97,7 +112,7 @@ const cleanupGlobalListener = () => {
 /**
  * Main composable
  */
-export function useKeyboardShortcuts(options = {}) {
+export function useKeyboardShortcuts() {
   const localShortcuts = new Map()
 
   // Register a shortcut
@@ -109,7 +124,7 @@ export function useKeyboardShortcuts(options = {}) {
   }
 
   // Unregister a shortcut
-  const unregisterShortcut = (shortcut) => {
+  const unregisterShortcut = shortcut => {
     const normalizedShortcut = shortcut.toLowerCase()
     globalShortcuts.delete(normalizedShortcut)
     localShortcuts.delete(normalizedShortcut)
@@ -156,13 +171,7 @@ export function useKeyboardShortcuts(options = {}) {
  * PMS-specific shortcuts composable
  */
 export function usePMSShortcuts(options = {}) {
-  const {
-    onNewWalkIn,
-    onNewReservation,
-    onSearch,
-    onSave,
-    onCancel
-  } = options
+  const { onNewWalkIn, onNewReservation, onSearch, onSave, onCancel } = options
 
   const { registerShortcut, unregisterShortcut } = useKeyboardShortcuts()
 
@@ -203,7 +212,7 @@ export function usePMSShortcuts(options = {}) {
 /**
  * Format shortcut for display
  */
-export const formatShortcut = (shortcut) => {
+export const formatShortcut = shortcut => {
   return shortcut
     .split('+')
     .map(key => {

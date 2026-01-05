@@ -19,7 +19,7 @@ mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB disconnected')
 })
 
-mongoose.connection.on('error', (error) => {
+mongoose.connection.on('error', error => {
   logger.error(`MongoDB error: ${error.message}`)
 })
 

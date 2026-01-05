@@ -39,8 +39,8 @@
 
         <!-- History button -->
         <button
-          @click="showHistory = true"
           class="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          @click="showHistory = true"
         >
           <span class="material-icons text-lg">history</span>
           <span class="hidden sm:inline">Gecmis</span>
@@ -57,23 +57,26 @@
     </div>
 
     <!-- No Active Audit - Start Button -->
-    <div v-else-if="!audit" class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-8 md:p-12 text-center">
-      <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+    <div
+      v-else-if="!audit"
+      class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 p-8 md:p-12 text-center"
+    >
+      <div
+        class="w-20 h-20 mx-auto mb-6 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+      >
         <span class="material-icons text-4xl text-indigo-600 dark:text-indigo-400">nightlight</span>
       </div>
 
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-        Night Audit Baslat
-      </h2>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Night Audit Baslat</h2>
       <p class="text-gray-500 dark:text-slate-400 mb-6 max-w-md mx-auto">
-        Gun sonu islemlerini baslatmak icin asagidaki butona tiklayin.
-        Audit sureci 5 adimdan olusur ve yaklasik 5-10 dakika surer.
+        Gun sonu islemlerini baslatmak icin asagidaki butona tiklayin. Audit sureci 5 adimdan olusur
+        ve yaklasik 5-10 dakika surer.
       </p>
 
       <button
-        @click="handleStartAudit"
         :disabled="starting"
         class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-xl transition-colors"
+        @click="handleStartAudit"
       >
         <span v-if="starting" class="material-icons animate-spin">refresh</span>
         <span v-else class="material-icons">play_arrow</span>
@@ -107,10 +110,14 @@
     <!-- Active Audit - Wizard -->
     <div v-else class="space-y-6">
       <!-- Progress Bar -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center justify-between mb-3">
           <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Ilerleme</span>
-          <span class="text-sm text-indigo-600 dark:text-indigo-400 font-medium">{{ progress }}%</span>
+          <span class="text-sm text-indigo-600 dark:text-indigo-400 font-medium"
+            >{{ progress }}%</span
+          >
         </div>
         <div class="h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
           <div
@@ -121,23 +128,27 @@
       </div>
 
       <!-- Step Indicator -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center justify-center gap-2 overflow-x-auto pb-2">
           <template v-for="(step, index) in steps" :key="step.number">
             <!-- Step Circle -->
             <button
-              @click="goToStep(step.number)"
               :disabled="!canGoToStep(step.number)"
               class="flex-shrink-0 flex flex-col items-center gap-2 group"
               :class="{ 'cursor-not-allowed opacity-50': !canGoToStep(step.number) }"
+              @click="goToStep(step.number)"
             >
               <!-- Circle -->
               <div
                 class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
                 :class="{
                   'bg-green-500 text-white': step.status === 'completed',
-                  'bg-indigo-600 text-white ring-4 ring-indigo-200 dark:ring-indigo-900': step.status === 'current',
-                  'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400': step.status === 'pending'
+                  'bg-indigo-600 text-white ring-4 ring-indigo-200 dark:ring-indigo-900':
+                    step.status === 'current',
+                  'bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-slate-400':
+                    step.status === 'pending'
                 }"
               >
                 <span v-if="step.status === 'completed'" class="material-icons text-lg">check</span>
@@ -160,14 +171,18 @@
             <div
               v-if="index < steps.length - 1"
               class="flex-shrink-0 w-8 md:w-12 h-1 rounded transition-colors duration-500"
-              :class="step.status === 'completed' ? 'bg-green-500' : 'bg-gray-200 dark:bg-slate-700'"
+              :class="
+                step.status === 'completed' ? 'bg-green-500' : 'bg-gray-200 dark:bg-slate-700'
+              "
             ></div>
           </template>
         </div>
       </div>
 
       <!-- Step Content -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+      >
         <Transition
           mode="out-in"
           enter-active-class="transition ease-out duration-200"
@@ -205,12 +220,16 @@
           class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
           @click.self="showHistory = false"
         >
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden">
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+          >
+            <div
+              class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700"
+            >
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Audit Gecmisi</h3>
               <button
-                @click="showHistory = false"
                 class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
+                @click="showHistory = false"
               >
                 <span class="material-icons">close</span>
               </button>
@@ -219,19 +238,24 @@
               <div v-if="historyLoading" class="text-center py-8">
                 <span class="material-icons animate-spin text-2xl text-indigo-600">refresh</span>
               </div>
-              <div v-else-if="history.length === 0" class="text-center py-8 text-gray-500 dark:text-slate-400">
+              <div
+                v-else-if="history.length === 0"
+                class="text-center py-8 text-gray-500 dark:text-slate-400"
+              >
                 Gecmis audit bulunamadi
               </div>
               <div v-else class="space-y-3">
                 <button
                   v-for="item in history"
                   :key="item._id"
-                  @click="goToAuditDetail(item._id)"
                   class="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-left"
+                  @click="goToAuditDetail(item._id)"
                 >
                   <div>
                     <p class="font-medium text-gray-900 dark:text-white">{{ item.auditNumber }}</p>
-                    <p class="text-sm text-gray-500 dark:text-slate-400">{{ formatDate(item.auditDate) }}</p>
+                    <p class="text-sm text-gray-500 dark:text-slate-400">
+                      {{ formatDate(item.auditDate) }}
+                    </p>
                   </div>
                   <div class="flex items-center gap-3">
                     <div class="text-right">
@@ -263,11 +287,21 @@ import { useNightAuditSocket } from '@/composables/useNightAuditSocket'
 import { usePmsContextInjection } from '@/composables/usePmsContext'
 
 // Lazy load step components
-const PreAuditCheck = defineAsyncComponent(() => import('@/modules/billing/components/steps/PreAuditCheck.vue'))
-const NoShowProcessing = defineAsyncComponent(() => import('@/modules/billing/components/steps/NoShowProcessing.vue'))
-const RoomChargePosting = defineAsyncComponent(() => import('@/modules/billing/components/steps/RoomChargePosting.vue'))
-const CashierReconciliation = defineAsyncComponent(() => import('@/modules/billing/components/steps/CashierReconciliation.vue'))
-const ReportsAndClose = defineAsyncComponent(() => import('@/modules/billing/components/steps/ReportsAndClose.vue'))
+const PreAuditCheck = defineAsyncComponent(
+  () => import('@/modules/billing/components/steps/PreAuditCheck.vue')
+)
+const NoShowProcessing = defineAsyncComponent(
+  () => import('@/modules/billing/components/steps/NoShowProcessing.vue')
+)
+const RoomChargePosting = defineAsyncComponent(
+  () => import('@/modules/billing/components/steps/RoomChargePosting.vue')
+)
+const CashierReconciliation = defineAsyncComponent(
+  () => import('@/modules/billing/components/steps/CashierReconciliation.vue')
+)
+const ReportsAndClose = defineAsyncComponent(
+  () => import('@/modules/billing/components/steps/ReportsAndClose.vue')
+)
 
 const toast = useToast()
 const router = useRouter()
@@ -282,15 +316,15 @@ const history = ref([])
 const historyLoading = ref(false)
 
 // WebSocket for real-time updates
-const { auditProgress, isConnected } = useNightAuditSocket(hotelId, {
-  onStarted: (data) => {
+const { isConnected } = useNightAuditSocket(hotelId, {
+  onStarted: data => {
     console.log('[NightAudit] Audit started via WebSocket:', data)
     // Refresh if we don't have the audit yet
     if (!audit.value) {
       fetchAudit()
     }
   },
-  onStepComplete: (data) => {
+  onStepComplete: data => {
     console.log('[NightAudit] Step completed via WebSocket:', data)
     // Refresh audit data to get the latest step
     fetchAudit()
@@ -300,7 +334,7 @@ const { auditProgress, isConnected } = useNightAuditSocket(hotelId, {
       toast.info(`${stepInfo.label} tamamlandi (baska kullanici tarafindan)`)
     }
   },
-  onCompleted: (data) => {
+  onCompleted: data => {
     console.log('[NightAudit] Audit completed via WebSocket:', data)
     // Refresh to show completion
     fetchAudit()
@@ -332,7 +366,7 @@ const currentStepComponent = computed(() => {
 })
 
 // Methods
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('tr-TR', {
     weekday: 'long',
@@ -342,18 +376,18 @@ const formatDate = (date) => {
   })
 }
 
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return nightAuditService.formatCurrency(amount)
 }
 
-const canGoToStep = (stepNumber) => {
+const canGoToStep = stepNumber => {
   if (!audit.value) return false
   // Can go to completed steps or current step
   const step = steps.value.find(s => s.number === stepNumber)
   return step?.status === 'completed' || step?.status === 'current'
 }
 
-const goToStep = (stepNumber) => {
+const goToStep = stepNumber => {
   if (!canGoToStep(stepNumber)) return
   // Only allow going back to completed steps for review
   // Current step stays as is
@@ -406,7 +440,7 @@ const handleStartAudit = async () => {
   }
 }
 
-const handleStepComplete = async (data) => {
+const handleStepComplete = async () => {
   // Refresh audit data after step completion
   await fetchAudit()
 
@@ -435,20 +469,20 @@ const fetchHistory = async () => {
   }
 }
 
-const goToAuditDetail = (auditId) => {
+const goToAuditDetail = auditId => {
   showHistory.value = false
   router.push({ name: 'pms-night-audit-detail', params: { auditId } })
 }
 
 // Watch for history modal
-watch(showHistory, (show) => {
+watch(showHistory, show => {
   if (show && history.value.length === 0) {
     fetchHistory()
   }
 })
 
 // Keyboard shortcuts
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (!audit.value) return
 
   // Ignore if typing in input

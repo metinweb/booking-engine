@@ -5,7 +5,7 @@
     size="xl"
     @close="$emit('close')"
   >
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form class="space-y-6" @submit.prevent="handleSubmit">
       <!-- Basic Info -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Room Code -->
@@ -24,7 +24,9 @@
             required
           />
           <p v-if="errors.code" class="text-red-500 text-xs mt-1">{{ errors.code }}</p>
-          <p v-else class="text-gray-500 dark:text-slate-400 text-xs mt-1">{{ $t('hotels.roomTemplates.codeHint') }}</p>
+          <p v-else class="text-gray-500 dark:text-slate-400 text-xs mt-1">
+            {{ $t('hotels.roomTemplates.codeHint') }}
+          </p>
         </div>
 
         <!-- Room Size -->
@@ -41,7 +43,10 @@
               max="1000"
               placeholder="25"
             />
-            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400">m²</span>
+            <span
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400"
+              >m²</span
+            >
           </div>
         </div>
       </div>
@@ -79,20 +84,52 @@
         </label>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('hotels.roomTemplates.maxAdults') }}</label>
-            <input v-model.number="form.occupancy.maxAdults" type="number" class="form-input w-full" min="1" max="10" />
+            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+              $t('hotels.roomTemplates.maxAdults')
+            }}</label>
+            <input
+              v-model.number="form.occupancy.maxAdults"
+              type="number"
+              class="form-input w-full"
+              min="1"
+              max="10"
+            />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('hotels.roomTemplates.maxChildren') }}</label>
-            <input v-model.number="form.occupancy.maxChildren" type="number" class="form-input w-full" min="0" max="6" />
+            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+              $t('hotels.roomTemplates.maxChildren')
+            }}</label>
+            <input
+              v-model.number="form.occupancy.maxChildren"
+              type="number"
+              class="form-input w-full"
+              min="0"
+              max="6"
+            />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('hotels.roomTemplates.maxInfants') }}</label>
-            <input v-model.number="form.occupancy.maxInfants" type="number" class="form-input w-full" min="0" max="2" />
+            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+              $t('hotels.roomTemplates.maxInfants')
+            }}</label>
+            <input
+              v-model.number="form.occupancy.maxInfants"
+              type="number"
+              class="form-input w-full"
+              min="0"
+              max="2"
+            />
           </div>
           <div>
-            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('hotels.roomTemplates.totalMax') }}</label>
-            <input v-model.number="form.occupancy.totalMaxGuests" type="number" class="form-input w-full" min="1" max="12" />
+            <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+              $t('hotels.roomTemplates.totalMax')
+            }}</label>
+            <input
+              v-model.number="form.occupancy.totalMaxGuests"
+              type="number"
+              class="form-input w-full"
+              min="1"
+              max="12"
+            />
           </div>
         </div>
       </div>
@@ -123,16 +160,16 @@
             />
             <button
               type="button"
-              @click="removeBed(index)"
               class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+              @click="removeBed(index)"
             >
               <span class="material-icons">remove_circle</span>
             </button>
           </div>
           <button
             type="button"
-            @click="addBed"
             class="flex items-center gap-2 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 text-sm"
+            @click="addBed"
           >
             <span class="material-icons text-lg">add_circle</span>
             {{ $t('hotels.roomTemplates.addBed') }}
@@ -145,12 +182,18 @@
         <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
           {{ $t('hotels.roomTemplates.amenities') }}
         </label>
-        <div class="max-h-80 overflow-y-auto p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg space-y-4">
+        <div
+          class="max-h-80 overflow-y-auto p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg space-y-4"
+        >
           <div v-for="category in amenityCategories" :key="category.key">
             <!-- Category Header -->
-            <div class="flex items-center gap-2 mb-2 pb-1 border-b border-gray-200 dark:border-slate-600">
+            <div
+              class="flex items-center gap-2 mb-2 pb-1 border-b border-gray-200 dark:border-slate-600"
+            >
               <span class="material-icons text-purple-500 text-lg">{{ category.icon }}</span>
-              <span class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ category.label }}</span>
+              <span class="text-sm font-medium text-gray-700 dark:text-slate-300">{{
+                category.label
+              }}</span>
             </div>
             <!-- Amenities Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
@@ -160,13 +203,17 @@
                 class="flex items-center gap-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-600 p-2 rounded transition-colors"
               >
                 <input
-                  type="checkbox"
                   v-model="form.amenities"
+                  type="checkbox"
                   :value="amenity.id"
                   class="rounded border-gray-300 dark:border-slate-600 text-purple-600 focus:ring-purple-500"
                 />
-                <span class="material-icons text-gray-400 dark:text-slate-500 text-base">{{ amenity.icon }}</span>
-                <span class="text-sm text-gray-700 dark:text-slate-300">{{ $t(`hotels.roomAmenities.${amenity.id}`) }}</span>
+                <span class="material-icons text-gray-400 dark:text-slate-500 text-base">{{
+                  amenity.icon
+                }}</span>
+                <span class="text-sm text-gray-700 dark:text-slate-300">{{
+                  $t(`hotels.roomAmenities.${amenity.id}`)
+                }}</span>
               </label>
             </div>
           </div>
@@ -182,9 +229,11 @@
         <!-- Upload Area -->
         <div
           class="border-2 border-dashed rounded-lg p-4 text-center transition-colors mb-4"
-          :class="isDragging
-            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-            : 'border-gray-300 dark:border-slate-600'"
+          :class="
+            isDragging
+              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+              : 'border-gray-300 dark:border-slate-600'
+          "
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
           @drop.prevent="handleDrop"
@@ -204,8 +253,10 @@
           </div>
           <div v-else class="flex items-center justify-center gap-3">
             <span class="material-icons text-gray-400">cloud_upload</span>
-            <span class="text-gray-600 dark:text-slate-400">{{ $t('hotels.gallery.dropImagesHere') }}</span>
-            <button type="button" @click="$refs.fileInput.click()" class="btn-secondary text-sm">
+            <span class="text-gray-600 dark:text-slate-400">{{
+              $t('hotels.gallery.dropImagesHere')
+            }}</span>
+            <button type="button" class="btn-secondary text-sm" @click="$refs.fileInput.click()">
               {{ $t('hotels.gallery.uploadImages') }}
             </button>
           </div>
@@ -219,22 +270,27 @@
             class="relative group aspect-square bg-gray-100 dark:bg-slate-700 rounded overflow-hidden"
           >
             <img :src="getImageUrl(image.url)" class="w-full h-full object-cover" />
-            <div v-if="image.isMain" class="absolute top-1 left-1 bg-purple-600 text-white text-xs px-1 rounded">
+            <div
+              v-if="image.isMain"
+              class="absolute top-1 left-1 bg-purple-600 text-white text-xs px-1 rounded"
+            >
               {{ $t('hotels.gallery.isMain') }}
             </div>
-            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+            <div
+              class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
+            >
               <button
                 v-if="!image.isMain"
                 type="button"
-                @click="setMainImage(image._id)"
                 class="p-1 bg-white/20 hover:bg-white/30 rounded text-white text-sm"
+                @click="setMainImage(image._id)"
               >
                 <span class="material-icons text-sm">star</span>
               </button>
               <button
                 type="button"
-                @click="deleteImage(image._id)"
                 class="p-1 bg-white/20 hover:bg-red-500/50 rounded text-white text-sm"
+                @click="deleteImage(image._id)"
               >
                 <span class="material-icons text-sm">delete</span>
               </button>
@@ -246,14 +302,25 @@
 
     <template #footer>
       <div class="flex justify-end gap-3">
-        <button type="button" @click="$emit('close')" class="btn-secondary">
+        <button type="button" class="btn-secondary" @click="$emit('close')">
           {{ $t('common.cancel') }}
         </button>
-        <button type="button" @click="handleSubmit" class="btn-primary" :disabled="saving">
+        <button type="button" class="btn-primary" :disabled="saving" @click="handleSubmit">
           <span v-if="saving" class="flex items-center gap-2">
             <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             {{ $t('common.saving') }}
           </span>
@@ -293,7 +360,28 @@ const emit = defineEmits(['close', 'saved'])
 const { t } = useI18n()
 const toast = useToast()
 
-const SUPPORTED_LANGUAGES = ['tr', 'en', 'ru', 'el', 'de', 'es', 'it', 'fr', 'ro', 'bg', 'pt', 'da', 'zh', 'ar', 'fa', 'he', 'sq', 'uk', 'pl', 'az']
+const SUPPORTED_LANGUAGES = [
+  'tr',
+  'en',
+  'ru',
+  'el',
+  'de',
+  'es',
+  'it',
+  'fr',
+  'ro',
+  'bg',
+  'pt',
+  'da',
+  'zh',
+  'ar',
+  'fa',
+  'he',
+  'sq',
+  'uk',
+  'pl',
+  'az'
+]
 
 const bedTypes = ['single', 'double', 'queen', 'king', 'twin', 'sofa', 'bunk', 'extra']
 
@@ -436,7 +524,9 @@ const amenityCategories = computed(() => [
 
 const createEmptyMultiLang = () => {
   const obj = {}
-  SUPPORTED_LANGUAGES.forEach(lang => { obj[lang] = '' })
+  SUPPORTED_LANGUAGES.forEach(lang => {
+    obj[lang] = ''
+  })
   return obj
 }
 
@@ -469,7 +559,7 @@ const addBed = () => {
   form.bedConfiguration.push({ type: '', count: 1 })
 }
 
-const removeBed = (index) => {
+const removeBed = index => {
   form.bedConfiguration.splice(index, 1)
 }
 
@@ -527,7 +617,7 @@ const handleSubmit = async () => {
 }
 
 // Image handling
-const handleDrop = (e) => {
+const handleDrop = e => {
   isDragging.value = false
   const files = e.dataTransfer.files
   if (files.length) {
@@ -535,7 +625,7 @@ const handleDrop = (e) => {
   }
 }
 
-const handleFileSelect = (e) => {
+const handleFileSelect = e => {
   const files = e.target.files
   if (files.length) {
     uploadImages(files)
@@ -543,7 +633,7 @@ const handleFileSelect = (e) => {
   e.target.value = ''
 }
 
-const uploadImages = async (files) => {
+const uploadImages = async files => {
   uploading.value = true
   try {
     for (const file of files) {
@@ -553,54 +643,58 @@ const uploadImages = async (files) => {
       }
     }
     toast.success(t('hotels.gallery.uploadSuccess'))
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   } finally {
     uploading.value = false
   }
 }
 
-const setMainImage = async (imageId) => {
+const setMainImage = async imageId => {
   try {
     await hotelService.setRoomTemplateMainImage(props.hotelId, form.code, imageId)
     form.images.forEach(img => {
       img.isMain = img._id === imageId
     })
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   }
 }
 
-const deleteImage = async (imageId) => {
+const deleteImage = async imageId => {
   try {
     await hotelService.deleteRoomTemplateImage(props.hotelId, form.code, imageId)
     form.images = form.images.filter(img => img._id !== imageId)
     toast.success(t('hotels.gallery.deleteSuccess'))
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   }
 }
 
 // Initialize form with template data if editing
-watch(() => props.template, (template) => {
-  if (template) {
-    Object.assign(form, {
-      code: template.code || '',
-      name: { ...createEmptyMultiLang(), ...template.name },
-      description: { ...createEmptyMultiLang(), ...template.description },
-      size: template.size || null,
-      occupancy: {
-        maxAdults: template.occupancy?.maxAdults ?? 2,
-        maxChildren: template.occupancy?.maxChildren ?? 2,
-        maxInfants: template.occupancy?.maxInfants ?? 1,
-        totalMaxGuests: template.occupancy?.totalMaxGuests ?? 4
-      },
-      bedConfiguration: template.bedConfiguration?.length
-        ? template.bedConfiguration.map(b => ({ ...b }))
-        : [],
-      amenities: template.amenities ? [...template.amenities] : [],
-      images: template.images ? [...template.images] : []
-    })
-  }
-}, { immediate: true })
+watch(
+  () => props.template,
+  template => {
+    if (template) {
+      Object.assign(form, {
+        code: template.code || '',
+        name: { ...createEmptyMultiLang(), ...template.name },
+        description: { ...createEmptyMultiLang(), ...template.description },
+        size: template.size || null,
+        occupancy: {
+          maxAdults: template.occupancy?.maxAdults ?? 2,
+          maxChildren: template.occupancy?.maxChildren ?? 2,
+          maxInfants: template.occupancy?.maxInfants ?? 1,
+          totalMaxGuests: template.occupancy?.totalMaxGuests ?? 4
+        },
+        bedConfiguration: template.bedConfiguration?.length
+          ? template.bedConfiguration.map(b => ({ ...b }))
+          : [],
+        amenities: template.amenities ? [...template.amenities] : [],
+        images: template.images ? [...template.images] : []
+      })
+    }
+  },
+  { immediate: true }
+)
 </script>

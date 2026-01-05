@@ -17,7 +17,8 @@ class SMSService {
    */
   async getSettings() {
     try {
-      const { default: PlatformSettings } = await import('../modules/platform-settings/platformSettings.model.js')
+      const { default: PlatformSettings } =
+        await import('../modules/platform-settings/platformSettings.model.js')
       const settings = await PlatformSettings.getSettings()
       return settings.getNetGSMCredentials()
     } catch (error) {
@@ -36,7 +37,7 @@ class SMSService {
     if (!phone) return null
 
     // Remove all non-numeric characters
-    let cleaned = phone.replace(/[^0-9]/g, '')
+    const cleaned = phone.replace(/[^0-9]/g, '')
 
     // Handle different formats
     if (cleaned.startsWith('90') && cleaned.length === 12) {
@@ -70,14 +71,14 @@ class SMSService {
 
     const errorMessages = {
       '00': 'Success',
-      '20': 'Message text is empty',
-      '30': 'Invalid user credentials',
-      '40': 'Message header not defined in system',
-      '50': 'Account is not active',
-      '51': 'Account blocked',
-      '70': 'Invalid parameters',
-      '80': 'Querying limit exceeded',
-      '85': 'Same content filter - duplicate message blocked'
+      20: 'Message text is empty',
+      30: 'Invalid user credentials',
+      40: 'Message header not defined in system',
+      50: 'Account is not active',
+      51: 'Account blocked',
+      70: 'Invalid parameters',
+      80: 'Querying limit exceeded',
+      85: 'Same content filter - duplicate message blocked'
     }
 
     const success = code === '00'
@@ -86,7 +87,7 @@ class SMSService {
       success,
       code,
       messageId: success ? messageId : null,
-      error: success ? null : (errorMessages[code] || `Unknown error: ${code}`)
+      error: success ? null : errorMessages[code] || `Unknown error: ${code}`
     }
   }
 
@@ -196,9 +197,12 @@ class SMSService {
         stession: 1 // Credit query parameter
       })
 
-      const response = await axios.get(`https://api.netgsm.com.tr/balance/check/get?${params.toString()}`, {
-        timeout: 30000
-      })
+      const response = await axios.get(
+        `https://api.netgsm.com.tr/balance/check/get?${params.toString()}`,
+        {
+          timeout: 30000
+        }
+      )
 
       const data = response.data.toString().trim()
 
@@ -223,23 +227,23 @@ class SMSService {
    * Pre-defined SMS templates
    */
   templates = {
-    bookingConfirmation: (data) => {
+    bookingConfirmation: data => {
       return `Rezervasyonunuz onaylandi!\nRez No: ${data.bookingNumber}\nOtel: ${data.hotelName}\nGiris: ${data.checkIn}\nCikis: ${data.checkOut}`
     },
 
-    bookingCancellation: (data) => {
+    bookingCancellation: data => {
       return `Rezervasyonunuz iptal edildi.\nRez No: ${data.bookingNumber}\nOtel: ${data.hotelName}`
     },
 
-    paymentReminder: (data) => {
+    paymentReminder: data => {
       return `Odeme hatirlatmasi: ${data.bookingNumber} no'lu rezervasyonunuz icin ${data.amount} ${data.currency} odeme bekleniyor.`
     },
 
-    checkinReminder: (data) => {
+    checkinReminder: data => {
       return `Giris hatirlatmasi: Yarin ${data.hotelName} otelinde konaklamaniz basliyor. Iyi tatiller!`
     },
 
-    verificationCode: (data) => {
+    verificationCode: data => {
       return `Dogrulama kodunuz: ${data.code}\nBu kod 5 dakika icinde gecersiz olacaktir.`
     }
   }

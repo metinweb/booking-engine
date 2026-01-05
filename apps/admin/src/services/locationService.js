@@ -11,7 +11,7 @@ import apiClient from './api'
  * Get cities by country code
  * @param {string} countryCode - ISO 3166-1 alpha-2 country code
  */
-export const getCities = async (countryCode) => {
+export const getCities = async countryCode => {
   const response = await apiClient.get('/locations/cities', {
     params: { country: countryCode }
   })
@@ -31,7 +31,7 @@ export const getAllCities = async (params = {}) => {
  * Create a city (platform admin only)
  * @param {Object} data - City data
  */
-export const createCity = async (data) => {
+export const createCity = async data => {
   const response = await apiClient.post('/locations/cities', data)
   return response.data
 }
@@ -50,7 +50,7 @@ export const updateCity = async (id, data) => {
  * Delete city (platform admin only)
  * @param {string} id - City ID
  */
-export const deleteCity = async (id) => {
+export const deleteCity = async id => {
   const response = await apiClient.delete(`/locations/cities/${id}`)
   return response.data
 }
@@ -61,7 +61,7 @@ export const deleteCity = async (id) => {
  * Get districts by city
  * @param {string} cityId - City ID
  */
-export const getDistricts = async (cityId) => {
+export const getDistricts = async cityId => {
   const response = await apiClient.get('/locations/districts', {
     params: { city: cityId }
   })
@@ -81,7 +81,7 @@ export const getAllDistricts = async (params = {}) => {
  * Get single district
  * @param {string} id - District ID
  */
-export const getDistrict = async (id) => {
+export const getDistrict = async id => {
   const response = await apiClient.get(`/locations/districts/${id}`)
   return response.data
 }
@@ -90,7 +90,7 @@ export const getDistrict = async (id) => {
  * Create a district (platform admin only)
  * @param {Object} data - District data
  */
-export const createDistrict = async (data) => {
+export const createDistrict = async data => {
   const response = await apiClient.post('/locations/districts', data)
   return response.data
 }
@@ -109,7 +109,7 @@ export const updateDistrict = async (id, data) => {
  * Delete district (platform admin only)
  * @param {string} id - District ID
  */
-export const deleteDistrict = async (id) => {
+export const deleteDistrict = async id => {
   const response = await apiClient.delete(`/locations/districts/${id}`)
   return response.data
 }
@@ -120,7 +120,7 @@ export const deleteDistrict = async (id) => {
  * Get tourism regions by city
  * @param {string} cityId - City ID
  */
-export const getRegions = async (cityId) => {
+export const getRegions = async cityId => {
   const response = await apiClient.get('/locations/regions', {
     params: { city: cityId }
   })
@@ -140,7 +140,7 @@ export const getAllRegions = async (params = {}) => {
  * Get single region
  * @param {string} id - Region ID
  */
-export const getRegion = async (id) => {
+export const getRegion = async id => {
   const response = await apiClient.get(`/locations/regions/${id}`)
   return response.data
 }
@@ -149,7 +149,7 @@ export const getRegion = async (id) => {
  * Create a tourism region (platform admin only)
  * @param {Object} data - Region data
  */
-export const createRegion = async (data) => {
+export const createRegion = async data => {
   const response = await apiClient.post('/locations/regions', data)
   return response.data
 }
@@ -168,7 +168,7 @@ export const updateRegion = async (id, data) => {
  * Delete tourism region (platform admin only)
  * @param {string} id - Region ID
  */
-export const deleteRegion = async (id) => {
+export const deleteRegion = async id => {
   const response = await apiClient.delete(`/locations/regions/${id}`)
   return response.data
 }

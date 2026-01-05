@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import pmsAuthService from '@/services/pms/pmsAuthService'
 import router from '@/router'
+import { storeLogger } from '@/utils/logger'
 
 export const usePmsAuthStore = defineStore('pmsAuth', () => {
   // State
@@ -18,7 +19,9 @@ export const usePmsAuthStore = defineStore('pmsAuth', () => {
   const hasMultipleHotels = computed(() => assignedHotels.value.length > 1)
   const currentRole = computed(() => currentHotel.value?.role || null)
   const currentPermissions = computed(() => currentHotel.value?.permissions || [])
-  const fullName = computed(() => user.value ? `${user.value.firstName} ${user.value.lastName}` : '')
+  const fullName = computed(() =>
+    user.value ? `${user.value.firstName} ${user.value.lastName}` : ''
+  )
 
   // Check if user has specific permission
   function hasPermission(permission) {
@@ -68,7 +71,7 @@ export const usePmsAuthStore = defineStore('pmsAuth', () => {
         throw new Error(response.message || 'Login failed')
       }
     } catch (error) {
-      console.error('PMS Login failed:', error)
+      storeLogger.error('PMS Login failed:', error)
       throw error
     }
   }
@@ -102,7 +105,7 @@ export const usePmsAuthStore = defineStore('pmsAuth', () => {
         throw new Error(response.message || 'Hotel selection failed')
       }
     } catch (error) {
-      console.error('Hotel selection failed:', error)
+      storeLogger.error('Hotel selection failed:', error)
       throw error
     }
   }
@@ -124,7 +127,7 @@ export const usePmsAuthStore = defineStore('pmsAuth', () => {
         throw new Error(response.message || 'Hotel switch failed')
       }
     } catch (error) {
-      console.error('Hotel switch failed:', error)
+      storeLogger.error('Hotel switch failed:', error)
       throw error
     }
   }
@@ -148,7 +151,7 @@ export const usePmsAuthStore = defineStore('pmsAuth', () => {
         throw new Error('Failed to fetch user info')
       }
     } catch (error) {
-      console.error('Fetch me failed:', error)
+      storeLogger.error('Fetch me failed:', error)
       logout()
       throw error
     }
@@ -193,7 +196,7 @@ export const usePmsAuthStore = defineStore('pmsAuth', () => {
         throw new Error(response.message || 'Password change failed')
       }
     } catch (error) {
-      console.error('Password change failed:', error)
+      storeLogger.error('Password change failed:', error)
       throw error
     }
   }
@@ -205,7 +208,7 @@ export const usePmsAuthStore = defineStore('pmsAuth', () => {
     try {
       await fetchMe()
       return true
-    } catch (error) {
+    } catch {
       return false
     }
   }

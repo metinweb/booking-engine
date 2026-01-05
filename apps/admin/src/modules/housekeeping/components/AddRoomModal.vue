@@ -8,20 +8,24 @@
     <!-- Mode Tabs -->
     <div class="flex gap-2 mb-6">
       <button
-        @click="mode = 'single'"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        :class="mode === 'single'
-          ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'"
+        :class="
+          mode === 'single'
+            ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+        "
+        @click="mode = 'single'"
       >
         Tekli Ekleme
       </button>
       <button
-        @click="mode = 'bulk'"
         class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        :class="mode === 'bulk'
-          ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'"
+        :class="
+          mode === 'bulk'
+            ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700'
+        "
+        @click="mode = 'bulk'"
       >
         Toplu Ekleme
       </button>
@@ -80,14 +84,13 @@
             v-for="feature in availableFeatures"
             :key="feature"
             class="flex items-center gap-2 px-3 py-1.5 border border-gray-200 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
-            :class="singleRoom.features.includes(feature) ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-300 dark:border-primary-600' : ''"
+            :class="
+              singleRoom.features.includes(feature)
+                ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-300 dark:border-primary-600'
+                : ''
+            "
           >
-            <input
-              type="checkbox"
-              :value="feature"
-              v-model="singleRoom.features"
-              class="hidden"
-            />
+            <input v-model="singleRoom.features" type="checkbox" :value="feature" class="hidden" />
             <span class="text-sm text-gray-700 dark:text-gray-300">{{ feature }}</span>
           </label>
         </div>
@@ -184,7 +187,10 @@
       </div>
 
       <!-- Preview -->
-      <div v-if="previewRooms.length > 0" class="border border-gray-200 dark:border-slate-600 rounded-lg p-4">
+      <div
+        v-if="previewRooms.length > 0"
+        class="border border-gray-200 dark:border-slate-600 rounded-lg p-4"
+      >
         <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Olusturulacak Odalar ({{ previewRooms.length }} adet)
         </h4>
@@ -211,14 +217,13 @@
             v-for="feature in availableFeatures"
             :key="feature"
             class="flex items-center gap-2 px-3 py-1.5 border border-gray-200 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
-            :class="bulkRooms.features.includes(feature) ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-300 dark:border-primary-600' : ''"
+            :class="
+              bulkRooms.features.includes(feature)
+                ? 'bg-primary-50 dark:bg-primary-900/20 border-primary-300 dark:border-primary-600'
+                : ''
+            "
           >
-            <input
-              type="checkbox"
-              :value="feature"
-              v-model="bulkRooms.features"
-              class="hidden"
-            />
+            <input v-model="bulkRooms.features" type="checkbox" :value="feature" class="hidden" />
             <span class="text-sm text-gray-700 dark:text-gray-300">{{ feature }}</span>
           </label>
         </div>
@@ -227,16 +232,16 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="save"
         class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
         :disabled="loading || !isValid"
+        @click="save"
       >
         <span v-if="loading">Kaydediliyor...</span>
         <span v-else>{{ mode === 'bulk' ? `${previewRooms.length} Oda Ekle` : 'Kaydet' }}</span>
@@ -274,7 +279,7 @@ const mode = ref('single')
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const availableFeatures = [
@@ -327,13 +332,9 @@ const previewRooms = computed(() => {
 
 const isValid = computed(() => {
   if (mode.value === 'single') {
-    return singleRoom.value.roomNumber &&
-           singleRoom.value.floor !== '' &&
-           singleRoom.value.roomType
+    return singleRoom.value.roomNumber && singleRoom.value.floor !== '' && singleRoom.value.roomType
   } else {
-    return bulkRooms.value.floor !== '' &&
-           bulkRooms.value.roomType &&
-           previewRooms.value.length > 0
+    return bulkRooms.value.floor !== '' && bulkRooms.value.roomType && previewRooms.value.length > 0
   }
 })
 
@@ -386,9 +387,12 @@ const resetForm = () => {
   mode.value = 'single'
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    resetForm()
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      resetForm()
+    }
   }
-})
+)
 </script>

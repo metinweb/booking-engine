@@ -3,43 +3,53 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('planning.campaigns.title') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.campaigns.description') }}</p>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+          {{ $t('planning.campaigns.title') }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400">
+          {{ $t('planning.campaigns.description') }}
+        </p>
       </div>
       <div class="flex items-center gap-3">
         <!-- Status Filter -->
         <div class="flex items-center gap-2 bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
           <button
-            @click="statusFilter = 'active'"
             class="px-3 py-1.5 text-sm rounded-md transition-colors"
-            :class="statusFilter === 'active'
-              ? 'bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm font-medium'
-              : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'"
+            :class="
+              statusFilter === 'active'
+                ? 'bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm font-medium'
+                : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+            "
+            @click="statusFilter = 'active'"
           >
             {{ $t('planning.campaigns.filterActive') }}
             <span class="ml-1 text-xs">({{ activeCampaignsCount }})</span>
           </button>
           <button
-            @click="statusFilter = 'inactive'"
             class="px-3 py-1.5 text-sm rounded-md transition-colors"
-            :class="statusFilter === 'inactive'
-              ? 'bg-white dark:bg-slate-600 text-gray-600 dark:text-gray-400 shadow-sm font-medium'
-              : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'"
+            :class="
+              statusFilter === 'inactive'
+                ? 'bg-white dark:bg-slate-600 text-gray-600 dark:text-gray-400 shadow-sm font-medium'
+                : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+            "
+            @click="statusFilter = 'inactive'"
           >
             {{ $t('planning.campaigns.filterInactive') }}
             <span class="ml-1 text-xs">({{ inactiveCampaignsCount }})</span>
           </button>
           <button
-            @click="statusFilter = 'all'"
             class="px-3 py-1.5 text-sm rounded-md transition-colors"
-            :class="statusFilter === 'all'
-              ? 'bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm font-medium'
-              : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'"
+            :class="
+              statusFilter === 'all'
+                ? 'bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm font-medium'
+                : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
+            "
+            @click="statusFilter = 'all'"
           >
             {{ $t('common.all') }}
           </button>
         </div>
-        <button @click="openNewCampaignForm" class="btn-primary flex items-center gap-2">
+        <button class="btn-primary flex items-center gap-2" @click="openNewCampaignForm">
           <span class="material-icons text-sm">add</span>
           {{ $t('planning.campaigns.add') }}
         </button>
@@ -65,7 +75,9 @@
               class="w-12 h-12 rounded-lg flex items-center justify-center"
               :class="getCampaignTypeColor(campaign.type)"
             >
-              <span class="material-icons text-white">{{ getCampaignTypeIcon(campaign.type) }}</span>
+              <span class="material-icons text-white">{{
+                getCampaignTypeIcon(campaign.type)
+              }}</span>
             </div>
             <div>
               <div class="font-medium text-gray-800 dark:text-white flex items-center gap-2">
@@ -73,9 +85,12 @@
                 <span
                   class="px-2 py-0.5 text-xs rounded"
                   :class="{
-                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': campaign.status === 'active',
-                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400': campaign.status === 'draft',
-                    'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400': campaign.status === 'inactive'
+                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
+                      campaign.status === 'active',
+                    'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400':
+                      campaign.status === 'draft',
+                    'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400':
+                      campaign.status === 'inactive'
                   }"
                 >
                   {{ $t(`common.status.${campaign.status}`) }}
@@ -87,17 +102,20 @@
                 <span class="font-bold text-green-600 dark:text-green-400">
                   {{ formatDiscount(campaign.discount) }}
                 </span>
-                <span v-if="campaign.conditions?.minNights > 1" class="text-orange-600 dark:text-orange-400">
+                <span
+                  v-if="campaign.conditions?.minNights > 1"
+                  class="text-orange-600 dark:text-orange-400"
+                >
                   {{ campaign.conditions.minNights }}+ {{ $t('planning.campaigns.nightsShort') }}
                 </span>
               </div>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <button @click="editCampaign(campaign)" class="p-2 text-gray-500 hover:text-indigo-600">
+            <button class="p-2 text-gray-500 hover:text-indigo-600" @click="editCampaign(campaign)">
               <span class="material-icons">edit</span>
             </button>
-            <button @click="confirmDelete(campaign)" class="p-2 text-gray-500 hover:text-red-600">
+            <button class="p-2 text-gray-500 hover:text-red-600" @click="confirmDelete(campaign)">
               <span class="material-icons">delete</span>
             </button>
           </div>
@@ -110,55 +128,88 @@
             :key="marketId"
             class="px-1.5 py-0.5 text-[10px] rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400"
           >
-            <span class="material-icons text-[10px] align-middle">public</span> {{ getMarketName(marketId) }}
+            <span class="material-icons text-[10px] align-middle">public</span>
+            {{ getMarketName(marketId) }}
           </span>
           <!-- All Markets badge if no specific markets selected -->
           <span
             v-if="!campaign.applicableMarkets || campaign.applicableMarkets.length === 0"
             class="px-1.5 py-0.5 text-[10px] rounded bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400"
           >
-            <span class="material-icons text-[10px] align-middle">public</span> {{ $t('common.allMarkets') }}
+            <span class="material-icons text-[10px] align-middle">public</span>
+            {{ $t('common.allMarkets') }}
           </span>
           <!-- B2C -->
-          <span v-if="campaign.visibility?.b2c" class="px-1.5 py-0.5 text-[10px] rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          <span
+            v-if="campaign.visibility?.b2c"
+            class="px-1.5 py-0.5 text-[10px] rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+          >
             <span class="material-icons text-[10px] align-middle">person</span> B2C
           </span>
           <!-- B2B -->
-          <span v-if="campaign.visibility?.b2b" class="px-1.5 py-0.5 text-[10px] rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+          <span
+            v-if="campaign.visibility?.b2b"
+            class="px-1.5 py-0.5 text-[10px] rounded bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
+          >
             <span class="material-icons text-[10px] align-middle">business</span> B2B
           </span>
           <!-- Combinable -->
-          <span v-if="campaign.combinable" class="px-1.5 py-0.5 text-[10px] rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-            <span class="material-icons text-[10px] align-middle">link</span> {{ $t('planning.campaigns.combinableShort') }}
+          <span
+            v-if="campaign.combinable"
+            class="px-1.5 py-0.5 text-[10px] rounded bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400"
+          >
+            <span class="material-icons text-[10px] align-middle">link</span>
+            {{ $t('planning.campaigns.combinableShort') }}
           </span>
           <!-- Calculation Type -->
-          <span class="px-1.5 py-0.5 text-[10px] rounded"
-                :class="campaign.calculationType === 'sequential'
-                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'">
-            {{ campaign.calculationType === 'sequential' ? $t('planning.campaigns.calculationTypeSequential') : $t('planning.campaigns.calculationTypeCumulative') }}
+          <span
+            class="px-1.5 py-0.5 text-[10px] rounded"
+            :class="
+              campaign.calculationType === 'sequential'
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+            "
+          >
+            {{
+              campaign.calculationType === 'sequential'
+                ? $t('planning.campaigns.calculationTypeSequential')
+                : $t('planning.campaigns.calculationTypeCumulative')
+            }}
           </span>
           <!-- Calculation Order -->
-          <span v-if="campaign.calculationOrder > 0" class="px-1.5 py-0.5 text-[10px] rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+          <span
+            v-if="campaign.calculationOrder > 0"
+            class="px-1.5 py-0.5 text-[10px] rounded bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+          >
             #{{ campaign.calculationOrder }}
           </span>
           <!-- Application Type -->
-          <span class="px-1.5 py-0.5 text-[10px] rounded"
-                :class="campaign.applicationType === 'checkin'
-                  ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
-                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'">
-            {{ campaign.applicationType === 'checkin' ? $t('planning.campaigns.applicationTypeCheckin') : $t('planning.campaigns.applicationTypeStay') }}
+          <span
+            class="px-1.5 py-0.5 text-[10px] rounded"
+            :class="
+              campaign.applicationType === 'checkin'
+                ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
+                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+            "
+          >
+            {{
+              campaign.applicationType === 'checkin'
+                ? $t('planning.campaigns.applicationTypeCheckin')
+                : $t('planning.campaigns.applicationTypeStay')
+            }}
           </span>
         </div>
         <!-- Date Info -->
         <div class="mt-2 text-xs text-gray-500 dark:text-slate-400 flex gap-4">
           <span class="flex items-center gap-1" :title="$t('planning.campaigns.bookingWindow')">
             <span class="material-icons text-xs">event_available</span>
-            {{ formatDate(campaign.bookingWindow?.startDate) }} - {{ formatDate(campaign.bookingWindow?.endDate) }}
+            {{ formatDate(campaign.bookingWindow?.startDate) }} -
+            {{ formatDate(campaign.bookingWindow?.endDate) }}
           </span>
           <span class="flex items-center gap-1" :title="$t('planning.campaigns.stayWindow')">
             <span class="material-icons text-xs">date_range</span>
-            {{ formatDate(campaign.stayWindow?.startDate) }} - {{ formatDate(campaign.stayWindow?.endDate) }}
+            {{ formatDate(campaign.stayWindow?.startDate) }} -
+            {{ formatDate(campaign.stayWindow?.endDate) }}
           </span>
         </div>
       </div>
@@ -168,7 +219,11 @@
     <div v-else class="text-center py-12 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
       <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">campaign</span>
       <p class="mt-3 text-gray-500 dark:text-slate-400">
-        {{ campaigns.length > 0 ? $t('planning.campaigns.noMatchingCampaigns') : $t('planning.campaigns.empty') }}
+        {{
+          campaigns.length > 0
+            ? $t('planning.campaigns.noMatchingCampaigns')
+            : $t('planning.campaigns.empty')
+        }}
       </p>
     </div>
 
@@ -193,8 +248,10 @@
     <Modal v-model="showDeleteModal" :title="$t('common.delete')" size="sm">
       <p class="text-gray-600 dark:text-slate-400">{{ $t('common.confirm') }}?</p>
       <template #footer>
-        <button @click="showDeleteModal = false" class="btn-secondary">{{ $t('common.no') }}</button>
-        <button @click="executeDelete" class="btn-danger" :disabled="deleting">
+        <button class="btn-secondary" @click="showDeleteModal = false">
+          {{ $t('common.no') }}
+        </button>
+        <button class="btn-danger" :disabled="deleting" @click="executeDelete">
           {{ deleting ? $t('common.loading') : $t('common.yes') }}
         </button>
       </template>
@@ -203,7 +260,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
 import Modal from '@/components/common/Modal.vue'
@@ -230,7 +287,7 @@ const deleting = ref(false)
 const statusFilter = ref('active')
 
 // Check if booking window has expired
-const isBookingWindowExpired = (campaign) => {
+const isBookingWindowExpired = campaign => {
   if (!campaign.bookingWindow?.endDate) return false
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -240,12 +297,12 @@ const isBookingWindowExpired = (campaign) => {
 }
 
 // Check if campaign is currently active (status active + booking window not expired)
-const isCampaignActive = (campaign) => {
+const isCampaignActive = campaign => {
   return campaign.status === 'active' && !isBookingWindowExpired(campaign)
 }
 
 // Check if campaign is past (status active but booking window expired)
-const isCampaignPast = (campaign) => {
+const isCampaignPast = campaign => {
   return campaign.status === 'active' && isBookingWindowExpired(campaign)
 }
 
@@ -270,16 +327,16 @@ const inactiveCampaignsCount = computed(() => {
 })
 
 // Get market name by ID
-const getMarketName = (marketId) => {
+const getMarketName = marketId => {
   const market = markets.value.find(m => m._id === marketId)
   return market?.name?.[locale.value] || market?.name?.tr || market?.name?.en || market?.code || ''
 }
 
-const getCampaignName = (campaign) => {
+const getCampaignName = campaign => {
   return campaign.name?.[locale.value] || campaign.name?.tr || campaign.name?.en || campaign.code
 }
 
-const getCampaignTypeIcon = (type) => {
+const getCampaignTypeIcon = type => {
   const icons = {
     early_bird: 'schedule',
     last_minute: 'flash_on',
@@ -294,7 +351,7 @@ const getCampaignTypeIcon = (type) => {
   return icons[type] || 'campaign'
 }
 
-const getCampaignTypeColor = (type) => {
+const getCampaignTypeColor = type => {
   const colors = {
     early_bird: 'bg-blue-500',
     last_minute: 'bg-red-500',
@@ -307,15 +364,16 @@ const getCampaignTypeColor = (type) => {
   return colors[type] || 'bg-gray-500'
 }
 
-const formatDiscount = (discount) => {
+const formatDiscount = discount => {
   if (!discount) return ''
   if (discount.type === 'percentage') return `-${discount.value}%`
   if (discount.type === 'fixed') return `-${discount.value}`
-  if (discount.type === 'free_nights') return `${discount.freeNights?.stayNights}=${discount.freeNights?.freeNights} Free`
+  if (discount.type === 'free_nights')
+    return `${discount.freeNights?.stayNights}=${discount.freeNights?.freeNights} Free`
   return ''
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString()
 }
@@ -327,7 +385,7 @@ const fetchCampaigns = async () => {
     if (response.success) {
       campaigns.value = response.data
     }
-  } catch (error) {
+  } catch {
     toast.error(t('common.fetchError'))
   } finally {
     loading.value = false
@@ -355,7 +413,7 @@ const openNewCampaignForm = () => {
   showCampaignForm.value = true
 }
 
-const editCampaign = (campaign) => {
+const editCampaign = campaign => {
   editingCampaign.value = campaign
   showCampaignForm.value = true
 }
@@ -366,7 +424,7 @@ const handleCampaignSaved = () => {
   fetchCampaigns()
 }
 
-const confirmDelete = (campaign) => {
+const confirmDelete = campaign => {
   deleteTarget.value = campaign
   showDeleteModal.value = true
 }
@@ -385,10 +443,14 @@ const executeDelete = async () => {
   }
 }
 
-watch(() => props.hotel?._id, (newId) => {
-  if (newId) {
-    fetchCampaigns()
-    fetchRelatedData()
-  }
-}, { immediate: true })
+watch(
+  () => props.hotel?._id,
+  newId => {
+    if (newId) {
+      fetchCampaigns()
+      fetchRelatedData()
+    }
+  },
+  { immediate: true }
+)
 </script>

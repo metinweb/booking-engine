@@ -161,7 +161,10 @@ export const updateInvoicingSettings = asyncHandler(async (req, res) => {
   if (invoicing) {
     // companyInfo nested object olarak güncelle
     if (invoicing.companyInfo) {
-      settings.invoicing.companyInfo = { ...settings.invoicing.companyInfo, ...invoicing.companyInfo }
+      settings.invoicing.companyInfo = {
+        ...settings.invoicing.companyInfo,
+        ...invoicing.companyInfo
+      }
     }
     // Diğer alanları güncelle
     const { companyInfo, ...rest } = invoicing
@@ -477,7 +480,10 @@ export const updateAllSettings = asyncHandler(async (req, res) => {
   }
   if (updates.invoicing) {
     if (updates.invoicing.companyInfo) {
-      settings.invoicing.companyInfo = { ...settings.invoicing.companyInfo, ...updates.invoicing.companyInfo }
+      settings.invoicing.companyInfo = {
+        ...settings.invoicing.companyInfo,
+        ...updates.invoicing.companyInfo
+      }
     }
     const { companyInfo, ...rest } = updates.invoicing
     Object.assign(settings.invoicing, rest)

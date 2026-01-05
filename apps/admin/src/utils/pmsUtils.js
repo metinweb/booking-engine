@@ -47,7 +47,7 @@ export const formatNumber = (value, decimals = 0) => {
  * @param {number} value - Yüzde değeri (0-100)
  * @returns {string} Formatlanmış yüzde
  */
-export const formatPercent = (value) => {
+export const formatPercent = value => {
   const num = Number(value) || 0
   return `%${num.toFixed(1)}`
 }
@@ -82,7 +82,7 @@ export const formatDate = (date, format = 'short') => {
  * @param {Date|string} date - Tarih/saat
  * @returns {string} Formatlanmış saat (HH:mm)
  */
-export const formatTime = (date) => {
+export const formatTime = date => {
   if (!date) return '-'
 
   const d = new Date(date)
@@ -99,7 +99,7 @@ export const formatTime = (date) => {
  * @param {Date|string} date - Tarih/saat
  * @returns {string} Formatlanmış tarih ve saat
  */
-export const formatDateTime = (date) => {
+export const formatDateTime = date => {
   if (!date) return '-'
 
   const d = new Date(date)
@@ -119,7 +119,7 @@ export const formatDateTime = (date) => {
  * @param {Date|string} date - Tarih
  * @returns {string} Relative time string
  */
-export const formatRelativeTime = (date) => {
+export const formatRelativeTime = date => {
   if (!date) return '-'
 
   const d = new Date(date)
@@ -162,7 +162,7 @@ export const calculateNights = (checkIn, checkOut) => {
  * @param {Date|string} date - Tarih
  * @returns {string} YYYY-MM-DD formatında tarih
  */
-export const toDateInputValue = (date) => {
+export const toDateInputValue = date => {
   if (!date) return ''
   const d = new Date(date)
   if (isNaN(d.getTime())) return ''
@@ -692,7 +692,7 @@ export const TRANSACTION_TYPE_INFO = {
  * @param {Object} guest - Misafir objesi
  * @returns {string} Formatlanmış isim
  */
-export const formatGuestName = (guest) => {
+export const formatGuestName = guest => {
   if (!guest) return 'Misafir'
   if (typeof guest === 'string') return guest
 
@@ -712,7 +712,7 @@ export const formatGuestName = (guest) => {
  * @param {Object} room - Oda objesi
  * @returns {string} Formatlanmış oda bilgisi
  */
-export const formatRoomInfo = (room) => {
+export const formatRoomInfo = room => {
   if (!room) return '-'
 
   const parts = [`Oda ${room.roomNumber}`]
@@ -728,7 +728,7 @@ export const formatRoomInfo = (room) => {
  * @param {number} balance - Bakiye tutarı
  * @returns {Object} Durum bilgisi
  */
-export const getBalanceStatus = (balance) => {
+export const getBalanceStatus = balance => {
   const amount = Number(balance) || 0
 
   if (amount > 0) {
@@ -760,7 +760,7 @@ export const getBalanceStatus = (balance) => {
  * @param {string} tcNo - TC Kimlik numarası
  * @returns {boolean} Geçerli mi?
  */
-export const validateTCKimlik = (tcNo) => {
+export const validateTCKimlik = tcNo => {
   if (!tcNo || typeof tcNo !== 'string') return false
 
   // 11 haneli olmalı
@@ -777,7 +777,7 @@ export const validateTCKimlik = (tcNo) => {
   const sum1 = digits[0] + digits[2] + digits[4] + digits[6] + digits[8]
   const sum2 = digits[1] + digits[3] + digits[5] + digits[7]
 
-  const check1 = ((sum1 * 7) - sum2) % 10
+  const check1 = (sum1 * 7 - sum2) % 10
   const check2 = (sum1 + sum2 + digits[9]) % 10
 
   return digits[9] === check1 && digits[10] === check2
@@ -788,7 +788,7 @@ export const validateTCKimlik = (tcNo) => {
  * @param {string} phone - Telefon numarası
  * @returns {string} Formatlanmış telefon
  */
-export const formatPhone = (phone) => {
+export const formatPhone = phone => {
   if (!phone) return '-'
 
   // Sadece rakamları al

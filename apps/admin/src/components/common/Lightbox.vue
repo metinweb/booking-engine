@@ -15,9 +15,9 @@
       >
         <!-- Close Button -->
         <button
-          @click="close"
           class="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-lg transition-colors z-10"
           :title="$t('common.cancel')"
+          @click="close"
         >
           <span class="material-icons">close</span>
         </button>
@@ -27,14 +27,28 @@
           <!-- Loading -->
           <div v-if="loading && !error" class="text-white text-center absolute">
             <svg class="animate-spin h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             <p>Yükleniyor...</p>
           </div>
 
           <!-- Error -->
-          <div v-if="error" class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-8 max-w-md text-center">
+          <div
+            v-if="error"
+            class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-8 max-w-md text-center"
+          >
             <span class="material-icons text-6xl text-red-600 dark:text-red-400 mb-4">error</span>
             <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Yüklenemedi</h3>
             <p class="text-sm text-gray-600 dark:text-slate-400 mb-2">{{ error }}</p>
@@ -68,11 +82,16 @@
             :src="blobUrl"
             class="w-full h-full rounded-lg shadow-2xl bg-white"
             frameborder="0"
-          />
+          ></iframe>
 
           <!-- Document (DOC, DOCX) -->
-          <div v-else class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-8 max-w-md text-center">
-            <span class="material-icons text-6xl text-blue-600 dark:text-blue-400 mb-4">description</span>
+          <div
+            v-else
+            class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl p-8 max-w-md text-center"
+          >
+            <span class="material-icons text-6xl text-blue-600 dark:text-blue-400 mb-4"
+              >description</span
+            >
             <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">{{ title }}</h3>
             <p class="text-sm text-gray-600 dark:text-slate-400 mb-6">
               Bu dosya türü tarayıcıda önizlenemiyor.
@@ -89,7 +108,10 @@
         </div>
 
         <!-- Document Info -->
-        <div v-if="title" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-lg backdrop-blur-sm">
+        <div
+          v-if="title"
+          class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-lg backdrop-blur-sm"
+        >
           <p class="text-sm font-medium">{{ title }}</p>
         </div>
       </div>
@@ -162,7 +184,7 @@ const handleLoad = () => {
   error.value = null
 }
 
-const handleError = (e) => {
+const handleError = e => {
   loading.value = false
   error.value = 'Resim yüklenemedi. Dosya bulunamadı veya erişim engellendi.'
   console.error('Image load error:', e)
@@ -181,30 +203,33 @@ const close = () => {
 }
 
 // Close on ESC key and reset states
-watch(() => props.modelValue, (newValue) => {
-  if (newValue) {
-    // Reset states when opening
-    loading.value = true
-    error.value = null
+watch(
+  () => props.modelValue,
+  newValue => {
+    if (newValue) {
+      // Reset states when opening
+      loading.value = true
+      error.value = null
 
-    // Fetch document with authentication
-    fetchDocument()
+      // Fetch document with authentication
+      fetchDocument()
 
-    const handleEscape = (e) => {
-      if (e.key === 'Escape') {
-        close()
+      const handleEscape = e => {
+        if (e.key === 'Escape') {
+          close()
+        }
       }
-    }
-    document.addEventListener('keydown', handleEscape)
-    // Prevent body scroll
-    document.body.style.overflow = 'hidden'
+      document.addEventListener('keydown', handleEscape)
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden'
 
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
+      return () => {
+        document.removeEventListener('keydown', handleEscape)
+        document.body.style.overflow = ''
+      }
+    } else {
       document.body.style.overflow = ''
     }
-  } else {
-    document.body.style.overflow = ''
   }
-})
+)
 </script>

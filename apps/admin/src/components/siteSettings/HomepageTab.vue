@@ -14,19 +14,27 @@
           v-for="service in services"
           :key="service.key"
           class="relative flex flex-col items-center p-4 rounded-lg cursor-pointer transition-all border-2"
-          :class="form.activeServices[service.key]
-            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-            : 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50 hover:border-gray-300'"
+          :class="
+            form.activeServices[service.key]
+              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+              : 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50 hover:border-gray-300'
+          "
         >
-          <input
-            type="checkbox"
-            v-model="form.activeServices[service.key]"
-            class="sr-only"
-          />
-          <span class="material-icons text-3xl mb-2" :class="form.activeServices[service.key] ? 'text-purple-600' : 'text-gray-400'">
+          <input v-model="form.activeServices[service.key]" type="checkbox" class="sr-only" />
+          <span
+            class="material-icons text-3xl mb-2"
+            :class="form.activeServices[service.key] ? 'text-purple-600' : 'text-gray-400'"
+          >
             {{ service.icon }}
           </span>
-          <span class="text-sm font-medium" :class="form.activeServices[service.key] ? 'text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-slate-400'">
+          <span
+            class="text-sm font-medium"
+            :class="
+              form.activeServices[service.key]
+                ? 'text-purple-700 dark:text-purple-300'
+                : 'text-gray-600 dark:text-slate-400'
+            "
+          >
             {{ service.label }}
           </span>
           <span
@@ -55,11 +63,7 @@
       <!-- Slider Grid -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <!-- Existing Slides -->
-        <div
-          v-for="(slide, index) in form.slider"
-          :key="slide._id || index"
-          class="relative group"
-        >
+        <div v-for="(slide, index) in form.slider" :key="slide._id || index" class="relative group">
           <div class="aspect-video bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden">
             <img
               v-if="slide.image"
@@ -73,11 +77,13 @@
           </div>
 
           <!-- Overlay Actions -->
-          <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+          <div
+            class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2"
+          >
             <button
-              @click="confirmDeleteSlider(slide)"
               class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               :title="$t('common.delete')"
+              @click="confirmDeleteSlider(slide)"
             >
               <span class="material-icons text-sm">delete</span>
             </button>
@@ -95,7 +101,9 @@
 
           <!-- Order Number -->
           <div class="absolute top-2 right-2">
-            <span class="w-6 h-6 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-xs font-bold text-gray-700 dark:text-slate-300 shadow">
+            <span
+              class="w-6 h-6 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center text-xs font-bold text-gray-700 dark:text-slate-300 shadow"
+            >
               {{ index + 1 }}
             </span>
           </div>
@@ -110,11 +118,15 @@
             type="file"
             accept="image/*"
             class="hidden"
-            @change="handleSliderUpload"
             :disabled="uploading"
+            @change="handleSliderUpload"
           />
-          <span v-if="uploading" class="animate-spin material-icons text-3xl text-purple-600 mb-2">refresh</span>
-          <span v-else class="material-icons text-3xl text-gray-400 dark:text-slate-500 mb-2">add_photo_alternate</span>
+          <span v-if="uploading" class="animate-spin material-icons text-3xl text-purple-600 mb-2"
+            >refresh</span
+          >
+          <span v-else class="material-icons text-3xl text-gray-400 dark:text-slate-500 mb-2"
+            >add_photo_alternate</span
+          >
           <span class="text-sm text-gray-500 dark:text-slate-400">
             {{ uploading ? $t('common.loading') : $t('siteSettings.homepage.addSlider') }}
           </span>
@@ -128,15 +140,22 @@
 
     <!-- Save Button for Active Services -->
     <div class="flex justify-end">
-      <button
-        @click="handleSave"
-        class="btn-primary"
-        :disabled="saving"
-      >
+      <button class="btn-primary" :disabled="saving" @click="handleSave">
         <span v-if="saving" class="flex items-center">
           <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           {{ $t('common.loading') }}
         </span>
@@ -145,20 +164,16 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <Modal
-      v-model="showDeleteModal"
-      :title="$t('siteSettings.homepage.deleteSlider')"
-      size="sm"
-    >
+    <Modal v-model="showDeleteModal" :title="$t('siteSettings.homepage.deleteSlider')" size="sm">
       <p class="text-gray-600 dark:text-slate-400">
         {{ $t('siteSettings.homepage.deleteSliderConfirm') }}
       </p>
 
       <template #footer>
-        <button @click="showDeleteModal = false" class="btn-secondary">
+        <button class="btn-secondary" @click="showDeleteModal = false">
           {{ $t('common.no') }}
         </button>
-        <button @click="handleDeleteSlider" class="btn-danger" :disabled="saving">
+        <button class="btn-danger" :disabled="saving" @click="handleDeleteSlider">
           {{ $t('common.yes') }}
         </button>
       </template>
@@ -205,23 +220,27 @@ const form = ref({
   }
 })
 
-watch(() => props.settings, (newSettings) => {
-  if (newSettings) {
-    form.value = {
-      slider: newSettings.slider || [],
-      activeServices: newSettings.activeServices || {
-        hotel: true,
-        tour: true,
-        flight: false,
-        transfer: true
+watch(
+  () => props.settings,
+  newSettings => {
+    if (newSettings) {
+      form.value = {
+        slider: newSettings.slider || [],
+        activeServices: newSettings.activeServices || {
+          hotel: true,
+          tour: true,
+          flight: false,
+          transfer: true
+        }
       }
     }
-  }
-}, { immediate: true, deep: true })
+  },
+  { immediate: true, deep: true }
+)
 
 // getImageUrl imported from @/utils/imageUrl
 
-const handleSliderUpload = async (event) => {
+const handleSliderUpload = async event => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -247,7 +266,7 @@ const handleSliderUpload = async (event) => {
   }
 }
 
-const confirmDeleteSlider = (slider) => {
+const confirmDeleteSlider = slider => {
   sliderToDelete.value = slider
   showDeleteModal.value = true
 }

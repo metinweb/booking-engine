@@ -12,7 +12,7 @@ export function useDebouncedRef(initialValue = '', delay = 300) {
   const isPending = ref(false)
   let timeout = null
 
-  watch(value, (newValue) => {
+  watch(value, newValue => {
     isPending.value = true
 
     if (timeout) {

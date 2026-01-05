@@ -1,5 +1,5 @@
 <template>
-  <div class="tag-input-container" ref="containerRef">
+  <div ref="containerRef" class="tag-input-container">
     <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
       {{ label }}
     </label>
@@ -20,8 +20,8 @@
           {{ getTagLabel(tag) }}
           <button
             type="button"
-            @click.stop="removeTag(tag)"
             class="hover:bg-white/20 rounded-full p-0.5 transition-colors"
+            @click.stop="removeTag(tag)"
           >
             <span class="material-icons text-xs">close</span>
           </button>
@@ -33,12 +33,12 @@
           v-model="searchQuery"
           type="text"
           :placeholder="selectedTags.length === 0 ? placeholder : ''"
+          class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-0"
           @input="handleSearch"
           @keydown.enter.prevent="handleEnter"
           @keydown.backspace="handleBackspace"
           @focus="showDropdown = true"
           @blur="handleBlur"
-          class="flex-1 min-w-[120px] border-0 bg-transparent p-1 text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-0"
         />
 
         <!-- Loading indicator -->
@@ -46,7 +46,6 @@
           <span class="material-icons text-sm animate-spin">sync</span>
         </span>
       </div>
-
     </div>
 
     <!-- Dropdown (Teleport to body) -->
@@ -70,8 +69,8 @@
             v-for="tag in filteredTags"
             :key="tag._id"
             type="button"
-            @mousedown.prevent="selectTag(tag)"
             class="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+            @mousedown.prevent="selectTag(tag)"
           >
             <span
               class="w-3 h-3 rounded-full"
@@ -84,8 +83,8 @@
           <button
             v-if="searchQuery.length >= 2 && canCreateNew"
             type="button"
-            @mousedown.prevent="createNewTag"
             class="w-full px-3 py-2 text-left text-sm hover:bg-purple-50 dark:hover:bg-purple-900/20 text-purple-600 dark:text-purple-400 flex items-center gap-2 border-t border-gray-100 dark:border-slate-700"
+            @mousedown.prevent="createNewTag"
           >
             <span class="material-icons text-sm">add</span>
             {{ $t('tags.createNew', { name: searchQuery }) }}
@@ -134,7 +133,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const toast = useToast()
 
 const inputRef = ref(null)
@@ -222,7 +221,7 @@ const canCreateNew = computed(() => {
 })
 
 // Get display label for a tag
-const getTagLabel = (tag) => {
+const getTagLabel = tag => {
   if (!tag || !tag.name) return ''
   return tag.name[props.lang] || tag.name.tr || tag.name.en || Object.values(tag.name)[0] || ''
 }
@@ -263,7 +262,7 @@ const handleBlur = () => {
 }
 
 // Select a tag
-const selectTag = (tag) => {
+const selectTag = tag => {
   if (!props.modelValue.includes(tag._id)) {
     emit('update:modelValue', [...props.modelValue, tag._id])
   }
@@ -272,7 +271,7 @@ const selectTag = (tag) => {
 }
 
 // Remove a tag
-const removeTag = (tag) => {
+const removeTag = tag => {
   const newValue = props.modelValue.filter(id => id !== tag._id)
   emit('update:modelValue', newValue)
 }
@@ -320,7 +319,7 @@ const loadTags = async () => {
 }
 
 // Update dropdown position when it opens
-watch(showDropdown, (isOpen) => {
+watch(showDropdown, isOpen => {
   if (isOpen) {
     updateDropdownPosition()
   }

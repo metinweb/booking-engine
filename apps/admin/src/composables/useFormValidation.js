@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 /**
@@ -9,7 +9,7 @@ import { useI18n } from 'vue-i18n'
  * const { errors, validate, validateField, clearErrors, hasErrors } = useFormValidation(rules)
  */
 export function useFormValidation(validationRules = {}) {
-  const { t } = useI18n()
+  const { t: translate } = useI18n()
 
   // All validation errors: { fieldName: 'error message' }
   const errors = ref({})
@@ -36,12 +36,15 @@ export function useFormValidation(validationRules = {}) {
     for (const rule of rules) {
       // Required check
       if (rule.required) {
-        const isEmpty = value === undefined || value === null || value === '' ||
+        const isEmpty =
+          value === undefined ||
+          value === null ||
+          value === '' ||
           (Array.isArray(value) && value.length === 0) ||
           (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
 
         if (isEmpty) {
-          error = rule.message || t('validation.required', { field: fieldName })
+          error = rule.message || translate('validation.required', { field: fieldName })
           break
         }
       }
@@ -51,13 +54,13 @@ export function useFormValidation(validationRules = {}) {
 
       // Min length
       if (rule.minLength && value && value.length < rule.minLength) {
-        error = rule.message || t('validation.minLength', { field: fieldName, min: rule.minLength })
+        error = rule.message || translate('validation.minLength', { field: fieldName, min: rule.minLength })
         break
       }
 
       // Max length
       if (rule.maxLength && value && value.length > rule.maxLength) {
-        error = rule.message || t('validation.maxLength', { field: fieldName, max: rule.maxLength })
+        error = rule.message || translate('validation.maxLength', { field: fieldName, max: rule.maxLength })
         break
       }
 
@@ -65,7 +68,7 @@ export function useFormValidation(validationRules = {}) {
       if (rule.email && value) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         if (!emailRegex.test(value)) {
-          error = rule.message || t('validation.email')
+          error = rule.message || translate('validation.email')
           break
         }
       }
@@ -74,7 +77,7 @@ export function useFormValidation(validationRules = {}) {
       if (rule.phone && value) {
         const phoneRegex = /^[+]?[\d\s()-]{7,20}$/
         if (!phoneRegex.test(value)) {
-          error = rule.message || t('validation.phone')
+          error = rule.message || translate('validation.phone')
           break
         }
       }
@@ -84,7 +87,7 @@ export function useFormValidation(validationRules = {}) {
         try {
           new URL(value)
         } catch {
-          error = rule.message || t('validation.url')
+          error = rule.message || translate('validation.url')
           break
         }
       }
@@ -92,7 +95,7 @@ export function useFormValidation(validationRules = {}) {
       // Min value (for numbers)
       if (rule.min !== undefined && value !== undefined && value !== '') {
         if (Number(value) < rule.min) {
-          error = rule.message || t('validation.min', { field: fieldName, min: rule.min })
+          error = rule.message || translate('validation.min', { field: fieldName, min: rule.min })
           break
         }
       }
@@ -100,7 +103,7 @@ export function useFormValidation(validationRules = {}) {
       // Max value (for numbers)
       if (rule.max !== undefined && value !== undefined && value !== '') {
         if (Number(value) > rule.max) {
-          error = rule.message || t('validation.max', { field: fieldName, max: rule.max })
+          error = rule.message || translate('validation.max', { field: fieldName, max: rule.max })
           break
         }
       }
@@ -108,7 +111,7 @@ export function useFormValidation(validationRules = {}) {
       // Pattern (regex)
       if (rule.pattern && value) {
         if (!rule.pattern.test(value)) {
-          error = rule.message || t('validation.pattern')
+          error = rule.message || translate('validation.pattern')
           break
         }
       }
@@ -117,7 +120,7 @@ export function useFormValidation(validationRules = {}) {
       if (rule.validator && typeof rule.validator === 'function') {
         const result = rule.validator(value, formData)
         if (result !== true) {
-          error = result || rule.message || t('validation.invalid')
+          error = result || rule.message || translate('validation.invalid')
           break
         }
       }
@@ -138,7 +141,7 @@ export function useFormValidation(validationRules = {}) {
    * @param {object} formData - The form data object
    * @returns {boolean} - True if valid
    */
-  const validate = (formData) => {
+  const validate = formData => {
     errors.value = {}
 
     for (const fieldName of Object.keys(validationRules)) {
@@ -155,7 +158,7 @@ export function useFormValidation(validationRules = {}) {
    * @param {object} formData - The form data object
    * @returns {boolean} - True if valid
    */
-  const validateTouched = (formData) => {
+  const validateTouched = formData => {
     for (const fieldName of Object.keys(touched.value)) {
       if (touched.value[fieldName]) {
         const value = getNestedValue(formData, fieldName)
@@ -178,7 +181,7 @@ export function useFormValidation(validationRules = {}) {
   /**
    * Mark field as touched
    */
-  const touchField = (fieldName) => {
+  const touchField = fieldName => {
     touched.value[fieldName] = true
   }
 
@@ -193,14 +196,14 @@ export function useFormValidation(validationRules = {}) {
   /**
    * Clear specific field error
    */
-  const clearFieldError = (fieldName) => {
+  const clearFieldError = fieldName => {
     delete errors.value[fieldName]
   }
 
   /**
    * Set errors from external source (e.g., server validation)
    */
-  const setErrors = (newErrors) => {
+  const setErrors = newErrors => {
     errors.value = { ...errors.value, ...newErrors }
   }
 
@@ -209,7 +212,7 @@ export function useFormValidation(validationRules = {}) {
    * @param {Array<string>} fieldNames - Fields that belong to this tab
    * @returns {object} - { count: number, fields: string[] }
    */
-  const getTabErrors = (fieldNames) => {
+  const getTabErrors = fieldNames => {
     const tabErrors = fieldNames.filter(field => errors.value[field])
     return {
       count: tabErrors.length,
@@ -233,14 +236,14 @@ export function useFormValidation(validationRules = {}) {
   /**
    * Check if a specific field has error
    */
-  const hasFieldError = (fieldName) => {
+  const hasFieldError = fieldName => {
     return !!errors.value[fieldName]
   }
 
   /**
    * Get error message for a specific field
    */
-  const getFieldError = (fieldName) => {
+  const getFieldError = fieldName => {
     return errors.value[fieldName] || ''
   }
 
@@ -266,10 +269,10 @@ export function useFormValidation(validationRules = {}) {
  * Create validation rules helper
  */
 export const createRules = {
-  required: (message) => ({ required: true, message }),
-  email: (message) => ({ email: true, message }),
-  phone: (message) => ({ phone: true, message }),
-  url: (message) => ({ url: true, message }),
+  required: message => ({ required: true, message }),
+  email: message => ({ email: true, message }),
+  phone: message => ({ phone: true, message }),
+  url: message => ({ url: true, message }),
   minLength: (min, message) => ({ minLength: min, message }),
   maxLength: (max, message) => ({ maxLength: max, message }),
   min: (min, message) => ({ min, message }),

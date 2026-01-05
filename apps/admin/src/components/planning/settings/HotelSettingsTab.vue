@@ -9,15 +9,22 @@
     <template v-else>
       <!-- Save Button Top -->
       <div class="flex justify-end">
-        <button
-          @click="saveSettings"
-          class="btn-primary"
-          :disabled="saving"
-        >
+        <button class="btn-primary" :disabled="saving" @click="saveSettings">
           <span v-if="saving" class="flex items-center">
             <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             {{ $t('common.saving') }}
           </span>
@@ -29,63 +36,95 @@
       </div>
 
       <!-- Visibility Settings -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6"
+      >
+        <h3
+          class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2"
+        >
           <span class="material-icons text-purple-500">visibility</span>
           {{ $t('planning.settings.visibility') }}
         </h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('planning.settings.visibilityDesc') }}</p>
+        <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+          {{ $t('planning.settings.visibilityDesc') }}
+        </p>
 
         <div class="flex flex-wrap gap-6">
           <!-- B2C Visibility -->
           <label class="flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="form.visibility.b2c"
+              type="checkbox"
               class="w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
             />
             <span class="ml-3 text-sm text-gray-700 dark:text-slate-300">
               <span class="font-medium">{{ $t('hotels.basic.b2cVisible') }}</span>
-              <span class="block text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.settings.b2cVisibleDesc') }}</span>
+              <span class="block text-xs text-gray-500 dark:text-slate-400">{{
+                $t('planning.settings.b2cVisibleDesc')
+              }}</span>
             </span>
           </label>
 
           <!-- B2B Visibility -->
           <label class="flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="form.visibility.b2b"
+              type="checkbox"
               class="w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 dark:focus:ring-purple-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-slate-700 dark:border-slate-600"
             />
             <span class="ml-3 text-sm text-gray-700 dark:text-slate-300">
               <span class="font-medium">{{ $t('hotels.basic.b2bVisible') }}</span>
-              <span class="block text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.settings.b2bVisibleDesc') }}</span>
+              <span class="block text-xs text-gray-500 dark:text-slate-400">{{
+                $t('planning.settings.b2bVisibleDesc')
+              }}</span>
             </span>
           </label>
         </div>
       </div>
 
       <!-- Child Age Settings -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6"
+      >
+        <h3
+          class="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center gap-2"
+        >
           <span class="material-icons text-blue-500">child_care</span>
           {{ $t('hotels.policies.childAgeSettings') }}
         </h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.policies.childAgeSettingsDesc') }}</p>
+        <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+          {{ $t('hotels.policies.childAgeSettingsDesc') }}
+        </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <!-- Max Baby Age -->
           <div>
             <label class="form-label">{{ $t('hotels.policies.maxBabyAge') }}</label>
-            <input v-model.number="form.policies.maxBabyAge" type="number" min="0" max="5" class="form-input" />
-            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ $t('hotels.policies.maxBabyAgeHelp') }}</p>
+            <input
+              v-model.number="form.policies.maxBabyAge"
+              type="number"
+              min="0"
+              max="5"
+              class="form-input"
+            />
+            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+              {{ $t('hotels.policies.maxBabyAgeHelp') }}
+            </p>
           </div>
 
           <!-- Max Child Age -->
           <div>
             <label class="form-label">{{ $t('hotels.policies.maxChildAge') }}</label>
-            <input v-model.number="form.policies.maxChildAge" type="number" min="0" max="18" class="form-input" />
-            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ $t('hotels.policies.maxChildAgeHelp') }}</p>
+            <input
+              v-model.number="form.policies.maxChildAge"
+              type="number"
+              min="0"
+              max="18"
+              class="form-input"
+            />
+            <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+              {{ $t('hotels.policies.maxChildAgeHelp') }}
+            </p>
           </div>
         </div>
 
@@ -104,8 +143,8 @@
             <button
               v-if="form.childAgeGroups.length < 3"
               type="button"
-              @click="addChildAgeGroup"
               class="px-3 py-1.5 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors flex items-center gap-1"
+              @click="addChildAgeGroup"
             >
               <span class="material-icons text-sm">add</span>
               {{ $t('planning.settings.addAgeGroup') }}
@@ -122,11 +161,13 @@
               <div class="w-32 flex-shrink-0">
                 <span
                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium"
-                  :class="ageGroup.code === 'infant'
-                    ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
-                    : ageGroup.code === 'first'
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'"
+                  :class="
+                    ageGroup.code === 'infant'
+                      ? 'bg-pink-100 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300'
+                      : ageGroup.code === 'first'
+                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                  "
                 >
                   <span class="material-icons text-sm">
                     {{ ageGroup.code === 'infant' ? 'baby_changing_station' : 'child_care' }}
@@ -164,7 +205,9 @@
                   <span class="text-[10px] text-gray-400 block text-center">max</span>
                 </div>
 
-                <span class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.settings.years') }}</span>
+                <span class="text-sm text-gray-500 dark:text-slate-400">{{
+                  $t('planning.settings.years')
+                }}</span>
               </div>
 
               <div class="flex-1"></div>
@@ -173,9 +216,9 @@
               <button
                 v-if="form.childAgeGroups.length > 1"
                 type="button"
-                @click="removeChildAgeGroup(index)"
                 class="p-1.5 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
                 :title="$t('common.delete')"
+                @click="removeChildAgeGroup(index)"
               >
                 <span class="material-icons text-sm">delete</span>
               </button>
@@ -191,15 +234,22 @@
 
       <!-- Save Button Bottom -->
       <div class="flex justify-end">
-        <button
-          @click="saveSettings"
-          class="btn-primary"
-          :disabled="saving"
-        >
+        <button class="btn-primary" :disabled="saving" @click="saveSettings">
           <span v-if="saving" class="flex items-center">
             <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             {{ $t('common.saving') }}
           </span>
@@ -241,7 +291,7 @@ const AGE_GROUP_NAMES = {
   second: { tr: '2. Tip Çocuk', en: 'Child Type 2' }
 }
 
-const getAgeGroupName = (code) => {
+const getAgeGroupName = code => {
   return AGE_GROUP_NAMES[code]?.tr || code
 }
 
@@ -264,29 +314,34 @@ const form = ref({
 })
 
 // Watch for hotel changes
-watch(() => props.hotel, (newHotel) => {
-  if (newHotel) {
-    form.value = {
-      visibility: {
-        b2c: newHotel.visibility?.b2c ?? true,
-        b2b: newHotel.visibility?.b2b ?? true
-      },
-      policies: {
-        maxBabyAge: newHotel.policies?.maxBabyAge ?? 2,
-        maxChildAge: newHotel.policies?.maxChildAge ?? 12
-      },
-      childAgeGroups: newHotel.childAgeGroups?.length > 0
-        ? newHotel.childAgeGroups.map(g => ({
-            code: g.code,
-            name: { tr: g.name?.tr || '', en: g.name?.en || '' },
-            minAge: g.minAge,
-            maxAge: g.maxAge,
-            order: g.order || 0
-          }))
-        : getDefaultChildAgeGroups()
+watch(
+  () => props.hotel,
+  newHotel => {
+    if (newHotel) {
+      form.value = {
+        visibility: {
+          b2c: newHotel.visibility?.b2c ?? true,
+          b2b: newHotel.visibility?.b2b ?? true
+        },
+        policies: {
+          maxBabyAge: newHotel.policies?.maxBabyAge ?? 2,
+          maxChildAge: newHotel.policies?.maxChildAge ?? 12
+        },
+        childAgeGroups:
+          newHotel.childAgeGroups?.length > 0
+            ? newHotel.childAgeGroups.map(g => ({
+                code: g.code,
+                name: { tr: g.name?.tr || '', en: g.name?.en || '' },
+                minAge: g.minAge,
+                maxAge: g.maxAge,
+                order: g.order || 0
+              }))
+            : getDefaultChildAgeGroups()
+      }
     }
-  }
-}, { immediate: true, deep: true })
+  },
+  { immediate: true, deep: true }
+)
 
 // Add new child age group
 const addChildAgeGroup = () => {
@@ -316,7 +371,7 @@ const addChildAgeGroup = () => {
 }
 
 // Remove child age group
-const removeChildAgeGroup = (index) => {
+const removeChildAgeGroup = index => {
   if (form.value.childAgeGroups.length <= 1) return
   form.value.childAgeGroups.splice(index, 1)
   form.value.childAgeGroups.forEach((g, i) => {
@@ -330,7 +385,7 @@ const removeChildAgeGroup = (index) => {
 }
 
 // When maxAge changes
-const onMaxAgeChange = (index) => {
+const onMaxAgeChange = index => {
   const groups = form.value.childAgeGroups
   const currentGroup = groups[index]
 

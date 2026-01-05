@@ -42,7 +42,16 @@ export const ID_TYPE_INFO = {
 // Required fields for KBS by nationality
 export const KBS_REQUIRED_FIELDS = {
   turkish: ['firstName', 'lastName', 'idNumber', 'dateOfBirth'],
-  foreign: ['firstName', 'lastName', 'idNumber', 'dateOfBirth', 'nationality', 'birthPlace', 'fatherName', 'motherName']
+  foreign: [
+    'firstName',
+    'lastName',
+    'idNumber',
+    'dateOfBirth',
+    'nationality',
+    'birthPlace',
+    'fatherName',
+    'motherName'
+  ]
 }
 
 export const KBS_FIELD_LABELS = {
@@ -156,7 +165,7 @@ export const updateGuestFields = async (hotelId, stayId, guestId, fields) => {
  * Test KBS web service connection
  * @param {string} hotelId - Hotel ID
  */
-export const testConnection = async (hotelId) => {
+export const testConnection = async hotelId => {
   const response = await pmsApiClient.post(`/pms/hotels/${hotelId}/kbs/test-connection`)
   return response.data
 }
@@ -189,7 +198,7 @@ export const sendStayToKBS = async (hotelId, data) => {
  * Check if guest is Turkish citizen
  * @param {object} guest - Guest object
  */
-export const isTurkishCitizen = (guest) => {
+export const isTurkishCitizen = guest => {
   return guest.nationality === 'TR' || guest.idType === ID_TYPES.TC_KIMLIK
 }
 
@@ -198,7 +207,7 @@ export const isTurkishCitizen = (guest) => {
  * @param {object} guest - Guest object
  * @returns {object} { isValid, missingFields, isTurkish }
  */
-export const validateKBSFields = (guest) => {
+export const validateKBSFields = guest => {
   const isTurkish = isTurkishCitizen(guest)
   const requiredFields = isTurkish ? KBS_REQUIRED_FIELDS.turkish : KBS_REQUIRED_FIELDS.foreign
   const missingFields = []
@@ -225,7 +234,7 @@ export const validateKBSFields = (guest) => {
  * Get missing field labels for display
  * @param {string[]} missingFields - Array of missing field names
  */
-export const getMissingFieldLabels = (missingFields) => {
+export const getMissingFieldLabels = missingFields => {
   return missingFields.map(field => KBS_FIELD_LABELS[field] || field)
 }
 
@@ -233,7 +242,7 @@ export const getMissingFieldLabels = (missingFields) => {
  * Format date for KBS display
  * @param {Date|string} date - Date to format
  */
-export const formatDate = (date) => {
+export const formatDate = date => {
   if (!date) return '-'
   const d = new Date(date)
   return d.toLocaleDateString('tr-TR')

@@ -1,10 +1,5 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Check-out"
-    size="lg"
-    @close="close"
-  >
+  <Modal v-model="show" title="Check-out" size="lg" @close="close">
     <div v-if="stay" class="space-y-6">
       <!-- Stay Summary -->
       <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
@@ -42,7 +37,9 @@
           </div>
           <div class="border-t border-gray-200 dark:border-slate-600 pt-2 flex justify-between">
             <span class="font-medium text-gray-900 dark:text-white">Toplam</span>
-            <span class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(stay.totalAmount) }}</span>
+            <span class="font-medium text-gray-900 dark:text-white">{{
+              formatCurrency(stay.totalAmount)
+            }}</span>
           </div>
           <div class="flex justify-between text-sm">
             <span class="text-gray-600 dark:text-slate-400">Odenen</span>
@@ -52,7 +49,10 @@
             <span class="font-medium" :class="stay.balance > 0 ? 'text-red-600' : 'text-green-600'">
               {{ stay.balance > 0 ? 'Kalan Borc' : 'Fazla Odeme' }}
             </span>
-            <span class="font-bold text-lg" :class="stay.balance > 0 ? 'text-red-600' : 'text-green-600'">
+            <span
+              class="font-bold text-lg"
+              :class="stay.balance > 0 ? 'text-red-600' : 'text-green-600'"
+            >
               {{ formatCurrency(Math.abs(stay.balance)) }}
             </span>
           </div>
@@ -72,7 +72,9 @@
               {{ extra.description }}
               <span v-if="extra.quantity > 1" class="text-xs">(x{{ extra.quantity }})</span>
             </span>
-            <span class="text-gray-900 dark:text-white">{{ formatCurrency(extra.amount * extra.quantity) }}</span>
+            <span class="text-gray-900 dark:text-white">{{
+              formatCurrency(extra.amount * extra.quantity)
+            }}</span>
           </div>
         </div>
       </div>
@@ -81,8 +83,8 @@
       <div v-if="stay.balance > 0" class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4">
         <label class="flex items-center gap-2">
           <input
-            type="checkbox"
             v-model="settleBalance"
+            type="checkbox"
             class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
           />
           <span class="text-sm text-amber-700 dark:text-amber-300">
@@ -95,16 +97,13 @@
             v-for="method in paymentMethods"
             :key="method.value"
             class="flex items-center gap-2 px-3 py-1.5 border rounded-lg cursor-pointer"
-            :class="paymentMethod === method.value
-              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-              : 'border-gray-200 dark:border-slate-600'"
+            :class="
+              paymentMethod === method.value
+                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                : 'border-gray-200 dark:border-slate-600'
+            "
           >
-            <input
-              type="radio"
-              :value="method.value"
-              v-model="paymentMethod"
-              class="hidden"
-            />
+            <input v-model="paymentMethod" type="radio" :value="method.value" class="hidden" />
             <span class="text-sm text-gray-700 dark:text-gray-300">{{ method.label }}</span>
           </label>
         </div>
@@ -114,26 +113,27 @@
       <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
         <p class="text-sm text-red-700 dark:text-red-300">
           <span class="material-icons text-sm align-middle mr-1">warning</span>
-          Check-out isleminden sonra oda temizlik icin isaretlenecek ve misafir kaydi kapatilacaktir.
+          Check-out isleminden sonra oda temizlik icin isaretlenecek ve misafir kaydi
+          kapatilacaktir.
         </p>
       </div>
     </div>
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>logout</span>
+        <span v-else class="material-icons text-sm">logout</span>
         Check-out Yap
       </button>
     </template>
@@ -172,12 +172,12 @@ const paymentMethods = PAYMENT_METHODS
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const extrasTotal = computed(() => {
   if (!props.stay?.extras) return 0
-  return props.stay.extras.reduce((sum, e) => sum + (e.amount * e.quantity), 0)
+  return props.stay.extras.reduce((sum, e) => sum + e.amount * e.quantity, 0)
 })
 
 const submit = async () => {
@@ -198,7 +198,7 @@ const submit = async () => {
   }
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -207,7 +207,7 @@ const formatDate = (date) => {
   })
 }
 
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
     currency: 'TRY'
@@ -220,10 +220,13 @@ const close = () => {
   paymentMethod.value = 'cash'
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    settleBalance.value = false
-    paymentMethod.value = 'cash'
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      settleBalance.value = false
+      paymentMethod.value = 'cash'
+    }
   }
-})
+)
 </script>

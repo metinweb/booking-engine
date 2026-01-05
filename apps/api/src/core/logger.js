@@ -38,21 +38,14 @@ const logsDir = path.join(__dirname, '../../logs')
 // Create logger
 const logger = winston.createLogger({
   level: config.isDev ? 'debug' : 'info',
-  format: combine(
-    timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-    errors({ stack: true })
-  ),
+  format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), errors({ stack: true })),
   defaultMeta: {
     service: 'booking-engine-api'
   },
   transports: [
     // Console output (colorized, human-readable)
     new winston.transports.Console({
-      format: combine(
-        colorize(),
-        timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        consoleFormat
-      )
+      format: combine(colorize(), timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), consoleFormat)
     })
   ]
 })
@@ -60,23 +53,27 @@ const logger = winston.createLogger({
 // Add file transports in production
 if (!config.isDev) {
   // Error log file
-  logger.add(new winston.transports.File({
-    filename: path.join(logsDir, 'error.log'),
-    level: 'error',
-    format: fileFormat,
-    maxsize: 10 * 1024 * 1024, // 10MB
-    maxFiles: 5,
-    tailable: true
-  }))
+  logger.add(
+    new winston.transports.File({
+      filename: path.join(logsDir, 'error.log'),
+      level: 'error',
+      format: fileFormat,
+      maxsize: 10 * 1024 * 1024, // 10MB
+      maxFiles: 5,
+      tailable: true
+    })
+  )
 
   // Combined log file
-  logger.add(new winston.transports.File({
-    filename: path.join(logsDir, 'combined.log'),
-    format: fileFormat,
-    maxsize: 10 * 1024 * 1024, // 10MB
-    maxFiles: 5,
-    tailable: true
-  }))
+  logger.add(
+    new winston.transports.File({
+      filename: path.join(logsDir, 'combined.log'),
+      format: fileFormat,
+      maxsize: 10 * 1024 * 1024, // 10MB
+      maxFiles: 5,
+      tailable: true
+    })
+  )
 }
 
 /**

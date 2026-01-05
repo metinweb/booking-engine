@@ -1,4 +1,5 @@
 import pmsApiClient from './pmsApi'
+import { pmsLogger } from '@/utils/logger'
 
 /**
  * Get all PMS users
@@ -9,7 +10,7 @@ const getAll = async (params = {}) => {
     const response = await pmsApiClient.get('/pms/users', { params })
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to fetch users', error.response?.data || error.message)
+    pmsLogger.error('PMS User Service: Failed to fetch users', error.response?.data || error.message)
     throw error
   }
 }
@@ -18,12 +19,12 @@ const getAll = async (params = {}) => {
  * Get single PMS user
  * @param {string} id - User ID
  */
-const getOne = async (id) => {
+const getOne = async id => {
   try {
     const response = await pmsApiClient.get(`/pms/users/${id}`)
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to fetch user', error.response?.data || error.message)
+    pmsLogger.error('PMS User Service: Failed to fetch user', error.response?.data || error.message)
     throw error
   }
 }
@@ -32,12 +33,12 @@ const getOne = async (id) => {
  * Create PMS user
  * @param {Object} data - User data
  */
-const create = async (data) => {
+const create = async data => {
   try {
     const response = await pmsApiClient.post('/pms/users', data)
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to create user', error.response?.data || error.message)
+    pmsLogger.error('PMS User Service: Failed to create user', error.response?.data || error.message)
     throw error
   }
 }
@@ -52,7 +53,7 @@ const update = async (id, data) => {
     const response = await pmsApiClient.put(`/pms/users/${id}`, data)
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to update user', error.response?.data || error.message)
+    pmsLogger.error('PMS User Service: Failed to update user', error.response?.data || error.message)
     throw error
   }
 }
@@ -61,12 +62,12 @@ const update = async (id, data) => {
  * Delete PMS user
  * @param {string} id - User ID
  */
-const remove = async (id) => {
+const remove = async id => {
   try {
     const response = await pmsApiClient.delete(`/pms/users/${id}`)
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to delete user', error.response?.data || error.message)
+    pmsLogger.error('PMS User Service: Failed to delete user', error.response?.data || error.message)
     throw error
   }
 }
@@ -81,7 +82,10 @@ const resetPassword = async (id, newPassword) => {
     const response = await pmsApiClient.post(`/pms/users/${id}/reset-password`, { newPassword })
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to reset password', error.response?.data || error.message)
+    pmsLogger.error(
+      'PMS User Service: Failed to reset password',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -96,7 +100,7 @@ const assignHotel = async (userId, data) => {
     const response = await pmsApiClient.post(`/pms/users/${userId}/assign-hotel`, data)
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to assign hotel', error.response?.data || error.message)
+    pmsLogger.error('PMS User Service: Failed to assign hotel', error.response?.data || error.message)
     throw error
   }
 }
@@ -111,7 +115,7 @@ const removeHotel = async (userId, hotelId) => {
     const response = await pmsApiClient.delete(`/pms/users/${userId}/hotels/${hotelId}`)
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to remove hotel', error.response?.data || error.message)
+    pmsLogger.error('PMS User Service: Failed to remove hotel', error.response?.data || error.message)
     throw error
   }
 }
@@ -124,10 +128,16 @@ const removeHotel = async (userId, hotelId) => {
  */
 const updatePermissions = async (userId, hotelId, data) => {
   try {
-    const response = await pmsApiClient.put(`/pms/users/${userId}/hotels/${hotelId}/permissions`, data)
+    const response = await pmsApiClient.put(
+      `/pms/users/${userId}/hotels/${hotelId}/permissions`,
+      data
+    )
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to update permissions', error.response?.data || error.message)
+    pmsLogger.error(
+      'PMS User Service: Failed to update permissions',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -136,12 +146,15 @@ const updatePermissions = async (userId, hotelId, data) => {
  * Get users by hotel
  * @param {string} hotelId - Hotel ID
  */
-const getByHotel = async (hotelId) => {
+const getByHotel = async hotelId => {
   try {
     const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/users`)
     return response.data
   } catch (error) {
-    console.error('PMS User Service: Failed to fetch hotel users', error.response?.data || error.message)
+    pmsLogger.error(
+      'PMS User Service: Failed to fetch hotel users',
+      error.response?.data || error.message
+    )
     throw error
   }
 }

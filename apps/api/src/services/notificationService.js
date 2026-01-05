@@ -1,5 +1,10 @@
 import logger from '../core/logger.js'
-import { sendEmail, sendBookingConfirmation, sendBookingCancellation, sendPasswordResetEmail } from '../helpers/mail.js'
+import {
+  sendEmail,
+  sendBookingConfirmation,
+  sendBookingCancellation,
+  sendPasswordResetEmail
+} from '../helpers/mail.js'
 import smsService from './smsService.js'
 import { sendPushToUser } from '../modules/push/push.service.js'
 import NotificationLog from '../modules/notification-log/notificationLog.model.js'
@@ -69,15 +74,7 @@ class NotificationService {
    * @returns {Object} Send results
    */
   async send(options) {
-    const {
-      type,
-      recipient,
-      data,
-      channels,
-      partnerId,
-      relatedTo,
-      meta
-    } = options
+    const { type, recipient, data, channels, partnerId, relatedTo, meta } = options
 
     const config = NotificationService.typeConfig[type]
     if (!config && type !== 'custom') {
@@ -109,7 +106,7 @@ class NotificationService {
         const emailResult = await sendEmail({
           to: recipient.email,
           subject: data.subject || this.getEmailSubject(type, data),
-          html: data.html || await this.renderEmailTemplate(type, data),
+          html: data.html || (await this.renderEmailTemplate(type, data)),
           partnerId
         })
 
@@ -123,7 +120,7 @@ class NotificationService {
         log.channels.email.success = false
         log.channels.email.error = error.message
         results.email = { success: false, error: error.message }
-        logger.error(`Email notification failed:`, error.message)
+        logger.error('Email notification failed:', error.message)
       }
     }
 
@@ -148,7 +145,7 @@ class NotificationService {
         log.channels.sms.success = false
         log.channels.sms.error = error.message
         results.sms = { success: false, error: error.message }
-        logger.error(`SMS notification failed:`, error.message)
+        logger.error('SMS notification failed:', error.message)
       }
     }
 
@@ -180,7 +177,7 @@ class NotificationService {
         log.channels.push.sent = 0
         log.channels.push.failed = 1
         results.push = { success: false, error: error.message }
-        logger.error(`Push notification failed:`, error.message)
+        logger.error('Push notification failed:', error.message)
       }
     }
 
@@ -320,7 +317,7 @@ class NotificationService {
     try {
       const { renderEmailTemplate } = await import('../helpers/emailTemplates.js')
       return await renderEmailTemplate(type, data)
-    } catch (error) {
+    } catch {
       // Fallback to basic HTML
       return `
         <div style="font-family: Arial, sans-serif; padding: 20px;">

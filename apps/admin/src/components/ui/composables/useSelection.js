@@ -8,10 +8,7 @@ import { ref, computed } from 'vue'
  * @returns {object} - Seçim state ve metodları
  */
 export function useSelection(options = {}) {
-  const {
-    idKey = '_id',
-    onSelect = null
-  } = options
+  const { idKey = '_id', onSelect = null } = options
 
   // State
   const selected = ref([])
@@ -23,7 +20,7 @@ export function useSelection(options = {}) {
   const hasSelection = computed(() => selected.value.length > 0)
 
   // Item ID'sini al
-  const getItemId = (item) => {
+  const getItemId = item => {
     if (typeof item === 'object' && item !== null) {
       return item[idKey]
     }
@@ -31,19 +28,19 @@ export function useSelection(options = {}) {
   }
 
   // Seçili mi kontrol et
-  const isSelected = (item) => {
+  const isSelected = item => {
     const id = getItemId(item)
     return selected.value.includes(id)
   }
 
   // Tümü seçili mi kontrol et
-  const isAllSelected = (items) => {
+  const isAllSelected = items => {
     if (!items || items.length === 0) return false
     return items.every(item => isSelected(item))
   }
 
   // Kısmi seçim var mı
-  const isIndeterminate = (items) => {
+  const isIndeterminate = items => {
     if (!items || items.length === 0) return false
     const selectedInItems = items.filter(item => isSelected(item)).length
     return selectedInItems > 0 && selectedInItems < items.length
@@ -89,7 +86,7 @@ export function useSelection(options = {}) {
   }
 
   // Seçimi ekle
-  const select = (item) => {
+  const select = item => {
     const id = getItemId(item)
     if (!selected.value.includes(id)) {
       selected.value.push(id)
@@ -98,7 +95,7 @@ export function useSelection(options = {}) {
   }
 
   // Seçimi kaldır
-  const deselect = (item) => {
+  const deselect = item => {
     const id = getItemId(item)
     const index = selected.value.indexOf(id)
     if (index !== -1) {
@@ -108,14 +105,14 @@ export function useSelection(options = {}) {
   }
 
   // Tümünü seç
-  const selectAll = (items) => {
+  const selectAll = items => {
     const ids = items.map(item => getItemId(item))
     selected.value = [...new Set([...selected.value, ...ids])]
     onSelect?.(selected.value)
   }
 
   // Listedeki tümünü seç/kaldır toggle
-  const toggleSelectAll = (items) => {
+  const toggleSelectAll = items => {
     if (isAllSelected(items)) {
       // Tümünü kaldır
       const ids = items.map(item => getItemId(item))
@@ -135,12 +132,12 @@ export function useSelection(options = {}) {
   }
 
   // Seçili item'ları al
-  const getSelectedItems = (items) => {
+  const getSelectedItems = items => {
     return items.filter(item => isSelected(item))
   }
 
   // Seçimi ayarla
-  const setSelection = (ids) => {
+  const setSelection = ids => {
     selected.value = [...ids]
     onSelect?.(selected.value)
   }

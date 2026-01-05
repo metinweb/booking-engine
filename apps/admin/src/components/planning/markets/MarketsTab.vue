@@ -3,10 +3,14 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('planning.markets.title') }}</h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('planning.markets.description') }}</p>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+          {{ $t('planning.markets.title') }}
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-slate-400">
+          {{ $t('planning.markets.description') }}
+        </p>
       </div>
-      <button @click="addMarket" class="btn-primary flex items-center gap-2">
+      <button class="btn-primary flex items-center gap-2" @click="addMarket">
         <span class="material-icons text-sm">add</span>
         {{ $t('planning.markets.add') }}
       </button>
@@ -28,19 +32,28 @@
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+            <div
+              class="w-12 h-12 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+            >
               <span class="material-icons text-indigo-600 dark:text-indigo-400">public</span>
             </div>
             <div>
               <div class="font-medium text-gray-800 dark:text-white flex items-center gap-2">
                 {{ getMarketName(market) }}
-                <span v-if="market.isDefault" class="px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded">
+                <span
+                  v-if="market.isDefault"
+                  class="px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded"
+                >
                   {{ $t('planning.markets.default') }}
                 </span>
               </div>
-              <div class="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-3 flex-wrap">
+              <div
+                class="text-sm text-gray-500 dark:text-slate-400 flex items-center gap-3 flex-wrap"
+              >
                 <span class="font-mono">{{ market.code }}</span>
-                <span class="font-bold text-green-600 dark:text-green-400">{{ market.currency }}</span>
+                <span class="font-bold text-green-600 dark:text-green-400">{{
+                  market.currency
+                }}</span>
                 <span v-if="market.countries?.length > 0">
                   {{ market.countries.length }} {{ $t('planning.markets.countries') }}
                 </span>
@@ -49,21 +62,36 @@
                 </span>
               </div>
               <!-- Extra Info Row -->
-              <div class="text-xs text-gray-400 dark:text-slate-500 flex items-center gap-3 mt-1 flex-wrap">
+              <div
+                class="text-xs text-gray-400 dark:text-slate-500 flex items-center gap-3 mt-1 flex-wrap"
+              >
                 <!-- Prepayment -->
-                <span v-if="market.paymentTerms?.prepaymentRequired" class="flex items-center gap-1">
+                <span
+                  v-if="market.paymentTerms?.prepaymentRequired"
+                  class="flex items-center gap-1"
+                >
                   <span class="material-icons text-xs">payments</span>
-                  %{{ market.paymentTerms.prepaymentPercentage || 30 }} {{ $t('planning.markets.prepaymentShort') }}
+                  %{{ market.paymentTerms.prepaymentPercentage || 30 }}
+                  {{ $t('planning.markets.prepaymentShort') }}
                 </span>
                 <!-- Child Age Groups (only if not inheriting from hotel) -->
-                <template v-if="!market.childAgeSettings?.inheritFromHotel && market.childAgeSettings?.childAgeGroups?.length">
+                <template
+                  v-if="
+                    !market.childAgeSettings?.inheritFromHotel &&
+                    market.childAgeSettings?.childAgeGroups?.length
+                  "
+                >
                   <span
                     v-for="group in market.childAgeSettings.childAgeGroups"
                     :key="group.code"
                     class="flex items-center gap-1"
                   >
-                    <span class="material-icons text-xs">{{ group.code === 'infant' ? 'baby_changing_station' : 'child_care' }}</span>
-                    {{ $t(`planning.childGroups.${group.code}`) }}: {{ group.minAge }}-{{ group.maxAge }}
+                    <span class="material-icons text-xs">{{
+                      group.code === 'infant' ? 'baby_changing_station' : 'child_care'
+                    }}</span>
+                    {{ $t(`planning.childGroups.${group.code}`) }}: {{ group.minAge }}-{{
+                      group.maxAge
+                    }}
                   </span>
                 </template>
               </div>
@@ -76,12 +104,20 @@
               <div class="flex items-center gap-2">
                 <span
                   class="px-2 py-0.5 text-xs rounded font-medium"
-                  :class="market.workingMode === 'commission'
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'"
+                  :class="
+                    market.workingMode === 'commission'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                  "
                 >
-                  {{ market.workingMode === 'commission' ? $t('planning.markets.workingModes.commission') : $t('planning.markets.workingModes.net') }}
-                  <span v-if="market.workingMode === 'commission'" class="ml-1">%{{ market.commissionRate || 10 }}</span>
+                  {{
+                    market.workingMode === 'commission'
+                      ? $t('planning.markets.workingModes.commission')
+                      : $t('planning.markets.workingModes.net')
+                  }}
+                  <span v-if="market.workingMode === 'commission'" class="ml-1"
+                    >%{{ market.commissionRate || 10 }}</span
+                  >
                 </span>
               </div>
               <!-- Sales Channels with Markups -->
@@ -91,34 +127,38 @@
                   class="px-2 py-0.5 text-xs rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
                 >
                   B2C
-                  <span v-if="market.markup?.b2c" class="ml-1 opacity-75">+{{ market.markup.b2c }}%</span>
+                  <span v-if="market.markup?.b2c" class="ml-1 opacity-75"
+                    >+{{ market.markup.b2c }}%</span
+                  >
                 </span>
                 <span
                   v-if="market.salesChannels?.b2b"
                   class="px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                 >
                   B2B
-                  <span v-if="market.markup?.b2b" class="ml-1 opacity-75">+{{ market.markup.b2b }}%</span>
+                  <span v-if="market.markup?.b2b" class="ml-1 opacity-75"
+                    >+{{ market.markup.b2b }}%</span
+                  >
                 </span>
               </div>
             </div>
             <button
               v-if="!market.isDefault"
-              @click.stop="setDefaultMarket(market)"
               class="p-2 text-gray-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
               :title="$t('planning.markets.setAsDefault')"
+              @click.stop="setDefaultMarket(market)"
             >
               <span class="material-icons">star_outline</span>
             </button>
             <button
-              @click.stop="editMarket(market)"
               class="p-2 text-gray-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
+              @click.stop="editMarket(market)"
             >
               <span class="material-icons">edit</span>
             </button>
             <button
-              @click.stop="confirmDelete(market)"
               class="p-2 text-gray-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+              @click.stop="confirmDelete(market)"
             >
               <span class="material-icons">delete</span>
             </button>
@@ -133,22 +173,34 @@
               class="px-2 py-0.5 text-xs bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-slate-300 rounded flex items-center gap-1"
               :title="getCountryName(country, locale)"
             >
-              <img :src="`/flags/${country.toLowerCase()}.svg`" :alt="country" class="w-4 h-3 object-contain" />
+              <img
+                :src="`/flags/${country.toLowerCase()}.svg`"
+                :alt="country"
+                class="w-4 h-3 object-contain"
+              />
               <span>{{ country }}</span>
             </span>
-            <span v-if="market.countries.length > 15" class="px-2 py-0.5 text-xs text-gray-500 dark:text-slate-400">
+            <span
+              v-if="market.countries.length > 15"
+              class="px-2 py-0.5 text-xs text-gray-500 dark:text-slate-400"
+            >
               +{{ market.countries.length - 15 }}
             </span>
           </template>
           <template v-else>
-            <span class="px-3 py-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full flex items-center gap-1">
+            <span
+              class="px-3 py-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full flex items-center gap-1"
+            >
               <span class="material-icons text-xs">language</span>
               {{ $t('planning.markets.catchAllHint') }}
             </span>
           </template>
         </div>
         <!-- Active Products Info -->
-        <div v-if="market.activeRoomTypes?.length || market.activeMealPlans?.length" class="mt-3 flex flex-wrap gap-2">
+        <div
+          v-if="market.activeRoomTypes?.length || market.activeMealPlans?.length"
+          class="mt-3 flex flex-wrap gap-2"
+        >
           <!-- Active Room Types -->
           <div v-if="market.activeRoomTypes?.length" class="flex items-center gap-1">
             <span class="material-icons text-xs text-blue-500">hotel</span>
@@ -177,7 +229,10 @@
           </div>
         </div>
         <!-- Commission Info -->
-        <div v-if="market.salesChannels?.b2b && market.agencyCommission" class="mt-2 text-xs text-gray-500 dark:text-slate-400">
+        <div
+          v-if="market.salesChannels?.b2b && market.agencyCommission"
+          class="mt-2 text-xs text-gray-500 dark:text-slate-400"
+        >
           {{ $t('planning.markets.agencyCommission') }}: {{ market.agencyCommission }}%
         </div>
       </div>
@@ -187,8 +242,10 @@
     <div v-else class="text-center py-12 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
       <span class="material-icons text-5xl text-gray-300 dark:text-slate-600">public</span>
       <p class="mt-3 text-gray-500 dark:text-slate-400">{{ $t('planning.markets.empty') }}</p>
-      <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">{{ $t('planning.markets.emptyHint') }}</p>
-      <button @click="addMarket" class="btn-primary mt-4">
+      <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">
+        {{ $t('planning.markets.emptyHint') }}
+      </p>
+      <button class="btn-primary mt-4" @click="addMarket">
         <span class="material-icons text-sm mr-1">add</span>
         {{ $t('planning.markets.add') }}
       </button>
@@ -198,8 +255,10 @@
     <Modal v-model="showDeleteModal" :title="$t('common.delete')" size="sm">
       <p class="text-gray-600 dark:text-slate-400">{{ $t('common.confirm') }}?</p>
       <template #footer>
-        <button @click="showDeleteModal = false" class="btn-secondary">{{ $t('common.no') }}</button>
-        <button @click="executeDelete" class="btn-danger" :disabled="deleting">
+        <button class="btn-secondary" @click="showDeleteModal = false">
+          {{ $t('common.no') }}
+        </button>
+        <button class="btn-danger" :disabled="deleting" @click="executeDelete">
           {{ deleting ? $t('common.loading') : $t('common.yes') }}
         </button>
       </template>
@@ -232,17 +291,17 @@ const showDeleteModal = ref(false)
 const deleteTarget = ref(null)
 const deleting = ref(false)
 
-const getMarketName = (market) => {
+const getMarketName = market => {
   return market.name?.[locale.value] || market.name?.tr || market.name?.en || market.code
 }
 
-const getRoomTypeCode = (id) => {
+const getRoomTypeCode = id => {
   const rtId = typeof id === 'object' ? id._id : id
   const rt = roomTypes.value.find(r => r._id === rtId)
   return rt?.code || '?'
 }
 
-const getMealPlanCode = (id) => {
+const getMealPlanCode = id => {
   const mpId = typeof id === 'object' ? id._id : id
   const mp = mealPlans.value.find(m => m._id === mpId)
   return mp?.code || '?'
@@ -255,7 +314,7 @@ const fetchMarkets = async () => {
     if (response.success) {
       markets.value = response.data
     }
-  } catch (error) {
+  } catch {
     toast.error(t('common.fetchError'))
   } finally {
     loading.value = false
@@ -270,8 +329,8 @@ const fetchRoomTypesAndMealPlans = async () => {
     ])
     if (rtRes.success) roomTypes.value = rtRes.data || []
     if (mpRes.success) mealPlans.value = mpRes.data || []
-  } catch (error) {
-    console.error('Failed to fetch room types/meal plans:', error)
+  } catch (err) {
+    console.error('Failed to fetch room types/meal plans:', err)
   }
 }
 
@@ -282,24 +341,24 @@ const addMarket = () => {
   })
 }
 
-const editMarket = (market) => {
+const editMarket = market => {
   router.push({
     name: 'market-detail',
     params: { hotelId: props.hotel._id, id: market._id }
   })
 }
 
-const setDefaultMarket = async (market) => {
+const setDefaultMarket = async market => {
   try {
     await planningService.setDefaultMarket(props.hotel._id, market._id)
     toast.success(t('planning.markets.defaultSet'))
     fetchMarkets()
-  } catch (error) {
+  } catch {
     toast.error(t('common.operationFailed'))
   }
 }
 
-const confirmDelete = (market) => {
+const confirmDelete = market => {
   deleteTarget.value = market
   showDeleteModal.value = true
 }
@@ -311,17 +370,21 @@ const executeDelete = async () => {
     toast.success(t('planning.markets.deleted'))
     showDeleteModal.value = false
     fetchMarkets()
-  } catch (error) {
-    toast.error(error.response?.data?.message || t('common.deleteFailed'))
+  } catch (err) {
+    toast.error(err.response?.data?.message || t('common.deleteFailed'))
   } finally {
     deleting.value = false
   }
 }
 
-watch(() => props.hotel?._id, (newId) => {
-  if (newId) {
-    fetchMarkets()
-    fetchRoomTypesAndMealPlans()
-  }
-}, { immediate: true })
+watch(
+  () => props.hotel?._id,
+  newId => {
+    if (newId) {
+      fetchMarkets()
+      fetchRoomTypesAndMealPlans()
+    }
+  },
+  { immediate: true }
+)
 </script>

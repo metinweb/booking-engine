@@ -2,33 +2,59 @@
   <div class="space-y-6">
     <!-- Summary Cards -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <p class="text-sm text-gray-500 dark:text-slate-400">Toplam Oda</p>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ data?.summary?.total || 0 }}</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+          {{ data?.summary?.total || 0 }}
+        </p>
       </div>
-      <div class="bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 p-4">
+      <div
+        class="bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 p-4"
+      >
         <p class="text-sm text-green-600 dark:text-green-400">Temiz</p>
-        <p class="text-2xl font-bold text-green-700 dark:text-green-300">{{ data?.summary?.clean || 0 }}</p>
+        <p class="text-2xl font-bold text-green-700 dark:text-green-300">
+          {{ data?.summary?.clean || 0 }}
+        </p>
       </div>
-      <div class="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-4">
+      <div
+        class="bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 p-4"
+      >
         <p class="text-sm text-red-600 dark:text-red-400">Kirli</p>
-        <p class="text-2xl font-bold text-red-700 dark:text-red-300">{{ data?.summary?.dirty || 0 }}</p>
+        <p class="text-2xl font-bold text-red-700 dark:text-red-300">
+          {{ data?.summary?.dirty || 0 }}
+        </p>
       </div>
-      <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-4">
+      <div
+        class="bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-4"
+      >
         <p class="text-sm text-blue-600 dark:text-blue-400">Kontrol Edildi</p>
-        <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">{{ data?.summary?.inspected || 0 }}</p>
+        <p class="text-2xl font-bold text-blue-700 dark:text-blue-300">
+          {{ data?.summary?.inspected || 0 }}
+        </p>
       </div>
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-4">
+      <div
+        class="bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 p-4"
+      >
         <p class="text-sm text-gray-600 dark:text-gray-400">Temizlik Orani</p>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">%{{ data?.summary?.cleanPercentage || 0 }}</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">
+          %{{ data?.summary?.cleanPercentage || 0 }}
+        </p>
       </div>
     </div>
 
     <!-- By Floor -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+    >
       <h3 class="font-medium text-gray-900 dark:text-white mb-4">Kata Gore Dagilim</h3>
       <div class="space-y-3">
-        <div v-for="(floorData, floor) in data?.byFloor || {}" :key="floor" class="flex items-center gap-4">
+        <div
+          v-for="(floorData, floor) in data?.byFloor || {}"
+          :key="floor"
+          class="flex items-center gap-4"
+        >
           <div class="w-16 text-sm font-medium text-gray-900 dark:text-white">Kat {{ floor }}</div>
           <div class="flex-1 flex gap-1 h-6">
             <div
@@ -66,16 +92,28 @@
         </div>
       </div>
       <div class="flex gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700 text-xs">
-        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-green-500 rounded"></span> Temiz</span>
-        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-500 rounded"></span> Kontrol</span>
-        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-red-500 rounded"></span> Kirli</span>
-        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-yellow-500 rounded"></span> Temizleniyor</span>
-        <span class="flex items-center gap-1"><span class="w-3 h-3 bg-gray-500 rounded"></span> Arizali</span>
+        <span class="flex items-center gap-1"
+          ><span class="w-3 h-3 bg-green-500 rounded"></span> Temiz</span
+        >
+        <span class="flex items-center gap-1"
+          ><span class="w-3 h-3 bg-blue-500 rounded"></span> Kontrol</span
+        >
+        <span class="flex items-center gap-1"
+          ><span class="w-3 h-3 bg-red-500 rounded"></span> Kirli</span
+        >
+        <span class="flex items-center gap-1"
+          ><span class="w-3 h-3 bg-yellow-500 rounded"></span> Temizleniyor</span
+        >
+        <span class="flex items-center gap-1"
+          ><span class="w-3 h-3 bg-gray-500 rounded"></span> Arizali</span
+        >
       </div>
     </div>
 
     <!-- Rooms Table -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+    >
       <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700">
         <h3 class="font-medium text-gray-900 dark:text-white">Oda Listesi</h3>
       </div>
@@ -86,25 +124,35 @@
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Oda</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tip</th>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Durum</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Temizlik</th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Son Temizlik</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Temizlik
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                Son Temizlik
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
             <tr v-for="room in data?.rooms || []" :key="room.roomNumber">
-              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ room.roomNumber }}</td>
-              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ room.roomType }}</td>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
+                {{ room.roomNumber }}
+              </td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                {{ room.roomType }}
+              </td>
               <td class="px-4 py-3">
                 <span
                   class="px-2 py-1 rounded-full text-xs font-medium"
                   :class="getRoomStatusClass(room.status)"
-                >{{ getRoomStatusLabel(room.status) }}</span>
+                  >{{ getRoomStatusLabel(room.status) }}</span
+                >
               </td>
               <td class="px-4 py-3">
                 <span
                   class="px-2 py-1 rounded-full text-xs font-medium"
                   :class="getHkStatusClass(room.housekeepingStatus)"
-                >{{ getHkStatusLabel(room.housekeepingStatus) }}</span>
+                  >{{ getHkStatusLabel(room.housekeepingStatus) }}</span
+                >
               </td>
               <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
                 {{ room.lastCleaned ? formatDateTime(room.lastCleaned) : '-' }}
@@ -122,19 +170,28 @@ defineProps({
   data: Object
 })
 
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('tr-TR', {
-    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 
-const getRoomStatusLabel = (status) => {
-  const labels = { available: 'Bos', occupied: 'Dolu', reserved: 'Rezerve', maintenance: 'Bakim', blocked: 'Bloke' }
+const getRoomStatusLabel = status => {
+  const labels = {
+    available: 'Bos',
+    occupied: 'Dolu',
+    reserved: 'Rezerve',
+    maintenance: 'Bakim',
+    blocked: 'Bloke'
+  }
   return labels[status] || status
 }
 
-const getRoomStatusClass = (status) => {
+const getRoomStatusClass = status => {
   const classes = {
     available: 'bg-green-100 text-green-800',
     occupied: 'bg-blue-100 text-blue-800',
@@ -145,12 +202,18 @@ const getRoomStatusClass = (status) => {
   return classes[status] || 'bg-gray-100 text-gray-800'
 }
 
-const getHkStatusLabel = (status) => {
-  const labels = { clean: 'Temiz', dirty: 'Kirli', inspected: 'Kontrol', in_progress: 'Temizleniyor', out_of_order: 'Arizali' }
+const getHkStatusLabel = status => {
+  const labels = {
+    clean: 'Temiz',
+    dirty: 'Kirli',
+    inspected: 'Kontrol',
+    in_progress: 'Temizleniyor',
+    out_of_order: 'Arizali'
+  }
   return labels[status] || status
 }
 
-const getHkStatusClass = (status) => {
+const getHkStatusClass = status => {
   const classes = {
     clean: 'bg-green-100 text-green-800',
     dirty: 'bg-red-100 text-red-800',

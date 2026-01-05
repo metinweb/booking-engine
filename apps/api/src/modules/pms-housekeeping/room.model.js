@@ -7,21 +7,21 @@ import mongoose from 'mongoose'
 
 // Room status enum
 export const ROOM_STATUS = {
-  VACANT_CLEAN: 'vacant_clean',       // Bos ve temiz - satisa hazir
-  VACANT_DIRTY: 'vacant_dirty',       // Bos ama kirli - temizlik bekliyor
-  OCCUPIED: 'occupied',               // Misafir var
-  CHECKOUT: 'checkout',               // Cikis yapildi, temizlik bekliyor
-  MAINTENANCE: 'maintenance',         // Bakimda
-  OUT_OF_ORDER: 'out_of_order',       // Kullanim disi
-  INSPECTED: 'inspected'              // Denetlendi, onaylandi
+  VACANT_CLEAN: 'vacant_clean', // Bos ve temiz - satisa hazir
+  VACANT_DIRTY: 'vacant_dirty', // Bos ama kirli - temizlik bekliyor
+  OCCUPIED: 'occupied', // Misafir var
+  CHECKOUT: 'checkout', // Cikis yapildi, temizlik bekliyor
+  MAINTENANCE: 'maintenance', // Bakimda
+  OUT_OF_ORDER: 'out_of_order', // Kullanim disi
+  INSPECTED: 'inspected' // Denetlendi, onaylandi
 }
 
 // Housekeeping status enum
 export const HOUSEKEEPING_STATUS = {
   CLEAN: 'clean',
   DIRTY: 'dirty',
-  CLEANING: 'cleaning',       // Temizlik yapiliyor
-  INSPECTED: 'inspected'      // Denetlendi
+  CLEANING: 'cleaning', // Temizlik yapiliyor
+  INSPECTED: 'inspected' // Denetlendi
 }
 
 // Housekeeping priority
@@ -32,156 +32,165 @@ export const HOUSEKEEPING_PRIORITY = {
   URGENT: 'urgent'
 }
 
-const roomSchema = new mongoose.Schema({
-  // Multi-tenant
-  partner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Partner',
-    required: [true, 'Partner gerekli'],
-    index: true
+const roomSchema = new mongoose.Schema(
+  {
+    // Multi-tenant
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Partner',
+      required: [true, 'Partner gerekli'],
+      index: true
+    },
+
+    hotel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hotel',
+      required: [true, 'Hotel gerekli'],
+      index: true
+    },
+
+    // Room identification
+    roomNumber: {
+      type: String,
+      required: [true, 'Oda numarasi gerekli'],
+      trim: true
+    },
+
+    floor: {
+      type: Number,
+      required: [true, 'Kat numarasi gerekli'],
+      min: -5, // Bodrum katlar icin
+      max: 100
+    },
+
+    // Room type reference
+    roomType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'RoomType',
+      required: [true, 'Oda tipi gerekli']
+    },
+
+    // Room status
+    status: {
+      type: String,
+      enum: Object.values(ROOM_STATUS),
+      default: ROOM_STATUS.VACANT_CLEAN
+    },
+
+    // Housekeeping status
+    housekeepingStatus: {
+      type: String,
+      enum: Object.values(HOUSEKEEPING_STATUS),
+      default: HOUSEKEEPING_STATUS.CLEAN
+    },
+
+    // Housekeeping priority
+    housekeepingPriority: {
+      type: String,
+      enum: Object.values(HOUSEKEEPING_PRIORITY),
+      default: HOUSEKEEPING_PRIORITY.NORMAL
+    },
+
+    // Current occupancy (if occupied)
+    currentBooking: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Booking',
+      default: null
+    },
+
+    currentGuests: [
+      {
+        firstName: String,
+        lastName: String,
+        isMainGuest: { type: Boolean, default: false }
+      }
+    ],
+
+    checkInDate: {
+      type: Date,
+      default: null
+    },
+
+    expectedCheckoutDate: {
+      type: Date,
+      default: null
+    },
+
+    // Housekeeping assignment
+    assignedHousekeeper: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+
+    lastCleanedAt: {
+      type: Date,
+      default: null
+    },
+
+    lastCleanedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+
+    lastInspectedAt: {
+      type: Date,
+      default: null
+    },
+
+    lastInspectedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+
+    // Room-specific features (additional to room type)
+    features: [
+      {
+        type: String,
+        trim: true
+      }
+    ],
+
+    // Connecting rooms
+    connectingRooms: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Room'
+      }
+    ],
+
+    // Room notes
+    notes: {
+      type: String,
+      trim: true,
+      maxlength: 1000
+    },
+
+    // Maintenance notes
+    maintenanceNotes: {
+      type: String,
+      trim: true,
+      maxlength: 1000
+    },
+
+    // Is room active?
+    isActive: {
+      type: Boolean,
+      default: true
+    },
+
+    // Sorting order
+    order: {
+      type: Number,
+      default: 0
+    }
   },
-
-  hotel: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Hotel',
-    required: [true, 'Hotel gerekli'],
-    index: true
-  },
-
-  // Room identification
-  roomNumber: {
-    type: String,
-    required: [true, 'Oda numarasi gerekli'],
-    trim: true
-  },
-
-  floor: {
-    type: Number,
-    required: [true, 'Kat numarasi gerekli'],
-    min: -5,  // Bodrum katlar icin
-    max: 100
-  },
-
-  // Room type reference
-  roomType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'RoomType',
-    required: [true, 'Oda tipi gerekli']
-  },
-
-  // Room status
-  status: {
-    type: String,
-    enum: Object.values(ROOM_STATUS),
-    default: ROOM_STATUS.VACANT_CLEAN
-  },
-
-  // Housekeeping status
-  housekeepingStatus: {
-    type: String,
-    enum: Object.values(HOUSEKEEPING_STATUS),
-    default: HOUSEKEEPING_STATUS.CLEAN
-  },
-
-  // Housekeeping priority
-  housekeepingPriority: {
-    type: String,
-    enum: Object.values(HOUSEKEEPING_PRIORITY),
-    default: HOUSEKEEPING_PRIORITY.NORMAL
-  },
-
-  // Current occupancy (if occupied)
-  currentBooking: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Booking',
-    default: null
-  },
-
-  currentGuests: [{
-    firstName: String,
-    lastName: String,
-    isMainGuest: { type: Boolean, default: false }
-  }],
-
-  checkInDate: {
-    type: Date,
-    default: null
-  },
-
-  expectedCheckoutDate: {
-    type: Date,
-    default: null
-  },
-
-  // Housekeeping assignment
-  assignedHousekeeper: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-
-  lastCleanedAt: {
-    type: Date,
-    default: null
-  },
-
-  lastCleanedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-
-  lastInspectedAt: {
-    type: Date,
-    default: null
-  },
-
-  lastInspectedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
-
-  // Room-specific features (additional to room type)
-  features: [{
-    type: String,
-    trim: true
-  }],
-
-  // Connecting rooms
-  connectingRooms: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room'
-  }],
-
-  // Room notes
-  notes: {
-    type: String,
-    trim: true,
-    maxlength: 1000
-  },
-
-  // Maintenance notes
-  maintenanceNotes: {
-    type: String,
-    trim: true,
-    maxlength: 1000
-  },
-
-  // Is room active?
-  isActive: {
-    type: Boolean,
-    default: true
-  },
-
-  // Sorting order
-  order: {
-    type: Number,
-    default: 0
+  {
+    timestamps: true
   }
-}, {
-  timestamps: true
-})
+)
 
 // Compound indexes
 roomSchema.index({ partner: 1, hotel: 1, roomNumber: 1 }, { unique: true })
@@ -192,25 +201,26 @@ roomSchema.index({ hotel: 1, roomType: 1 })
 roomSchema.index({ assignedHousekeeper: 1 })
 
 // Virtual for display name
-roomSchema.virtual('displayName').get(function() {
+roomSchema.virtual('displayName').get(function () {
   return `Oda ${this.roomNumber}`
 })
 
 // Check if room is available for check-in
-roomSchema.methods.isAvailableForCheckIn = function() {
-  return this.status === ROOM_STATUS.VACANT_CLEAN ||
-         this.status === ROOM_STATUS.INSPECTED
+roomSchema.methods.isAvailableForCheckIn = function () {
+  return this.status === ROOM_STATUS.VACANT_CLEAN || this.status === ROOM_STATUS.INSPECTED
 }
 
 // Check if room needs cleaning
-roomSchema.methods.needsCleaning = function() {
-  return this.housekeepingStatus === HOUSEKEEPING_STATUS.DIRTY ||
-         this.status === ROOM_STATUS.VACANT_DIRTY ||
-         this.status === ROOM_STATUS.CHECKOUT
+roomSchema.methods.needsCleaning = function () {
+  return (
+    this.housekeepingStatus === HOUSEKEEPING_STATUS.DIRTY ||
+    this.status === ROOM_STATUS.VACANT_DIRTY ||
+    this.status === ROOM_STATUS.CHECKOUT
+  )
 }
 
 // Mark as occupied
-roomSchema.methods.checkIn = async function(bookingId, guests, checkoutDate) {
+roomSchema.methods.checkIn = async function (bookingId, guests, checkoutDate) {
   this.status = ROOM_STATUS.OCCUPIED
   this.currentBooking = bookingId
   this.currentGuests = guests
@@ -220,7 +230,7 @@ roomSchema.methods.checkIn = async function(bookingId, guests, checkoutDate) {
 }
 
 // Mark as checkout
-roomSchema.methods.checkOut = async function() {
+roomSchema.methods.checkOut = async function () {
   this.status = ROOM_STATUS.CHECKOUT
   this.housekeepingStatus = HOUSEKEEPING_STATUS.DIRTY
   this.housekeepingPriority = HOUSEKEEPING_PRIORITY.HIGH
@@ -232,7 +242,7 @@ roomSchema.methods.checkOut = async function() {
 }
 
 // Mark as cleaned
-roomSchema.methods.markCleaned = async function(userId) {
+roomSchema.methods.markCleaned = async function (userId) {
   this.housekeepingStatus = HOUSEKEEPING_STATUS.CLEAN
   this.lastCleanedAt = new Date()
   this.lastCleanedBy = userId
@@ -246,7 +256,7 @@ roomSchema.methods.markCleaned = async function(userId) {
 }
 
 // Mark as inspected
-roomSchema.methods.markInspected = async function(userId) {
+roomSchema.methods.markInspected = async function (userId) {
   this.housekeepingStatus = HOUSEKEEPING_STATUS.INSPECTED
   this.lastInspectedAt = new Date()
   this.lastInspectedBy = userId
@@ -259,14 +269,14 @@ roomSchema.methods.markInspected = async function(userId) {
 }
 
 // Static: Get rooms by floor
-roomSchema.statics.getByFloor = function(hotelId, floor) {
+roomSchema.statics.getByFloor = function (hotelId, floor) {
   return this.find({ hotel: hotelId, floor, isActive: true })
     .populate('roomType', 'name code')
     .sort('roomNumber')
 }
 
 // Static: Get rooms needing cleaning
-roomSchema.statics.getNeedingCleaning = function(hotelId) {
+roomSchema.statics.getNeedingCleaning = function (hotelId) {
   return this.find({
     hotel: hotelId,
     isActive: true,
@@ -282,7 +292,7 @@ roomSchema.statics.getNeedingCleaning = function(hotelId) {
 }
 
 // Static: Get room statistics
-roomSchema.statics.getStatistics = async function(hotelId) {
+roomSchema.statics.getStatistics = async function (hotelId) {
   const stats = await this.aggregate([
     { $match: { hotel: new mongoose.Types.ObjectId(hotelId), isActive: true } },
     {
@@ -312,31 +322,30 @@ roomSchema.statics.getStatistics = async function(hotelId) {
         },
         needsCleaning: {
           $sum: {
-            $cond: [
-              { $in: ['$housekeepingStatus', [HOUSEKEEPING_STATUS.DIRTY]] },
-              1, 0
-            ]
+            $cond: [{ $in: ['$housekeepingStatus', [HOUSEKEEPING_STATUS.DIRTY]] }, 1, 0]
           }
         }
       }
     }
   ])
 
-  return stats[0] || {
-    total: 0,
-    occupied: 0,
-    vacantClean: 0,
-    vacantDirty: 0,
-    checkout: 0,
-    maintenance: 0,
-    outOfOrder: 0,
-    inspected: 0,
-    needsCleaning: 0
-  }
+  return (
+    stats[0] || {
+      total: 0,
+      occupied: 0,
+      vacantClean: 0,
+      vacantDirty: 0,
+      checkout: 0,
+      maintenance: 0,
+      outOfOrder: 0,
+      inspected: 0,
+      needsCleaning: 0
+    }
+  )
 }
 
 // Static: Get floor summary
-roomSchema.statics.getFloorSummary = async function(hotelId) {
+roomSchema.statics.getFloorSummary = async function (hotelId) {
   return this.aggregate([
     { $match: { hotel: new mongoose.Types.ObjectId(hotelId), isActive: true } },
     {
@@ -348,18 +357,12 @@ roomSchema.statics.getFloorSummary = async function(hotelId) {
         },
         available: {
           $sum: {
-            $cond: [
-              { $in: ['$status', [ROOM_STATUS.VACANT_CLEAN, ROOM_STATUS.INSPECTED]] },
-              1, 0
-            ]
+            $cond: [{ $in: ['$status', [ROOM_STATUS.VACANT_CLEAN, ROOM_STATUS.INSPECTED]] }, 1, 0]
           }
         },
         dirty: {
           $sum: {
-            $cond: [
-              { $in: ['$status', [ROOM_STATUS.VACANT_DIRTY, ROOM_STATUS.CHECKOUT]] },
-              1, 0
-            ]
+            $cond: [{ $in: ['$status', [ROOM_STATUS.VACANT_DIRTY, ROOM_STATUS.CHECKOUT]] }, 1, 0]
           }
         }
       }

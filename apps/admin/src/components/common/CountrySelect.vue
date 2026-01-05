@@ -1,23 +1,37 @@
 <template>
-  <div class="relative" ref="triggerRef">
+  <div ref="triggerRef" class="relative">
     <button
       type="button"
-      @click="toggleDropdown"
       class="form-input w-full pl-10 pr-10 text-left cursor-pointer flex items-center gap-2"
-      :class="modelValue ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20' : ''"
+      :class="
+        modelValue
+          ? 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20'
+          : ''
+      "
       :disabled="disabled"
+      @click="toggleDropdown"
     >
       <template v-if="selectedCountry">
-        <img :src="`/flags/${selectedCountry.code.toLowerCase()}.svg`" :alt="selectedCountry.code" class="w-5 h-4 object-contain" />
+        <img
+          :src="`/flags/${selectedCountry.code.toLowerCase()}.svg`"
+          :alt="selectedCountry.code"
+          class="w-5 h-4 object-contain"
+        />
         <span class="truncate">{{ getCountryDisplayName(selectedCountry) }}</span>
       </template>
-      <span v-else class="text-gray-400 dark:text-slate-500">{{ placeholder || $t('locations.selectCountry') }}</span>
+      <span v-else class="text-gray-400 dark:text-slate-500">{{
+        placeholder || $t('locations.selectCountry')
+      }}</span>
     </button>
     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
       <span class="material-icons text-lg">public</span>
     </span>
     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-      <span class="material-icons text-lg transition-transform" :class="showDropdown ? 'rotate-180' : ''">expand_more</span>
+      <span
+        class="material-icons text-lg transition-transform"
+        :class="showDropdown ? 'rotate-180' : ''"
+        >expand_more</span
+      >
     </span>
 
     <!-- Dropdown - Teleported to body -->
@@ -37,9 +51,9 @@
               type="text"
               :placeholder="$t('common.search')"
               class="form-input w-full pl-8 py-1.5 text-sm"
+              autocomplete="off"
               @keydown.enter.prevent="selectFirst"
               @keydown.esc="showDropdown = false"
-              autocomplete="off"
             />
             <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">
               <span class="material-icons text-sm">search</span>
@@ -52,14 +66,25 @@
             v-for="country in filteredCountries"
             :key="country.code"
             type="button"
-            @click="selectCountry(country)"
             class="w-full px-3 py-2 text-left text-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/30 flex items-center gap-2 transition-colors"
-            :class="country.code === modelValue ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-slate-300'"
+            :class="
+              country.code === modelValue
+                ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                : 'text-gray-700 dark:text-slate-300'
+            "
+            @click="selectCountry(country)"
           >
-            <img :src="`/flags/${country.code.toLowerCase()}.svg`" :alt="country.code" class="w-5 h-4 object-contain" />
+            <img
+              :src="`/flags/${country.code.toLowerCase()}.svg`"
+              :alt="country.code"
+              class="w-5 h-4 object-contain"
+            />
             <span class="truncate">{{ getCountryDisplayName(country) }}</span>
           </button>
-          <div v-if="filteredCountries.length === 0" class="px-3 py-4 text-center text-sm text-gray-500 dark:text-slate-400">
+          <div
+            v-if="filteredCountries.length === 0"
+            class="px-3 py-4 text-center text-sm text-gray-500 dark:text-slate-400"
+          >
             {{ $t('common.noData') }}
           </div>
         </div>
@@ -119,7 +144,7 @@ const updateDropdownPosition = () => {
 }
 
 // Watch for dropdown open and update position
-watch(showDropdown, (val) => {
+watch(showDropdown, val => {
   if (val) {
     nextTick(() => {
       updateDropdownPosition()
@@ -153,7 +178,7 @@ const selectedCountry = computed(() => {
 })
 
 // Get country display name
-const getCountryDisplayName = (country) => {
+const getCountryDisplayName = country => {
   return country.name[locale.value] || country.name.tr || country.name.en || country.code
 }
 
@@ -170,7 +195,7 @@ const toggleDropdown = () => {
 }
 
 // Select country
-const selectCountry = (country) => {
+const selectCountry = country => {
   emit('update:modelValue', country.code)
   showDropdown.value = false
   searchQuery.value = ''
@@ -184,7 +209,7 @@ const selectFirst = () => {
 }
 
 // Handle click outside to close dropdown
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   const clickedTrigger = triggerRef.value?.contains(event.target)
   const clickedDropdown = dropdownRef.value?.contains(event.target)
   if (!clickedTrigger && !clickedDropdown) {

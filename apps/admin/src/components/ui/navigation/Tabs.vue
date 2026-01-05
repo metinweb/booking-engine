@@ -36,7 +36,7 @@
     </div>
 
     <!-- Tab Panels -->
-    <div class="mt-4" v-if="$slots.default">
+    <div v-if="$slots.default" class="mt-4">
       <slot></slot>
     </div>
   </div>
@@ -59,19 +59,19 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'underline',
-    validator: (v) => ['underline', 'pills', 'boxed'].includes(v)
+    validator: v => ['underline', 'pills', 'boxed'].includes(v)
   },
   // Size
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'blue', 'green', 'red', 'purple'].includes(v)
+    validator: v => ['indigo', 'blue', 'green', 'red', 'purple'].includes(v)
   },
   // Full width
   grow: {
@@ -141,7 +141,7 @@ const iconSizeClasses = computed(() => {
 })
 
 // Get tab classes
-const getTabClasses = (tab) => {
+const getTabClasses = tab => {
   const isActive = props.modelValue === tab.value
   const colors = colorMap[props.color]
 
@@ -186,7 +186,7 @@ const getTabClasses = (tab) => {
 }
 
 // Get badge classes
-const getBadgeClasses = (tab) => {
+const getBadgeClasses = tab => {
   const isActive = props.modelValue === tab.value
 
   if (isActive) {
@@ -196,7 +196,7 @@ const getBadgeClasses = (tab) => {
 }
 
 // Select tab
-const selectTab = (tab) => {
+const selectTab = tab => {
   if (tab.disabled) return
   emit('update:modelValue', tab.value)
   emit('change', tab.value)

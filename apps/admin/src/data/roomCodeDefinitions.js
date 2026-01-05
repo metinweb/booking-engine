@@ -659,7 +659,7 @@ export const ROOM_CODE_DEFINITIONS = [
 /**
  * Get room code definition by code
  */
-export const getRoomCodeDefinition = (code) => {
+export const getRoomCodeDefinition = code => {
   return ROOM_CODE_DEFINITIONS.find(def => def.code === code.toUpperCase())
 }
 
@@ -670,9 +670,10 @@ export const searchRoomCodes = (query, locale = 'en') => {
   const q = query.toLowerCase()
   return ROOM_CODE_DEFINITIONS.filter(def => {
     const codeMatch = def.code.toLowerCase().includes(q)
-    const nameMatch = def.names[locale]?.toLowerCase().includes(q) ||
-                      def.names.en?.toLowerCase().includes(q) ||
-                      def.names.tr?.toLowerCase().includes(q)
+    const nameMatch =
+      def.names[locale]?.toLowerCase().includes(q) ||
+      def.names.en?.toLowerCase().includes(q) ||
+      def.names.tr?.toLowerCase().includes(q)
     return codeMatch || nameMatch
   })
 }

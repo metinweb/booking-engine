@@ -105,7 +105,7 @@ export default class VonageProvider extends ISMSProvider {
     if (!phone) return null
 
     // Remove all non-numeric characters
-    let cleaned = phone.replace(/[^0-9]/g, '')
+    const cleaned = phone.replace(/[^0-9]/g, '')
 
     // Handle Turkish numbers
     if (cleaned.startsWith('90') && cleaned.length === 12) {
@@ -145,22 +145,22 @@ export default class VonageProvider extends ISMSProvider {
    */
   getErrorMessage(code) {
     const errorMessages = {
-      '1': 'Akış sınırlandırıldı',
-      '2': 'Parametre eksik',
-      '3': 'Geçersiz parametre',
-      '4': 'Geçersiz kimlik bilgileri',
-      '5': 'İç hata',
-      '6': 'Geçersiz mesaj',
-      '7': 'Numara yasaklı',
-      '8': 'Hesap yasaklı',
-      '9': 'Partner kotası aşıldı',
-      '10': 'Çok fazla bağlı istek',
-      '11': 'REST ile kullanılamaz',
-      '12': 'Mesaj çok uzun',
-      '15': 'Geçersiz gönderici adresi',
-      '22': 'Geçersiz ağ kodu',
-      '23': 'Geçersiz callback URL',
-      '29': 'Tekrarlanan numara'
+      1: 'Akış sınırlandırıldı',
+      2: 'Parametre eksik',
+      3: 'Geçersiz parametre',
+      4: 'Geçersiz kimlik bilgileri',
+      5: 'İç hata',
+      6: 'Geçersiz mesaj',
+      7: 'Numara yasaklı',
+      8: 'Hesap yasaklı',
+      9: 'Partner kotası aşıldı',
+      10: 'Çok fazla bağlı istek',
+      11: 'REST ile kullanılamaz',
+      12: 'Mesaj çok uzun',
+      15: 'Geçersiz gönderici adresi',
+      22: 'Geçersiz ağ kodu',
+      23: 'Geçersiz callback URL',
+      29: 'Tekrarlanan numara'
     }
 
     return errorMessages[code]

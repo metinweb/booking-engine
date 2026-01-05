@@ -1,15 +1,12 @@
 <template>
-  <Modal
-    v-model="isOpen"
-    title="Sifre Sifirla"
-    size="sm"
-    :close-on-overlay="false"
-  >
+  <Modal v-model="isOpen" title="Sifre Sifirla" size="sm" :close-on-overlay="false">
     <div class="space-y-4">
       <!-- User Info -->
       <div class="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
         <p class="text-sm text-gray-500 dark:text-slate-400">Kullanici</p>
-        <p class="font-medium text-gray-900 dark:text-white">{{ user?.firstName }} {{ user?.lastName }}</p>
+        <p class="font-medium text-gray-900 dark:text-white">
+          {{ user?.firstName }} {{ user?.lastName }}
+        </p>
         <p class="text-sm text-gray-500 dark:text-slate-400">@{{ user?.username }}</p>
       </div>
 
@@ -30,10 +27,12 @@
           />
           <button
             type="button"
-            @click="showPassword = !showPassword"
             class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            @click="showPassword = !showPassword"
           >
-            <span class="material-icons text-lg">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+            <span class="material-icons text-lg">{{
+              showPassword ? 'visibility_off' : 'visibility'
+            }}</span>
           </button>
         </div>
       </div>
@@ -66,8 +65,8 @@
       <!-- Generate Random Password -->
       <button
         type="button"
-        @click="generatePassword"
         class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1"
+        @click="generatePassword"
       >
         <span class="material-icons text-lg">casino</span>
         Rastgele sifre olustur
@@ -77,16 +76,18 @@
     <template #footer>
       <div class="flex justify-end gap-3">
         <button
-          @click="isOpen = false"
           type="button"
           class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+          @click="isOpen = false"
         >
           Iptal
         </button>
         <button
-          @click="resetPassword"
-          :disabled="saving || !newPassword || newPassword !== confirmPassword || newPassword.length < 6"
+          :disabled="
+            saving || !newPassword || newPassword !== confirmPassword || newPassword.length < 6
+          "
           class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg disabled:opacity-50 flex items-center gap-2"
+          @click="resetPassword"
         >
           <span v-if="saving" class="animate-spin material-icons text-lg">refresh</span>
           {{ saving ? 'Sifirlaniyor...' : 'Sifreyi Sifirla' }}
@@ -113,7 +114,7 @@ const toast = useToast()
 
 const isOpen = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const saving = ref(false)
@@ -122,13 +123,16 @@ const newPassword = ref('')
 const confirmPassword = ref('')
 
 // Reset form when modal opens
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    newPassword.value = ''
-    confirmPassword.value = ''
-    showPassword.value = false
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      newPassword.value = ''
+      confirmPassword.value = ''
+      showPassword.value = false
+    }
   }
-})
+)
 
 const generatePassword = () => {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'

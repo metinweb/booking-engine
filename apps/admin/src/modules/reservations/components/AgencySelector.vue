@@ -1,5 +1,5 @@
 <template>
-  <div class="agency-selector" ref="containerRef">
+  <div ref="containerRef" class="agency-selector">
     <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
@@ -9,10 +9,10 @@
     <div class="relative">
       <button
         type="button"
-        @click="toggleDropdown"
         :disabled="disabled"
         class="w-full flex items-center gap-2 px-3 py-2 border rounded-lg text-left transition-all"
         :class="triggerClasses"
+        @click="toggleDropdown"
       >
         <span class="material-icons text-gray-400 dark:text-slate-500">business</span>
 
@@ -21,14 +21,19 @@
             <div class="font-medium text-gray-900 dark:text-white truncate">
               {{ selectedAgency.companyName || selectedAgency.tradeName }}
             </div>
-            <div v-if="selectedAgency.tradeName && selectedAgency.tradeName !== selectedAgency.companyName" class="text-xs text-gray-500 dark:text-slate-400 truncate">
+            <div
+              v-if="
+                selectedAgency.tradeName && selectedAgency.tradeName !== selectedAgency.companyName
+              "
+              class="text-xs text-gray-500 dark:text-slate-400 truncate"
+            >
               {{ selectedAgency.tradeName }}
             </div>
           </div>
           <button
             type="button"
-            @click.stop="clearSelection"
             class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded"
+            @click.stop="clearSelection"
           >
             <span class="material-icons text-gray-400 text-sm">close</span>
           </button>
@@ -38,7 +43,10 @@
           {{ placeholder || $t('pms.reservation.selectAgency') }}
         </span>
 
-        <span class="material-icons text-gray-400 transition-transform" :class="showDropdown ? 'rotate-180' : ''">
+        <span
+          class="material-icons text-gray-400 transition-transform"
+          :class="showDropdown ? 'rotate-180' : ''"
+        >
           expand_more
         </span>
       </button>
@@ -55,7 +63,10 @@
         <!-- Search Input -->
         <div class="p-3 border-b border-gray-200 dark:border-slate-700">
           <div class="relative">
-            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+            <span
+              class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
+              >search</span
+            >
             <input
               ref="searchInputRef"
               v-model="searchQuery"
@@ -79,19 +90,19 @@
           <button
             v-if="searchQuery && !exactMatch"
             type="button"
-            @click="showCreateForm = true"
             class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border-b border-gray-100 dark:border-slate-700"
+            @click="showCreateForm = true"
           >
-            <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+            <div
+              class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center"
+            >
               <span class="material-icons text-indigo-600 dark:text-indigo-400 text-lg">add</span>
             </div>
             <div>
               <div class="font-medium text-indigo-600 dark:text-indigo-400">
                 {{ $t('pms.reservation.createAgency') }}
               </div>
-              <div class="text-xs text-gray-500 dark:text-slate-400">
-                "{{ searchQuery }}"
-              </div>
+              <div class="text-xs text-gray-500 dark:text-slate-400">"{{ searchQuery }}"</div>
             </div>
           </button>
 
@@ -100,11 +111,13 @@
             v-for="agency in filteredAgencies"
             :key="agency._id"
             type="button"
-            @click="selectAgency(agency)"
             class="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
             :class="modelValue === agency._id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''"
+            @click="selectAgency(agency)"
           >
-            <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+            <div
+              class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 flex items-center justify-center"
+            >
               <span class="material-icons text-gray-500 dark:text-slate-400 text-lg">business</span>
             </div>
             <div class="flex-1 min-w-0">
@@ -112,7 +125,9 @@
                 {{ agency.companyName }}
               </div>
               <div class="text-xs text-gray-500 dark:text-slate-400 flex items-center gap-2">
-                <span v-if="agency.tradeName && agency.tradeName !== agency.companyName">{{ agency.tradeName }}</span>
+                <span v-if="agency.tradeName && agency.tradeName !== agency.companyName">{{
+                  agency.tradeName
+                }}</span>
                 <span v-if="agency.email">{{ agency.email }}</span>
               </div>
             </div>
@@ -127,7 +142,9 @@
           <!-- No Results -->
           <div v-if="filteredAgencies.length === 0 && !searchQuery" class="py-8 text-center">
             <span class="material-icons text-4xl text-gray-300 dark:text-slate-600">business</span>
-            <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">{{ $t('pms.reservation.noAgencies') }}</p>
+            <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('pms.reservation.noAgencies') }}
+            </p>
           </div>
         </div>
       </div>
@@ -140,23 +157,27 @@
         class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50"
         @click.self="showCreateForm = false"
       >
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+        <div
+          class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+        >
           <!-- Header -->
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+          <div
+            class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700"
+          >
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ $t('pms.reservation.newAgency') }}
             </h3>
             <button
               type="button"
-              @click="showCreateForm = false"
               class="p-1 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+              @click="showCreateForm = false"
             >
               <span class="material-icons text-gray-500">close</span>
             </button>
           </div>
 
           <!-- Form -->
-          <form @submit.prevent="createAgency" class="p-6 space-y-4">
+          <form class="p-6 space-y-4" @submit.prevent="createAgency">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                 {{ $t('pms.reservation.companyName') }} *
@@ -207,7 +228,10 @@
             </div>
 
             <!-- Error Message -->
-            <div v-if="createError" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div
+              v-if="createError"
+              class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+            >
               <p class="text-sm text-red-600 dark:text-red-400">{{ createError }}</p>
             </div>
 
@@ -215,8 +239,8 @@
             <div class="flex items-center gap-3 pt-2">
               <button
                 type="button"
-                @click="showCreateForm = false"
                 class="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700"
+                @click="showCreateForm = false"
               >
                 {{ $t('common.cancel') }}
               </button>
@@ -226,7 +250,7 @@
                 class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <span v-if="creating" class="material-icons animate-spin text-sm">refresh</span>
-                <span class="material-icons text-sm" v-else>add</span>
+                <span v-else class="material-icons text-sm">add</span>
                 {{ $t('common.create') }}
               </button>
             </div>
@@ -330,9 +354,8 @@ const exactMatch = computed(() => {
   if (!searchQuery.value) return true
   const list = Array.isArray(agencies.value) ? agencies.value : []
   const query = searchQuery.value.toLowerCase()
-  return list.some(a =>
-    a.companyName?.toLowerCase() === query ||
-    a.tradeName?.toLowerCase() === query
+  return list.some(
+    a => a.companyName?.toLowerCase() === query || a.tradeName?.toLowerCase() === query
   )
 })
 
@@ -378,7 +401,7 @@ const toggleDropdown = () => {
   }
 }
 
-const selectAgency = (agency) => {
+const selectAgency = agency => {
   emit('update:modelValue', agency._id)
   emit('select', agency)
   showDropdown.value = false
@@ -444,7 +467,7 @@ const fetchAgencies = async () => {
 }
 
 // Click outside handler
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   const clickedContainer = containerRef.value?.contains(event.target)
   const clickedDropdown = dropdownRef.value?.contains(event.target)
 
@@ -454,7 +477,7 @@ const handleClickOutside = (event) => {
 }
 
 // Watch for opening create form with search query
-watch(showCreateForm, (val) => {
+watch(showCreateForm, val => {
   if (val && searchQuery.value) {
     newAgency.value.companyName = searchQuery.value
   }

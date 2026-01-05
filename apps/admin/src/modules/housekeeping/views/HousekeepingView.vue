@@ -16,7 +16,9 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+    >
       <div class="flex flex-wrap items-center gap-3">
         <!-- Floor Filter -->
         <div class="flex items-center gap-2">
@@ -61,16 +63,24 @@
         <!-- View Mode -->
         <div class="ml-auto flex items-center gap-1 bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
           <button
-            @click="viewMode = 'grid'"
             class="p-1.5 rounded transition-colors"
-            :class="viewMode === 'grid' ? 'bg-white dark:bg-slate-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            :class="
+              viewMode === 'grid'
+                ? 'bg-white dark:bg-slate-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            "
+            @click="viewMode = 'grid'"
           >
             <span class="material-icons text-lg">grid_view</span>
           </button>
           <button
-            @click="viewMode = 'list'"
             class="p-1.5 rounded transition-colors"
-            :class="viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+            :class="
+              viewMode === 'list'
+                ? 'bg-white dark:bg-slate-600 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            "
+            @click="viewMode = 'list'"
           >
             <span class="material-icons text-lg">view_list</span>
           </button>
@@ -84,27 +94,45 @@
     </div>
 
     <!-- No Hotel Selected -->
-    <div v-else-if="!hotelId" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center">
+    <div
+      v-else-if="!hotelId"
+      class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center"
+    >
       <span class="material-icons text-4xl text-amber-500 mb-2">hotel</span>
       <p class="text-amber-700 dark:text-amber-300">Lutfen ust bardaki seciciden bir otel secin.</p>
     </div>
 
     <!-- No Rooms -->
-    <div v-else-if="filteredRooms.length === 0 && !loading" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-12 text-center">
-      <div class="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+    <div
+      v-else-if="filteredRooms.length === 0 && !loading"
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-12 text-center"
+    >
+      <div
+        class="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4"
+      >
         <span class="material-icons text-3xl text-gray-400">meeting_room</span>
       </div>
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Oda Bulunamadi</h3>
       <p class="text-gray-500 dark:text-slate-400">
-        {{ rooms.length === 0 ? 'Henuz oda eklenmemis. Ayarlar sayfasindan oda ekleyebilirsiniz.' : 'Filtrelere uygun oda bulunamadi.' }}
+        {{
+          rooms.length === 0
+            ? 'Henuz oda eklenmemis. Ayarlar sayfasindan oda ekleyebilirsiniz.'
+            : 'Filtrelere uygun oda bulunamadi.'
+        }}
       </p>
     </div>
 
     <!-- Grid View -->
     <div v-else-if="viewMode === 'grid'" class="space-y-6">
-      <div v-for="floor in sortedFloors" :key="floor" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+      <div
+        v-for="floor in sortedFloors"
+        :key="floor"
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+      >
         <!-- Floor Header -->
-        <div class="px-4 py-3 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+        <div
+          class="px-4 py-3 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between"
+        >
           <h3 class="font-semibold text-gray-900 dark:text-white">{{ floor }}. Kat</h3>
           <span class="text-sm text-gray-500 dark:text-slate-400">
             {{ getRoomsByFloor(floor).length }} oda
@@ -112,22 +140,29 @@
         </div>
 
         <!-- Rooms Grid -->
-        <div class="p-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
+        <div
+          class="p-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3"
+        >
           <div
             v-for="room in getRoomsByFloor(floor)"
             :key="room._id"
-            @click="openRoomDetail(room)"
             class="relative cursor-pointer rounded-lg border-2 p-3 transition-all hover:shadow-lg"
             :class="getRoomCardClasses(room)"
+            @click="openRoomDetail(room)"
           >
             <!-- Room Number -->
             <div class="text-center">
-              <span class="text-lg font-bold text-gray-900 dark:text-white">{{ room.roomNumber }}</span>
+              <span class="text-lg font-bold text-gray-900 dark:text-white">{{
+                room.roomNumber
+              }}</span>
             </div>
 
             <!-- Status Icon -->
             <div class="absolute top-1 right-1">
-              <span class="material-icons text-sm" :class="ROOM_STATUS_INFO[room.status]?.textColor">
+              <span
+                class="material-icons text-sm"
+                :class="ROOM_STATUS_INFO[room.status]?.textColor"
+              >
                 {{ ROOM_STATUS_INFO[room.status]?.icon }}
               </span>
             </div>
@@ -140,7 +175,10 @@
             </div>
 
             <!-- Guest indicator for occupied rooms -->
-            <div v-if="room.status === 'occupied' && room.currentGuests?.length" class="text-center mt-1">
+            <div
+              v-if="room.status === 'occupied' && room.currentGuests?.length"
+              class="text-center mt-1"
+            >
               <span class="text-xs text-blue-600 dark:text-blue-400 truncate block">
                 {{ room.currentGuests[0]?.lastName }}
               </span>
@@ -156,17 +194,48 @@
     </div>
 
     <!-- List View -->
-    <div v-else class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div
+      v-else
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+    >
       <table class="w-full">
         <thead class="bg-gray-50 dark:bg-slate-700/50">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Oda</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Tip</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Durum</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Temizlik</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Misafir</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Gorevli</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Islemler</th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Oda
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Tip
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Durum
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Temizlik
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Misafir
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Gorevli
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Islemler
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
@@ -188,16 +257,24 @@
             <td class="px-4 py-3">
               <span
                 class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                :class="[ROOM_STATUS_INFO[room.status]?.bgColor, ROOM_STATUS_INFO[room.status]?.textColor]"
+                :class="[
+                  ROOM_STATUS_INFO[room.status]?.bgColor,
+                  ROOM_STATUS_INFO[room.status]?.textColor
+                ]"
               >
-                <span class="material-icons text-sm">{{ ROOM_STATUS_INFO[room.status]?.icon }}</span>
+                <span class="material-icons text-sm">{{
+                  ROOM_STATUS_INFO[room.status]?.icon
+                }}</span>
                 {{ ROOM_STATUS_INFO[room.status]?.label }}
               </span>
             </td>
             <td class="px-4 py-3">
               <span
                 class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
-                :class="[HOUSEKEEPING_STATUS_INFO[room.housekeepingStatus]?.bgColor, HOUSEKEEPING_STATUS_INFO[room.housekeepingStatus]?.textColor]"
+                :class="[
+                  HOUSEKEEPING_STATUS_INFO[room.housekeepingStatus]?.bgColor,
+                  HOUSEKEEPING_STATUS_INFO[room.housekeepingStatus]?.textColor
+                ]"
               >
                 {{ HOUSEKEEPING_STATUS_INFO[room.housekeepingStatus]?.label }}
               </span>
@@ -216,8 +293,8 @@
             </td>
             <td class="px-4 py-3 text-right">
               <button
-                @click.stop="openStatusModal(room)"
                 class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded transition-colors"
+                @click.stop="openStatusModal(room)"
               >
                 <span class="material-icons text-lg">edit</span>
               </button>
@@ -234,28 +311,24 @@
       :hotel-id="hotelId"
       @updated="handleRoomUpdated"
     />
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import roomService, {
   ROOM_STATUS,
-  HOUSEKEEPING_STATUS,
   ROOM_STATUS_INFO,
   HOUSEKEEPING_STATUS_INFO
 } from '@/services/pms/roomService'
 import * as roomServiceModule from '@/services/pms/roomService'
 import { useToast } from 'vue-toastification'
 import { usePMSSocket } from '@/composables/usePMSSocket'
-import { useAccessibility } from '@/composables/useAccessibility'
 import { usePmsContextInjection } from '@/composables/usePmsContext'
 import RoomStatusModal from '@/modules/housekeeping/components/RoomStatusModal.vue'
 
 const toast = useToast()
 const { hotelId } = usePmsContextInjection()
-const { announce } = useAccessibility()
 
 // State
 const loading = ref(false)
@@ -310,22 +383,64 @@ const filteredRooms = computed(() => {
 const statsCards = computed(() => {
   const stats = statistics.value || {}
   return [
-    { key: 'total', label: 'Toplam', value: stats.total || 0, icon: 'meeting_room', iconColor: 'text-gray-500' },
-    { key: 'occupied', label: 'Dolu', value: stats.occupied || 0, icon: 'person', iconColor: 'text-blue-500' },
-    { key: 'vacantClean', label: 'Bos Temiz', value: stats.vacantClean || 0, icon: 'check_circle', iconColor: 'text-green-500' },
-    { key: 'vacantDirty', label: 'Bos Kirli', value: stats.vacantDirty || 0, icon: 'cleaning_services', iconColor: 'text-amber-500' },
-    { key: 'checkout', label: 'Cikis', value: stats.checkout || 0, icon: 'logout', iconColor: 'text-orange-500' },
-    { key: 'maintenance', label: 'Bakim', value: stats.maintenance || 0, icon: 'build', iconColor: 'text-purple-500' },
-    { key: 'outOfOrder', label: 'Kapali', value: stats.outOfOrder || 0, icon: 'block', iconColor: 'text-red-500' }
+    {
+      key: 'total',
+      label: 'Toplam',
+      value: stats.total || 0,
+      icon: 'meeting_room',
+      iconColor: 'text-gray-500'
+    },
+    {
+      key: 'occupied',
+      label: 'Dolu',
+      value: stats.occupied || 0,
+      icon: 'person',
+      iconColor: 'text-blue-500'
+    },
+    {
+      key: 'vacantClean',
+      label: 'Bos Temiz',
+      value: stats.vacantClean || 0,
+      icon: 'check_circle',
+      iconColor: 'text-green-500'
+    },
+    {
+      key: 'vacantDirty',
+      label: 'Bos Kirli',
+      value: stats.vacantDirty || 0,
+      icon: 'cleaning_services',
+      iconColor: 'text-amber-500'
+    },
+    {
+      key: 'checkout',
+      label: 'Cikis',
+      value: stats.checkout || 0,
+      icon: 'logout',
+      iconColor: 'text-orange-500'
+    },
+    {
+      key: 'maintenance',
+      label: 'Bakim',
+      value: stats.maintenance || 0,
+      icon: 'build',
+      iconColor: 'text-purple-500'
+    },
+    {
+      key: 'outOfOrder',
+      label: 'Kapali',
+      value: stats.outOfOrder || 0,
+      icon: 'block',
+      iconColor: 'text-red-500'
+    }
   ]
 })
 
 // Methods
-const getRoomsByFloor = (floor) => {
+const getRoomsByFloor = floor => {
   return filteredRooms.value.filter(r => r.floor === floor)
 }
 
-const getRoomCardClasses = (room) => {
+const getRoomCardClasses = room => {
   const statusInfo = ROOM_STATUS_INFO[room.status]
   const baseClasses = statusInfo?.bgColor || 'bg-gray-100 dark:bg-slate-700'
 
@@ -345,12 +460,12 @@ const getRoomCardClasses = (room) => {
   return [baseClasses, borderColor]
 }
 
-const openRoomDetail = (room) => {
+const openRoomDetail = room => {
   selectedRoom.value = room
   showStatusModal.value = true
 }
 
-const openStatusModal = (room) => {
+const openStatusModal = room => {
   selectedRoom.value = room
   showStatusModal.value = true
 }
@@ -402,53 +517,51 @@ const handleRoomUpdated = async () => {
 }
 
 // Watch hotel changes
-watch(hotelId, (newId) => {
-  if (newId) {
-    fetchRooms()
-    fetchRoomTypes()
-  } else {
-    rooms.value = []
-    roomTypes.value = []
-    statistics.value = null
-  }
-}, { immediate: true })
+watch(
+  hotelId,
+  newId => {
+    if (newId) {
+      fetchRooms()
+      fetchRoomTypes()
+    } else {
+      rooms.value = []
+      roomTypes.value = []
+      statistics.value = null
+    }
+  },
+  { immediate: true }
+)
 
 // Socket.io real-time updates (socket room managed by PMSLayout)
-const {
-  onRoomStatusChange,
-  onHousekeeping,
-  onCheckIn,
-  onCheckOut,
-  isConnected
-} = usePMSSocket()
+const { onRoomStatusChange, onHousekeeping, onCheckIn, onCheckOut } = usePMSSocket()
 
 // Store unregister functions for cleanup
 const unregisterCallbacks = []
 
 // Handle real-time room status changes
 // Note: Notifications are handled by notification system, only update UI here
-const handleRoomStatusChange = (data) => {
+const handleRoomStatusChange = data => {
   console.log('[Housekeeping] Room status change:', data)
   refreshAndUpdateSelected()
 }
 unregisterCallbacks.push(onRoomStatusChange(handleRoomStatusChange))
 
 // Handle real-time housekeeping updates
-const handleHousekeepingUpdate = (data) => {
+const handleHousekeepingUpdate = data => {
   console.log('[Housekeeping] Update:', data)
   refreshAndUpdateSelected()
 }
 unregisterCallbacks.push(onHousekeeping(handleHousekeepingUpdate))
 
 // Handle check-in (room becomes occupied)
-const handleCheckInEvent = (data) => {
+const handleCheckInEvent = data => {
   console.log('[Housekeeping] Check-in:', data)
   refreshAndUpdateSelected()
 }
 unregisterCallbacks.push(onCheckIn(handleCheckInEvent))
 
 // Handle check-out (room needs cleaning)
-const handleCheckOutEvent = (data) => {
+const handleCheckOutEvent = data => {
   console.log('[Housekeeping] Check-out:', data)
   refreshAndUpdateSelected()
 }

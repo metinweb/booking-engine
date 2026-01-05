@@ -18,7 +18,13 @@ export default class TwilioProvider extends ISMSProvider {
     return [
       { key: 'accountSid', label: 'Account SID', type: 'text', required: true },
       { key: 'authToken', label: 'Auth Token', type: 'password', required: true },
-      { key: 'fromNumber', label: 'Gönderici Numara', type: 'tel', required: true, placeholder: '+1234567890' }
+      {
+        key: 'fromNumber',
+        label: 'Gönderici Numara',
+        type: 'tel',
+        required: true,
+        placeholder: '+1234567890'
+      }
     ]
   }
 
@@ -128,7 +134,7 @@ export default class TwilioProvider extends ISMSProvider {
     if (!phone) return null
 
     // Remove all non-numeric characters except leading +
-    let cleaned = phone.replace(/[^0-9+]/g, '')
+    const cleaned = phone.replace(/[^0-9+]/g, '')
 
     // If already starts with +, return as is
     if (cleaned.startsWith('+')) {
@@ -170,18 +176,18 @@ export default class TwilioProvider extends ISMSProvider {
    */
   getErrorMessage(code) {
     const errorMessages = {
-      '21211': 'Geçersiz telefon numarası',
-      '21608': 'Bölge desteklenmiyor',
-      '21610': 'Numara kara listede',
-      '21614': 'Numara SMS desteklemiyor',
-      '30001': 'Mesaj kuyruğa alınamadı',
-      '30002': 'Hesap askıya alınmış',
-      '30003': 'Numara erişilemez',
-      '30004': 'Mesaj engellendi',
-      '30005': 'Bilinmeyen hedef',
-      '30006': 'Operatör hatası',
-      '30007': 'Mesaj filtre tarafından engellendi',
-      '30008': 'Bilinmeyen hata'
+      21211: 'Geçersiz telefon numarası',
+      21608: 'Bölge desteklenmiyor',
+      21610: 'Numara kara listede',
+      21614: 'Numara SMS desteklemiyor',
+      30001: 'Mesaj kuyruğa alınamadı',
+      30002: 'Hesap askıya alınmış',
+      30003: 'Numara erişilemez',
+      30004: 'Mesaj engellendi',
+      30005: 'Bilinmeyen hedef',
+      30006: 'Operatör hatası',
+      30007: 'Mesaj filtre tarafından engellendi',
+      30008: 'Bilinmeyen hata'
     }
 
     return errorMessages[code]

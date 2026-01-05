@@ -168,8 +168,12 @@ export const getPreAuditChecks = asyncHandler(async (req, res) => {
   }).lean()
 
   summary.totalDepartures = todayDepartures.length
-  summary.checkedOutDepartures = todayDepartures.filter(s => s.status === STAY_STATUS.CHECKED_OUT).length
-  summary.pendingDepartures = todayDepartures.filter(s => s.status === STAY_STATUS.CHECKED_IN).length
+  summary.checkedOutDepartures = todayDepartures.filter(
+    s => s.status === STAY_STATUS.CHECKED_OUT
+  ).length
+  summary.pendingDepartures = todayDepartures.filter(
+    s => s.status === STAY_STATUS.CHECKED_IN
+  ).length
 
   if (summary.pendingDepartures > 0) {
     issues.push({
@@ -189,7 +193,9 @@ export const getPreAuditChecks = asyncHandler(async (req, res) => {
     partner: req.partner._id,
     status: STAY_STATUS.CHECKED_IN,
     balance: { $gt: 0 }
-  }).populate('room', 'roomNumber').lean()
+  })
+    .populate('room', 'roomNumber')
+    .lean()
 
   summary.outstandingBalances = staysWithBalance.length
   summary.outstandingAmount = staysWithBalance.reduce((sum, s) => sum + (s.balance || 0), 0)
@@ -216,7 +222,9 @@ export const getPreAuditChecks = asyncHandler(async (req, res) => {
     hotel: hotelId,
     partner: req.partner._id,
     housekeepingStatus: { $in: ['dirty', 'cleaning'] }
-  }).select('roomNumber floor housekeepingStatus').lean()
+  })
+    .select('roomNumber floor housekeepingStatus')
+    .lean()
 
   summary.dirtyRooms = dirtyRooms.length
 
@@ -237,7 +245,9 @@ export const getPreAuditChecks = asyncHandler(async (req, res) => {
     hotel: hotelId,
     partner: req.partner._id,
     status: 'open'
-  }).populate('cashier', 'firstName lastName').lean()
+  })
+    .populate('cashier', 'firstName lastName')
+    .lean()
 
   summary.openShifts = openShifts.length
 
@@ -250,7 +260,8 @@ export const getPreAuditChecks = asyncHandler(async (req, res) => {
         count: summary.openShifts,
         shifts: openShifts.map(s => ({
           shiftNumber: s.shiftNumber,
-          cashierName: s.cashierName || `${s.cashier?.firstName || ''} ${s.cashier?.lastName || ''}`.trim(),
+          cashierName:
+            s.cashierName || `${s.cashier?.firstName || ''} ${s.cashier?.lastName || ''}`.trim(),
           openedAt: s.openedAt
         }))
       }
@@ -264,7 +275,7 @@ export const getPreAuditChecks = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     data: {
-      status: hasErrors ? 'error' : (hasWarnings ? 'warning' : 'success'),
+      status: hasErrors ? 'error' : hasWarnings ? 'warning' : 'success',
       canProceed: !hasErrors,
       issues,
       summary
@@ -341,7 +352,8 @@ export const getNoShows = asyncHandler(async (req, res) => {
     return {
       booking: booking._id,
       bookingNumber: booking.bookingNumber,
-      guestName: `${booking.leadGuest?.firstName || ''} ${booking.leadGuest?.lastName || ''}`.trim(),
+      guestName:
+        `${booking.leadGuest?.firstName || ''} ${booking.leadGuest?.lastName || ''}`.trim(),
       email: booking.contact?.email,
       phone: booking.contact?.phone,
       roomCount: booking.rooms?.length || 1,
@@ -400,7 +412,8 @@ export const processNoShows = asyncHandler(async (req, res) => {
     records.push({
       booking: booking._id,
       bookingNumber: booking.bookingNumber,
-      guestName: `${booking.leadGuest?.firstName || ''} ${booking.leadGuest?.lastName || ''}`.trim(),
+      guestName:
+        `${booking.leadGuest?.firstName || ''} ${booking.leadGuest?.lastName || ''}`.trim(),
       roomCount: booking.rooms?.length || 1,
       nights: booking.nights,
       totalAmount: booking.pricing?.grandTotal || 0,
@@ -468,7 +481,7 @@ export const getRoomCharges = asyncHandler(async (req, res) => {
         const today = new Date()
         return extraDate.toDateString() === today.toDateString()
       })
-      .reduce((sum, e) => sum + (e.amount * (e.quantity || 1)), 0)
+      .reduce((sum, e) => sum + e.amount * (e.quantity || 1), 0)
 
     return {
       stay: stay._id,
@@ -603,7 +616,9 @@ export const getCashierData = asyncHandler(async (req, res) => {
   const shifts = openShifts.map(shift => ({
     shift: shift._id,
     shiftNumber: shift.shiftNumber,
-    cashierName: shift.cashierName || `${shift.cashier?.firstName || ''} ${shift.cashier?.lastName || ''}`.trim(),
+    cashierName:
+      shift.cashierName ||
+      `${shift.cashier?.firstName || ''} ${shift.cashier?.lastName || ''}`.trim(),
     openedAt: shift.openedAt,
     status: shift.status,
     expectedCash: shift.currentBalance?.cash || 0,
@@ -762,7 +777,9 @@ export const getAuditSummary = asyncHandler(async (req, res) => {
     .reduce((sum, t) => sum + t.amount, 0)
 
   const extraRevenue = transactions
-    .filter(t => ['EXTRA_CHARGE', 'MINIBAR', 'SPA', 'LAUNDRY', 'RESTAURANT', 'BAR'].includes(t.type))
+    .filter(t =>
+      ['EXTRA_CHARGE', 'MINIBAR', 'SPA', 'LAUNDRY', 'RESTAURANT', 'BAR'].includes(t.type)
+    )
     .reduce((sum, t) => sum + t.amount, 0)
 
   const totalRevenue = roomRevenue + extraRevenue
@@ -800,17 +817,12 @@ export const getAuditSummary = asyncHandler(async (req, res) => {
   const noShows = audit.noShowProcessing?.records?.filter(r => r.action === 'no_show').length || 0
 
   // Calculate metrics
-  const occupancyRate = roomStats.total > 0
-    ? Math.round((roomStats.occupied / roomStats.total) * 100)
-    : 0
+  const occupancyRate =
+    roomStats.total > 0 ? Math.round((roomStats.occupied / roomStats.total) * 100) : 0
 
-  const averageDailyRate = roomStats.occupied > 0
-    ? Math.round(roomRevenue / roomStats.occupied)
-    : 0
+  const averageDailyRate = roomStats.occupied > 0 ? Math.round(roomRevenue / roomStats.occupied) : 0
 
-  const revPar = roomStats.total > 0
-    ? Math.round(roomRevenue / roomStats.total)
-    : 0
+  const revPar = roomStats.total > 0 ? Math.round(roomRevenue / roomStats.total) : 0
 
   // Update audit summary
   audit.summary = {
@@ -858,10 +870,12 @@ export const completeAudit = asyncHandler(async (req, res) => {
   }
 
   // Verify all steps completed
-  if (!audit.preAuditCheck?.completed ||
+  if (
+    !audit.preAuditCheck?.completed ||
     !audit.noShowProcessing?.completed ||
     !audit.roomChargePosting?.completed ||
-    !audit.cashierReconciliation?.completed) {
+    !audit.cashierReconciliation?.completed
+  ) {
     throw new BadRequestError('Tum adimlar tamamlanmadan audit kapatılamaz')
   }
 

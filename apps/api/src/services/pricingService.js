@@ -18,43 +18,106 @@ import Market from '../modules/planning/market.model.js'
 import Season from '../modules/planning/season.model.js'
 import Hotel from '../modules/hotel/hotel.model.js'
 import {
-	calculatePrice,
-	calculateCombinationMultiplier,
-	getEffectiveMultiplier,
-	generateCombinationKey
+  calculatePrice,
+  calculateCombinationMultiplier,
+  getEffectiveMultiplier,
+  generateCombinationKey
 } from '../utils/multiplierUtils.js'
 import { BadRequestError, NotFoundError } from '../core/errors.js'
 import cache, { CACHE_PREFIXES, CACHE_TTL, generateCacheKey } from './cacheService.js'
 
 /**
+ * Custom error class for pricing-related errors
+ */
+export class PricingError extends Error {
+  constructor(code, details = {}) {
+    super(code)
+    this.name = 'PricingError'
+    this.code = code
+    this.details = details
+  }
+}
+
+/**
+ * Validate pricing result to ensure all required fields are present
+ * @param {Object} result - Pricing result from calculatePriceWithCampaigns
+ * @param {Object} context - Additional context for error reporting
+ * @throws {PricingError} If validation fails
+ * @returns {Object} Validated result
+ */
+export function validatePricingResult(result, context = {}) {
+  // Check success
+  if (!result.success) {
+    throw new PricingError('PRICING_CALCULATION_FAILED', {
+      error: result.error,
+      message: result.message,
+      ...context
+    })
+  }
+
+  // Check required pricing fields
+  const pricing = result.pricing
+  if (!pricing) {
+    throw new PricingError('MISSING_PRICING_DATA', { result, ...context })
+  }
+
+  const requiredFields = ['originalTotal', 'finalTotal']
+  for (const field of requiredFields) {
+    if (pricing[field] === undefined || pricing[field] === null) {
+      throw new PricingError(`MISSING_PRICING_FIELD_${field.toUpperCase()}`, {
+        field,
+        pricing,
+        ...context
+      })
+    }
+  }
+
+  // Validate logical consistency
+  // finalTotal should equal originalTotal - totalDiscount
+  const expectedFinal = pricing.originalTotal - (pricing.totalDiscount || 0)
+  const tolerance = 0.01 // Allow 1 cent tolerance for rounding
+  if (Math.abs(expectedFinal - pricing.finalTotal) > tolerance) {
+    console.warn('[PricingService] Pricing inconsistency detected:', {
+      originalTotal: pricing.originalTotal,
+      totalDiscount: pricing.totalDiscount,
+      expectedFinal,
+      actualFinal: pricing.finalTotal,
+      difference: Math.abs(expectedFinal - pricing.finalTotal)
+    })
+  }
+
+  return result
+}
+
+/**
  * Convert mongoose Map to plain object
  */
-const mapToObject = (map) => {
-	if (!map) return null
-	if (map instanceof Map) {
-		const obj = {}
-		for (const [key, value] of map) {
-			if (value instanceof Map) {
-				obj[key] = mapToObject(value)
-			} else {
-				obj[key] = value
-			}
-		}
-		return obj
-	}
-	// Already an object (from lean())
-	if (typeof map === 'object' && map !== null && !Array.isArray(map)) {
-		const obj = {}
-		for (const [key, value] of Object.entries(map)) {
-			if (value && typeof value === 'object' && !Array.isArray(value)) {
-				obj[key] = mapToObject(value)
-			} else {
-				obj[key] = value
-			}
-		}
-		return obj
-	}
-	return map
+const mapToObject = map => {
+  if (!map) return null
+  if (map instanceof Map) {
+    const obj = {}
+    for (const [key, value] of map) {
+      if (value instanceof Map) {
+        obj[key] = mapToObject(value)
+      } else {
+        obj[key] = value
+      }
+    }
+    return obj
+  }
+  // Already an object (from lean())
+  if (typeof map === 'object' && map !== null && !Array.isArray(map)) {
+    const obj = {}
+    for (const [key, value] of Object.entries(map)) {
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        obj[key] = mapToObject(value)
+      } else {
+        obj[key] = value
+      }
+    }
+    return obj
+  }
+  return map
 }
 
 /**
@@ -65,33 +128,35 @@ const mapToObject = (map) => {
  * @returns {number} Minimum adults required
  */
 export function getEffectiveMinAdults(roomType, market = null, season = null) {
-	// Start with room type's base minAdults
-	let minAdults = roomType?.occupancy?.minAdults || 1
-	const roomTypeId = roomType?._id?.toString()
+  // Start with room type's base minAdults
+  let minAdults = roomType?.occupancy?.minAdults || 1
+  const roomTypeId = roomType?._id?.toString()
 
-	// Check Market override
-	if (market?.pricingOverrides?.length > 0 && roomTypeId) {
-		const marketOverride = market.pricingOverrides.find(po => {
-			const rtId = typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
-			return rtId === roomTypeId && po.useMinAdultsOverride
-		})
-		if (marketOverride && marketOverride.minAdults) {
-			minAdults = marketOverride.minAdults
-		}
-	}
+  // Check Market override
+  if (market?.pricingOverrides?.length > 0 && roomTypeId) {
+    const marketOverride = market.pricingOverrides.find(po => {
+      const rtId =
+        typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
+      return rtId === roomTypeId && po.useMinAdultsOverride
+    })
+    if (marketOverride && marketOverride.minAdults) {
+      minAdults = marketOverride.minAdults
+    }
+  }
 
-	// Check Season override (higher priority than Market)
-	if (season?.pricingOverrides?.length > 0 && roomTypeId) {
-		const seasonOverride = season.pricingOverrides.find(po => {
-			const rtId = typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
-			return rtId === roomTypeId && po.useMinAdultsOverride
-		})
-		if (seasonOverride && seasonOverride.minAdults) {
-			minAdults = seasonOverride.minAdults
-		}
-	}
+  // Check Season override (higher priority than Market)
+  if (season?.pricingOverrides?.length > 0 && roomTypeId) {
+    const seasonOverride = season.pricingOverrides.find(po => {
+      const rtId =
+        typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
+      return rtId === roomTypeId && po.useMinAdultsOverride
+    })
+    if (seasonOverride && seasonOverride.minAdults) {
+      minAdults = seasonOverride.minAdults
+    }
+  }
 
-	return minAdults
+  return minAdults
 }
 
 /**
@@ -103,38 +168,40 @@ export function getEffectiveMinAdults(roomType, market = null, season = null) {
  * @returns {string} 'unit' or 'per_person'
  */
 export function getEffectivePricingType(roomType, market = null, season = null, rate = null) {
-	// Start with room type's base pricing type
-	let pricingType = roomType?.pricingType || 'unit'
-	const roomTypeId = roomType?._id?.toString()
+  // Start with room type's base pricing type
+  let pricingType = roomType?.pricingType || 'unit'
+  const roomTypeId = roomType?._id?.toString()
 
-	// Check Market override
-	if (market?.pricingOverrides?.length > 0 && roomTypeId) {
-		const marketOverride = market.pricingOverrides.find(po => {
-			const rtId = typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
-			return rtId === roomTypeId && po.usePricingTypeOverride
-		})
-		if (marketOverride) {
-			pricingType = marketOverride.pricingType
-		}
-	}
+  // Check Market override
+  if (market?.pricingOverrides?.length > 0 && roomTypeId) {
+    const marketOverride = market.pricingOverrides.find(po => {
+      const rtId =
+        typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
+      return rtId === roomTypeId && po.usePricingTypeOverride
+    })
+    if (marketOverride) {
+      pricingType = marketOverride.pricingType
+    }
+  }
 
-	// Check Season override (higher priority than Market)
-	if (season?.pricingOverrides?.length > 0 && roomTypeId) {
-		const seasonOverride = season.pricingOverrides.find(po => {
-			const rtId = typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
-			return rtId === roomTypeId && po.usePricingTypeOverride
-		})
-		if (seasonOverride) {
-			pricingType = seasonOverride.pricingType
-		}
-	}
+  // Check Season override (higher priority than Market)
+  if (season?.pricingOverrides?.length > 0 && roomTypeId) {
+    const seasonOverride = season.pricingOverrides.find(po => {
+      const rtId =
+        typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
+      return rtId === roomTypeId && po.usePricingTypeOverride
+    })
+    if (seasonOverride) {
+      pricingType = seasonOverride.pricingType
+    }
+  }
 
-	// Rate pricingType is the final stored value (already determined at save time)
-	if (rate?.pricingType) {
-		pricingType = rate.pricingType
-	}
+  // Rate pricingType is the final stored value (already determined at save time)
+  if (rate?.pricingType) {
+    pricingType = rate.pricingType
+  }
 
-	return pricingType
+  return pricingType
 }
 
 /**
@@ -145,75 +212,94 @@ export function getEffectivePricingType(roomType, market = null, season = null, 
  * @param {Object} rate - Rate document (optional)
  * @returns {Object} { adultMultipliers, childMultipliers, combinationTable, roundingRule, useMultipliers }
  */
-export function getEffectiveMultiplierTemplate(roomType, market = null, season = null, rate = null) {
-	const roomTypeId = roomType?._id?.toString()
+export function getEffectiveMultiplierTemplate(
+  roomType,
+  market = null,
+  season = null,
+  rate = null
+) {
+  const roomTypeId = roomType?._id?.toString()
 
-	// Default: no multipliers
-	let result = {
-		useMultipliers: false,
-		adultMultipliers: {},
-		childMultipliers: {},
-		combinationTable: [],
-		roundingRule: 'none'
-	}
+  // Default: no multipliers
+  let result = {
+    useMultipliers: false,
+    adultMultipliers: {},
+    childMultipliers: {},
+    combinationTable: [],
+    roundingRule: 'none'
+  }
 
-	// Start with RoomType's multiplier template
-	if (roomType?.useMultipliers && roomType?.multiplierTemplate) {
-		result = {
-			useMultipliers: true,
-			adultMultipliers: mapToObject(roomType.multiplierTemplate.adultMultipliers) || {},
-			childMultipliers: mapToObject(roomType.multiplierTemplate.childMultipliers) || {},
-			combinationTable: roomType.multiplierTemplate.combinationTable || [],
-			roundingRule: roomType.multiplierTemplate.roundingRule || 'none'
-		}
-	}
+  // Start with RoomType's multiplier template
+  if (roomType?.useMultipliers && roomType?.multiplierTemplate) {
+    result = {
+      useMultipliers: true,
+      adultMultipliers: mapToObject(roomType.multiplierTemplate.adultMultipliers) || {},
+      childMultipliers: mapToObject(roomType.multiplierTemplate.childMultipliers) || {},
+      combinationTable: roomType.multiplierTemplate.combinationTable || [],
+      roundingRule: roomType.multiplierTemplate.roundingRule || 'none'
+    }
+  }
 
-	// Check Market override
-	if (market?.pricingOverrides?.length > 0 && roomTypeId) {
-		const marketOverride = market.pricingOverrides.find(po => {
-			const rtId = typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
-			return rtId === roomTypeId && po.useMultiplierOverride
-		})
-		if (marketOverride?.multiplierOverride) {
-			result = {
-				useMultipliers: true,
-				adultMultipliers: mapToObject(marketOverride.multiplierOverride.adultMultipliers) || result.adultMultipliers,
-				childMultipliers: mapToObject(marketOverride.multiplierOverride.childMultipliers) || result.childMultipliers,
-				combinationTable: marketOverride.multiplierOverride.combinationTable || result.combinationTable,
-				roundingRule: marketOverride.multiplierOverride.roundingRule || result.roundingRule
-			}
-		}
-	}
+  // Check Market override
+  if (market?.pricingOverrides?.length > 0 && roomTypeId) {
+    const marketOverride = market.pricingOverrides.find(po => {
+      const rtId =
+        typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
+      return rtId === roomTypeId && po.useMultiplierOverride
+    })
+    if (marketOverride?.multiplierOverride) {
+      result = {
+        useMultipliers: true,
+        adultMultipliers:
+          mapToObject(marketOverride.multiplierOverride.adultMultipliers) ||
+          result.adultMultipliers,
+        childMultipliers:
+          mapToObject(marketOverride.multiplierOverride.childMultipliers) ||
+          result.childMultipliers,
+        combinationTable:
+          marketOverride.multiplierOverride.combinationTable || result.combinationTable,
+        roundingRule: marketOverride.multiplierOverride.roundingRule || result.roundingRule
+      }
+    }
+  }
 
-	// Check Season override (higher priority than Market)
-	if (season?.pricingOverrides?.length > 0 && roomTypeId) {
-		const seasonOverride = season.pricingOverrides.find(po => {
-			const rtId = typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
-			return rtId === roomTypeId && po.useMultiplierOverride
-		})
-		if (seasonOverride?.multiplierOverride) {
-			result = {
-				useMultipliers: true,
-				adultMultipliers: mapToObject(seasonOverride.multiplierOverride.adultMultipliers) || result.adultMultipliers,
-				childMultipliers: mapToObject(seasonOverride.multiplierOverride.childMultipliers) || result.childMultipliers,
-				combinationTable: seasonOverride.multiplierOverride.combinationTable || result.combinationTable,
-				roundingRule: seasonOverride.multiplierOverride.roundingRule || result.roundingRule
-			}
-		}
-	}
+  // Check Season override (higher priority than Market)
+  if (season?.pricingOverrides?.length > 0 && roomTypeId) {
+    const seasonOverride = season.pricingOverrides.find(po => {
+      const rtId =
+        typeof po.roomType === 'object' ? po.roomType._id?.toString() : po.roomType?.toString()
+      return rtId === roomTypeId && po.useMultiplierOverride
+    })
+    if (seasonOverride?.multiplierOverride) {
+      result = {
+        useMultipliers: true,
+        adultMultipliers:
+          mapToObject(seasonOverride.multiplierOverride.adultMultipliers) ||
+          result.adultMultipliers,
+        childMultipliers:
+          mapToObject(seasonOverride.multiplierOverride.childMultipliers) ||
+          result.childMultipliers,
+        combinationTable:
+          seasonOverride.multiplierOverride.combinationTable || result.combinationTable,
+        roundingRule: seasonOverride.multiplierOverride.roundingRule || result.roundingRule
+      }
+    }
+  }
 
-	// Check Rate override (highest priority)
-	if (rate?.useMultiplierOverride && rate?.multiplierOverride) {
-		result = {
-			useMultipliers: true,
-			adultMultipliers: mapToObject(rate.multiplierOverride.adultMultipliers) || result.adultMultipliers,
-			childMultipliers: mapToObject(rate.multiplierOverride.childMultipliers) || result.childMultipliers,
-			combinationTable: rate.multiplierOverride.combinationTable || result.combinationTable,
-			roundingRule: rate.multiplierOverride.roundingRule || result.roundingRule
-		}
-	}
+  // Check Rate override (highest priority)
+  if (rate?.useMultiplierOverride && rate?.multiplierOverride) {
+    result = {
+      useMultipliers: true,
+      adultMultipliers:
+        mapToObject(rate.multiplierOverride.adultMultipliers) || result.adultMultipliers,
+      childMultipliers:
+        mapToObject(rate.multiplierOverride.childMultipliers) || result.childMultipliers,
+      combinationTable: rate.multiplierOverride.combinationTable || result.combinationTable,
+      roundingRule: rate.multiplierOverride.roundingRule || result.roundingRule
+    }
+  }
 
-	return result
+  return result
 }
 
 /**
@@ -224,24 +310,24 @@ export function getEffectiveMultiplierTemplate(roomType, market = null, season =
  * @returns {Array} Child age groups array
  */
 export function getEffectiveChildAgeGroups(hotel, market = null, season = null) {
-	// Default: hotel's child age groups
-	let childAgeGroups = hotel?.childAgeGroups || []
+  // Default: hotel's child age groups
+  let childAgeGroups = hotel?.childAgeGroups || []
 
-	// Check Market override
-	if (market && !market.childAgeSettings?.inheritFromHotel) {
-		if (market.childAgeSettings?.childAgeGroups?.length > 0) {
-			childAgeGroups = market.childAgeSettings.childAgeGroups
-		}
-	}
+  // Check Market override
+  if (market && !market.childAgeSettings?.inheritFromHotel) {
+    if (market.childAgeSettings?.childAgeGroups?.length > 0) {
+      childAgeGroups = market.childAgeSettings.childAgeGroups
+    }
+  }
 
-	// Check Season override (higher priority than Market)
-	if (season && !season.childAgeSettings?.inheritFromMarket) {
-		if (season.childAgeSettings?.childAgeGroups?.length > 0) {
-			childAgeGroups = season.childAgeSettings.childAgeGroups
-		}
-	}
+  // Check Season override (higher priority than Market)
+  if (season && !season.childAgeSettings?.inheritFromMarket) {
+    if (season.childAgeSettings?.childAgeGroups?.length > 0) {
+      childAgeGroups = season.childAgeSettings.childAgeGroups
+    }
+  }
 
-	return childAgeGroups
+  return childAgeGroups
 }
 
 /**
@@ -253,8 +339,8 @@ export function getEffectiveChildAgeGroups(hotel, market = null, season = null) 
  * @returns {string} Rounding rule
  */
 export function getEffectiveRoundingRule(roomType, market = null, season = null, rate = null) {
-	const template = getEffectiveMultiplierTemplate(roomType, market, season, rate)
-	return template.roundingRule || 'none'
+  const template = getEffectiveMultiplierTemplate(roomType, market, season, rate)
+  return template.roundingRule || 'none'
 }
 
 /**
@@ -262,35 +348,37 @@ export function getEffectiveRoundingRule(roomType, market = null, season = null,
  * Market -> Season (if not inheritFromMarket)
  * @param {Object} market - Market document
  * @param {Object} season - Season document (optional)
- * @returns {Object} { workingMode, commissionRate, markup: { b2c, b2b }, agencyCommission }
+ * @returns {Object} { workingMode, commissionRate, markup: { b2c, b2b }, agencyCommission, agencyMarginShare }
  */
 export function getEffectiveSalesSettings(market, season = null) {
-	// Default values from market
-	let settings = {
-		workingMode: market?.workingMode || 'net',
-		commissionRate: market?.commissionRate || 10,
-		markup: {
-			b2c: market?.markup?.b2c || 0,
-			b2b: market?.markup?.b2b || 0
-		},
-		agencyCommission: market?.agencyCommission || 10
-	}
+  // Default values from market
+  let settings = {
+    workingMode: market?.workingMode || 'net',
+    commissionRate: market?.commissionRate || 10,
+    markup: {
+      b2c: market?.markup?.b2c || 0,
+      b2b: market?.markup?.b2b || 0
+    },
+    agencyCommission: market?.agencyCommission || 10,
+    agencyMarginShare: market?.agencyMarginShare ?? 50 // Default: agency gets 50% of margin
+  }
 
-	// Check Season override (higher priority than Market)
-	if (season && !season.salesSettingsOverride?.inheritFromMarket) {
-		const override = season.salesSettingsOverride
-		settings = {
-			workingMode: override.workingMode || settings.workingMode,
-			commissionRate: override.commissionRate ?? settings.commissionRate,
-			markup: {
-				b2c: override.markup?.b2c ?? settings.markup.b2c,
-				b2b: override.markup?.b2b ?? settings.markup.b2b
-			},
-			agencyCommission: override.agencyCommission ?? settings.agencyCommission
-		}
-	}
+  // Check Season override (higher priority than Market)
+  if (season && !season.salesSettingsOverride?.inheritFromMarket) {
+    const override = season.salesSettingsOverride
+    settings = {
+      workingMode: override.workingMode || settings.workingMode,
+      commissionRate: override.commissionRate ?? settings.commissionRate,
+      markup: {
+        b2c: override.markup?.b2c ?? settings.markup.b2c,
+        b2b: override.markup?.b2b ?? settings.markup.b2b
+      },
+      agencyCommission: override.agencyCommission ?? settings.agencyCommission,
+      agencyMarginShare: override.agencyMarginShare ?? settings.agencyMarginShare
+    }
+  }
 
-	return settings
+  return settings
 }
 
 /**
@@ -301,66 +389,101 @@ export function getEffectiveSalesSettings(market, season = null) {
  *   b2cPrice  = basePrice × (1 + b2cMarkup%)
  *   b2bPrice  = basePrice × (1 + b2bMarkup%)
  *
- * Working Mode: Commission
+ * Working Mode: Commission (with Margin Sharing)
  *   basePrice = gross price (what hotel enters, includes commission)
  *   hotelCost = basePrice × (1 - commissionRate%)
  *   b2cPrice  = basePrice × (1 + b2cMarkup%)
- *   b2bPrice  = basePrice × (1 - agencyCommission%)
  *
- *   Partner earns from B2C: b2cPrice - hotelCost
- *   Partner earns from B2B: b2bPrice - hotelCost
- *   Agency earns from B2B: basePrice - b2bPrice (or basePrice × agencyCommission%)
+ *   Margin Sharing Model:
+ *   - Total margin = commissionRate% (e.g., 10%)
+ *   - Agency share = totalMargin × (agencyMarginShare / 100) (e.g., 10% × 50% = 5%)
+ *   - b2bPrice = basePrice × (1 - agencyShare%) (e.g., basePrice × 0.95)
+ *   - Partner always keeps: totalMargin - agencyShare (e.g., 10% - 5% = 5%)
+ *
+ *   This ensures partner NEVER has negative margin on B2B sales!
  *
  * @param {number} basePrice - Base calculated price
- * @param {Object} salesSettings - { workingMode, commissionRate, markup, agencyCommission }
+ * @param {Object} salesSettings - { workingMode, commissionRate, markup, agencyCommission, agencyMarginShare }
  * @returns {Object} { hotelCost, b2cPrice, b2bPrice, basePrice, breakdown }
  */
 export function calculateTierPricing(basePrice, salesSettings) {
-	const { workingMode, commissionRate, markup, agencyCommission } = salesSettings
+  const { workingMode, commissionRate, markup, agencyMarginShare } = salesSettings
 
-	let hotelCost, b2cPrice, b2bPrice
-	const breakdown = {
-		workingMode,
-		basePrice
-	}
+  let hotelCost, b2cPrice, b2bPrice
+  const breakdown = {
+    workingMode,
+    basePrice
+  }
 
-	if (workingMode === 'commission') {
-		// Commission mode: basePrice is gross (includes partner's commission)
-		hotelCost = basePrice * (1 - commissionRate / 100)
-		b2cPrice = basePrice * (1 + (markup?.b2c || 0) / 100)
-		b2bPrice = basePrice * (1 - agencyCommission / 100)
+  if (workingMode === 'commission') {
+    // Commission mode: basePrice is gross (sale price including commission)
+    // Commission rate is like markup: 10% means hotel adds 10% to their cost
+    // So: basePrice = hotelCost * (1 + commissionRate/100)
+    // Therefore: hotelCost = basePrice / (1 + commissionRate/100)
+    // Real margin = commissionRate / (100 + commissionRate) * 100
+    // Example: 10% commission → hotelCost = basePrice/1.10, realMargin = 9.09%
 
-		breakdown.commissionRate = commissionRate
-		breakdown.partnerCommission = basePrice - hotelCost
-		breakdown.b2cMarkup = markup?.b2c || 0
-		breakdown.agencyCommission = agencyCommission
-		breakdown.partnerB2CProfit = b2cPrice - hotelCost
-		breakdown.partnerB2BProfit = b2bPrice - hotelCost
-		breakdown.agencyProfit = basePrice - b2bPrice
-	} else {
-		// Net mode: basePrice is net (what partner pays to hotel)
-		hotelCost = basePrice
-		b2cPrice = basePrice * (1 + (markup?.b2c || 0) / 100)
-		b2bPrice = basePrice * (1 + (markup?.b2b || 0) / 100)
+    const commRate = commissionRate || 10
+    const agencySharePercent = (agencyMarginShare ?? 50) / 100 // Share of margin for agency (e.g., 50%)
 
-		breakdown.b2cMarkup = markup?.b2c || 0
-		breakdown.b2bMarkup = markup?.b2b || 0
-		breakdown.partnerB2CProfit = b2cPrice - hotelCost
-		breakdown.partnerB2BProfit = b2bPrice - hotelCost
-	}
+    // Calculate real margin from commission rate
+    // 10% commission → 10/110 = 9.09% real margin
+    const realMarginPercent = (commRate / (100 + commRate)) * 100
 
-	// Round to 2 decimal places
-	hotelCost = Math.round(hotelCost * 100) / 100
-	b2cPrice = Math.round(b2cPrice * 100) / 100
-	b2bPrice = Math.round(b2bPrice * 100) / 100
+    // Calculate actual agency commission from margin share
+    // If real margin is 9.09% and agency gets 50% of it, agency commission = 4.545%
+    const calculatedAgencyCommission = realMarginPercent * agencySharePercent
 
-	return {
-		hotelCost,
-		b2cPrice,
-		b2bPrice,
-		basePrice,
-		breakdown
-	}
+    // Hotel cost = basePrice / (1 + commission/100)
+    hotelCost = basePrice / (1 + commRate / 100)
+    b2cPrice = basePrice * (1 + (markup?.b2c || 0) / 100)
+    // Agency gets their share of the margin as discount from basePrice
+    b2bPrice = basePrice * (1 - calculatedAgencyCommission / 100)
+
+    // Calculate amounts for breakdown
+    const totalMargin = basePrice - hotelCost
+    const agencyAmount = basePrice - b2bPrice
+    const partnerB2BAmount = b2bPrice - hotelCost
+
+    breakdown.commissionRate = commRate
+    breakdown.realMarginPercent = Math.round(realMarginPercent * 100) / 100
+    breakdown.agencyMarginShare = agencyMarginShare ?? 50
+    breakdown.calculatedAgencyCommission = Math.round(calculatedAgencyCommission * 100) / 100
+    breakdown.partnerCommission = Math.round(totalMargin * 100) / 100
+    breakdown.b2cMarkup = markup?.b2c || 0
+    breakdown.partnerB2CProfit = Math.round((b2cPrice - hotelCost) * 100) / 100
+    breakdown.partnerB2BProfit = Math.round(partnerB2BAmount * 100) / 100
+    breakdown.agencyProfit = Math.round(agencyAmount * 100) / 100
+    // Real margin percentages (based on sale price)
+    breakdown.realB2CMarginPercent = b2cPrice > 0 ? Math.round(((b2cPrice - hotelCost) / b2cPrice) * 10000) / 100 : 0
+    breakdown.realB2BMarginPercent = b2bPrice > 0 ? Math.round((partnerB2BAmount / b2bPrice) * 10000) / 100 : 0
+  } else {
+    // Net mode: basePrice is net (what partner pays to hotel)
+    hotelCost = basePrice
+    b2cPrice = basePrice * (1 + (markup?.b2c || 0) / 100)
+    b2bPrice = basePrice * (1 + (markup?.b2b || 0) / 100)
+
+    breakdown.b2cMarkup = markup?.b2c || 0
+    breakdown.b2bMarkup = markup?.b2b || 0
+    breakdown.partnerB2CProfit = b2cPrice - hotelCost
+    breakdown.partnerB2BProfit = b2bPrice - hotelCost
+    // Real margin percentages
+    breakdown.realB2CMarginPercent = b2cPrice > 0 ? Math.round(((b2cPrice - hotelCost) / b2cPrice) * 10000) / 100 : 0
+    breakdown.realB2BMarginPercent = b2bPrice > 0 ? Math.round(((b2bPrice - hotelCost) / b2bPrice) * 10000) / 100 : 0
+  }
+
+  // Round to 2 decimal places
+  hotelCost = Math.round(hotelCost * 100) / 100
+  b2cPrice = Math.round(b2cPrice * 100) / 100
+  b2bPrice = Math.round(b2bPrice * 100) / 100
+
+  return {
+    hotelCost,
+    b2cPrice,
+    b2bPrice,
+    basePrice,
+    breakdown
+  }
 }
 
 /**
@@ -370,115 +493,122 @@ export function calculateTierPricing(basePrice, salesSettings) {
  * @returns {Object} { isBookable, restrictions: { stopSale, singleStop, belowMinAdults, minStay, maxStay, releaseDays, closedToArrival, closedToDeparture } }
  */
 export function checkRestrictions(rate, options = {}) {
-	const { checkInDate, checkOutDate, adults = 2, bookingDate = new Date(), requiredRooms = 1, minAdults = 1 } = options
+  const {
+    checkInDate,
+    checkOutDate,
+    adults = 2,
+    bookingDate = new Date(),
+    requiredRooms = 1,
+    minAdults = 1
+  } = options
 
-	const restrictions = {
-		stopSale: false,
-		singleStop: false,
-		belowMinAdults: false,
-		minStay: false,
-		maxStay: false,
-		releaseDays: false,
-		closedToArrival: false,
-		closedToDeparture: false,
-		noAvailability: false,
-		insufficientAllotment: false
-	}
-	const messages = []
+  const restrictions = {
+    stopSale: false,
+    singleStop: false,
+    belowMinAdults: false,
+    minStay: false,
+    maxStay: false,
+    releaseDays: false,
+    closedToArrival: false,
+    closedToDeparture: false,
+    noAvailability: false,
+    insufficientAllotment: false
+  }
+  const messages = []
 
-	// Stop sale check
-	if (rate.stopSale) {
-		restrictions.stopSale = true
-		messages.push('Stop sale active')
-	}
+  // Stop sale check
+  if (rate.stopSale) {
+    restrictions.stopSale = true
+    messages.push('Stop sale active')
+  }
 
-	// Minimum adults check (considering override hierarchy)
-	if (adults < minAdults) {
-		restrictions.belowMinAdults = true
-		messages.push(`Minimum ${minAdults} adult(s) required`)
-	}
+  // Minimum adults check (considering override hierarchy)
+  if (adults < minAdults) {
+    restrictions.belowMinAdults = true
+    messages.push(`Minimum ${minAdults} adult(s) required`)
+  }
 
-	// Single stop check (1 adult not allowed) - legacy, kept for backwards compatibility
-	if (rate.singleStop && adults === 1) {
-		restrictions.singleStop = true
-		messages.push('Single occupancy not available')
-	}
+  // Single stop check (1 adult not allowed) - legacy, kept for backwards compatibility
+  if (rate.singleStop && adults === 1) {
+    restrictions.singleStop = true
+    messages.push('Single occupancy not available')
+  }
 
-	// Real-time allotment check
-	// rate.allotment = total rooms allocated
-	// rate.sold = rooms already sold
-	// available = allotment - sold
-	const allotment = rate.allotment ?? null
-	const sold = rate.sold ?? 0
+  // Real-time allotment check
+  // rate.allotment = total rooms allocated
+  // rate.sold = rooms already sold
+  // available = allotment - sold
+  const allotment = rate.allotment ?? null
+  const sold = rate.sold ?? 0
 
-	if (allotment !== null) {
-		const available = allotment - sold
-		if (available < requiredRooms) {
-			restrictions.insufficientAllotment = true
-			if (available <= 0) {
-				restrictions.noAvailability = true
-				messages.push('No rooms available')
-			} else {
-				messages.push(`Only ${available} room(s) available, ${requiredRooms} required`)
-			}
-		}
-	}
+  if (allotment !== null) {
+    const available = allotment - sold
+    if (available < requiredRooms) {
+      restrictions.insufficientAllotment = true
+      if (available <= 0) {
+        restrictions.noAvailability = true
+        messages.push('No rooms available')
+      } else {
+        messages.push(`Only ${available} room(s) available, ${requiredRooms} required`)
+      }
+    }
+  }
 
-	// Legacy availability check (for backwards compatibility)
-	if (rate.available !== undefined && rate.available <= 0) {
-		restrictions.noAvailability = true
-		if (!messages.includes('No rooms available')) {
-			messages.push('No rooms available')
-		}
-	}
+  // Legacy availability check (for backwards compatibility)
+  if (rate.available !== undefined && rate.available <= 0) {
+    restrictions.noAvailability = true
+    if (!messages.includes('No rooms available')) {
+      messages.push('No rooms available')
+    }
+  }
 
-	// Release days check
-	if (rate.releaseDays > 0 && checkInDate) {
-		const checkIn = new Date(checkInDate)
-		const booking = new Date(bookingDate)
-		const daysDifference = Math.floor((checkIn - booking) / (1000 * 60 * 60 * 24))
+  // Release days check
+  if (rate.releaseDays > 0 && checkInDate) {
+    const checkIn = new Date(checkInDate)
+    const booking = new Date(bookingDate)
+    const daysDifference = Math.floor((checkIn - booking) / (1000 * 60 * 60 * 24))
 
-		if (daysDifference < rate.releaseDays) {
-			restrictions.releaseDays = true
-			messages.push(`Minimum ${rate.releaseDays} days advance booking required`)
-		}
-	}
+    if (daysDifference < rate.releaseDays) {
+      restrictions.releaseDays = true
+      messages.push(`Minimum ${rate.releaseDays} days advance booking required`)
+    }
+  }
 
-	// Min/Max stay check
-	if (checkInDate && checkOutDate) {
-		const checkIn = new Date(checkInDate)
-		const checkOut = new Date(checkOutDate)
-		const nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24))
+  // Min/Max stay check
+  if (checkInDate && checkOutDate) {
+    const checkIn = new Date(checkInDate)
+    const checkOut = new Date(checkOutDate)
+    const nights = Math.floor((checkOut - checkIn) / (1000 * 60 * 60 * 24))
 
-		if (rate.minStay && nights < rate.minStay) {
-			restrictions.minStay = true
-			messages.push(`Minimum ${rate.minStay} night stay required`)
-		}
+    if (rate.minStay && nights < rate.minStay) {
+      restrictions.minStay = true
+      messages.push(`Minimum ${rate.minStay} night stay required`)
+    }
 
-		if (rate.maxStay && nights > rate.maxStay) {
-			restrictions.maxStay = true
-			messages.push(`Maximum ${rate.maxStay} night stay allowed`)
-		}
-	}
+    if (rate.maxStay && nights > rate.maxStay) {
+      restrictions.maxStay = true
+      messages.push(`Maximum ${rate.maxStay} night stay allowed`)
+    }
+  }
 
-	// Closed to arrival/departure
-	if (rate.closedToArrival) {
-		restrictions.closedToArrival = true
-		messages.push('Arrival not allowed on this date')
-	}
+  // Closed to arrival/departure
+  if (rate.closedToArrival) {
+    restrictions.closedToArrival = true
+    messages.push('Arrival not allowed on this date')
+  }
 
-	if (rate.closedToDeparture) {
-		restrictions.closedToDeparture = true
-		messages.push('Departure not allowed on this date')
-	}
+  if (rate.closedToDeparture) {
+    restrictions.closedToDeparture = true
+    messages.push('Departure not allowed on this date')
+  }
 
-	const isBookable = !Object.values(restrictions).some(v => v === true)
+  const isBookable = !Object.values(restrictions).some(v => v === true)
 
-	return {
-		isBookable,
-		restrictions,
-		messages
-	}
+  return {
+    isBookable,
+    restrictions,
+    messages
+  }
 }
 
 /**
@@ -489,236 +619,258 @@ export function checkRestrictions(rate, options = {}) {
  * @returns {Object} { totalPrice, breakdown, pricingType, ... }
  */
 export function calculateOccupancyPrice(rate, options = {}, context = {}) {
-	const { adults = 2, children = [], nights = 1 } = options
-	const { roomType, market, season, hotel } = context
+  let { adults = 2, children = [], nights = 1 } = options
+  const { roomType, market, season, hotel } = context
 
-	// Get effective pricing type
-	const pricingType = getEffectivePricingType(roomType, market, season, rate)
+  // Get effective pricing type
+  const pricingType = getEffectivePricingType(roomType, market, season, rate)
 
-	// Get effective child age groups
-	const childAgeGroups = getEffectiveChildAgeGroups(hotel, market, season)
+  // Get effective child age groups
+  const childAgeGroups = getEffectiveChildAgeGroups(hotel, market, season)
 
-	const result = {
-		pricingType,
-		adults,
-		children,
-		nights,
-		basePrice: 0,
-		adultPrice: 0,
-		childPrice: 0,
-		totalPerNight: 0,
-		totalPrice: 0,
-		breakdown: [],
-		currency: rate.currency || market?.currency || 'EUR'
-	}
+  // Find max child age from age groups
+  const maxChildAge = childAgeGroups.length > 0
+    ? Math.max(...childAgeGroups.map(ag => ag.maxAge || 0))
+    : 12 // Default max child age if no groups defined (industry standard: 0-12 child, 13+ adult)
 
-	if (pricingType === 'unit') {
-		// Unit-based pricing
-		result.basePrice = rate.pricePerNight || 0
+  // Separate children: those above max age should be counted as adults
+  const validChildren = []
+  let childrenAsAdults = 0
 
-		// Calculate adult pricing
-		const baseOccupancy = roomType?.occupancy?.baseOccupancy || 2
+  children.forEach(child => {
+    if (child.age !== undefined && child.age > maxChildAge) {
+      // This child is above max child age, count as adult
+      childrenAsAdults++
+    } else {
+      validChildren.push(child)
+    }
+  })
 
-		if (adults < baseOccupancy) {
-			// Single supplement (reduction)
-			result.adultPrice = result.basePrice - (rate.singleSupplement || 0)
-			result.breakdown.push({
-				type: 'base',
-				description: `Base price (${baseOccupancy} adults)`,
-				amount: result.basePrice
-			})
-			result.breakdown.push({
-				type: 'single_supplement',
-				description: 'Single supplement reduction',
-				amount: -(rate.singleSupplement || 0)
-			})
-		} else if (adults > baseOccupancy) {
-			// Extra adults
-			const extraAdults = adults - baseOccupancy
-			const extraAdultTotal = extraAdults * (rate.extraAdult || 0)
-			result.adultPrice = result.basePrice + extraAdultTotal
-			result.breakdown.push({
-				type: 'base',
-				description: `Base price (${baseOccupancy} adults)`,
-				amount: result.basePrice
-			})
-			if (extraAdultTotal > 0) {
-				result.breakdown.push({
-					type: 'extra_adult',
-					description: `${extraAdults} extra adult(s) × ${rate.extraAdult}`,
-					amount: extraAdultTotal
-				})
-			}
-		} else {
-			result.adultPrice = result.basePrice
-			result.breakdown.push({
-				type: 'base',
-				description: `Base price (${adults} adults)`,
-				amount: result.basePrice
-			})
-		}
+  // Adjust counts
+  adults = adults + childrenAsAdults
+  children = validChildren
 
-		// Calculate child pricing
-		children.forEach((child, index) => {
-			const childOrder = index + 1
-			let childPrice = 0
+  const result = {
+    pricingType,
+    adults,
+    children,
+    childrenAsAdults, // Children counted as adults due to age
+    maxChildAge, // Max child age threshold used
+    nights,
+    basePrice: 0,
+    adultPrice: 0,
+    childPrice: 0,
+    totalPerNight: 0,
+    totalPrice: 0,
+    breakdown: [],
+    currency: rate.currency || market?.currency || 'EUR'
+  }
 
-			// Try childOrderPricing first (position-based)
-			if (rate.childOrderPricing && rate.childOrderPricing[index] !== undefined) {
-				childPrice = rate.childOrderPricing[index]
-			}
-			// Then try childPricing (age-based tiers)
-			else if (rate.childPricing && rate.childPricing.length > 0 && child.age !== undefined) {
-				const tier = rate.childPricing.find(t => child.age >= t.minAge && child.age <= t.maxAge)
-				if (tier) {
-					childPrice = tier.price
-				}
-			}
-			// Fallback to extraChild
-			else {
-				childPrice = rate.extraChild || 0
-			}
+  if (pricingType === 'unit') {
+    // Unit-based pricing
+    result.basePrice = rate.pricePerNight || 0
 
-			result.childPrice += childPrice
-			if (childPrice > 0) {
-				result.breakdown.push({
-					type: 'child',
-					description: `Child ${childOrder} (age ${child.age || 'N/A'})`,
-					amount: childPrice
-				})
-			}
-		})
+    // Calculate adult pricing
+    const baseOccupancy = roomType?.occupancy?.baseOccupancy || 2
 
-		result.totalPerNight = result.adultPrice + result.childPrice
-		result.totalPrice = result.totalPerNight * nights
+    if (adults < baseOccupancy) {
+      // Single supplement (reduction)
+      result.adultPrice = result.basePrice - (rate.singleSupplement || 0)
+      result.breakdown.push({
+        type: 'base',
+        description: `Base price (${baseOccupancy} adults)`,
+        amount: result.basePrice
+      })
+      result.breakdown.push({
+        type: 'single_supplement',
+        description: 'Single supplement reduction',
+        amount: -(rate.singleSupplement || 0)
+      })
+    } else if (adults > baseOccupancy) {
+      // Extra adults
+      const extraAdults = adults - baseOccupancy
+      const extraAdultTotal = extraAdults * (rate.extraAdult || 0)
+      result.adultPrice = result.basePrice + extraAdultTotal
+      result.breakdown.push({
+        type: 'base',
+        description: `Base price (${baseOccupancy} adults)`,
+        amount: result.basePrice
+      })
+      if (extraAdultTotal > 0) {
+        result.breakdown.push({
+          type: 'extra_adult',
+          description: `${extraAdults} extra adult(s) × ${rate.extraAdult}`,
+          amount: extraAdultTotal
+        })
+      }
+    } else {
+      result.adultPrice = result.basePrice
+      result.breakdown.push({
+        type: 'base',
+        description: `Base price (${adults} adults)`,
+        amount: result.basePrice
+      })
+    }
 
-	} else {
-		// OBP (per_person) pricing
-		const multiplierTemplate = getEffectiveMultiplierTemplate(roomType, market, season, rate)
+    // Calculate child pricing
+    children.forEach((child, index) => {
+      const childOrder = index + 1
+      let childPrice = 0
 
-		// If using direct occupancy pricing (no multipliers)
-		if (!multiplierTemplate.useMultipliers) {
-			// Use occupancyPricing directly
-			const occupancyPrice = rate.occupancyPricing?.[adults] || 0
-			result.basePrice = occupancyPrice
-			result.adultPrice = occupancyPrice
+      // Try childOrderPricing first (position-based)
+      if (rate.childOrderPricing && rate.childOrderPricing[index] !== undefined) {
+        childPrice = rate.childOrderPricing[index]
+      }
+      // Then try childPricing (age-based tiers)
+      else if (rate.childPricing && rate.childPricing.length > 0 && child.age !== undefined) {
+        const tier = rate.childPricing.find(t => child.age >= t.minAge && child.age <= t.maxAge)
+        if (tier) {
+          childPrice = tier.price
+        }
+      }
+      // Fallback to extraChild
+      else {
+        childPrice = rate.extraChild || 0
+      }
 
-			result.breakdown.push({
-				type: 'occupancy',
-				description: `${adults} adult(s) occupancy price`,
-				amount: occupancyPrice
-			})
+      result.childPrice += childPrice
+      if (childPrice > 0) {
+        result.breakdown.push({
+          type: 'child',
+          description: `Child ${childOrder} (age ${child.age || 'N/A'})`,
+          amount: childPrice
+        })
+      }
+    })
 
-			// Child pricing for OBP without multipliers - use childOrderPricing
-			children.forEach((child, index) => {
-				const childOrder = index + 1
-				let childPrice = 0
+    result.totalPerNight = result.adultPrice + result.childPrice
+    result.totalPrice = result.totalPerNight * nights
+  } else {
+    // OBP (per_person) pricing
+    const multiplierTemplate = getEffectiveMultiplierTemplate(roomType, market, season, rate)
 
-				if (rate.childOrderPricing && rate.childOrderPricing[index] !== undefined) {
-					childPrice = rate.childOrderPricing[index]
-				} else if (rate.childPricing && rate.childPricing.length > 0 && child.age !== undefined) {
-					const tier = rate.childPricing.find(t => child.age >= t.minAge && child.age <= t.maxAge)
-					if (tier) {
-						childPrice = tier.price
-					}
-				}
+    // If using direct occupancy pricing (no multipliers)
+    if (!multiplierTemplate.useMultipliers) {
+      // Use occupancyPricing directly
+      const occupancyPrice = rate.occupancyPricing?.[adults] || 0
+      result.basePrice = occupancyPrice
+      result.adultPrice = occupancyPrice
 
-				result.childPrice += childPrice
-				if (childPrice > 0) {
-					result.breakdown.push({
-						type: 'child',
-						description: `Child ${childOrder} (age ${child.age || 'N/A'})`,
-						amount: childPrice
-					})
-				}
-			})
+      result.breakdown.push({
+        type: 'occupancy',
+        description: `${adults} adult(s) occupancy price`,
+        amount: occupancyPrice
+      })
 
-			result.totalPerNight = result.adultPrice + result.childPrice
-			result.totalPrice = result.totalPerNight * nights
+      // Child pricing for OBP without multipliers - use childOrderPricing
+      children.forEach((child, index) => {
+        const childOrder = index + 1
+        let childPrice = 0
 
-		} else {
-			// OBP with multipliers
-			// Base price is occupancyPricing[2] (double occupancy)
-			const baseOccupancy = roomType?.occupancy?.baseOccupancy || 2
-			const basePrice = rate.occupancyPricing?.[baseOccupancy] || rate.pricePerNight || 0
-			result.basePrice = basePrice
+        if (rate.childOrderPricing && rate.childOrderPricing[index] !== undefined) {
+          childPrice = rate.childOrderPricing[index]
+        } else if (rate.childPricing && rate.childPricing.length > 0 && child.age !== undefined) {
+          const tier = rate.childPricing.find(t => child.age >= t.minAge && child.age <= t.maxAge)
+          if (tier) {
+            childPrice = tier.price
+          }
+        }
 
-			// Determine child age groups for children
-			const childrenWithAgeGroups = children.map((child, index) => {
-				let ageGroup = child.ageGroup
+        result.childPrice += childPrice
+        if (childPrice > 0) {
+          result.breakdown.push({
+            type: 'child',
+            description: `Child ${childOrder} (age ${child.age || 'N/A'})`,
+            amount: childPrice
+          })
+        }
+      })
 
-				// If ageGroup not provided, determine from age
-				if (!ageGroup && child.age !== undefined && childAgeGroups.length > 0) {
-					const group = childAgeGroups.find(ag => child.age >= ag.minAge && child.age <= ag.maxAge)
-					ageGroup = group?.code || 'first'
-				}
+      result.totalPerNight = result.adultPrice + result.childPrice
+      result.totalPrice = result.totalPerNight * nights
+    } else {
+      // OBP with multipliers
+      // Base price is occupancyPricing[2] (double occupancy)
+      const baseOccupancy = roomType?.occupancy?.baseOccupancy || 2
+      const basePrice = rate.occupancyPricing?.[baseOccupancy] || rate.pricePerNight || 0
+      result.basePrice = basePrice
 
-				return {
-					order: index + 1,
-					ageGroup: ageGroup || 'first',
-					age: child.age
-				}
-			})
+      // Determine child age groups for children
+      const childrenWithAgeGroups = children.map((child, index) => {
+        let ageGroup = child.ageGroup
 
-			// Generate combination key
-			const combinationKey = generateCombinationKey(adults, childrenWithAgeGroups)
+        // If ageGroup not provided, determine from age
+        if (!ageGroup && child.age !== undefined && childAgeGroups.length > 0) {
+          const group = childAgeGroups.find(ag => child.age >= ag.minAge && child.age <= ag.maxAge)
+          ageGroup = group?.code || 'first'
+        }
 
-			// Look for combination in table
-			let multiplier = 1
-			let combinationFound = false
+        return {
+          order: index + 1,
+          ageGroup: ageGroup || 'first',
+          age: child.age
+        }
+      })
 
-			if (multiplierTemplate.combinationTable?.length > 0) {
-				const combination = multiplierTemplate.combinationTable.find(c => c.key === combinationKey)
-				if (combination) {
-					combinationFound = true
+      // Generate combination key
+      const combinationKey = generateCombinationKey(adults, childrenWithAgeGroups)
 
-					// Check if combination is active
-					if (!combination.isActive) {
-						result.error = 'Combination not available for sale'
-						result.isAvailable = false
-						return result
-					}
+      // Look for combination in table
+      let multiplier = 1
+      let combinationFound = false
 
-					multiplier = getEffectiveMultiplier(combination)
-				}
-			}
+      if (multiplierTemplate.combinationTable?.length > 0) {
+        const combination = multiplierTemplate.combinationTable.find(c => c.key === combinationKey)
+        if (combination) {
+          combinationFound = true
 
-			// If not found in table, calculate from multipliers
-			if (!combinationFound) {
-				multiplier = calculateCombinationMultiplier(
-					adults,
-					childrenWithAgeGroups,
-					multiplierTemplate.adultMultipliers,
-					multiplierTemplate.childMultipliers
-				)
-			}
+          // Check if combination is active
+          if (!combination.isActive) {
+            result.error = 'Combination not available for sale'
+            result.isAvailable = false
+            return result
+          }
 
-			// Apply rounding rule
-			const roundingRule = multiplierTemplate.roundingRule || 'none'
-			const calculatedPrice = calculatePrice(basePrice, multiplier, roundingRule)
+          multiplier = getEffectiveMultiplier(combination)
+        }
+      }
 
-			result.multiplier = multiplier
-			result.combinationKey = combinationKey
-			result.roundingRule = roundingRule
-			result.adultPrice = calculatedPrice
-			result.totalPerNight = calculatedPrice
-			result.totalPrice = calculatedPrice * nights
+      // If not found in table, calculate from multipliers
+      if (!combinationFound) {
+        multiplier = calculateCombinationMultiplier(
+          adults,
+          childrenWithAgeGroups,
+          multiplierTemplate.adultMultipliers,
+          multiplierTemplate.childMultipliers
+        )
+      }
 
-			result.breakdown.push({
-				type: 'obp_base',
-				description: `Base price (${baseOccupancy} adults)`,
-				amount: basePrice
-			})
-			result.breakdown.push({
-				type: 'multiplier',
-				description: `Multiplier for ${combinationKey}: ×${multiplier}`,
-				amount: calculatedPrice - basePrice
-			})
-		}
-	}
+      // Apply rounding rule
+      const roundingRule = multiplierTemplate.roundingRule || 'none'
+      const calculatedPrice = calculatePrice(basePrice, multiplier, roundingRule)
 
-	result.isAvailable = true
-	return result
+      result.multiplier = multiplier
+      result.combinationKey = combinationKey
+      result.roundingRule = roundingRule
+      result.adultPrice = calculatedPrice
+      result.totalPerNight = calculatedPrice
+      result.totalPrice = calculatedPrice * nights
+
+      result.breakdown.push({
+        type: 'obp_base',
+        description: `Base price (${baseOccupancy} adults)`,
+        amount: basePrice
+      })
+      result.breakdown.push({
+        type: 'multiplier',
+        description: `Multiplier for ${combinationKey}: ×${multiplier}`,
+        amount: calculatedPrice - basePrice
+      })
+    }
+  }
+
+  result.isAvailable = true
+  return result
 }
 
 /**
@@ -731,42 +883,42 @@ export function calculateOccupancyPrice(rate, options = {}, context = {}) {
  * @returns {Object} { rate, roomType, mealPlan, market, season, hotel, effectivePricingType, effectiveMultipliers }
  */
 export async function getEffectiveRate(hotelId, roomTypeId, mealPlanId, marketId, date) {
-	// Fetch all required documents in parallel
-	const [rate, roomType, mealPlan, market, hotel] = await Promise.all([
-		Rate.findByDate(hotelId, roomTypeId, mealPlanId, marketId, date),
-		RoomType.findById(roomTypeId).lean(),
-		MealPlan.findById(mealPlanId).lean(),
-		Market.findById(marketId).lean(),
-		Hotel.findById(hotelId).select('childAgeGroups').lean()
-	])
+  // Fetch all required documents in parallel
+  const [rate, roomType, mealPlan, market, hotel] = await Promise.all([
+    Rate.findByDate(hotelId, roomTypeId, mealPlanId, marketId, date),
+    RoomType.findById(roomTypeId).lean(),
+    MealPlan.findById(mealPlanId).lean(),
+    Market.findById(marketId).lean(),
+    Hotel.findById(hotelId).select('childAgeGroups').lean()
+  ])
 
-	if (!rate) {
-		throw new NotFoundError('RATE_NOT_FOUND')
-	}
+  if (!rate) {
+    throw new NotFoundError('RATE_NOT_FOUND')
+  }
 
-	// Get season for the date
-	const season = await Season.findByDate(hotelId, marketId, date)
+  // Get season for the date
+  const season = await Season.findByDate(hotelId, marketId, date)
 
-	// Calculate effective values
-	const effectivePricingType = getEffectivePricingType(roomType, market, season, rate)
-	const effectiveMultipliers = getEffectiveMultiplierTemplate(roomType, market, season, rate)
-	const effectiveChildAgeGroups = getEffectiveChildAgeGroups(hotel, market, season)
-	const effectiveRoundingRule = effectiveMultipliers.roundingRule
-	const effectiveMinAdults = getEffectiveMinAdults(roomType, market, season)
+  // Calculate effective values
+  const effectivePricingType = getEffectivePricingType(roomType, market, season, rate)
+  const effectiveMultipliers = getEffectiveMultiplierTemplate(roomType, market, season, rate)
+  const effectiveChildAgeGroups = getEffectiveChildAgeGroups(hotel, market, season)
+  const effectiveRoundingRule = effectiveMultipliers.roundingRule
+  const effectiveMinAdults = getEffectiveMinAdults(roomType, market, season)
 
-	return {
-		rate: rate.toObject(),
-		roomType,
-		mealPlan,
-		market,
-		season: season ? season.toObject() : null,
-		hotel,
-		effectivePricingType,
-		effectiveMultipliers,
-		effectiveChildAgeGroups,
-		effectiveRoundingRule,
-		effectiveMinAdults
-	}
+  return {
+    rate: rate.toObject(),
+    roomType,
+    mealPlan,
+    market,
+    season: season ? season.toObject() : null,
+    hotel,
+    effectivePricingType,
+    effectiveMultipliers,
+    effectiveChildAgeGroups,
+    effectiveRoundingRule,
+    effectiveMinAdults
+  }
 }
 
 /**
@@ -775,99 +927,101 @@ export async function getEffectiveRate(hotelId, roomTypeId, mealPlanId, marketId
  * @returns {Object} Calculated price with breakdown
  */
 export async function calculateBookingPrice(query, useCache = true) {
-	const {
-		hotelId,
-		roomTypeId,
-		mealPlanId,
-		marketId,
-		date,
-		adults = 2,
-		children = [],
-		nights = 1
-	} = query
+  const {
+    hotelId,
+    roomTypeId,
+    mealPlanId,
+    marketId,
+    date,
+    adults = 2,
+    children = [],
+    nights = 1
+  } = query
 
-	// Check cache first
-	if (useCache) {
-		const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
-			hotelId,
-			roomTypeId,
-			mealPlanId,
-			marketId,
-			date: date instanceof Date ? date.toISOString().split('T')[0] : date,
-			adults,
-			children: JSON.stringify(children),
-			nights
-		})
+  // Check cache first
+  if (useCache) {
+    const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
+      hotelId,
+      roomTypeId,
+      mealPlanId,
+      marketId,
+      date: date instanceof Date ? date.toISOString().split('T')[0] : date,
+      adults,
+      children: JSON.stringify(children),
+      nights
+    })
 
-		const cached = cache.get(cacheKey)
-		if (cached) {
-			return { ...cached, fromCache: true }
-		}
-	}
+    const cached = cache.get(cacheKey)
+    if (cached) {
+      return { ...cached, fromCache: true }
+    }
+  }
 
-	// Get effective rate with context
-	const effectiveData = await getEffectiveRate(hotelId, roomTypeId, mealPlanId, marketId, date)
+  // Get effective rate with context
+  const effectiveData = await getEffectiveRate(hotelId, roomTypeId, mealPlanId, marketId, date)
 
-	// Check restrictions (including minAdults from effective hierarchy)
-	const restrictionCheck = checkRestrictions(effectiveData.rate, {
-		adults,
-		bookingDate: new Date(),
-		minAdults: effectiveData.effectiveMinAdults
-	})
+  // Check restrictions (including minAdults from effective hierarchy)
+  const restrictionCheck = checkRestrictions(effectiveData.rate, {
+    adults,
+    bookingDate: new Date(),
+    minAdults: effectiveData.effectiveMinAdults
+  })
 
-	if (!restrictionCheck.isBookable) {
-		return {
-			success: false,
-			error: 'Rate not bookable',
-			restrictions: restrictionCheck.restrictions,
-			messages: restrictionCheck.messages
-		}
-	}
+  if (!restrictionCheck.isBookable) {
+    return {
+      success: false,
+      error: 'Rate not bookable',
+      restrictions: restrictionCheck.restrictions,
+      messages: restrictionCheck.messages
+    }
+  }
 
-	// Calculate price
-	const priceResult = calculateOccupancyPrice(
-		effectiveData.rate,
-		{ adults, children, nights },
-		{
-			roomType: effectiveData.roomType,
-			market: effectiveData.market,
-			season: effectiveData.season,
-			hotel: effectiveData.hotel
-		}
-	)
+  // Calculate price
+  const priceResult = calculateOccupancyPrice(
+    effectiveData.rate,
+    { adults, children, nights },
+    {
+      roomType: effectiveData.roomType,
+      market: effectiveData.market,
+      season: effectiveData.season,
+      hotel: effectiveData.hotel
+    }
+  )
 
-	const result = {
-		success: true,
-		...priceResult,
-		effectiveData: {
-			pricingType: effectiveData.effectivePricingType,
-			multipliers: effectiveData.effectiveMultipliers,
-			childAgeGroups: effectiveData.effectiveChildAgeGroups,
-			roundingRule: effectiveData.effectiveRoundingRule,
-			season: effectiveData.season ? {
-				_id: effectiveData.season._id,
-				name: effectiveData.season.name,
-				code: effectiveData.season.code
-			} : null
-		}
-	}
+  const result = {
+    success: true,
+    ...priceResult,
+    effectiveData: {
+      pricingType: effectiveData.effectivePricingType,
+      multipliers: effectiveData.effectiveMultipliers,
+      childAgeGroups: effectiveData.effectiveChildAgeGroups,
+      roundingRule: effectiveData.effectiveRoundingRule,
+      season: effectiveData.season
+        ? {
+            _id: effectiveData.season._id,
+            name: effectiveData.season.name,
+            code: effectiveData.season.code
+          }
+        : null
+    }
+  }
 
-	// Cache the result
-	if (useCache) {
-		const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
-			hotelId,
-			roomTypeId,
-			mealPlanId,
-			marketId,
-			date: date instanceof Date ? date.toISOString().split('T')[0] : date,
-			adults,
-			children: JSON.stringify(children),
-			nights
-		})
-		cache.set(cacheKey, result, CACHE_TTL.PRICE_CALCULATION)
-	}
+  // Cache the result
+  if (useCache) {
+    const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
+      hotelId,
+      roomTypeId,
+      mealPlanId,
+      marketId,
+      date: date instanceof Date ? date.toISOString().split('T')[0] : date,
+      adults,
+      children: JSON.stringify(children),
+      nights
+    })
+    cache.set(cacheKey, result, CACHE_TTL.PRICE_CALCULATION)
+  }
 
-	return result
+  return result
 }
 
 /**
@@ -876,14 +1030,16 @@ export async function calculateBookingPrice(query, useCache = true) {
  * @returns {Array} Array of calculated prices
  */
 export async function bulkCalculatePrices(queries) {
-	const results = await Promise.all(
-		queries.map(query => calculateBookingPrice(query).catch(error => ({
-			success: false,
-			error: error.message,
-			query
-		})))
-	)
-	return results
+  const results = await Promise.all(
+    queries.map(query =>
+      calculateBookingPrice(query).catch(error => ({
+        success: false,
+        error: error.message,
+        query
+      }))
+    )
+  )
+  return results
 }
 
 /**
@@ -892,32 +1048,32 @@ export async function bulkCalculatePrices(queries) {
  * @returns {Object} { isAvailable, unavailableDates, restrictions }
  */
 export async function checkAvailability(params) {
-	const { hotelId, roomTypeId, mealPlanId, marketId, startDate, endDate, adults = 2 } = params
+  const { hotelId, roomTypeId, mealPlanId, marketId, startDate, endDate, adults = 2 } = params
 
-	const rates = await Rate.findInRange(hotelId, startDate, endDate, {
-		roomType: roomTypeId,
-		mealPlan: mealPlanId,
-		market: marketId
-	})
+  const rates = await Rate.findInRange(hotelId, startDate, endDate, {
+    roomType: roomTypeId,
+    mealPlan: mealPlanId,
+    market: marketId
+  })
 
-	const unavailableDates = []
-	const restrictionsByDate = {}
+  const unavailableDates = []
+  const restrictionsByDate = {}
 
-	for (const rate of rates) {
-		const check = checkRestrictions(rate, { adults, bookingDate: new Date() })
-		if (!check.isBookable) {
-			const dateStr = rate.date.toISOString().split('T')[0]
-			unavailableDates.push(dateStr)
-			restrictionsByDate[dateStr] = check
-		}
-	}
+  for (const rate of rates) {
+    const check = checkRestrictions(rate, { adults, bookingDate: new Date() })
+    if (!check.isBookable) {
+      const dateStr = rate.date.toISOString().split('T')[0]
+      unavailableDates.push(dateStr)
+      restrictionsByDate[dateStr] = check
+    }
+  }
 
-	return {
-		isAvailable: unavailableDates.length === 0,
-		unavailableDates,
-		restrictionsByDate,
-		totalDaysChecked: rates.length
-	}
+  return {
+    isAvailable: unavailableDates.length === 0,
+    unavailableDates,
+    restrictionsByDate,
+    totalDaysChecked: rates.length
+  }
 }
 
 // ==================== CAMPAIGN FUNCTIONS ====================
@@ -929,30 +1085,30 @@ export async function checkAvailability(params) {
  * @returns {Array} Applicable campaigns sorted by priority
  */
 export async function getApplicableCampaigns(hotelId, params) {
-	const Campaign = (await import('../modules/planning/campaign.model.js')).default
+  const Campaign = (await import('../modules/planning/campaign.model.js')).default
 
-	const {
-		checkInDate,
-		checkOutDate,
-		roomTypeId,
-		marketId,
-		mealPlanId,
-		nights,
-		bookingDate = new Date()
-	} = params
+  const {
+    checkInDate,
+    checkOutDate,
+    roomTypeId,
+    marketId,
+    mealPlanId,
+    nights,
+    bookingDate = new Date()
+  } = params
 
-	// Use the model's findApplicable method
-	const campaigns = await Campaign.findApplicable(hotelId, {
-		bookingDate,
-		checkInDate: new Date(checkInDate),
-		checkOutDate: new Date(checkOutDate),
-		roomTypeId,
-		marketId,
-		mealPlanId,
-		nights
-	})
+  // Use the model's findApplicable method
+  const campaigns = await Campaign.findApplicable(hotelId, {
+    bookingDate,
+    checkInDate: new Date(checkInDate),
+    checkOutDate: new Date(checkOutDate),
+    roomTypeId,
+    marketId,
+    mealPlanId,
+    nights
+  })
 
-	return campaigns
+  return campaigns
 }
 
 /**
@@ -963,25 +1119,25 @@ export async function getApplicableCampaigns(hotelId, params) {
  * @returns {boolean}
  */
 function isDateEligibleForCampaign(campaign, date, checkInDate) {
-	const dateObj = new Date(date)
-	const stayStart = new Date(campaign.stayWindow.startDate)
-	const stayEnd = new Date(campaign.stayWindow.endDate)
+  const dateObj = new Date(date)
+  const stayStart = new Date(campaign.stayWindow.startDate)
+  const stayEnd = new Date(campaign.stayWindow.endDate)
 
-	// Normalize dates for comparison
-	stayStart.setHours(0, 0, 0, 0)
-	stayEnd.setHours(23, 59, 59, 999)
-	dateObj.setHours(0, 0, 0, 0)
+  // Normalize dates for comparison
+  stayStart.setHours(0, 0, 0, 0)
+  stayEnd.setHours(23, 59, 59, 999)
+  dateObj.setHours(0, 0, 0, 0)
 
-	// Check application type
-	if (campaign.applicationType === 'checkin') {
-		// If check-in is within stay window, all nights are eligible
-		const checkIn = new Date(checkInDate)
-		checkIn.setHours(0, 0, 0, 0)
-		return checkIn >= stayStart && checkIn <= stayEnd
-	}
+  // Check application type
+  if (campaign.applicationType === 'checkin') {
+    // If check-in is within stay window, all nights are eligible
+    const checkIn = new Date(checkInDate)
+    checkIn.setHours(0, 0, 0, 0)
+    return checkIn >= stayStart && checkIn <= stayEnd
+  }
 
-	// Default: 'stay' - only dates within stay window are eligible
-	return dateObj >= stayStart && dateObj <= stayEnd
+  // Default: 'stay' - only dates within stay window are eligible
+  return dateObj >= stayStart && dateObj <= stayEnd
 }
 
 /**
@@ -990,8 +1146,8 @@ function isDateEligibleForCampaign(campaign, date, checkInDate) {
  * @returns {string} lowercase day name
  */
 function getDayOfWeek(date) {
-	const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-	return days[new Date(date).getDay()]
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+  return days[new Date(date).getDay()]
 }
 
 /**
@@ -1001,9 +1157,9 @@ function getDayOfWeek(date) {
  * @returns {boolean}
  */
 function isDayApplicable(campaign, date) {
-	if (!campaign.conditions?.applicableDays) return true
-	const dayName = getDayOfWeek(date)
-	return campaign.conditions.applicableDays[dayName] !== false
+  if (!campaign.conditions?.applicableDays) return true
+  const dayName = getDayOfWeek(date)
+  return campaign.conditions.applicableDays[dayName] !== false
 }
 
 /**
@@ -1014,125 +1170,124 @@ function isDayApplicable(campaign, date) {
  * @returns {Object} { dailyBreakdown, totalDiscount, discountText }
  */
 export function applyCampaignToBreakdown(campaign, dailyBreakdown, options = {}) {
-	const { checkInDate, calculationType = 'cumulative' } = options
-	let totalDiscount = 0
-	let eligibleNights = 0
-	const discountDetails = []
+  const { checkInDate, calculationType = 'cumulative' } = options
+  let totalDiscount = 0
+  let eligibleNights = 0
+  const discountDetails = []
 
-	// Clone breakdown to avoid mutation
-	const updatedBreakdown = dailyBreakdown.map(day => ({ ...day }))
+  // Clone breakdown to avoid mutation
+  const updatedBreakdown = dailyBreakdown.map(day => ({ ...day }))
 
-	// Find eligible days
-	const eligibleDays = updatedBreakdown.filter(day => {
-		const isEligible = isDateEligibleForCampaign(campaign, day.date, checkInDate)
-		const isDayOk = isDayApplicable(campaign, day.date)
-		return isEligible && isDayOk && day.price > 0
-	})
+  // Find eligible days
+  const eligibleDays = updatedBreakdown.filter(day => {
+    const isEligible = isDateEligibleForCampaign(campaign, day.date, checkInDate)
+    const isDayOk = isDayApplicable(campaign, day.date)
+    return isEligible && isDayOk && day.price > 0
+  })
 
-	eligibleNights = eligibleDays.length
+  eligibleNights = eligibleDays.length
 
-	if (eligibleNights === 0) {
-		return {
-			dailyBreakdown: updatedBreakdown,
-			totalDiscount: 0,
-			discountText: '',
-			eligibleNights: 0,
-			applied: false
-		}
-	}
+  if (eligibleNights === 0) {
+    return {
+      dailyBreakdown: updatedBreakdown,
+      totalDiscount: 0,
+      discountText: '',
+      eligibleNights: 0,
+      applied: false
+    }
+  }
 
-	// Apply discount based on type
-	if (campaign.discount.type === 'percentage') {
-		const discountPercent = campaign.discount.value / 100
+  // Apply discount based on type
+  if (campaign.discount.type === 'percentage') {
+    const discountPercent = campaign.discount.value / 100
 
-		eligibleDays.forEach(eligibleDay => {
-			const day = updatedBreakdown.find(d => d.date === eligibleDay.date)
-			const basePrice = calculationType === 'cumulative' ? (day.originalPrice || day.price) : day.price
-			const dayDiscount = basePrice * discountPercent
+    eligibleDays.forEach(eligibleDay => {
+      const day = updatedBreakdown.find(d => d.date === eligibleDay.date)
+      const basePrice =
+        calculationType === 'cumulative' ? day.originalPrice || day.price : day.price
+      const dayDiscount = basePrice * discountPercent
 
-			day.price = Math.max(0, day.price - dayDiscount)
-			day.discountAmount = (day.discountAmount || 0) + dayDiscount
-			day.campaignApplied = true
-			day.appliedCampaigns = day.appliedCampaigns || []
-			day.appliedCampaigns.push({
-				code: campaign.code,
-				name: campaign.name,
-				discount: `-${campaign.discount.value}%`,
-				amount: dayDiscount
-			})
+      day.price = Math.max(0, day.price - dayDiscount)
+      day.discountAmount = (day.discountAmount || 0) + dayDiscount
+      day.campaignApplied = true
+      day.appliedCampaigns = day.appliedCampaigns || []
+      day.appliedCampaigns.push({
+        code: campaign.code,
+        name: campaign.name,
+        discount: `-${campaign.discount.value}%`,
+        amount: dayDiscount
+      })
 
-			totalDiscount += dayDiscount
-		})
+      totalDiscount += dayDiscount
+    })
 
-		discountDetails.push(`-${campaign.discount.value}%`)
+    discountDetails.push(`-${campaign.discount.value}%`)
+  } else if (campaign.discount.type === 'fixed') {
+    const discountPerNight = campaign.discount.value
 
-	} else if (campaign.discount.type === 'fixed') {
-		const discountPerNight = campaign.discount.value
+    eligibleDays.forEach(eligibleDay => {
+      const day = updatedBreakdown.find(d => d.date === eligibleDay.date)
+      const dayDiscount = Math.min(discountPerNight, day.price)
 
-		eligibleDays.forEach(eligibleDay => {
-			const day = updatedBreakdown.find(d => d.date === eligibleDay.date)
-			const dayDiscount = Math.min(discountPerNight, day.price)
+      day.price = Math.max(0, day.price - dayDiscount)
+      day.discountAmount = (day.discountAmount || 0) + dayDiscount
+      day.campaignApplied = true
+      day.appliedCampaigns = day.appliedCampaigns || []
+      day.appliedCampaigns.push({
+        code: campaign.code,
+        name: campaign.name,
+        discount: `-${campaign.discount.value}`,
+        amount: dayDiscount
+      })
 
-			day.price = Math.max(0, day.price - dayDiscount)
-			day.discountAmount = (day.discountAmount || 0) + dayDiscount
-			day.campaignApplied = true
-			day.appliedCampaigns = day.appliedCampaigns || []
-			day.appliedCampaigns.push({
-				code: campaign.code,
-				name: campaign.name,
-				discount: `-${campaign.discount.value}`,
-				amount: dayDiscount
-			})
+      totalDiscount += dayDiscount
+    })
 
-			totalDiscount += dayDiscount
-		})
+    discountDetails.push(`-${campaign.discount.value}/night`)
+  } else if (campaign.discount.type === 'free_nights') {
+    const { stayNights, freeNights } = campaign.discount.freeNights || {}
 
-		discountDetails.push(`-${campaign.discount.value}/night`)
+    if (stayNights && freeNights && eligibleNights >= stayNights) {
+      // Sort eligible days by price (cheapest first for free nights)
+      const sortedEligible = [...eligibleDays].sort((a, b) => a.price - b.price)
+      const freeNightDays = sortedEligible.slice(0, freeNights)
 
-	} else if (campaign.discount.type === 'free_nights') {
-		const { stayNights, freeNights } = campaign.discount.freeNights || {}
+      freeNightDays.forEach(eligibleDay => {
+        const day = updatedBreakdown.find(d => d.date === eligibleDay.date)
+        const dayDiscount = day.price
 
-		if (stayNights && freeNights && eligibleNights >= stayNights) {
-			// Sort eligible days by price (cheapest first for free nights)
-			const sortedEligible = [...eligibleDays].sort((a, b) => a.price - b.price)
-			const freeNightDays = sortedEligible.slice(0, freeNights)
+        day.price = 0
+        day.discountAmount = (day.discountAmount || 0) + dayDiscount
+        day.isFreeNight = true
+        day.campaignApplied = true
+        day.appliedCampaigns = day.appliedCampaigns || []
+        day.appliedCampaigns.push({
+          code: campaign.code,
+          name: campaign.name,
+          discount: 'FREE',
+          amount: dayDiscount
+        })
 
-			freeNightDays.forEach(eligibleDay => {
-				const day = updatedBreakdown.find(d => d.date === eligibleDay.date)
-				const dayDiscount = day.price
+        totalDiscount += dayDiscount
+      })
 
-				day.price = 0
-				day.discountAmount = (day.discountAmount || 0) + dayDiscount
-				day.isFreeNight = true
-				day.campaignApplied = true
-				day.appliedCampaigns = day.appliedCampaigns || []
-				day.appliedCampaigns.push({
-					code: campaign.code,
-					name: campaign.name,
-					discount: 'FREE',
-					amount: dayDiscount
-				})
+      discountDetails.push(`${stayNights}=${freeNights} Free`)
+    }
+  }
 
-				totalDiscount += dayDiscount
-			})
+  // Build discount text
+  let discountText = discountDetails.join(', ')
+  if (eligibleNights < dailyBreakdown.length && discountText) {
+    discountText += ` (${eligibleNights}/${dailyBreakdown.length} nights)`
+  }
 
-			discountDetails.push(`${stayNights}=${freeNights} Free`)
-		}
-	}
-
-	// Build discount text
-	let discountText = discountDetails.join(', ')
-	if (eligibleNights < dailyBreakdown.length && discountText) {
-		discountText += ` (${eligibleNights}/${dailyBreakdown.length} nights)`
-	}
-
-	return {
-		dailyBreakdown: updatedBreakdown,
-		totalDiscount,
-		discountText,
-		eligibleNights,
-		applied: totalDiscount > 0
-	}
+  return {
+    dailyBreakdown: updatedBreakdown,
+    totalDiscount,
+    discountText,
+    eligibleNights,
+    applied: totalDiscount > 0
+  }
 }
 
 /**
@@ -1144,79 +1299,79 @@ export function applyCampaignToBreakdown(campaign, dailyBreakdown, options = {})
  * @returns {Object} { dailyBreakdown, appliedCampaigns, totalDiscount, originalTotal, finalTotal }
  */
 export function applyCampaigns(campaigns, dailyBreakdown, options = {}) {
-	if (!campaigns || campaigns.length === 0) {
-		const totalPrice = dailyBreakdown.reduce((sum, d) => sum + (d.price || 0), 0)
-		return {
-			dailyBreakdown,
-			appliedCampaigns: [],
-			totalDiscount: 0,
-			originalTotal: totalPrice,
-			finalTotal: totalPrice
-		}
-	}
+  if (!campaigns || campaigns.length === 0) {
+    const totalPrice = dailyBreakdown.reduce((sum, d) => sum + (d.price || 0), 0)
+    return {
+      dailyBreakdown,
+      appliedCampaigns: [],
+      totalDiscount: 0,
+      originalTotal: totalPrice,
+      finalTotal: totalPrice
+    }
+  }
 
-	const { checkInDate } = options
-	const originalTotal = dailyBreakdown.reduce((sum, d) => sum + (d.price || 0), 0)
+  const { checkInDate } = options
+  const originalTotal = dailyBreakdown.reduce((sum, d) => sum + (d.price || 0), 0)
 
-	// Store original prices
-	let currentBreakdown = dailyBreakdown.map(day => ({
-		...day,
-		originalPrice: day.price
-	}))
+  // Store original prices
+  let currentBreakdown = dailyBreakdown.map(day => ({
+    ...day,
+    originalPrice: day.price
+  }))
 
-	// Separate combinable and non-combinable campaigns
-	const nonCombinableCampaigns = campaigns.filter(c => !c.combinable)
-	const combinableCampaigns = campaigns.filter(c => c.combinable)
+  // Separate combinable and non-combinable campaigns
+  const nonCombinableCampaigns = campaigns.filter(c => !c.combinable)
+  const combinableCampaigns = campaigns.filter(c => c.combinable)
 
-	let campaignsToApply = []
-	let appliedCampaigns = []
-	let totalDiscount = 0
+  let campaignsToApply = []
+  const appliedCampaigns = []
+  let totalDiscount = 0
 
-	// If there are non-combinable campaigns, use the highest priority one
-	if (nonCombinableCampaigns.length > 0) {
-		// Sort by priority (highest first)
-		nonCombinableCampaigns.sort((a, b) => (b.priority || 0) - (a.priority || 0))
-		campaignsToApply = [nonCombinableCampaigns[0]]
-	} else if (combinableCampaigns.length > 0) {
-		// Sort by calculationOrder for sequential application
-		combinableCampaigns.sort((a, b) => (a.calculationOrder || 0) - (b.calculationOrder || 0))
-		campaignsToApply = combinableCampaigns
-	}
+  // If there are non-combinable campaigns, use the highest priority one
+  if (nonCombinableCampaigns.length > 0) {
+    // Sort by priority (highest first)
+    nonCombinableCampaigns.sort((a, b) => (b.priority || 0) - (a.priority || 0))
+    campaignsToApply = [nonCombinableCampaigns[0]]
+  } else if (combinableCampaigns.length > 0) {
+    // Sort by calculationOrder for sequential application
+    combinableCampaigns.sort((a, b) => (a.calculationOrder || 0) - (b.calculationOrder || 0))
+    campaignsToApply = combinableCampaigns
+  }
 
-	// Apply each campaign
-	for (const campaign of campaignsToApply) {
-		const result = applyCampaignToBreakdown(campaign, currentBreakdown, {
-			checkInDate,
-			calculationType: campaign.calculationType || 'cumulative'
-		})
+  // Apply each campaign
+  for (const campaign of campaignsToApply) {
+    const result = applyCampaignToBreakdown(campaign, currentBreakdown, {
+      checkInDate,
+      calculationType: campaign.calculationType || 'cumulative'
+    })
 
-		if (result.applied) {
-			currentBreakdown = result.dailyBreakdown
-			totalDiscount += result.totalDiscount
-			appliedCampaigns.push({
-				_id: campaign._id,
-				code: campaign.code,
-				name: campaign.name,
-				type: campaign.type,
-				discountType: campaign.discount.type,
-				discountValue: campaign.discount.value,
-				freeNights: campaign.discount.freeNights,
-				discountAmount: result.totalDiscount,
-				discountText: result.discountText,
-				eligibleNights: result.eligibleNights
-			})
-		}
-	}
+    if (result.applied) {
+      currentBreakdown = result.dailyBreakdown
+      totalDiscount += result.totalDiscount
+      appliedCampaigns.push({
+        _id: campaign._id,
+        code: campaign.code,
+        name: campaign.name,
+        type: campaign.type,
+        discountType: campaign.discount.type,
+        discountValue: campaign.discount.value,
+        freeNights: campaign.discount.freeNights,
+        discountAmount: result.totalDiscount,
+        discountText: result.discountText,
+        eligibleNights: result.eligibleNights
+      })
+    }
+  }
 
-	const finalTotal = currentBreakdown.reduce((sum, d) => sum + (d.price || 0), 0)
+  const finalTotal = currentBreakdown.reduce((sum, d) => sum + (d.price || 0), 0)
 
-	return {
-		dailyBreakdown: currentBreakdown,
-		appliedCampaigns,
-		totalDiscount,
-		originalTotal,
-		finalTotal
-	}
+  return {
+    dailyBreakdown: currentBreakdown,
+    appliedCampaigns,
+    totalDiscount,
+    originalTotal,
+    finalTotal
+  }
 }
 
 /**
@@ -1225,372 +1380,660 @@ export function applyCampaigns(campaigns, dailyBreakdown, options = {}) {
  * @returns {Object} Complete price breakdown with campaigns
  */
 export async function calculatePriceWithCampaigns(query, useCache = true) {
-	const {
-		hotelId,
-		roomTypeId,
-		mealPlanId,
-		marketId,
-		checkInDate,
-		checkOutDate,
-		adults = 2,
-		children = [],
-		includeCampaigns = true
-	} = query
+  const {
+    hotelId,
+    roomTypeId,
+    mealPlanId,
+    marketId,
+    checkInDate,
+    checkOutDate,
+    adults = 2,
+    children = [],
+    includeCampaigns = true
+  } = query
 
-	// Check cache first
-	if (useCache) {
-		const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
-			type: 'withCampaigns',
-			hotelId,
-			roomTypeId,
-			mealPlanId,
-			marketId,
-			checkInDate,
-			checkOutDate,
-			adults,
-			children: JSON.stringify(children),
-			includeCampaigns
-		})
+  // Check cache first
+  if (useCache) {
+    const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
+      type: 'withCampaigns',
+      hotelId,
+      roomTypeId,
+      mealPlanId,
+      marketId,
+      checkInDate,
+      checkOutDate,
+      adults,
+      children: JSON.stringify(children),
+      includeCampaigns
+    })
 
-		const cached = cache.get(cacheKey)
-		if (cached) {
-			return { ...cached, fromCache: true }
-		}
-	}
+    const cached = cache.get(cacheKey)
+    if (cached) {
+      return { ...cached, fromCache: true }
+    }
+  }
 
-	// Calculate number of nights
-	const checkIn = new Date(checkInDate)
-	const checkOut = new Date(checkOutDate)
-	const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
+  // Calculate number of nights
+  const checkIn = new Date(checkInDate)
+  const checkOut = new Date(checkOutDate)
+  const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
 
-	if (nights <= 0) {
-		throw new BadRequestError('INVALID_DATE_RANGE')
-	}
+  if (nights <= 0) {
+    throw new BadRequestError('INVALID_DATE_RANGE')
+  }
 
-	// Get all rates for the date range
-	const rates = await Rate.findInRange(hotelId, checkInDate, checkOutDate, {
-		roomType: roomTypeId,
-		mealPlan: mealPlanId,
-		market: marketId
-	})
+  // Get all rates for the date range
+  const rates = await Rate.findInRange(hotelId, checkInDate, checkOutDate, {
+    roomType: roomTypeId,
+    mealPlan: mealPlanId,
+    market: marketId
+  })
 
-	if (!rates || rates.length === 0) {
-		throw new NotFoundError('NO_RATES_FOUND')
-	}
+  if (!rates || rates.length === 0) {
+    throw new NotFoundError('NO_RATES_FOUND')
+  }
 
-	// Get context for first rate
-	const firstRate = rates[0]
-	const [roomType, mealPlan, market, hotel] = await Promise.all([
-		RoomType.findById(roomTypeId).lean(),
-		MealPlan.findById(mealPlanId).lean(),
-		Market.findById(marketId).lean(),
-		Hotel.findById(hotelId).lean()
-	])
+  // Get context for first rate
+  const firstRate = rates[0]
+  const [roomType, mealPlan, market, hotel] = await Promise.all([
+    RoomType.findById(roomTypeId).lean(),
+    MealPlan.findById(mealPlanId).lean(),
+    Market.findById(marketId).lean(),
+    Hotel.findById(hotelId).lean()
+  ])
 
-	if (!roomType) throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
-	if (!mealPlan) throw new NotFoundError('MEAL_PLAN_NOT_FOUND')
-	if (!market) throw new NotFoundError('MARKET_NOT_FOUND')
+  if (!roomType) throw new NotFoundError('ROOM_TYPE_NOT_FOUND')
+  if (!mealPlan) throw new NotFoundError('MEAL_PLAN_NOT_FOUND')
+  if (!market) throw new NotFoundError('MARKET_NOT_FOUND')
 
-	// Get season for minAdults calculation
-	const season = await Season.findByDate(hotelId, marketId, checkInDate)
+  // Get season for minAdults calculation
+  const season = await Season.findByDate(hotelId, marketId, checkInDate)
 
-	// Get effective minAdults considering override hierarchy
-	const effectiveMinAdults = getEffectiveMinAdults(roomType, market, season)
+  // Get effective child age groups and max child age
+  const childAgeGroups = getEffectiveChildAgeGroups(hotel, market, season)
+  const maxChildAge = childAgeGroups.length > 0
+    ? Math.max(...childAgeGroups.map(ag => ag.maxAge || 0))
+    : 12 // Default max child age if no groups defined (industry standard: 0-12 child, 13+ adult)
 
-	// Check minAdults restriction upfront
-	if (adults < effectiveMinAdults) {
-		return {
-			success: false,
-			error: 'BELOW_MIN_ADULTS',
-			message: `Minimum ${effectiveMinAdults} adult(s) required for this room type`,
-			minAdults: effectiveMinAdults,
-			requestedAdults: adults
-		}
-	}
+  // Separate children: those above max age should be counted as adults
+  let effectiveAdults = adults
+  let effectiveChildren = children
+  let childrenAsAdults = 0
 
-	// Build daily breakdown
-	const dailyBreakdown = []
-	let totalBasePrice = 0
-	let hasIssues = false
-	const issues = []
+  if (children && children.length > 0) {
+    const validChildren = []
+    children.forEach(child => {
+      const childAge = typeof child === 'object' ? child.age : child
+      if (childAge !== undefined && childAge > maxChildAge) {
+        childrenAsAdults++
+      } else {
+        validChildren.push(child)
+      }
+    })
+    effectiveAdults = adults + childrenAsAdults
+    effectiveChildren = validChildren
+  }
 
-	// Generate dates array
-	const dates = []
-	const currentDate = new Date(checkInDate)
-	while (currentDate < checkOut) {
-		dates.push(currentDate.toISOString().split('T')[0])
-		currentDate.setDate(currentDate.getDate() + 1)
-	}
+  // Get effective minAdults considering override hierarchy
+  const effectiveMinAdults = getEffectiveMinAdults(roomType, market, season)
 
-	// Pre-fetch all seasons for the date range to avoid N+1 queries
-	const seasonsMap = new Map()
-	for (const dateStr of dates) {
-		const daySeason = await Season.findByDate(hotelId, marketId, dateStr)
-		seasonsMap.set(dateStr, daySeason)
-	}
+  // Check minAdults restriction upfront (using effective adults count)
+  if (effectiveAdults < effectiveMinAdults) {
+    return {
+      success: false,
+      error: 'BELOW_MIN_ADULTS',
+      message: `Minimum ${effectiveMinAdults} adult(s) required for this room type`,
+      minAdults: effectiveMinAdults,
+      requestedAdults: adults
+    }
+  }
 
-	for (let i = 0; i < dates.length; i++) {
-		const dateStr = dates[i]
-		const rate = rates.find(r => {
-			const rateDateStr = r.date?.toISOString?.()?.split('T')[0] || r.date?.substring?.(0, 10)
-			return rateDateStr === dateStr
-		})
+  // Build daily breakdown
+  const dailyBreakdown = []
+  let totalBasePrice = 0
+  let hasIssues = false
+  const issues = []
 
-		const isCheckIn = i === 0
-		const isCheckOut = i === dates.length - 1
+  // Generate dates array
+  const dates = []
+  const currentDate = new Date(checkInDate)
+  while (currentDate < checkOut) {
+    dates.push(currentDate.toISOString().split('T')[0])
+    currentDate.setDate(currentDate.getDate() + 1)
+  }
 
-		if (!rate) {
-			dailyBreakdown.push({
-				date: dateStr,
-				price: 0,
-				hasRate: false,
-				hasIssue: true,
-				issue: 'NO_RATE'
-			})
-			hasIssues = true
-			issues.push({ date: dateStr, type: 'no_rate', message: 'No rate defined' })
-			continue
-		}
+  // Pre-fetch all seasons for the date range to avoid N+1 queries
+  const seasonsMap = new Map()
+  for (const dateStr of dates) {
+    const daySeason = await Season.findByDate(hotelId, marketId, dateStr)
+    seasonsMap.set(dateStr, daySeason)
+  }
 
-		// Get season for this specific day
-		const daySeason = seasonsMap.get(dateStr)
+  for (let i = 0; i < dates.length; i++) {
+    const dateStr = dates[i]
+    const rate = rates.find(r => {
+      const rateDateStr = r.date?.toISOString?.()?.split('T')[0] || r.date?.substring?.(0, 10)
+      return rateDateStr === dateStr
+    })
 
-		// Check restrictions (including minAdults)
-		const restrictionCheck = checkRestrictions(rate, {
-			checkInDate,
-			checkOutDate,
-			adults,
-			bookingDate: new Date(),
-			isCheckIn,
-			isCheckOut,
-			minAdults: effectiveMinAdults
-		})
+    const isCheckIn = i === 0
+    const isCheckOut = i === dates.length - 1
 
-		// Calculate daily price
-		const priceResult = calculateOccupancyPrice(rate, { adults, children, nights: 1 }, {
-			roomType,
-			market,
-			hotel
-		})
+    if (!rate) {
+      dailyBreakdown.push({
+        date: dateStr,
+        price: 0,
+        hasRate: false,
+        hasIssue: true,
+        issue: 'NO_RATE'
+      })
+      hasIssues = true
+      issues.push({ date: dateStr, type: 'no_rate', message: 'No rate defined' })
+      continue
+    }
 
-		// Get sales settings for this day (considering day's season)
-		const daySalesSettings = getEffectiveSalesSettings(market, daySeason)
+    // Get season for this specific day
+    const daySeason = seasonsMap.get(dateStr)
 
-		// Calculate 3-tier pricing for this day
-		const dayTierPricing = calculateTierPricing(priceResult.totalPrice, daySalesSettings)
+    // Check restrictions (including minAdults)
+    const restrictionCheck = checkRestrictions(rate, {
+      checkInDate,
+      checkOutDate,
+      adults: effectiveAdults,
+      bookingDate: new Date(),
+      isCheckIn,
+      isCheckOut,
+      minAdults: effectiveMinAdults
+    })
 
-		const dayData = {
-			date: dateStr,
-			price: priceResult.totalPrice,
-			basePrice: priceResult.basePrice,
-			adultPrice: priceResult.adultPrice,
-			childPrice: priceResult.childPrice,
-			// 3-tier pricing for this day
-			hotelCost: dayTierPricing.hotelCost,
-			b2cPrice: dayTierPricing.b2cPrice,
-			b2bPrice: dayTierPricing.b2bPrice,
-			// Sales settings applied for this day
-			salesSettings: {
-				workingMode: daySalesSettings.workingMode,
-				commissionRate: daySalesSettings.commissionRate,
-				agencyCommission: daySalesSettings.agencyCommission,
-				markup: daySalesSettings.markup
-			},
-			season: daySeason ? { _id: daySeason._id, code: daySeason.code, name: daySeason.name } : null,
-			hasRate: true,
-			hasIssue: !restrictionCheck.isBookable,
-			restrictions: restrictionCheck.restrictions,
-			pricingType: priceResult.pricingType
-		}
+    // Calculate daily price
+    const priceResult = calculateOccupancyPrice(
+      rate,
+      { adults: effectiveAdults, children: effectiveChildren, nights: 1 },
+      {
+        roomType,
+        market,
+        hotel
+      }
+    )
 
-		if (!restrictionCheck.isBookable) {
-			hasIssues = true
-			restrictionCheck.messages.forEach(msg => {
-				issues.push({ date: dateStr, type: 'restriction', message: msg })
-			})
-		}
+    // Get sales settings for this day (considering day's season)
+    const daySalesSettings = getEffectiveSalesSettings(market, daySeason)
 
-		dailyBreakdown.push(dayData)
-		totalBasePrice += priceResult.totalPrice
-	}
+    // Calculate 3-tier pricing for this day
+    const dayTierPricing = calculateTierPricing(priceResult.totalPrice, daySalesSettings)
 
-	// Apply campaigns if requested
-	let campaignResult = {
-		dailyBreakdown,
-		appliedCampaigns: [],
-		totalDiscount: 0,
-		originalTotal: totalBasePrice,
-		finalTotal: totalBasePrice
-	}
+    const dayData = {
+      date: dateStr,
+      price: priceResult.totalPrice,
+      basePrice: priceResult.basePrice,
+      adultPrice: priceResult.adultPrice,
+      childPrice: priceResult.childPrice,
+      // 3-tier pricing for this day
+      hotelCost: dayTierPricing.hotelCost,
+      b2cPrice: dayTierPricing.b2cPrice,
+      b2bPrice: dayTierPricing.b2bPrice,
+      // Sales settings applied for this day
+      salesSettings: {
+        workingMode: daySalesSettings.workingMode,
+        commissionRate: daySalesSettings.commissionRate,
+        agencyCommission: daySalesSettings.agencyCommission,
+        markup: daySalesSettings.markup
+      },
+      season: daySeason ? { _id: daySeason._id, code: daySeason.code, name: daySeason.name } : null,
+      hasRate: true,
+      hasIssue: !restrictionCheck.isBookable,
+      restrictions: restrictionCheck.restrictions,
+      pricingType: priceResult.pricingType
+    }
 
-	if (includeCampaigns) {
-		// Get applicable campaigns
-		const campaigns = await getApplicableCampaigns(hotelId, {
-			checkInDate,
-			checkOutDate,
-			roomTypeId,
-			marketId,
-			mealPlanId,
-			nights
-		})
+    if (!restrictionCheck.isBookable) {
+      hasIssues = true
+      restrictionCheck.messages.forEach(msg => {
+        issues.push({ date: dateStr, type: 'restriction', message: msg })
+      })
+    }
 
-		if (campaigns.length > 0) {
-			campaignResult = applyCampaigns(campaigns, dailyBreakdown, { checkInDate })
-		}
-	}
+    dailyBreakdown.push(dayData)
+    totalBasePrice += priceResult.totalPrice
+  }
 
-	// Aggregate 3-tier pricing from daily breakdown (after campaigns applied)
-	// Each day may have different sales settings based on its season
-	let totalHotelCost = 0
-	let totalB2CPrice = 0
-	let totalB2BPrice = 0
+  // Apply campaigns if requested
+  let campaignResult = {
+    dailyBreakdown,
+    appliedCampaigns: [],
+    totalDiscount: 0,
+    originalTotal: totalBasePrice,
+    finalTotal: totalBasePrice
+  }
 
-	// Re-calculate tier pricing for each day after campaigns are applied
-	const finalDailyBreakdown = campaignResult.dailyBreakdown.map(day => {
-		if (!day.hasRate) return day
+  if (includeCampaigns) {
+    // Get applicable campaigns
+    const campaigns = await getApplicableCampaigns(hotelId, {
+      checkInDate,
+      checkOutDate,
+      roomTypeId,
+      marketId,
+      mealPlanId,
+      nights
+    })
 
-		// Get the day's sales settings (already stored in day.salesSettings)
-		const daySalesSettings = day.salesSettings || getEffectiveSalesSettings(market, null)
+    if (campaigns.length > 0) {
+      campaignResult = applyCampaigns(campaigns, dailyBreakdown, { checkInDate })
+    }
+  }
 
-		// Calculate tier pricing based on the discounted price (after campaigns)
-		const dayTierPricing = calculateTierPricing(day.price, daySalesSettings)
+  // Aggregate 3-tier pricing from daily breakdown (after campaigns applied)
+  // Each day may have different sales settings based on its season
+  let totalHotelCost = 0
+  let totalB2CPrice = 0
+  let totalB2BPrice = 0
 
-		totalHotelCost += dayTierPricing.hotelCost
-		totalB2CPrice += dayTierPricing.b2cPrice
-		totalB2BPrice += dayTierPricing.b2bPrice
+  // Re-calculate tier pricing for each day after campaigns are applied
+  const finalDailyBreakdown = campaignResult.dailyBreakdown.map(day => {
+    if (!day.hasRate) return day
 
-		return {
-			...day,
-			// Update tier pricing after campaign discount
-			hotelCost: dayTierPricing.hotelCost,
-			b2cPrice: dayTierPricing.b2cPrice,
-			b2bPrice: dayTierPricing.b2bPrice
-		}
-	})
+    // Get the day's sales settings (already stored in day.salesSettings)
+    const daySalesSettings = day.salesSettings || getEffectiveSalesSettings(market, null)
 
-	// Round totals
-	totalHotelCost = Math.round(totalHotelCost * 100) / 100
-	totalB2CPrice = Math.round(totalB2CPrice * 100) / 100
-	totalB2BPrice = Math.round(totalB2BPrice * 100) / 100
+    // Calculate tier pricing based on the discounted price (after campaigns)
+    const dayTierPricing = calculateTierPricing(day.price, daySalesSettings)
 
-	// Determine if booking spans multiple seasons with different working modes
-	const workingModes = [...new Set(finalDailyBreakdown.filter(d => d.hasRate).map(d => d.salesSettings?.workingMode))]
-	const hasMultipleWorkingModes = workingModes.length > 1
+    totalHotelCost += dayTierPricing.hotelCost
+    totalB2CPrice += dayTierPricing.b2cPrice
+    totalB2BPrice += dayTierPricing.b2bPrice
 
-	const result = {
-		success: true,
-		hotelId,
-		roomType: { _id: roomType?._id, code: roomType?.code, name: roomType?.name },
-		mealPlan: { _id: mealPlan?._id, code: mealPlan?.code, name: mealPlan?.name },
-		market: { _id: market?._id, code: market?.code, currency: market?.currency },
-		checkInDate,
-		checkOutDate,
-		nights,
-		adults,
-		children,
-		currency: market?.currency,
-		dailyBreakdown: finalDailyBreakdown,
-		pricing: {
-			originalTotal: campaignResult.originalTotal,
-			totalDiscount: campaignResult.totalDiscount,
-			finalTotal: campaignResult.finalTotal,
-			avgPerNight: campaignResult.finalTotal / nights,
-			// 3-tier pricing (total for all nights - aggregated from daily)
-			hotelCost: totalHotelCost,
-			b2cPrice: totalB2CPrice,
-			b2bPrice: totalB2BPrice,
-			// 3-tier pricing per night (average)
-			perNight: {
-				hotelCost: Math.round((totalHotelCost / nights) * 100) / 100,
-				b2cPrice: Math.round((totalB2CPrice / nights) * 100) / 100,
-				b2bPrice: Math.round((totalB2BPrice / nights) * 100) / 100
-			}
-		},
-		// Summary of sales settings (mixed if multiple seasons)
-		salesSettings: {
-			hasMultipleWorkingModes,
-			workingModes,
-			// If single working mode, show details; otherwise indicate mixed
-			...(hasMultipleWorkingModes ? {
-				note: 'Multiple seasons with different working modes. See dailyBreakdown for per-day details.'
-			} : {
-				workingMode: workingModes[0] || 'net',
-				commissionRate: finalDailyBreakdown[0]?.salesSettings?.commissionRate,
-				markup: finalDailyBreakdown[0]?.salesSettings?.markup,
-				agencyCommission: finalDailyBreakdown[0]?.salesSettings?.agencyCommission
-			})
-		},
-		campaigns: {
-			applied: campaignResult.appliedCampaigns,
-			totalDiscount: campaignResult.totalDiscount
-		},
-		availability: {
-			isAvailable: !hasIssues,
-			issues
-		}
-	}
+    return {
+      ...day,
+      // Update tier pricing after campaign discount
+      hotelCost: dayTierPricing.hotelCost,
+      b2cPrice: dayTierPricing.b2cPrice,
+      b2bPrice: dayTierPricing.b2bPrice
+    }
+  })
 
-	// Add non-refundable pricing if market/season supports it
-	// Check season override first, then fall back to market settings
-	let nonRefundableEnabled = false
-	let nonRefundableDiscount = 10
+  // Round totals
+  totalHotelCost = Math.round(totalHotelCost * 100) / 100
+  totalB2CPrice = Math.round(totalB2CPrice * 100) / 100
+  totalB2BPrice = Math.round(totalB2BPrice * 100) / 100
 
-	if (season && !season.nonRefundableOverride?.inheritFromMarket) {
-		// Use season override
-		nonRefundableEnabled = season.nonRefundableOverride?.enabled || false
-		nonRefundableDiscount = season.nonRefundableOverride?.discount || 10
-	} else {
-		// Use market settings
-		nonRefundableEnabled = market.ratePolicy === 'non_refundable' || market.ratePolicy === 'both'
-		nonRefundableDiscount = market.nonRefundableDiscount || 10
-	}
+  // Determine if booking spans multiple seasons with different working modes
+  const workingModes = [
+    ...new Set(finalDailyBreakdown.filter(d => d.hasRate).map(d => d.salesSettings?.workingMode))
+  ]
+  const hasMultipleWorkingModes = workingModes.length > 1
 
-	if (nonRefundableEnabled) {
-		const discountMultiplier = 1 - (nonRefundableDiscount / 100)
+  const result = {
+    success: true,
+    hotelId,
+    roomType: { _id: roomType?._id, code: roomType?.code, name: roomType?.name },
+    mealPlan: { _id: mealPlan?._id, code: mealPlan?.code, name: mealPlan?.name },
+    market: { _id: market?._id, code: market?.code, currency: market?.currency },
+    checkInDate,
+    checkOutDate,
+    nights,
+    adults,
+    children,
+    // Effective counts after child age validation
+    occupancy: {
+      requestedAdults: adults,
+      requestedChildren: children.length,
+      effectiveAdults,
+      effectiveChildren: effectiveChildren.length,
+      childrenAsAdults, // Children counted as adults due to exceeding max child age
+      maxChildAge // Max child age threshold used
+    },
+    currency: market?.currency,
+    dailyBreakdown: finalDailyBreakdown,
+    pricing: {
+      originalTotal: campaignResult.originalTotal,
+      totalDiscount: campaignResult.totalDiscount,
+      finalTotal: campaignResult.finalTotal,
+      avgPerNight: campaignResult.finalTotal / nights,
+      // 3-tier pricing (total for all nights - aggregated from daily)
+      hotelCost: totalHotelCost,
+      b2cPrice: totalB2CPrice,
+      b2bPrice: totalB2BPrice,
+      // 3-tier pricing per night (average)
+      perNight: {
+        hotelCost: Math.round((totalHotelCost / nights) * 100) / 100,
+        b2cPrice: Math.round((totalB2CPrice / nights) * 100) / 100,
+        b2bPrice: Math.round((totalB2BPrice / nights) * 100) / 100
+      }
+    },
+    // Summary of sales settings (mixed if multiple seasons)
+    salesSettings: {
+      hasMultipleWorkingModes,
+      workingModes,
+      // If single working mode, show details; otherwise indicate mixed
+      ...(hasMultipleWorkingModes
+        ? {
+            note: 'Multiple seasons with different working modes. See dailyBreakdown for per-day details.'
+          }
+        : {
+            workingMode: workingModes[0] || 'net',
+            commissionRate: finalDailyBreakdown[0]?.salesSettings?.commissionRate,
+            markup: finalDailyBreakdown[0]?.salesSettings?.markup,
+            agencyCommission: finalDailyBreakdown[0]?.salesSettings?.agencyCommission
+          })
+    },
+    campaigns: {
+      applied: campaignResult.appliedCampaigns,
+      totalDiscount: campaignResult.totalDiscount
+    },
+    availability: {
+      isAvailable: !hasIssues,
+      issues
+    }
+  }
 
-		result.nonRefundable = {
-			enabled: true,
-			discountPercent: nonRefundableDiscount,
-			pricing: {
-				finalTotal: Math.round(campaignResult.finalTotal * discountMultiplier * 100) / 100,
-				avgPerNight: Math.round((campaignResult.finalTotal / nights) * discountMultiplier * 100) / 100,
-				hotelCost: Math.round(totalHotelCost * discountMultiplier * 100) / 100,
-				b2cPrice: Math.round(totalB2CPrice * discountMultiplier * 100) / 100,
-				b2bPrice: Math.round(totalB2BPrice * discountMultiplier * 100) / 100,
-				perNight: {
-					hotelCost: Math.round((totalHotelCost / nights) * discountMultiplier * 100) / 100,
-					b2cPrice: Math.round((totalB2CPrice / nights) * discountMultiplier * 100) / 100,
-					b2bPrice: Math.round((totalB2BPrice / nights) * discountMultiplier * 100) / 100
-				}
-			},
-			savings: {
-				total: Math.round(campaignResult.finalTotal * (nonRefundableDiscount / 100) * 100) / 100,
-				b2cTotal: Math.round(totalB2CPrice * (nonRefundableDiscount / 100) * 100) / 100,
-				b2bTotal: Math.round(totalB2BPrice * (nonRefundableDiscount / 100) * 100) / 100
-			}
-		}
-	} else {
-		result.nonRefundable = { enabled: false }
-	}
+  // Add non-refundable pricing if market/season supports it
+  // Check season override first, then fall back to market settings
+  let nonRefundableEnabled = false
+  let nonRefundableDiscount = 10
 
-	// Cache the result
-	if (useCache) {
-		const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
-			type: 'withCampaigns',
-			hotelId,
-			roomTypeId,
-			mealPlanId,
-			marketId,
-			checkInDate,
-			checkOutDate,
-			adults,
-			children: JSON.stringify(children),
-			includeCampaigns
-		})
-		cache.set(cacheKey, result, CACHE_TTL.PRICE_CALCULATION)
-	}
+  if (season && !season.nonRefundableOverride?.inheritFromMarket) {
+    // Use season override
+    nonRefundableEnabled = season.nonRefundableOverride?.enabled || false
+    nonRefundableDiscount = season.nonRefundableOverride?.discount || 10
+  } else {
+    // Use market settings
+    nonRefundableEnabled = market.ratePolicy === 'non_refundable' || market.ratePolicy === 'both'
+    nonRefundableDiscount = market.nonRefundableDiscount || 10
+  }
 
-	return result
+  if (nonRefundableEnabled) {
+    const discountMultiplier = 1 - nonRefundableDiscount / 100
+
+    result.nonRefundable = {
+      enabled: true,
+      discountPercent: nonRefundableDiscount,
+      pricing: {
+        finalTotal: Math.round(campaignResult.finalTotal * discountMultiplier * 100) / 100,
+        avgPerNight:
+          Math.round((campaignResult.finalTotal / nights) * discountMultiplier * 100) / 100,
+        hotelCost: Math.round(totalHotelCost * discountMultiplier * 100) / 100,
+        b2cPrice: Math.round(totalB2CPrice * discountMultiplier * 100) / 100,
+        b2bPrice: Math.round(totalB2BPrice * discountMultiplier * 100) / 100,
+        perNight: {
+          hotelCost: Math.round((totalHotelCost / nights) * discountMultiplier * 100) / 100,
+          b2cPrice: Math.round((totalB2CPrice / nights) * discountMultiplier * 100) / 100,
+          b2bPrice: Math.round((totalB2BPrice / nights) * discountMultiplier * 100) / 100
+        }
+      },
+      savings: {
+        total: Math.round(campaignResult.finalTotal * (nonRefundableDiscount / 100) * 100) / 100,
+        b2cTotal: Math.round(totalB2CPrice * (nonRefundableDiscount / 100) * 100) / 100,
+        b2bTotal: Math.round(totalB2BPrice * (nonRefundableDiscount / 100) * 100) / 100
+      }
+    }
+  } else {
+    result.nonRefundable = { enabled: false }
+  }
+
+  // Cache the result
+  if (useCache) {
+    const cacheKey = generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, {
+      type: 'withCampaigns',
+      hotelId,
+      roomTypeId,
+      mealPlanId,
+      marketId,
+      checkInDate,
+      checkOutDate,
+      adults,
+      children: JSON.stringify(children),
+      includeCampaigns
+    })
+    cache.set(cacheKey, result, CACHE_TTL.PRICE_CALCULATION)
+  }
+
+  return result
+}
+
+// ==================== MULTI-ROOM BOOKING PRICING ====================
+
+/**
+ * Calculate pricing for multiple rooms in a single booking
+ * This is the SINGLE SOURCE OF TRUTH for booking total calculations
+ *
+ * @param {Object} params
+ * @param {string} params.hotelId - Hotel ID
+ * @param {Array} params.rooms - Array of room configurations
+ * @param {string} params.rooms[].roomTypeId - Room type ID
+ * @param {string} params.rooms[].mealPlanId - Meal plan ID
+ * @param {number} params.rooms[].adults - Number of adults
+ * @param {Array} params.rooms[].children - Array of child ages [{age: 5}, {age: 10}] or [5, 10]
+ * @param {string} params.rooms[].rateType - 'refundable' or 'non_refundable'
+ * @param {Object} params.rooms[].guests - Guest information (optional)
+ * @param {string} params.marketId - Market ID
+ * @param {string|Date} params.checkInDate - Check-in date
+ * @param {string|Date} params.checkOutDate - Check-out date
+ * @param {boolean} params.includeCampaigns - Include campaigns (default: true)
+ * @param {boolean} params.throwOnError - Throw error on pricing failure (default: false)
+ * @param {string} params.salesChannel - 'b2c' or 'b2b' (default: 'b2c')
+ *
+ * @returns {Object} {
+ *   success: boolean,
+ *   rooms: Array<RoomPricingResult>,
+ *   totals: { subtotal, totalDiscount, grandTotal, currency },
+ *   nights: number,
+ *   errors: Array<Error> (if any room failed)
+ * }
+ */
+export async function calculateMultiRoomBookingPrice(params) {
+  const {
+    hotelId,
+    rooms,
+    marketId,
+    checkInDate,
+    checkOutDate,
+    includeCampaigns = true,
+    throwOnError = false,
+    salesChannel = 'b2c' // 'b2c' or 'b2b'
+  } = params
+
+  if (!rooms || rooms.length === 0) {
+    throw new PricingError('NO_ROOMS_PROVIDED', { params })
+  }
+
+  // Calculate nights
+  const checkIn = new Date(checkInDate)
+  const checkOut = new Date(checkOutDate)
+  const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24))
+
+  if (nights <= 0) {
+    throw new PricingError('INVALID_DATE_RANGE', { checkInDate, checkOutDate, nights })
+  }
+
+  // Get market for currency
+  const market = await Market.findById(marketId).lean()
+  if (!market) {
+    throw new NotFoundError('MARKET_NOT_FOUND')
+  }
+
+  const currency = market.currency || 'TRY'
+  const roomResults = []
+  const errors = []
+
+  // Process each room in PARALLEL for maximum performance
+  const roomPromises = rooms.map(async (room, i) => {
+    // Normalize children format
+    const normalizedChildren = (room.children || []).map(child => {
+      if (typeof child === 'object' && child !== null) {
+        return { age: child.age }
+      }
+      return { age: child }
+    })
+
+    try {
+      // Calculate price for this room
+      const priceResult = await calculatePriceWithCampaigns({
+        hotelId,
+        roomTypeId: room.roomTypeId,
+        mealPlanId: room.mealPlanId,
+        marketId,
+        checkInDate,
+        checkOutDate,
+        adults: room.adults || 2,
+        children: normalizedChildren,
+        includeCampaigns
+      })
+
+      // Validate the result
+      try {
+        validatePricingResult(priceResult, { roomIndex: i, room })
+      } catch (validationError) {
+        if (throwOnError) throw validationError
+        return {
+          success: false,
+          roomIndex: i,
+          error: {
+            roomIndex: i,
+            error: validationError.code,
+            message: validationError.message,
+            details: validationError.details
+          }
+        }
+      }
+
+      // Check availability
+      let availabilityError = null
+      if (!priceResult.availability?.isAvailable) {
+        availabilityError = {
+          roomIndex: i,
+          error: 'ROOM_NOT_AVAILABLE',
+          issues: priceResult.availability?.issues || []
+        }
+        if (throwOnError) {
+          throw new PricingError('ROOM_NOT_AVAILABLE', {
+            roomIndex: i,
+            issues: priceResult.availability?.issues
+          })
+        }
+      }
+
+      // Determine final price based on sales channel
+      // B2C: Use b2cPrice (with B2C markup)
+      // B2B: Use b2bPrice (with agency commission)
+      // hotelCost is NEVER shown to customers - it's internal cost only
+      let finalPrice = salesChannel === 'b2b'
+        ? priceResult.pricing.b2bPrice
+        : priceResult.pricing.b2cPrice
+      let appliedNonRefundable = false
+      let nonRefundableDiscount = 0
+
+      if (room.rateType === 'non_refundable' && priceResult.nonRefundable?.enabled) {
+        finalPrice = salesChannel === 'b2b'
+          ? priceResult.nonRefundable.pricing.b2bPrice
+          : priceResult.nonRefundable.pricing.b2cPrice
+        appliedNonRefundable = true
+        nonRefundableDiscount = priceResult.nonRefundable.discountPercent
+      }
+
+      // Build room result
+      return {
+        success: true,
+        roomIndex: i,
+        availabilityError,
+        result: {
+          roomIndex: i,
+          roomTypeId: room.roomTypeId,
+          roomTypeName: priceResult.roomType?.name,
+          roomTypeCode: priceResult.roomType?.code,
+          mealPlanId: room.mealPlanId,
+          mealPlanName: priceResult.mealPlan?.name,
+          mealPlanCode: priceResult.mealPlan?.code,
+          guests: room.guests,
+          rateType: room.rateType || 'refundable',
+          occupancy: priceResult.occupancy,
+          pricing: {
+            currency,
+            originalTotal: priceResult.pricing.originalTotal,
+            campaignDiscount: priceResult.pricing.totalDiscount,
+            finalTotal: finalPrice,
+            avgPerNight: finalPrice / nights,
+            // 3-tier pricing
+            hotelCost: appliedNonRefundable
+              ? priceResult.nonRefundable.pricing.hotelCost
+              : priceResult.pricing.hotelCost,
+            b2cPrice: appliedNonRefundable
+              ? priceResult.nonRefundable.pricing.b2cPrice
+              : priceResult.pricing.b2cPrice,
+            b2bPrice: appliedNonRefundable
+              ? priceResult.nonRefundable.pricing.b2bPrice
+              : priceResult.pricing.b2bPrice
+          },
+          dailyBreakdown: priceResult.dailyBreakdown,
+          campaigns: priceResult.campaigns?.applied || [],
+          nonRefundable: appliedNonRefundable
+            ? {
+                applied: true,
+                discountPercent: nonRefundableDiscount,
+                savings: priceResult.pricing.finalTotal - finalPrice
+              }
+            : { applied: false },
+          available: priceResult.availability?.isAvailable ?? true
+        },
+        originalTotal: priceResult.pricing.originalTotal,
+        finalPrice
+      }
+    } catch (error) {
+      if (throwOnError) throw error
+      return {
+        success: false,
+        roomIndex: i,
+        error: {
+          roomIndex: i,
+          error: error.code || error.message,
+          message: error.message
+        }
+      }
+    }
+  })
+
+  // Wait for all room calculations to complete in parallel
+  const roomCalculations = await Promise.all(roomPromises)
+
+  // Aggregate results
+  let subtotal = 0
+  let grandTotal = 0
+
+  for (const calc of roomCalculations) {
+    if (calc.success) {
+      roomResults.push(calc.result)
+      subtotal += calc.originalTotal
+      grandTotal += calc.finalPrice
+      if (calc.availabilityError) {
+        errors.push(calc.availabilityError)
+      }
+    } else {
+      errors.push(calc.error)
+    }
+  }
+
+  // Sort results by roomIndex to maintain order
+  roomResults.sort((a, b) => a.roomIndex - b.roomIndex)
+
+  // Calculate total discount
+  const totalDiscount = subtotal - grandTotal
+
+  return {
+    success: errors.length === 0,
+    hotelId,
+    marketId,
+    checkInDate,
+    checkOutDate,
+    nights,
+    rooms: roomResults,
+    totals: {
+      currency,
+      subtotal,           // Original total (before campaigns/discounts)
+      totalDiscount,      // Total discount amount
+      grandTotal          // Final total (after all discounts)
+    },
+    errors: errors.length > 0 ? errors : undefined
+  }
 }
 
 // ==================== ALLOTMENT MANAGEMENT ====================
@@ -1602,57 +2045,57 @@ export async function calculatePriceWithCampaigns(query, useCache = true) {
  * @returns {Object} { success, updatedRates }
  */
 export async function reserveAllotment(params) {
-	const { hotelId, roomTypeId, mealPlanId, marketId, dates, rooms = 1 } = params
+  const { hotelId, roomTypeId, mealPlanId, marketId, dates, rooms = 1 } = params
 
-	if (!dates || dates.length === 0) {
-		throw new BadRequestError('DATES_REQUIRED')
-	}
+  if (!dates || dates.length === 0) {
+    throw new BadRequestError('DATES_REQUIRED')
+  }
 
-	const updatedRates = []
-	const errors = []
+  const updatedRates = []
+  const errors = []
 
-	for (const date of dates) {
-		try {
-			const rate = await Rate.findOne({
-				hotel: hotelId,
-				roomType: roomTypeId,
-				mealPlan: mealPlanId,
-				market: marketId,
-				date: new Date(date)
-			})
+  for (const date of dates) {
+    try {
+      const rate = await Rate.findOne({
+        hotel: hotelId,
+        roomType: roomTypeId,
+        mealPlan: mealPlanId,
+        market: marketId,
+        date: new Date(date)
+      })
 
-			if (!rate) {
-				errors.push({ date, error: 'RATE_NOT_FOUND' })
-				continue
-			}
+      if (!rate) {
+        errors.push({ date, error: 'RATE_NOT_FOUND' })
+        continue
+      }
 
-			// Check if enough allotment is available
-			const available = (rate.allotment ?? 0) - (rate.sold ?? 0)
-			if (available < rooms) {
-				errors.push({ date, error: 'INSUFFICIENT_ALLOTMENT', available, required: rooms })
-				continue
-			}
+      // Check if enough allotment is available
+      const available = (rate.allotment ?? 0) - (rate.sold ?? 0)
+      if (available < rooms) {
+        errors.push({ date, error: 'INSUFFICIENT_ALLOTMENT', available, required: rooms })
+        continue
+      }
 
-			// Increment sold count
-			rate.sold = (rate.sold ?? 0) + rooms
-			await rate.save()
+      // Increment sold count
+      rate.sold = (rate.sold ?? 0) + rooms
+      await rate.save()
 
-			updatedRates.push({
-				date: rate.date,
-				allotment: rate.allotment,
-				sold: rate.sold,
-				available: rate.allotment - rate.sold
-			})
-		} catch (error) {
-			errors.push({ date, error: error.message })
-		}
-	}
+      updatedRates.push({
+        date: rate.date,
+        allotment: rate.allotment,
+        sold: rate.sold,
+        available: rate.allotment - rate.sold
+      })
+    } catch (error) {
+      errors.push({ date, error: error.message })
+    }
+  }
 
-	return {
-		success: errors.length === 0,
-		updatedRates,
-		errors: errors.length > 0 ? errors : undefined
-	}
+  return {
+    success: errors.length === 0,
+    updatedRates,
+    errors: errors.length > 0 ? errors : undefined
+  }
 }
 
 /**
@@ -1662,50 +2105,50 @@ export async function reserveAllotment(params) {
  * @returns {Object} { success, updatedRates }
  */
 export async function releaseAllotment(params) {
-	const { hotelId, roomTypeId, mealPlanId, marketId, dates, rooms = 1 } = params
+  const { hotelId, roomTypeId, mealPlanId, marketId, dates, rooms = 1 } = params
 
-	if (!dates || dates.length === 0) {
-		throw new BadRequestError('DATES_REQUIRED')
-	}
+  if (!dates || dates.length === 0) {
+    throw new BadRequestError('DATES_REQUIRED')
+  }
 
-	const updatedRates = []
-	const errors = []
+  const updatedRates = []
+  const errors = []
 
-	for (const date of dates) {
-		try {
-			const rate = await Rate.findOne({
-				hotel: hotelId,
-				roomType: roomTypeId,
-				mealPlan: mealPlanId,
-				market: marketId,
-				date: new Date(date)
-			})
+  for (const date of dates) {
+    try {
+      const rate = await Rate.findOne({
+        hotel: hotelId,
+        roomType: roomTypeId,
+        mealPlan: mealPlanId,
+        market: marketId,
+        date: new Date(date)
+      })
 
-			if (!rate) {
-				errors.push({ date, error: 'RATE_NOT_FOUND' })
-				continue
-			}
+      if (!rate) {
+        errors.push({ date, error: 'RATE_NOT_FOUND' })
+        continue
+      }
 
-			// Decrease sold count (minimum 0)
-			rate.sold = Math.max(0, (rate.sold ?? 0) - rooms)
-			await rate.save()
+      // Decrease sold count (minimum 0)
+      rate.sold = Math.max(0, (rate.sold ?? 0) - rooms)
+      await rate.save()
 
-			updatedRates.push({
-				date: rate.date,
-				allotment: rate.allotment,
-				sold: rate.sold,
-				available: (rate.allotment ?? 0) - rate.sold
-			})
-		} catch (error) {
-			errors.push({ date, error: error.message })
-		}
-	}
+      updatedRates.push({
+        date: rate.date,
+        allotment: rate.allotment,
+        sold: rate.sold,
+        available: (rate.allotment ?? 0) - rate.sold
+      })
+    } catch (error) {
+      errors.push({ date, error: error.message })
+    }
+  }
 
-	return {
-		success: errors.length === 0,
-		updatedRates,
-		errors: errors.length > 0 ? errors : undefined
-	}
+  return {
+    success: errors.length === 0,
+    updatedRates,
+    errors: errors.length > 0 ? errors : undefined
+  }
 }
 
 /**
@@ -1714,46 +2157,53 @@ export async function releaseAllotment(params) {
  * @returns {Array} Allotment status per day
  */
 export async function getAllotmentStatus(params) {
-	const { hotelId, roomTypeId, mealPlanId, marketId, startDate, endDate } = params
+  const { hotelId, roomTypeId, mealPlanId, marketId, startDate, endDate } = params
 
-	const rates = await Rate.findInRange(hotelId, startDate, endDate, {
-		roomType: roomTypeId,
-		mealPlan: mealPlanId,
-		market: marketId
-	})
+  const rates = await Rate.findInRange(hotelId, startDate, endDate, {
+    roomType: roomTypeId,
+    mealPlan: mealPlanId,
+    market: marketId
+  })
 
-	return rates.map(rate => ({
-		date: rate.date,
-		allotment: rate.allotment ?? null,
-		sold: rate.sold ?? 0,
-		available: rate.allotment !== null ? (rate.allotment - (rate.sold ?? 0)) : null,
-		stopSale: rate.stopSale || false
-	}))
+  return rates.map(rate => ({
+    date: rate.date,
+    allotment: rate.allotment ?? null,
+    sold: rate.sold ?? 0,
+    available: rate.allotment !== null ? rate.allotment - (rate.sold ?? 0) : null,
+    stopSale: rate.stopSale || false
+  }))
 }
 
 export default {
-	getEffectiveMinAdults,
-	getEffectivePricingType,
-	getEffectiveMultiplierTemplate,
-	getEffectiveChildAgeGroups,
-	getEffectiveRoundingRule,
-	// Sales settings functions
-	getEffectiveSalesSettings,
-	calculateTierPricing,
-	// Core functions
-	checkRestrictions,
-	calculateOccupancyPrice,
-	getEffectiveRate,
-	calculateBookingPrice,
-	bulkCalculatePrices,
-	checkAvailability,
-	// Campaign functions
-	getApplicableCampaigns,
-	applyCampaignToBreakdown,
-	applyCampaigns,
-	calculatePriceWithCampaigns,
-	// Allotment functions
-	reserveAllotment,
-	releaseAllotment,
-	getAllotmentStatus
+  // Error class
+  PricingError,
+  // Validation
+  validatePricingResult,
+  // Override hierarchy functions
+  getEffectiveMinAdults,
+  getEffectivePricingType,
+  getEffectiveMultiplierTemplate,
+  getEffectiveChildAgeGroups,
+  getEffectiveRoundingRule,
+  // Sales settings functions
+  getEffectiveSalesSettings,
+  calculateTierPricing,
+  // Core functions
+  checkRestrictions,
+  calculateOccupancyPrice,
+  getEffectiveRate,
+  calculateBookingPrice,
+  bulkCalculatePrices,
+  checkAvailability,
+  // Campaign functions
+  getApplicableCampaigns,
+  applyCampaignToBreakdown,
+  applyCampaigns,
+  calculatePriceWithCampaigns,
+  // Multi-room booking pricing (SINGLE SOURCE OF TRUTH)
+  calculateMultiRoomBookingPrice,
+  // Allotment functions
+  reserveAllotment,
+  releaseAllotment,
+  getAllotmentStatus
 }

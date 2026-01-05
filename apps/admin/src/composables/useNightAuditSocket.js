@@ -1,5 +1,6 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useSocket } from './useSocket'
+import { socketLogger } from '@/utils/logger'
 
 /**
  * Composable for receiving real-time Night Audit progress updates via WebSocket
@@ -7,7 +8,7 @@ import { useSocket } from './useSocket'
  * @param {Object} callbacks - Optional callback functions for events
  */
 export function useNightAuditSocket(hotelId, callbacks = {}) {
-  const { socket, join, leave, on, off, isConnected } = useSocket()
+  const { join, leave, on, off, isConnected } = useSocket()
 
   const auditProgress = ref({
     auditId: null,
@@ -22,7 +23,7 @@ export function useNightAuditSocket(hotelId, callbacks = {}) {
 
   // Event handlers
   const handlers = {
-    started: (data) => {
+    started: data => {
       auditProgress.value = {
         auditId: data.auditId,
         currentStep: data.currentStep || 1,
@@ -32,13 +33,13 @@ export function useNightAuditSocket(hotelId, callbacks = {}) {
       }
       callbacks.onStarted?.(data)
     },
-    'step-complete': (data) => {
+    'step-complete': data => {
       auditProgress.value.currentStep = data.currentStep
       auditProgress.value.lastEvent = 'step-complete'
       auditProgress.value.lastUpdate = new Date()
       callbacks.onStepComplete?.(data)
     },
-    completed: (data) => {
+    completed: data => {
       auditProgress.value.isCompleted = true
       auditProgress.value.lastEvent = 'completed'
       auditProgress.value.lastUpdate = new Date()
@@ -46,7 +47,7 @@ export function useNightAuditSocket(hotelId, callbacks = {}) {
     }
   }
 
-  const joinRoom = (hId) => {
+  const joinRoom = hId => {
     if (!hId) return
 
     const room = `night-audit:${hId}`
@@ -69,7 +70,7 @@ export function useNightAuditSocket(hotelId, callbacks = {}) {
       on(`${eventPrefix}${event}`, handler)
     })
 
-    console.log('[NightAuditSocket] Joined room:', room)
+    socketLogger.debug('[NightAuditSocket] Joined room:', room)
   }
 
   const leaveRoom = () => {
@@ -80,7 +81,7 @@ export function useNightAuditSocket(hotelId, callbacks = {}) {
       })
 
       leave(currentRoom)
-      console.log('[NightAuditSocket] Left room:', currentRoom)
+      socketLogger.debug('[NightAuditSocket] Left room:', currentRoom)
       currentRoom = null
     }
   }
@@ -95,7 +96,7 @@ export function useNightAuditSocket(hotelId, callbacks = {}) {
   // Watch for hotel ID changes
   watch(
     () => getHotelIdValue(),
-    (newHotelId) => {
+    newHotelId => {
       if (newHotelId) {
         joinRoom(newHotelId)
       } else {

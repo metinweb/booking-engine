@@ -1,4 +1,4 @@
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 
 /**
  * Sayfalama için composable
@@ -51,7 +51,7 @@ export function usePagination(options = {}) {
     const half = Math.floor(maxVisible / 2)
 
     let start = Math.max(1, page.value - half)
-    let end = Math.min(totalPages.value, start + maxVisible - 1)
+    const end = Math.min(totalPages.value, start + maxVisible - 1)
 
     // Baştan taşma düzeltmesi
     if (end - start + 1 < maxVisible) {
@@ -66,7 +66,7 @@ export function usePagination(options = {}) {
   })
 
   // Methods
-  const setPage = (newPage) => {
+  const setPage = newPage => {
     const validPage = Math.max(1, Math.min(newPage, totalPages.value))
     if (page.value !== validPage) {
       page.value = validPage
@@ -94,7 +94,7 @@ export function usePagination(options = {}) {
     setPage(totalPages.value)
   }
 
-  const setPerPage = (newPerPage) => {
+  const setPerPage = newPerPage => {
     if (perPage.value !== newPerPage) {
       perPage.value = newPerPage
       // Sayfa başına kayıt değiştiğinde ilk sayfaya dön
@@ -103,7 +103,7 @@ export function usePagination(options = {}) {
     }
   }
 
-  const setTotal = (newTotal) => {
+  const setTotal = newTotal => {
     total.value = newTotal
     // Total değiştiğinde sayfa aşıyorsa düzelt
     if (page.value > totalPages.value) {
@@ -124,7 +124,7 @@ export function usePagination(options = {}) {
   }))
 
   // API response'dan güncelleme
-  const fromResponse = (response) => {
+  const fromResponse = response => {
     if (response?.pagination) {
       total.value = response.pagination.total || 0
       if (response.pagination.page) {

@@ -40,7 +40,7 @@ class NetGSMProvider extends ISMSProvider {
     if (!phone) return null
 
     // Remove all non-numeric characters
-    let cleaned = phone.replace(/[^0-9]/g, '')
+    const cleaned = phone.replace(/[^0-9]/g, '')
 
     // Handle different formats
     if (cleaned.startsWith('90') && cleaned.length === 12) {
@@ -72,14 +72,14 @@ class NetGSMProvider extends ISMSProvider {
 
     const errorMessages = {
       '00': 'Success',
-      '20': 'Mesaj metni boş',
-      '30': 'Geçersiz kullanıcı bilgileri',
-      '40': 'Mesaj başlığı sistemde tanımlı değil',
-      '50': 'Hesap aktif değil',
-      '51': 'Hesap bloke',
-      '70': 'Geçersiz parametreler',
-      '80': 'Sorgulama limiti aşıldı',
-      '85': 'Aynı içerik filtresi - tekrar mesaj engellendi'
+      20: 'Mesaj metni boş',
+      30: 'Geçersiz kullanıcı bilgileri',
+      40: 'Mesaj başlığı sistemde tanımlı değil',
+      50: 'Hesap aktif değil',
+      51: 'Hesap bloke',
+      70: 'Geçersiz parametreler',
+      80: 'Sorgulama limiti aşıldı',
+      85: 'Aynı içerik filtresi - tekrar mesaj engellendi'
     }
 
     const success = code === '00'
@@ -88,7 +88,7 @@ class NetGSMProvider extends ISMSProvider {
       success,
       code,
       messageId: success ? messageId : null,
-      error: success ? null : (errorMessages[code] || 'NetGSM hatası: ' + code)
+      error: success ? null : errorMessages[code] || 'NetGSM hatası: ' + code
     }
   }
 
@@ -107,18 +107,31 @@ class NetGSMProvider extends ISMSProvider {
     }
 
     try {
-      const xmlBody = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      const xmlBody =
+        '<?xml version="1.0" encoding="UTF-8"?>\n' +
         '<mainbody>\n' +
         '    <header>\n' +
-        '        <company dil="' + language + '">Netgsm</company>\n' +
-        '        <usercode>' + this.config.usercode + '</usercode>\n' +
-        '        <password>' + this.config.password + '</password>\n' +
+        '        <company dil="' +
+        language +
+        '">Netgsm</company>\n' +
+        '        <usercode>' +
+        this.config.usercode +
+        '</usercode>\n' +
+        '        <password>' +
+        this.config.password +
+        '</password>\n' +
         '        <type>1:n</type>\n' +
-        '        <msgheader>' + this.config.msgheader + '</msgheader>\n' +
+        '        <msgheader>' +
+        this.config.msgheader +
+        '</msgheader>\n' +
         '    </header>\n' +
         '    <body>\n' +
-        '        <msg><![CDATA[' + message + ']]></msg>\n' +
-        '        <no>' + formattedPhone + '</no>\n' +
+        '        <msg><![CDATA[' +
+        message +
+        ']]></msg>\n' +
+        '        <no>' +
+        formattedPhone +
+        '</no>\n' +
         '    </body>\n' +
         '</mainbody>'
 

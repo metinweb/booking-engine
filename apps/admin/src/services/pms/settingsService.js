@@ -14,7 +14,7 @@ const BASE_URL = '/pms'
 /**
  * Tüm ayarları getir
  */
-export const getSettings = async (hotelId) => {
+export const getSettings = async hotelId => {
   const response = await pmsApiClient.get(`${BASE_URL}/hotels/${hotelId}/settings`)
   return response.data
 }
@@ -51,7 +51,9 @@ export const updateAllSettings = async (hotelId, settings) => {
  * Genel ayarları güncelle
  */
 export const updateGeneralSettings = async (hotelId, general) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/general`, { general })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/general`, {
+    general
+  })
   return response.data
 }
 
@@ -59,7 +61,9 @@ export const updateGeneralSettings = async (hotelId, general) => {
  * Resepsiyon ayarlarını güncelle
  */
 export const updateFrontDeskSettings = async (hotelId, frontDesk) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/front-desk`, { frontDesk })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/front-desk`, {
+    frontDesk
+  })
   return response.data
 }
 
@@ -75,7 +79,9 @@ export const updateTaxSettings = async (hotelId, taxes) => {
  * Fatura ayarlarını güncelle
  */
 export const updateInvoicingSettings = async (hotelId, invoicing) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/invoicing`, { invoicing })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/invoicing`, {
+    invoicing
+  })
   return response.data
 }
 
@@ -83,7 +89,9 @@ export const updateInvoicingSettings = async (hotelId, invoicing) => {
  * Kat hizmetleri ayarlarını güncelle
  */
 export const updateHousekeepingSettings = async (hotelId, housekeeping) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/housekeeping`, { housekeeping })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/housekeeping`, {
+    housekeeping
+  })
   return response.data
 }
 
@@ -91,7 +99,9 @@ export const updateHousekeepingSettings = async (hotelId, housekeeping) => {
  * Kasa/POS ayarlarını güncelle
  */
 export const updateCashierSettings = async (hotelId, cashier) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/cashier`, { cashier })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/cashier`, {
+    cashier
+  })
   return response.data
 }
 
@@ -99,7 +109,9 @@ export const updateCashierSettings = async (hotelId, cashier) => {
  * Bildirim ayarlarını güncelle
  */
 export const updateNotificationSettings = async (hotelId, notifications) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/notifications`, { notifications })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/notifications`, {
+    notifications
+  })
   return response.data
 }
 
@@ -107,7 +119,9 @@ export const updateNotificationSettings = async (hotelId, notifications) => {
  * Rezervasyon ayarlarını güncelle
  */
 export const updateReservationSettings = async (hotelId, reservations) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/reservations`, { reservations })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/reservations`, {
+    reservations
+  })
   return response.data
 }
 
@@ -115,7 +129,9 @@ export const updateReservationSettings = async (hotelId, reservations) => {
  * Misafir ayarlarını güncelle
  */
 export const updateGuestSettings = async (hotelId, guests) => {
-  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/guests`, { guests })
+  const response = await pmsApiClient.put(`${BASE_URL}/hotels/${hotelId}/settings/guests`, {
+    guests
+  })
   return response.data
 }
 
@@ -127,7 +143,9 @@ export const updateGuestSettings = async (hotelId, guests) => {
  * Ayarları varsayılana sıfırla
  */
 export const resetSettings = async (hotelId, section = 'all') => {
-  const response = await pmsApiClient.post(`${BASE_URL}/hotels/${hotelId}/settings/reset`, { section })
+  const response = await pmsApiClient.post(`${BASE_URL}/hotels/${hotelId}/settings/reset`, {
+    section
+  })
   return response.data
 }
 
@@ -138,7 +156,7 @@ export const resetSettings = async (hotelId, section = 'all') => {
 /**
  * Fatura numarası al
  */
-export const getNextInvoiceNumber = async (hotelId) => {
+export const getNextInvoiceNumber = async hotelId => {
   const response = await pmsApiClient.post(`${BASE_URL}/hotels/${hotelId}/settings/invoice-number`)
   return response.data
 }
@@ -146,7 +164,7 @@ export const getNextInvoiceNumber = async (hotelId) => {
 /**
  * Fiş numarası al
  */
-export const getNextReceiptNumber = async (hotelId) => {
+export const getNextReceiptNumber = async hotelId => {
   const response = await pmsApiClient.post(`${BASE_URL}/hotels/${hotelId}/settings/receipt-number`)
   return response.data
 }

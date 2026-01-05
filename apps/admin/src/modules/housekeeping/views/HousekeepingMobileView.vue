@@ -5,14 +5,16 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
           <span class="material-icons text-indigo-600 dark:text-indigo-400">cleaning_services</span>
-          <h1 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('housekeeping.mobile.title') }}</h1>
+          <h1 class="text-lg font-bold text-gray-900 dark:text-white">
+            {{ $t('housekeeping.mobile.title') }}
+          </h1>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-sm text-gray-500 dark:text-slate-400">{{ userName }}</span>
           <button
-            @click="handleLogout"
             class="p-2 text-gray-500 hover:text-red-500 transition-colors"
             :title="$t('auth.logout')"
+            @click="handleLogout"
           >
             <span class="material-icons">logout</span>
           </button>
@@ -24,19 +26,19 @@
         <button
           v-for="filter in filters"
           :key="filter.value"
-          @click="activeFilter = filter.value"
           class="px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1"
-          :class="activeFilter === filter.value
-            ? 'bg-indigo-600 text-white'
-            : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300'"
+          :class="
+            activeFilter === filter.value
+              ? 'bg-indigo-600 text-white'
+              : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300'
+          "
+          @click="activeFilter = filter.value"
         >
           {{ filter.label }}
           <span
             v-if="filter.count > 0"
             class="ml-1 px-1.5 py-0.5 rounded-full text-xs"
-            :class="activeFilter === filter.value
-              ? 'bg-white/20'
-              : 'bg-gray-300 dark:bg-slate-600'"
+            :class="activeFilter === filter.value ? 'bg-white/20' : 'bg-gray-300 dark:bg-slate-600'"
           >
             {{ filter.count }}
           </span>
@@ -64,7 +66,9 @@
 
     <!-- No Hotel Selected -->
     <div v-else-if="!hotelId" class="p-4">
-      <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6 text-center">
+      <div
+        class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-6 text-center"
+      >
         <span class="material-icons text-5xl text-amber-500 mb-3">hotel</span>
         <p class="text-amber-700 dark:text-amber-300">{{ $t('housekeeping.mobile.noHotel') }}</p>
       </div>
@@ -88,7 +92,9 @@
           class="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden"
         >
           <!-- Room Header -->
-          <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+          <div
+            class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-700"
+          >
             <div class="flex items-center gap-3">
               <!-- Room Number Badge -->
               <div
@@ -117,7 +123,9 @@
               </span>
               <!-- Priority Indicator -->
               <p
-                v-if="room.housekeepingPriority === 'urgent' || room.housekeepingPriority === 'high'"
+                v-if="
+                  room.housekeepingPriority === 'urgent' || room.housekeepingPriority === 'high'
+                "
                 class="text-xs mt-1 flex items-center justify-end gap-1"
                 :class="room.housekeepingPriority === 'urgent' ? 'text-red-500' : 'text-amber-500'"
               >
@@ -132,11 +140,17 @@
             v-if="room.currentGuests?.length || room.housekeepingNotes"
             class="px-4 py-2 bg-gray-50 dark:bg-slate-700/50"
           >
-            <p v-if="room.currentGuests?.length" class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1">
+            <p
+              v-if="room.currentGuests?.length"
+              class="text-sm text-gray-600 dark:text-gray-300 flex items-center gap-1"
+            >
               <span class="material-icons text-sm">person</span>
               {{ room.currentGuests[0]?.firstName }} {{ room.currentGuests[0]?.lastName }}
             </p>
-            <p v-if="room.housekeepingNotes" class="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            <p
+              v-if="room.housekeepingNotes"
+              class="text-sm text-amber-600 dark:text-amber-400 flex items-center gap-1"
+            >
               <span class="material-icons text-sm">note</span>
               {{ room.housekeepingNotes }}
             </p>
@@ -147,9 +161,9 @@
             <!-- Start Cleaning (for dirty rooms) -->
             <button
               v-if="room.housekeepingStatus === 'dirty'"
-              @click="startCleaning(room)"
               :disabled="actionLoading === room._id"
               class="flex items-center justify-center gap-2 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium text-lg transition-colors disabled:opacity-50"
+              @click="startCleaning(room)"
             >
               <span class="material-icons">cleaning_services</span>
               {{ $t('housekeeping.mobile.startCleaning') }}
@@ -157,10 +171,12 @@
 
             <!-- Mark as Clean (for in-progress rooms) -->
             <button
-              v-if="room.housekeepingStatus === 'cleaning' || room.housekeepingStatus === 'in_progress'"
-              @click="markAsClean(room)"
+              v-if="
+                room.housekeepingStatus === 'cleaning' || room.housekeepingStatus === 'in_progress'
+              "
               :disabled="actionLoading === room._id"
               class="flex items-center justify-center gap-2 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium text-lg transition-colors disabled:opacity-50"
+              @click="markAsClean(room)"
             >
               <span class="material-icons">check_circle</span>
               {{ $t('housekeeping.mobile.markClean') }}
@@ -168,9 +184,12 @@
 
             <!-- Add Note Button -->
             <button
-              @click="openNotes(room)"
               class="flex items-center justify-center gap-2 py-4 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded-xl font-medium transition-colors hover:bg-gray-300 dark:hover:bg-slate-500"
-              :class="{ 'col-span-2': room.housekeepingStatus === 'clean' || room.housekeepingStatus === 'inspected' }"
+              :class="{
+                'col-span-2':
+                  room.housekeepingStatus === 'clean' || room.housekeepingStatus === 'inspected'
+              }"
+              @click="openNotes(room)"
             >
               <span class="material-icons">edit_note</span>
               {{ $t('housekeeping.mobile.addNote') }}
@@ -179,8 +198,8 @@
             <!-- Report Issue Button -->
             <button
               v-if="room.housekeepingStatus !== 'out_of_service'"
-              @click="reportIssue(room)"
               class="flex items-center justify-center gap-2 py-4 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl font-medium transition-colors hover:bg-red-200 dark:hover:bg-red-900/50"
+              @click="reportIssue(room)"
             >
               <span class="material-icons">report_problem</span>
               {{ $t('housekeeping.mobile.reportIssue') }}
@@ -189,9 +208,9 @@
             <!-- Mark as Dirty (for clean rooms) -->
             <button
               v-if="room.housekeepingStatus === 'clean' || room.housekeepingStatus === 'inspected'"
-              @click="markAsDirty(room)"
               :disabled="actionLoading === room._id"
               class="flex items-center justify-center gap-2 py-4 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl font-medium transition-colors hover:bg-amber-200 dark:hover:bg-amber-900/50 col-span-2"
+              @click="markAsDirty(room)"
             >
               <span class="material-icons">cleaning_services</span>
               {{ $t('housekeeping.mobile.markDirty') }}
@@ -201,12 +220,13 @@
       </TransitionGroup>
 
       <!-- Empty State -->
-      <div
-        v-if="filteredRooms.length === 0 && !loading"
-        class="text-center py-12"
-      >
-        <span class="material-icons text-6xl text-gray-300 dark:text-slate-600 mb-4">check_circle</span>
-        <p class="text-gray-500 dark:text-slate-400 text-lg">{{ $t('housekeeping.mobile.allClean') }}</p>
+      <div v-if="filteredRooms.length === 0 && !loading" class="text-center py-12">
+        <span class="material-icons text-6xl text-gray-300 dark:text-slate-600 mb-4"
+          >check_circle</span
+        >
+        <p class="text-gray-500 dark:text-slate-400 text-lg">
+          {{ $t('housekeeping.mobile.allClean') }}
+        </p>
       </div>
     </div>
 
@@ -218,12 +238,16 @@
           class="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
           @click.self="closeNotesModal"
         >
-          <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-2xl shadow-xl animate-slide-up">
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+          <div
+            class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-2xl shadow-xl animate-slide-up"
+          >
+            <div
+              class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between"
+            >
               <h3 class="font-semibold text-gray-900 dark:text-white">
                 {{ $t('housekeeping.mobile.notesFor') }} {{ selectedRoom?.roomNumber }}
               </h3>
-              <button @click="closeNotesModal" class="p-2 text-gray-500 hover:text-gray-700">
+              <button class="p-2 text-gray-500 hover:text-gray-700" @click="closeNotesModal">
                 <span class="material-icons">close</span>
               </button>
             </div>
@@ -235,15 +259,15 @@
               ></textarea>
               <div class="flex gap-3 mt-4">
                 <button
-                  @click="closeNotesModal"
                   class="flex-1 py-3 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded-xl font-medium"
+                  @click="closeNotesModal"
                 >
                   {{ $t('common.cancel') }}
                 </button>
                 <button
-                  @click="saveNotes"
                   :disabled="savingNotes"
                   class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium disabled:opacity-50"
+                  @click="saveNotes"
                 >
                   {{ savingNotes ? $t('common.saving') : $t('common.save') }}
                 </button>
@@ -262,12 +286,16 @@
           class="fixed inset-0 z-50 flex items-end justify-center bg-black/50"
           @click.self="closeIssueModal"
         >
-          <div class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-2xl shadow-xl animate-slide-up">
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between">
+          <div
+            class="w-full max-w-lg bg-white dark:bg-slate-800 rounded-t-2xl shadow-xl animate-slide-up"
+          >
+            <div
+              class="px-4 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center justify-between"
+            >
               <h3 class="font-semibold text-gray-900 dark:text-white">
                 {{ $t('housekeeping.mobile.issueFor') }} {{ selectedRoom?.roomNumber }}
               </h3>
-              <button @click="closeIssueModal" class="p-2 text-gray-500 hover:text-gray-700">
+              <button class="p-2 text-gray-500 hover:text-gray-700" @click="closeIssueModal">
                 <span class="material-icons">close</span>
               </button>
             </div>
@@ -281,11 +309,13 @@
                   <button
                     v-for="issue in issueTypes"
                     :key="issue.value"
-                    @click="issueType = issue.value"
                     class="py-3 px-4 rounded-xl border-2 text-sm font-medium transition-colors"
-                    :class="issueType === issue.value
-                      ? 'border-red-500 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                      : 'border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300'"
+                    :class="
+                      issueType === issue.value
+                        ? 'border-red-500 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                        : 'border-gray-200 dark:border-slate-600 text-gray-700 dark:text-gray-300'
+                    "
+                    @click="issueType = issue.value"
                   >
                     {{ issue.label }}
                   </button>
@@ -306,15 +336,15 @@
 
               <div class="flex gap-3">
                 <button
-                  @click="closeIssueModal"
                   class="flex-1 py-3 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200 rounded-xl font-medium"
+                  @click="closeIssueModal"
                 >
                   {{ $t('common.cancel') }}
                 </button>
                 <button
-                  @click="submitIssue"
                   :disabled="!issueType || savingIssue"
                   class="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium disabled:opacity-50"
+                  @click="submitIssue"
                 >
                   {{ savingIssue ? $t('common.saving') : $t('housekeeping.mobile.submitIssue') }}
                 </button>
@@ -333,9 +363,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { usePmsAuthStore } from '@/stores/pms/pmsAuth'
 import roomService, {
-  HOUSEKEEPING_STATUS,
-  ROOM_STATUS_INFO,
-  HOUSEKEEPING_STATUS_INFO
+  ROOM_STATUS_INFO
 } from '@/services/pms/roomService'
 import { usePMSSocket } from '@/composables/usePMSSocket'
 import { useToast } from 'vue-toastification'
@@ -384,8 +412,12 @@ const userName = computed(() => {
 
 const summary = computed(() => {
   const dirty = rooms.value.filter(r => r.housekeepingStatus === 'dirty').length
-  const cleaning = rooms.value.filter(r => r.housekeepingStatus === 'cleaning' || r.housekeepingStatus === 'in_progress').length
-  const clean = rooms.value.filter(r => r.housekeepingStatus === 'clean' || r.housekeepingStatus === 'inspected').length
+  const cleaning = rooms.value.filter(
+    r => r.housekeepingStatus === 'cleaning' || r.housekeepingStatus === 'in_progress'
+  ).length
+  const clean = rooms.value.filter(
+    r => r.housekeepingStatus === 'clean' || r.housekeepingStatus === 'inspected'
+  ).length
   return { dirty, cleaning, clean, total: rooms.value.length }
 })
 
@@ -402,9 +434,13 @@ const filteredRooms = computed(() => {
   if (activeFilter.value === 'dirty') {
     result = result.filter(r => r.housekeepingStatus === 'dirty')
   } else if (activeFilter.value === 'cleaning') {
-    result = result.filter(r => r.housekeepingStatus === 'cleaning' || r.housekeepingStatus === 'in_progress')
+    result = result.filter(
+      r => r.housekeepingStatus === 'cleaning' || r.housekeepingStatus === 'in_progress'
+    )
   } else if (activeFilter.value === 'clean') {
-    result = result.filter(r => r.housekeepingStatus === 'clean' || r.housekeepingStatus === 'inspected')
+    result = result.filter(
+      r => r.housekeepingStatus === 'clean' || r.housekeepingStatus === 'inspected'
+    )
   }
 
   // Sort by priority first, then by floor and room number
@@ -419,7 +455,7 @@ const filteredRooms = computed(() => {
 })
 
 // Methods
-const getStatusBgClass = (status) => {
+const getStatusBgClass = status => {
   const classes = {
     dirty: 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300',
     cleaning: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
@@ -431,16 +467,16 @@ const getStatusBgClass = (status) => {
   return classes[status] || 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300'
 }
 
-const getStatusBadgeClass = (status) => {
+const getStatusBadgeClass = status => {
   const info = ROOM_STATUS_INFO[status]
   return info ? `${info.bgColor} ${info.textColor}` : 'bg-gray-100 text-gray-700'
 }
 
-const getStatusIcon = (status) => {
+const getStatusIcon = status => {
   return ROOM_STATUS_INFO[status]?.icon || 'meeting_room'
 }
 
-const getStatusLabel = (status) => {
+const getStatusLabel = status => {
   return ROOM_STATUS_INFO[status]?.label || status
 }
 
@@ -460,7 +496,7 @@ const fetchRooms = async () => {
   }
 }
 
-const startCleaning = async (room) => {
+const startCleaning = async room => {
   actionLoading.value = room._id
   try {
     await roomService.updateHousekeepingStatus(hotelId.value, room._id, {
@@ -476,7 +512,7 @@ const startCleaning = async (room) => {
   }
 }
 
-const markAsClean = async (room) => {
+const markAsClean = async room => {
   actionLoading.value = room._id
   try {
     await roomService.updateHousekeepingStatus(hotelId.value, room._id, {
@@ -492,7 +528,7 @@ const markAsClean = async (room) => {
   }
 }
 
-const markAsDirty = async (room) => {
+const markAsDirty = async room => {
   actionLoading.value = room._id
   try {
     await roomService.updateHousekeepingStatus(hotelId.value, room._id, {
@@ -508,7 +544,7 @@ const markAsDirty = async (room) => {
   }
 }
 
-const openNotes = (room) => {
+const openNotes = room => {
   selectedRoom.value = room
   notesText.value = room.housekeepingNotes || ''
   showNotesModal.value = true
@@ -539,7 +575,7 @@ const saveNotes = async () => {
   }
 }
 
-const reportIssue = (room) => {
+const reportIssue = room => {
   selectedRoom.value = room
   issueType.value = ''
   issueDescription.value = ''
@@ -559,7 +595,12 @@ const submitIssue = async () => {
   savingIssue.value = true
   try {
     // Mark room as out of order/maintenance
-    await roomService.updateRoomStatus(hotelId.value, selectedRoom.value._id, 'maintenance', issueDescription.value)
+    await roomService.updateRoomStatus(
+      hotelId.value,
+      selectedRoom.value._id,
+      'maintenance',
+      issueDescription.value
+    )
 
     // Update local state
     selectedRoom.value.status = 'maintenance'
@@ -581,21 +622,25 @@ const handleLogout = async () => {
 }
 
 // Watch hotel changes
-watch(hotelId, (newId) => {
-  if (newId) {
-    fetchRooms()
-  } else {
-    rooms.value = []
-  }
-}, { immediate: true })
+watch(
+  hotelId,
+  newId => {
+    if (newId) {
+      fetchRooms()
+    } else {
+      rooms.value = []
+    }
+  },
+  { immediate: true }
+)
 
 // Socket.io real-time updates
-const { onHousekeeping, onCheckOut, isConnected } = usePMSSocket()
+const { onHousekeeping, onCheckOut } = usePMSSocket()
 
 // Store unregister functions for cleanup
 const unregisterCallbacks = []
 
-const handleHousekeepingUpdate = (data) => {
+const handleHousekeepingUpdate = data => {
   console.log('[Mobile HK] Housekeeping update:', data)
   // Update room in list - notifications handled by notification system
   const room = rooms.value.find(r => r._id === data.roomId || r.roomNumber === data.roomNumber)
@@ -605,7 +650,7 @@ const handleHousekeepingUpdate = (data) => {
 }
 unregisterCallbacks.push(onHousekeeping(handleHousekeepingUpdate))
 
-const handleCheckOutEvent = (data) => {
+const handleCheckOutEvent = data => {
   console.log('[Mobile HK] Check-out:', data)
   fetchRooms() // Refresh to get updated data
 }

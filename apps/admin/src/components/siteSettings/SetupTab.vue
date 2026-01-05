@@ -26,16 +26,16 @@
           <div class="border-t border-gray-200 dark:border-slate-600 pt-4 mt-4">
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm text-gray-600 dark:text-slate-400">SSL:</span>
-              <span
-                class="badge"
-                :class="getSslBadgeClass(settings?.b2cSslStatus)"
-              >
+              <span class="badge" :class="getSslBadgeClass(settings?.b2cSslStatus)">
                 {{ getSslStatusText(settings?.b2cSslStatus) }}
               </span>
             </div>
 
             <!-- SSL Expiry Date -->
-            <div v-if="settings?.b2cSslStatus === 'active' && settings?.b2cSslExpiresAt" class="text-xs text-gray-500 dark:text-slate-400 mb-3">
+            <div
+              v-if="settings?.b2cSslStatus === 'active' && settings?.b2cSslExpiresAt"
+              class="text-xs text-gray-500 dark:text-slate-400 mb-3"
+            >
               {{ $t('siteSettings.setup.sslExpires') }}: {{ formatDate(settings.b2cSslExpiresAt) }}
             </div>
 
@@ -44,14 +44,25 @@
               <!-- Verify DNS Button -->
               <button
                 v-if="form.b2cDomain && settings?.b2cSslStatus !== 'active'"
-                @click="handleVerifyDns('b2c')"
                 class="btn-secondary text-sm flex-1"
                 :disabled="verifying.b2c || saving"
+                @click="handleVerifyDns('b2c')"
               >
                 <span v-if="verifying.b2c" class="flex items-center justify-center">
                   <svg class="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   {{ $t('siteSettings.setup.verifying') }}
                 </span>
@@ -64,14 +75,25 @@
               <!-- Setup SSL Button (shown after DNS verified) -->
               <button
                 v-if="form.b2cDomain && dnsVerified.b2c && settings?.b2cSslStatus !== 'active'"
-                @click="handleSetupSsl('b2c')"
                 class="btn-primary text-sm flex-1"
                 :disabled="settingUpSsl.b2c || saving"
+                @click="handleSetupSsl('b2c')"
               >
                 <span v-if="settingUpSsl.b2c" class="flex items-center justify-center">
                   <svg class="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   {{ $t('siteSettings.setup.settingUpSsl') }}
                 </span>
@@ -83,13 +105,26 @@
             </div>
 
             <!-- DNS Verification Result -->
-            <div v-if="dnsResult.b2c" class="mt-3 p-3 rounded-lg text-sm" :class="dnsResult.b2c.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'">
+            <div
+              v-if="dnsResult.b2c"
+              class="mt-3 p-3 rounded-lg text-sm"
+              :class="
+                dnsResult.b2c.success
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+              "
+            >
               <div class="flex items-center">
-                <span class="material-icons text-sm mr-2">{{ dnsResult.b2c.success ? 'check_circle' : 'error' }}</span>
+                <span class="material-icons text-sm mr-2">{{
+                  dnsResult.b2c.success ? 'check_circle' : 'error'
+                }}</span>
                 {{ dnsResult.b2c.message }}
               </div>
               <div v-if="!dnsResult.b2c.success && dnsResult.b2c.serverIP" class="mt-2 text-xs">
-                {{ $t('siteSettings.setup.pointDomainTo') }}: <code class="bg-gray-200 dark:bg-slate-700 px-1 rounded">{{ dnsResult.b2c.serverIP }}</code>
+                {{ $t('siteSettings.setup.pointDomainTo') }}:
+                <code class="bg-gray-200 dark:bg-slate-700 px-1 rounded">{{
+                  dnsResult.b2c.serverIP
+                }}</code>
               </div>
             </div>
           </div>
@@ -121,16 +156,16 @@
           <div class="border-t border-gray-200 dark:border-slate-600 pt-4 mt-4">
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm text-gray-600 dark:text-slate-400">SSL:</span>
-              <span
-                class="badge"
-                :class="getSslBadgeClass(settings?.b2bSslStatus)"
-              >
+              <span class="badge" :class="getSslBadgeClass(settings?.b2bSslStatus)">
                 {{ getSslStatusText(settings?.b2bSslStatus) }}
               </span>
             </div>
 
             <!-- SSL Expiry Date -->
-            <div v-if="settings?.b2bSslStatus === 'active' && settings?.b2bSslExpiresAt" class="text-xs text-gray-500 dark:text-slate-400 mb-3">
+            <div
+              v-if="settings?.b2bSslStatus === 'active' && settings?.b2bSslExpiresAt"
+              class="text-xs text-gray-500 dark:text-slate-400 mb-3"
+            >
               {{ $t('siteSettings.setup.sslExpires') }}: {{ formatDate(settings.b2bSslExpiresAt) }}
             </div>
 
@@ -138,14 +173,25 @@
             <div class="flex flex-wrap gap-2">
               <button
                 v-if="form.b2bDomain && settings?.b2bSslStatus !== 'active'"
-                @click="handleVerifyDns('b2b')"
                 class="btn-secondary text-sm flex-1"
                 :disabled="verifying.b2b || saving"
+                @click="handleVerifyDns('b2b')"
               >
                 <span v-if="verifying.b2b" class="flex items-center justify-center">
                   <svg class="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   {{ $t('siteSettings.setup.verifying') }}
                 </span>
@@ -157,14 +203,25 @@
 
               <button
                 v-if="form.b2bDomain && dnsVerified.b2b && settings?.b2bSslStatus !== 'active'"
-                @click="handleSetupSsl('b2b')"
                 class="btn-primary text-sm flex-1"
                 :disabled="settingUpSsl.b2b || saving"
+                @click="handleSetupSsl('b2b')"
               >
                 <span v-if="settingUpSsl.b2b" class="flex items-center justify-center">
                   <svg class="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   {{ $t('siteSettings.setup.settingUpSsl') }}
                 </span>
@@ -176,13 +233,26 @@
             </div>
 
             <!-- DNS Verification Result -->
-            <div v-if="dnsResult.b2b" class="mt-3 p-3 rounded-lg text-sm" :class="dnsResult.b2b.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'">
+            <div
+              v-if="dnsResult.b2b"
+              class="mt-3 p-3 rounded-lg text-sm"
+              :class="
+                dnsResult.b2b.success
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+              "
+            >
               <div class="flex items-center">
-                <span class="material-icons text-sm mr-2">{{ dnsResult.b2b.success ? 'check_circle' : 'error' }}</span>
+                <span class="material-icons text-sm mr-2">{{
+                  dnsResult.b2b.success ? 'check_circle' : 'error'
+                }}</span>
                 {{ dnsResult.b2b.message }}
               </div>
               <div v-if="!dnsResult.b2b.success && dnsResult.b2b.serverIP" class="mt-2 text-xs">
-                {{ $t('siteSettings.setup.pointDomainTo') }}: <code class="bg-gray-200 dark:bg-slate-700 px-1 rounded">{{ dnsResult.b2b.serverIP }}</code>
+                {{ $t('siteSettings.setup.pointDomainTo') }}:
+                <code class="bg-gray-200 dark:bg-slate-700 px-1 rounded">{{
+                  dnsResult.b2b.serverIP
+                }}</code>
               </div>
             </div>
           </div>
@@ -214,16 +284,16 @@
           <div class="border-t border-gray-200 dark:border-slate-600 pt-4 mt-4">
             <div class="flex items-center justify-between mb-3">
               <span class="text-sm text-gray-600 dark:text-slate-400">SSL:</span>
-              <span
-                class="badge"
-                :class="getSslBadgeClass(settings?.pmsSslStatus)"
-              >
+              <span class="badge" :class="getSslBadgeClass(settings?.pmsSslStatus)">
                 {{ getSslStatusText(settings?.pmsSslStatus) }}
               </span>
             </div>
 
             <!-- SSL Expiry Date -->
-            <div v-if="settings?.pmsSslStatus === 'active' && settings?.pmsSslExpiresAt" class="text-xs text-gray-500 dark:text-slate-400 mb-3">
+            <div
+              v-if="settings?.pmsSslStatus === 'active' && settings?.pmsSslExpiresAt"
+              class="text-xs text-gray-500 dark:text-slate-400 mb-3"
+            >
               {{ $t('siteSettings.setup.sslExpires') }}: {{ formatDate(settings.pmsSslExpiresAt) }}
             </div>
 
@@ -231,14 +301,25 @@
             <div class="flex flex-wrap gap-2">
               <button
                 v-if="form.pmsDomain && settings?.pmsSslStatus !== 'active'"
-                @click="handleVerifyDns('pms')"
                 class="btn-secondary text-sm flex-1"
                 :disabled="verifying.pms || saving"
+                @click="handleVerifyDns('pms')"
               >
                 <span v-if="verifying.pms" class="flex items-center justify-center">
                   <svg class="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   {{ $t('siteSettings.setup.verifying') }}
                 </span>
@@ -250,14 +331,25 @@
 
               <button
                 v-if="form.pmsDomain && dnsVerified.pms && settings?.pmsSslStatus !== 'active'"
-                @click="handleSetupSsl('pms')"
                 class="btn-primary text-sm flex-1"
                 :disabled="settingUpSsl.pms || saving"
+                @click="handleSetupSsl('pms')"
               >
                 <span v-if="settingUpSsl.pms" class="flex items-center justify-center">
                   <svg class="animate-spin h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
                   </svg>
                   {{ $t('siteSettings.setup.settingUpSsl') }}
                 </span>
@@ -269,13 +361,26 @@
             </div>
 
             <!-- DNS Verification Result -->
-            <div v-if="dnsResult.pms" class="mt-3 p-3 rounded-lg text-sm" :class="dnsResult.pms.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'">
+            <div
+              v-if="dnsResult.pms"
+              class="mt-3 p-3 rounded-lg text-sm"
+              :class="
+                dnsResult.pms.success
+                  ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400'
+                  : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400'
+              "
+            >
               <div class="flex items-center">
-                <span class="material-icons text-sm mr-2">{{ dnsResult.pms.success ? 'check_circle' : 'error' }}</span>
+                <span class="material-icons text-sm mr-2">{{
+                  dnsResult.pms.success ? 'check_circle' : 'error'
+                }}</span>
                 {{ dnsResult.pms.message }}
               </div>
               <div v-if="!dnsResult.pms.success && dnsResult.pms.serverIP" class="mt-2 text-xs">
-                {{ $t('siteSettings.setup.pointDomainTo') }}: <code class="bg-gray-200 dark:bg-slate-700 px-1 rounded">{{ dnsResult.pms.serverIP }}</code>
+                {{ $t('siteSettings.setup.pointDomainTo') }}:
+                <code class="bg-gray-200 dark:bg-slate-700 px-1 rounded">{{
+                  dnsResult.pms.serverIP
+                }}</code>
               </div>
             </div>
           </div>
@@ -284,7 +389,9 @@
     </div>
 
     <!-- DNS Instructions -->
-    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+    <div
+      class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4"
+    >
       <h4 class="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 flex items-center">
         <span class="material-icons text-sm mr-2">info</span>
         {{ $t('siteSettings.setup.dnsInstructions') }}
@@ -292,7 +399,9 @@
       <p class="text-sm text-blue-700 dark:text-blue-400">
         {{ $t('siteSettings.setup.dnsDescription') }}
       </p>
-      <div class="mt-2 p-2 bg-blue-100 dark:bg-blue-900/40 rounded text-xs text-blue-800 dark:text-blue-300 font-mono">
+      <div
+        class="mt-2 p-2 bg-blue-100 dark:bg-blue-900/40 rounded text-xs text-blue-800 dark:text-blue-300 font-mono"
+      >
         <div>{{ $t('siteSettings.setup.dnsRecordType') }}: A</div>
         <div>{{ $t('siteSettings.setup.dnsRecordValue') }}: {{ serverIP || '...' }}</div>
       </div>
@@ -300,15 +409,22 @@
 
     <!-- Save Button -->
     <div class="flex justify-end">
-      <button
-        @click="handleSave"
-        class="btn-primary"
-        :disabled="saving"
-      >
+      <button class="btn-primary" :disabled="saving" @click="handleSave">
         <span v-if="saving" class="flex items-center">
           <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           {{ $t('common.loading') }}
         </span>
@@ -347,17 +463,21 @@ const dnsResult = reactive({ b2c: null, b2b: null, pms: null })
 const settingUpSsl = reactive({ b2c: false, b2b: false, pms: false })
 const serverIP = ref(null)
 
-watch(() => props.settings, (newSettings) => {
-  if (newSettings) {
-    form.value = {
-      b2cDomain: newSettings.b2cDomain || '',
-      b2bDomain: newSettings.b2bDomain || '',
-      pmsDomain: newSettings.pmsDomain || ''
+watch(
+  () => props.settings,
+  newSettings => {
+    if (newSettings) {
+      form.value = {
+        b2cDomain: newSettings.b2cDomain || '',
+        b2bDomain: newSettings.b2bDomain || '',
+        pmsDomain: newSettings.pmsDomain || ''
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
-const getSslBadgeClass = (status) => {
+const getSslBadgeClass = status => {
   return {
     'badge-success': status === 'active',
     'badge-warning': status === 'pending',
@@ -366,7 +486,7 @@ const getSslBadgeClass = (status) => {
   }
 }
 
-const getSslStatusText = (status) => {
+const getSslStatusText = status => {
   const statusMap = {
     active: t('siteSettings.setup.sslActive'),
     pending: t('siteSettings.setup.sslPending'),
@@ -376,12 +496,12 @@ const getSslStatusText = (status) => {
   return statusMap[status] || statusMap.none
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleDateString()
 }
 
-const handleVerifyDns = async (type) => {
+const handleVerifyDns = async type => {
   const domainMap = { b2c: 'b2cDomain', b2b: 'b2bDomain', pms: 'pmsDomain' }
   const domain = form.value[domainMap[type]]
 
@@ -429,7 +549,7 @@ const handleVerifyDns = async (type) => {
   }
 }
 
-const handleSetupSsl = async (type) => {
+const handleSetupSsl = async type => {
   settingUpSsl[type] = true
 
   try {

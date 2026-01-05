@@ -6,12 +6,28 @@
 
 import { BadRequestError } from '../core/errors.js'
 import Exchange from '../models/exchange.model.js'
+import logger from '../core/logger.js'
 
 // Supported currencies
 export const SUPPORTED_CURRENCIES = [
-  'TRY', 'USD', 'EUR', 'GBP', 'CHF', 'JPY', 'CNY',
-  'AUD', 'CAD', 'DKK', 'SEK', 'NOK', 'SAR', 'KWD',
-  'AED', 'BGN', 'RON', 'RUB'
+  'TRY',
+  'USD',
+  'EUR',
+  'GBP',
+  'CHF',
+  'JPY',
+  'CNY',
+  'AUD',
+  'CAD',
+  'DKK',
+  'SEK',
+  'NOK',
+  'SAR',
+  'KWD',
+  'AED',
+  'BGN',
+  'RON',
+  'RUB'
 ]
 
 // Default fallback rates (used only if DB has no rates)
@@ -40,7 +56,7 @@ const FALLBACK_RATES = {
 }
 
 // In-memory cache to reduce DB calls
-let ratesCache = {
+const ratesCache = {
   data: null,
   lastFetch: null,
   ttl: 60 * 1000 // 1 minute cache
@@ -93,7 +109,7 @@ export async function getExchangeRates() {
       source: 'fallback'
     }
   } catch (error) {
-    console.error('getExchangeRates error:', error.message)
+    logger.error('getExchangeRates error:', error.message)
 
     // Return fallback on error
     return {
@@ -286,8 +302,12 @@ export async function convertPriceData(priceData, targetCurrency) {
       ...day,
       price: Math.round((day.price || 0) * rate * 100) / 100,
       basePrice: day.basePrice ? Math.round(day.basePrice * rate * 100) / 100 : undefined,
-      originalPrice: day.originalPrice ? Math.round(day.originalPrice * rate * 100) / 100 : undefined,
-      discountAmount: day.discountAmount ? Math.round(day.discountAmount * rate * 100) / 100 : undefined
+      originalPrice: day.originalPrice
+        ? Math.round(day.originalPrice * rate * 100) / 100
+        : undefined,
+      discountAmount: day.discountAmount
+        ? Math.round(day.discountAmount * rate * 100) / 100
+        : undefined
     }))
   }
 

@@ -80,7 +80,6 @@ async function main() {
 
     await mongoose.disconnect()
     console.log('\n✅ Test complete')
-
   } catch (error) {
     console.error('Error:', error)
     process.exit(1)

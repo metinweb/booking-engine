@@ -10,9 +10,9 @@ import apiClient from './api'
  * @param {string} bookingId - Booking ID
  * @returns {Promise} - Payments list with summary
  */
-export const getPayments = async (bookingId) => {
-	const response = await apiClient.get(`/bookings/${bookingId}/payments`)
-	return response.data
+export const getPayments = async bookingId => {
+  const response = await apiClient.get(`/bookings/${bookingId}/payments`)
+  return response.data
 }
 
 /**
@@ -22,8 +22,8 @@ export const getPayments = async (bookingId) => {
  * @returns {Promise} - Created payment
  */
 export const addPayment = async (bookingId, data) => {
-	const response = await apiClient.post(`/bookings/${bookingId}/payments`, data)
-	return response.data
+  const response = await apiClient.post(`/bookings/${bookingId}/payments`, data)
+  return response.data
 }
 
 /**
@@ -34,8 +34,8 @@ export const addPayment = async (bookingId, data) => {
  * @returns {Promise} - Updated payment
  */
 export const updatePayment = async (bookingId, paymentId, data) => {
-	const response = await apiClient.patch(`/bookings/${bookingId}/payments/${paymentId}`, data)
-	return response.data
+  const response = await apiClient.patch(`/bookings/${bookingId}/payments/${paymentId}`, data)
+  return response.data
 }
 
 /**
@@ -45,8 +45,8 @@ export const updatePayment = async (bookingId, paymentId, data) => {
  * @returns {Promise} - Confirmed payment
  */
 export const confirmPayment = async (bookingId, paymentId) => {
-	const response = await apiClient.post(`/bookings/${bookingId}/payments/${paymentId}/confirm`)
-	return response.data
+  const response = await apiClient.post(`/bookings/${bookingId}/payments/${paymentId}/confirm`)
+  return response.data
 }
 
 /**
@@ -56,8 +56,8 @@ export const confirmPayment = async (bookingId, paymentId) => {
  * @returns {Promise} - Cancelled payment
  */
 export const cancelPayment = async (bookingId, paymentId) => {
-	const response = await apiClient.delete(`/bookings/${bookingId}/payments/${paymentId}`)
-	return response.data
+  const response = await apiClient.delete(`/bookings/${bookingId}/payments/${paymentId}`)
+  return response.data
 }
 
 /**
@@ -68,8 +68,8 @@ export const cancelPayment = async (bookingId, paymentId) => {
  * @returns {Promise} - Refunded payment
  */
 export const refundPayment = async (bookingId, paymentId, data) => {
-	const response = await apiClient.post(`/bookings/${bookingId}/payments/${paymentId}/refund`, data)
-	return response.data
+  const response = await apiClient.post(`/bookings/${bookingId}/payments/${paymentId}/refund`, data)
+  return response.data
 }
 
 /**
@@ -80,27 +80,27 @@ export const refundPayment = async (bookingId, paymentId, data) => {
  * @returns {Promise} - Updated payment
  */
 export const uploadReceipt = async (bookingId, paymentId, file) => {
-	const formData = new FormData()
-	formData.append('receipt', file)
+  const formData = new FormData()
+  formData.append('receipt', file)
 
-	const response = await apiClient.post(
-		`/bookings/${bookingId}/payments/${paymentId}/upload-receipt`,
-		formData,
-		{
-			headers: {
-				'Content-Type': 'multipart/form-data'
-			}
-		}
-	)
-	return response.data
+  const response = await apiClient.post(
+    `/bookings/${bookingId}/payments/${paymentId}/upload-receipt`,
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  )
+  return response.data
 }
 
 export default {
-	getPayments,
-	addPayment,
-	updatePayment,
-	confirmPayment,
-	cancelPayment,
-	refundPayment,
-	uploadReceipt
+  getPayments,
+  addPayment,
+  updatePayment,
+  confirmPayment,
+  cancelPayment,
+  refundPayment,
+  uploadReceipt
 }

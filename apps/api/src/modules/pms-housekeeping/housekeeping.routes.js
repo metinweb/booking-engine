@@ -2,14 +2,14 @@ import express from 'express'
 import * as roomService from './room.service.js'
 import * as planningService from '../planning/planning.service.js'
 import {
-    pmsDualAuth,
-    pmsDualRequirePartnerOrAdmin,
-    pmsSetPartnerFromHotel
+  pmsDualAuth,
+  pmsDualRequirePartnerOrAdmin,
+  pmsSetPartnerFromHotel
 } from '../pms-settings/pmsAuth.middleware.js'
 
 const router = express.Router()
 
-const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel];
+const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel]
 
 // ===========================================
 // ROOM TYPE ROUTES
@@ -36,7 +36,11 @@ router.get('/hotels/:hotelId/rooms', hotelMiddleware, roomService.getRooms)
 router.get('/hotels/:hotelId/rooms/statistics', hotelMiddleware, roomService.getRoomStatistics)
 
 // Get rooms needing cleaning
-router.get('/hotels/:hotelId/rooms/needs-cleaning', hotelMiddleware, roomService.getRoomsNeedingCleaning)
+router.get(
+  '/hotels/:hotelId/rooms/needs-cleaning',
+  hotelMiddleware,
+  roomService.getRoomsNeedingCleaning
+)
 
 // Get rooms by floor
 router.get('/hotels/:hotelId/rooms/floor/:floor', hotelMiddleware, roomService.getRoomsByFloor)
@@ -60,10 +64,18 @@ router.delete('/hotels/:hotelId/rooms/:roomId', hotelMiddleware, roomService.del
 router.patch('/hotels/:hotelId/rooms/:roomId/status', hotelMiddleware, roomService.updateRoomStatus)
 
 // Update housekeeping status
-router.patch('/hotels/:hotelId/rooms/:roomId/housekeeping', hotelMiddleware, roomService.updateHousekeepingStatus)
+router.patch(
+  '/hotels/:hotelId/rooms/:roomId/housekeeping',
+  hotelMiddleware,
+  roomService.updateHousekeepingStatus
+)
 
 // Bulk update housekeeping
-router.patch('/hotels/:hotelId/rooms/bulk/housekeeping', hotelMiddleware, roomService.bulkUpdateHousekeeping)
+router.patch(
+  '/hotels/:hotelId/rooms/bulk/housekeeping',
+  hotelMiddleware,
+  roomService.bulkUpdateHousekeeping
+)
 
 // ===========================================
 // HOUSEKEEPING ROUTES

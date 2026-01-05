@@ -2,8 +2,12 @@
   <div class="p-6">
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-        <span class="material-icons text-2xl text-purple-600 dark:text-purple-400">point_of_sale</span>
+      <div
+        class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center"
+      >
+        <span class="material-icons text-2xl text-purple-600 dark:text-purple-400"
+          >point_of_sale</span
+        >
       </div>
       <div>
         <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Kasa Kapanisi</h2>
@@ -25,7 +29,9 @@
       v-else-if="shifts.length === 0"
       class="text-center py-12 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800"
     >
-      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+      <div
+        class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+      >
         <span class="material-icons text-3xl text-green-600 dark:text-green-400">check_circle</span>
       </div>
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Tum Kasalar Kapali</h3>
@@ -38,14 +44,22 @@
         v-for="shift in shifts"
         :key="shift._id"
         class="bg-white dark:bg-slate-800 rounded-xl border transition-all duration-300"
-        :class="shift.closed ? 'border-green-200 dark:border-green-800 bg-green-50/30 dark:bg-green-900/10' : 'border-gray-200 dark:border-slate-700'"
+        :class="
+          shift.closed
+            ? 'border-green-200 dark:border-green-800 bg-green-50/30 dark:bg-green-900/10'
+            : 'border-gray-200 dark:border-slate-700'
+        "
       >
         <!-- Shift Header -->
         <div class="p-4 border-b border-gray-100 dark:border-slate-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                <span class="material-icons text-purple-600 dark:text-purple-400">account_circle</span>
+              <div
+                class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center"
+              >
+                <span class="material-icons text-purple-600 dark:text-purple-400"
+                  >account_circle</span
+                >
               </div>
               <div>
                 <h3 class="font-medium text-gray-900 dark:text-white">{{ shift.cashierName }}</h3>
@@ -73,27 +87,43 @@
         <div class="p-4">
           <div class="space-y-3">
             <!-- Opening Balance -->
-            <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700">
+            <div
+              class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700"
+            >
               <span class="text-gray-600 dark:text-gray-400">Acilis Bakiyesi</span>
-              <span class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(shift.openingBalance) }}</span>
+              <span class="font-medium text-gray-900 dark:text-white">{{
+                formatCurrency(shift.openingBalance)
+              }}</span>
             </div>
 
             <!-- Cash In -->
-            <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700">
+            <div
+              class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700"
+            >
               <span class="text-gray-600 dark:text-gray-400">+ Nakit Giris</span>
-              <span class="font-medium text-green-600 dark:text-green-400">{{ formatCurrency(shift.cashIn) }}</span>
+              <span class="font-medium text-green-600 dark:text-green-400">{{
+                formatCurrency(shift.cashIn)
+              }}</span>
             </div>
 
             <!-- Cash Out -->
-            <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700">
+            <div
+              class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-slate-700"
+            >
               <span class="text-gray-600 dark:text-gray-400">- Nakit Cikis</span>
-              <span class="font-medium text-red-600 dark:text-red-400">-{{ formatCurrency(shift.cashOut) }}</span>
+              <span class="font-medium text-red-600 dark:text-red-400"
+                >-{{ formatCurrency(shift.cashOut) }}</span
+              >
             </div>
 
             <!-- Expected Cash -->
-            <div class="flex items-center justify-between py-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3">
+            <div
+              class="flex items-center justify-between py-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3"
+            >
               <span class="font-medium text-gray-900 dark:text-white">Beklenen Nakit</span>
-              <span class="font-bold text-lg text-gray-900 dark:text-white">{{ formatCurrency(shift.expectedCash) }}</span>
+              <span class="font-bold text-lg text-gray-900 dark:text-white">{{
+                formatCurrency(shift.expectedCash)
+              }}</span>
             </div>
 
             <!-- Card Payments -->
@@ -109,7 +139,10 @@
           </div>
 
           <!-- Close Shift Form -->
-          <div v-if="!shift.closed" class="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+          <div
+            v-if="!shift.closed"
+            class="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700"
+          >
             <div class="space-y-4">
               <!-- Actual Cash Input -->
               <div>
@@ -132,18 +165,30 @@
               <div
                 v-if="getDiscrepancy(shift) !== 0"
                 class="p-3 rounded-lg"
-                :class="getDiscrepancy(shift) > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'"
+                :class="
+                  getDiscrepancy(shift) > 0
+                    ? 'bg-green-50 dark:bg-green-900/20'
+                    : 'bg-red-50 dark:bg-red-900/20'
+                "
               >
                 <div class="flex items-center justify-between">
                   <span
                     class="font-medium"
-                    :class="getDiscrepancy(shift) > 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+                    :class="
+                      getDiscrepancy(shift) > 0
+                        ? 'text-green-700 dark:text-green-400'
+                        : 'text-red-700 dark:text-red-400'
+                    "
                   >
                     {{ getDiscrepancy(shift) > 0 ? 'Fazla' : 'Eksik' }}
                   </span>
                   <span
                     class="font-bold"
-                    :class="getDiscrepancy(shift) > 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'"
+                    :class="
+                      getDiscrepancy(shift) > 0
+                        ? 'text-green-700 dark:text-green-400'
+                        : 'text-red-700 dark:text-red-400'
+                    "
                   >
                     {{ formatCurrency(Math.abs(getDiscrepancy(shift))) }}
                   </span>
@@ -165,11 +210,16 @@
 
               <!-- Close Button -->
               <button
-                @click="closeShift(shift)"
-                :disabled="closingShift === shift._id || (getDiscrepancy(shift) !== 0 && !shiftInputs[shift._id].note)"
+                :disabled="
+                  closingShift === shift._id ||
+                  (getDiscrepancy(shift) !== 0 && !shiftInputs[shift._id].note)
+                "
                 class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white font-medium rounded-lg transition-colors"
+                @click="closeShift(shift)"
               >
-                <span v-if="closingShift === shift._id" class="material-icons animate-spin">refresh</span>
+                <span v-if="closingShift === shift._id" class="material-icons animate-spin"
+                  >refresh</span
+                >
                 <span v-else class="material-icons">lock</span>
                 {{ closingShift === shift._id ? 'Kapatiliyor...' : 'Kasayi Kapat' }}
               </button>
@@ -187,7 +237,10 @@
                 {{ formatCurrency(shift.actualCash || shift.expectedCash) }}
               </span>
             </div>
-            <div v-if="shift.discrepancy && shift.discrepancy !== 0" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <div
+              v-if="shift.discrepancy && shift.discrepancy !== 0"
+              class="mt-2 text-sm text-gray-600 dark:text-gray-400"
+            >
               Fark: {{ formatCurrency(shift.discrepancy) }}
               <span v-if="shift.discrepancyNote">- {{ shift.discrepancyNote }}</span>
             </div>
@@ -203,24 +256,22 @@
           <template v-if="shifts.length > 0">
             {{ closedCount }} / {{ shifts.length }} kasa kapatildi
           </template>
-          <template v-else>
-            Islem yapilacak kasa yok
-          </template>
+          <template v-else> Islem yapilacak kasa yok </template>
         </p>
 
         <div class="flex items-center gap-3">
           <button
-            @click="emit('back')"
             class="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="emit('back')"
           >
             <span class="material-icons">arrow_back</span>
             Geri
           </button>
 
           <button
-            @click="handleContinue"
             :disabled="loading || completing || (shifts.length > 0 && !allClosed)"
             class="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-lg transition-colors"
+            @click="handleContinue"
           >
             <span v-if="completing" class="material-icons animate-spin">refresh</span>
             {{ completing ? 'Kaydediliyor...' : 'Devam Et' }}
@@ -269,11 +320,11 @@ const allClosed = computed(() => {
 })
 
 // Methods
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return nightAuditService.formatCurrency(amount)
 }
 
-const formatTime = (date) => {
+const formatTime = date => {
   if (!date) return ''
   return new Date(date).toLocaleTimeString('tr-TR', {
     hour: '2-digit',
@@ -281,9 +332,14 @@ const formatTime = (date) => {
   })
 }
 
-const getDiscrepancy = (shift) => {
+const getDiscrepancy = shift => {
   const input = shiftInputs[shift._id]
-  if (!input || input.actualCash === null || input.actualCash === undefined || input.actualCash === '') {
+  if (
+    !input ||
+    input.actualCash === null ||
+    input.actualCash === undefined ||
+    input.actualCash === ''
+  ) {
     return 0
   }
   return input.actualCash - shift.expectedCash
@@ -335,7 +391,7 @@ const fetchCashierData = async () => {
   }
 }
 
-const closeShift = async (shift) => {
+const closeShift = async shift => {
   const input = shiftInputs[shift._id]
   const discrepancy = getDiscrepancy(shift)
 
@@ -347,12 +403,14 @@ const closeShift = async (shift) => {
   try {
     closingShift.value = shift._id
 
-    await nightAuditService.closeCashierShifts(props.hotelId, [{
-      shiftId: shift._id,
-      actualCash: input.actualCash,
-      discrepancy: discrepancy,
-      note: input.note || null
-    }])
+    await nightAuditService.closeCashierShifts(props.hotelId, [
+      {
+        shiftId: shift._id,
+        actualCash: input.actualCash,
+        discrepancy: discrepancy,
+        note: input.note || null
+      }
+    ])
 
     // Update local state
     shift.closed = true

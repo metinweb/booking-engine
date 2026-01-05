@@ -38,25 +38,15 @@
       </span>
 
       <!-- Half icon -->
-      <span
-        v-else-if="getIconState(index) === 'half'"
-        class="relative inline-block"
-      >
+      <span v-else-if="getIconState(index) === 'half'" class="relative inline-block">
         <span class="material-icons" :class="inactiveColorClasses">{{ iconEmpty || icon }}</span>
-        <span
-          class="absolute inset-0 overflow-hidden"
-          style="width: 50%"
-        >
+        <span class="absolute inset-0 overflow-hidden" style="width: 50%">
           <span class="material-icons" :class="activeColorClasses">{{ icon }}</span>
         </span>
       </span>
 
       <!-- Empty icon -->
-      <span
-        v-else
-        class="material-icons"
-        :class="inactiveColorClasses"
-      >
+      <span v-else class="material-icons" :class="inactiveColorClasses">
         {{ iconEmpty || icon }}
       </span>
     </button>
@@ -90,13 +80,13 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
+    validator: v => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'amber',
-    validator: (v) => ['amber', 'yellow', 'red', 'pink', 'indigo', 'blue', 'green'].includes(v)
+    validator: v => ['amber', 'yellow', 'red', 'pink', 'indigo', 'blue', 'green'].includes(v)
   },
   // Icons
   icon: {
@@ -158,7 +148,7 @@ const displayValue = computed(() => {
 })
 
 // Get icon state for each position
-const getIconState = (index) => {
+const getIconState = index => {
   const activeValue = hoveredValue.value || props.modelValue
 
   if (activeValue >= index) {
@@ -173,7 +163,7 @@ const getIconState = (index) => {
 }
 
 // Handle click
-const handleClick = (index) => {
+const handleClick = index => {
   if (props.disabled || props.readonly) return
 
   let newValue = index
@@ -201,7 +191,7 @@ const handleClick = (index) => {
 }
 
 // Handle hover
-const handleHover = (index) => {
+const handleHover = index => {
   if (props.disabled || props.readonly) return
   hoveredValue.value = index
 }

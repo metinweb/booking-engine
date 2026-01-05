@@ -34,8 +34,8 @@ export const useToast = () => {
 
     return id
   }
-  
-  const removeToast = (id) => {
+
+  const removeToast = id => {
     const index = toasts.value.findIndex(t => t.id === id)
     if (index > -1) {
       toasts.value[index].show = false
@@ -44,12 +44,12 @@ export const useToast = () => {
       }, 300) // Wait for fade out animation
     }
   }
-  
+
   const success = (message, duration) => showToast(message, 'success', duration)
   const error = (message, duration) => showToast(message, 'error', duration)
   const warning = (message, duration) => showToast(message, 'warning', duration)
   const info = (message, duration) => showToast(message, 'info', duration)
-  
+
   return {
     toasts,
     showToast,

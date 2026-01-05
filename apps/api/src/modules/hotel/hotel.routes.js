@@ -23,13 +23,34 @@ router.get('/base/:id/linked-partners', requirePlatformAdmin, hotelService.getLi
 router.get('/base/:id/room-templates', requirePlatformAdmin, hotelService.getRoomTemplates)
 router.post('/base/:id/room-templates', requirePlatformAdmin, hotelService.createRoomTemplate)
 router.put('/base/:id/room-templates/:code', requirePlatformAdmin, hotelService.updateRoomTemplate)
-router.delete('/base/:id/room-templates/:code', requirePlatformAdmin, hotelService.deleteRoomTemplate)
+router.delete(
+  '/base/:id/room-templates/:code',
+  requirePlatformAdmin,
+  hotelService.deleteRoomTemplate
+)
 
 // Room Template Image Management (SuperAdmin only)
-router.post('/base/:id/room-templates/:code/images', requirePlatformAdmin, roomTemplateUpload.single('image'), hotelService.uploadRoomTemplateImage)
-router.delete('/base/:id/room-templates/:code/images/:imageId', requirePlatformAdmin, hotelService.deleteRoomTemplateImage)
-router.patch('/base/:id/room-templates/:code/images/:imageId/main', requirePlatformAdmin, hotelService.setRoomTemplateMainImage)
-router.patch('/base/:id/room-templates/:code/images/reorder', requirePlatformAdmin, hotelService.reorderRoomTemplateImages)
+router.post(
+  '/base/:id/room-templates/:code/images',
+  requirePlatformAdmin,
+  roomTemplateUpload.single('image'),
+  hotelService.uploadRoomTemplateImage
+)
+router.delete(
+  '/base/:id/room-templates/:code/images/:imageId',
+  requirePlatformAdmin,
+  hotelService.deleteRoomTemplateImage
+)
+router.patch(
+  '/base/:id/room-templates/:code/images/:imageId/main',
+  requirePlatformAdmin,
+  hotelService.setRoomTemplateMainImage
+)
+router.patch(
+  '/base/:id/room-templates/:code/images/reorder',
+  requirePlatformAdmin,
+  hotelService.reorderRoomTemplateImages
+)
 
 // AI Hotel Data Extraction (SuperAdmin only)
 router.post('/ai-extract', requirePlatformAdmin, hotelService.aiExtractHotelData)

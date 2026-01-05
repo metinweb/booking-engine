@@ -17,7 +17,9 @@
         v-if="prefixIcon"
         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
       >
-        <span class="material-icons text-gray-400 dark:text-slate-500 text-lg">{{ prefixIcon }}</span>
+        <span class="material-icons text-gray-400 dark:text-slate-500 text-lg">{{
+          prefixIcon
+        }}</span>
       </div>
 
       <!-- Input -->
@@ -34,9 +36,6 @@
         :max="max"
         :step="step"
         :maxlength="maxlength"
-        @input="handleInput"
-        @blur="handleBlur"
-        @focus="handleFocus"
         class="block w-full rounded-lg border transition-colors focus:ring-2 focus:ring-offset-0"
         :class="[
           inputClasses,
@@ -45,6 +44,9 @@
         ]"
         :aria-describedby="error ? `${inputId}-error` : helper ? `${inputId}-helper` : undefined"
         :aria-invalid="!!error"
+        @input="handleInput"
+        @blur="handleBlur"
+        @focus="handleFocus"
       />
 
       <!-- Textarea -->
@@ -57,29 +59,31 @@
         :readonly="readonly"
         :rows="rows"
         :maxlength="maxlength"
-        @input="handleInput"
-        @blur="handleBlur"
-        @focus="handleFocus"
         class="block w-full rounded-lg border transition-colors focus:ring-2 focus:ring-offset-0 resize-none"
         :class="[inputClasses, 'px-3']"
         :aria-describedby="error ? `${inputId}-error` : helper ? `${inputId}-helper` : undefined"
         :aria-invalid="!!error"
-      />
+        @input="handleInput"
+        @blur="handleBlur"
+        @focus="handleFocus"
+      ></textarea>
 
       <!-- Suffix Icon -->
       <div
         v-if="suffixIcon && !clearable"
         class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"
       >
-        <span class="material-icons text-gray-400 dark:text-slate-500 text-lg">{{ suffixIcon }}</span>
+        <span class="material-icons text-gray-400 dark:text-slate-500 text-lg">{{
+          suffixIcon
+        }}</span>
       </div>
 
       <!-- Clear Button -->
       <button
         v-if="clearable && modelValue"
         type="button"
-        @click="handleClear"
         class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+        @click="handleClear"
       >
         <span class="material-icons text-lg">close</span>
       </button>
@@ -203,7 +207,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md', // 'sm' | 'md' | 'lg'
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   }
 })
 
@@ -242,7 +246,7 @@ const inputClasses = computed(() => {
   return `${base} border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-slate-700`
 })
 
-const handleInput = (event) => {
+const handleInput = event => {
   let value = event.target.value
 
   // For number type, convert to number
@@ -253,11 +257,11 @@ const handleInput = (event) => {
   emit('update:modelValue', value)
 }
 
-const handleBlur = (event) => {
+const handleBlur = event => {
   emit('blur', event)
 }
 
-const handleFocus = (event) => {
+const handleFocus = event => {
   emit('focus', event)
 }
 

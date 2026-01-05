@@ -7,16 +7,12 @@
       </label>
       <select
         :value="modelValue"
-        @change="handleChange($event.target.value)"
         :disabled="disabled"
         class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
         :class="selectClass"
+        @change="handleChange($event.target.value)"
       >
-        <option
-          v-for="currency in availableCurrencies"
-          :key="currency"
-          :value="currency"
-        >
+        <option v-for="currency in availableCurrencies" :key="currency" :value="currency">
           {{ getCurrencyLabel(currency) }}
         </option>
       </select>
@@ -30,15 +26,11 @@
       <div class="flex items-center gap-3">
         <select
           :value="modelValue"
-          @change="handleChange($event.target.value)"
           :disabled="disabled"
           class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+          @change="handleChange($event.target.value)"
         >
-          <option
-            v-for="currency in availableCurrencies"
-            :key="currency"
-            :value="currency"
-          >
+          <option v-for="currency in availableCurrencies" :key="currency" :value="currency">
             {{ getCurrencyLabel(currency) }}
           </option>
         </select>
@@ -48,7 +40,9 @@
           v-if="modelValue !== baseCurrency && currentRate"
           class="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-slate-700 rounded-lg"
         >
-          <span class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.currency.exchangeRate') }}:</span>
+          <span class="text-xs text-gray-500 dark:text-slate-400"
+            >{{ $t('pms.currency.exchangeRate') }}:</span
+          >
           <span class="text-sm font-medium text-gray-700 dark:text-slate-300">
             1 {{ modelValue }} = {{ formatRate(currentRate) }} {{ baseCurrency }}
           </span>
@@ -60,7 +54,9 @@
         v-if="amount && modelValue !== baseCurrency && currentRate"
         class="flex items-center gap-2 text-sm"
       >
-        <span class="text-gray-500 dark:text-slate-400">{{ $t('pms.currency.equivalentInTRY') }}:</span>
+        <span class="text-gray-500 dark:text-slate-400"
+          >{{ $t('pms.currency.equivalentInTRY') }}:</span
+        >
         <span class="font-medium text-indigo-600 dark:text-indigo-400">
           {{ formatCurrency(amount * currentRate, baseCurrency) }}
         </span>
@@ -70,10 +66,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
+import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -159,7 +152,7 @@ const currentRate = computed(() => {
 })
 
 // Get currency label
-const getCurrencyLabel = (currency) => {
+const getCurrencyLabel = currency => {
   if (props.inline) {
     return shortLabels[currency] || currency
   }
@@ -167,7 +160,7 @@ const getCurrencyLabel = (currency) => {
 }
 
 // Handle currency change
-const handleChange = (currency) => {
+const handleChange = currency => {
   emit('update:modelValue', currency)
   emit('change', {
     currency,
@@ -177,7 +170,7 @@ const handleChange = (currency) => {
 }
 
 // Format exchange rate
-const formatRate = (rate) => {
+const formatRate = rate => {
   return new Intl.NumberFormat('tr-TR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 4

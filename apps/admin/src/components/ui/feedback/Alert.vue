@@ -1,9 +1,5 @@
 <template>
-  <div
-    v-if="!dismissed"
-    :class="alertClasses"
-    role="alert"
-  >
+  <div v-if="!dismissed" :class="alertClasses" role="alert">
     <!-- Icon -->
     <div v-if="showIcon" class="flex-shrink-0">
       <span class="material-icons" :class="iconClass">{{ alertIcon }}</span>
@@ -44,7 +40,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'info',
-    validator: (v) => ['info', 'success', 'warning', 'error'].includes(v)
+    validator: v => ['info', 'success', 'warning', 'error'].includes(v)
   },
   title: {
     type: String,
@@ -69,12 +65,12 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'light',
-    validator: (v) => ['light', 'solid', 'outline'].includes(v)
+    validator: v => ['light', 'solid', 'outline'].includes(v)
   },
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   }
 })
 
@@ -198,6 +194,8 @@ const dismiss = () => {
 
 // Expose reset
 defineExpose({
-  reset: () => { dismissed.value = false }
+  reset: () => {
+    dismissed.value = false
+  }
 })
 </script>

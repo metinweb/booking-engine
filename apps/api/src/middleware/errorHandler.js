@@ -2,7 +2,7 @@ import { AppError } from '../core/errors.js'
 import logger from '../core/logger.js'
 import config from '../config/index.js'
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, _next) => {
   let statusCode = err.statusCode || 500
   let message = err.message
 
@@ -30,9 +30,7 @@ export const errorHandler = (err, req, res, next) => {
   else if (err.name === 'JsonWebTokenError') {
     statusCode = 401
     message = req.t('INVALID_TOKEN')
-  }
-
-  else if (err.name === 'TokenExpiredError') {
+  } else if (err.name === 'TokenExpiredError') {
     statusCode = 401
     message = req.t('TOKEN_EXPIRED')
   }

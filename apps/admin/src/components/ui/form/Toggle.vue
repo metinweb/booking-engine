@@ -16,12 +16,7 @@
     <!-- Toggle Track -->
     <span
       class="relative inline-flex items-center shrink-0 rounded-full transition-colors duration-200"
-      :class="[
-        trackSizeClasses,
-        modelValue
-          ? activeColorClasses
-          : 'bg-gray-300 dark:bg-slate-600'
-      ]"
+      :class="[trackSizeClasses, modelValue ? activeColorClasses : 'bg-gray-300 dark:bg-slate-600']"
     >
       <!-- Toggle Thumb -->
       <span
@@ -99,13 +94,14 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Colors
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'green', 'blue', 'red', 'amber', 'purple', 'pink', 'teal'].includes(v)
+    validator: v =>
+      ['indigo', 'green', 'blue', 'red', 'amber', 'purple', 'pink', 'teal'].includes(v)
   },
   // Icons
   checkedIcon: {
@@ -124,7 +120,7 @@ const props = defineProps({
   labelPosition: {
     type: String,
     default: 'right',
-    validator: (v) => ['left', 'right'].includes(v)
+    validator: v => ['left', 'right'].includes(v)
   }
 })
 

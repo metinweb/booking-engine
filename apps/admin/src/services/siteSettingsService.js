@@ -1,82 +1,107 @@
 import apiClient from './api'
+import { apiLogger } from '@/utils/logger'
 
 const getSiteSettings = async () => {
   try {
     const response = await apiClient.get('/site-settings')
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to fetch settings', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to fetch settings',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const updateSiteSettings = async (data) => {
+const updateSiteSettings = async data => {
   try {
     const response = await apiClient.put('/site-settings', data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to update settings', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to update settings',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const updateSetup = async (data) => {
+const updateSetup = async data => {
   try {
     const response = await apiClient.put('/site-settings/setup', data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to update setup', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to update setup',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const updateGeneral = async (data) => {
+const updateGeneral = async data => {
   try {
     const response = await apiClient.put('/site-settings/general', data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to update general settings', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to update general settings',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const updateHomepage = async (data) => {
+const updateHomepage = async data => {
   try {
     const response = await apiClient.put('/site-settings/homepage', data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to update homepage settings', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to update homepage settings',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const updateContact = async (data) => {
+const updateContact = async data => {
   try {
     const response = await apiClient.put('/site-settings/contact', data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to update contact settings', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to update contact settings',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const updateTracking = async (data) => {
+const updateTracking = async data => {
   try {
     const response = await apiClient.put('/site-settings/tracking', data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to update tracking settings', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to update tracking settings',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
 // Slider management
-const addSliderItem = async (data) => {
+const addSliderItem = async data => {
   try {
     const response = await apiClient.post('/site-settings/slider', data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to add slider', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to add slider',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -86,28 +111,37 @@ const updateSliderItem = async (sliderId, data) => {
     const response = await apiClient.put(`/site-settings/slider/${sliderId}`, data)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to update slider', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to update slider',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const deleteSliderItem = async (sliderId) => {
+const deleteSliderItem = async sliderId => {
   try {
     const response = await apiClient.delete(`/site-settings/slider/${sliderId}`)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to delete slider', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to delete slider',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
 // SSL management
-const requestSsl = async (type) => {
+const requestSsl = async type => {
   try {
     const response = await apiClient.post('/site-settings/ssl/request', { type })
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to request SSL', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to request SSL',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -117,27 +151,36 @@ const verifyDns = async (type, domain) => {
     const response = await apiClient.post('/site-settings/ssl/verify-dns', { type, domain })
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to verify DNS', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to verify DNS',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const setupSsl = async (type) => {
+const setupSsl = async type => {
   try {
     const response = await apiClient.post('/site-settings/ssl/setup', { type })
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to setup SSL', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to setup SSL',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
 
-const getSslStatus = async (type) => {
+const getSslStatus = async type => {
   try {
     const response = await apiClient.get(`/site-settings/ssl/status/${type}`)
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to get SSL status', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to get SSL status',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -156,7 +199,10 @@ const uploadImage = async (file, type) => {
     })
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to upload image', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to upload image',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -168,7 +214,10 @@ const deleteImage = async (filename, type) => {
     })
     return response.data
   } catch (error) {
-    console.error('SiteSettings Service: Failed to delete image', error.response?.data || error.message)
+    apiLogger.error(
+      'SiteSettings Service: Failed to delete image',
+      error.response?.data || error.message
+    )
     throw error
   }
 }

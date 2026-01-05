@@ -13,13 +13,13 @@ const __dirname = path.dirname(__filename)
 
 // Color palette
 const COLORS = {
-  primary: '#4F46E5',     // Indigo
-  secondary: '#6B7280',   // Gray
-  success: '#10B981',     // Green
-  warning: '#F59E0B',     // Amber
-  danger: '#EF4444',      // Red
-  dark: '#1F2937',        // Dark gray
-  light: '#F3F4F6',       // Light gray
+  primary: '#4F46E5', // Indigo
+  secondary: '#6B7280', // Gray
+  success: '#10B981', // Green
+  warning: '#F59E0B', // Amber
+  danger: '#EF4444', // Red
+  dark: '#1F2937', // Dark gray
+  light: '#F3F4F6', // Light gray
   white: '#FFFFFF'
 }
 
@@ -38,7 +38,7 @@ const formatCurrency = (amount, currency = 'TRY') => {
 /**
  * Format date
  */
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('tr-TR', {
     weekday: 'long',
@@ -51,7 +51,7 @@ const formatDate = (date) => {
 /**
  * Format time
  */
-const formatTime = (date) => {
+const formatTime = date => {
   if (!date) return ''
   return new Date(date).toLocaleTimeString('tr-TR', {
     hour: '2-digit',
@@ -62,7 +62,7 @@ const formatTime = (date) => {
 /**
  * Format datetime
  */
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return ''
   return `${formatDate(date)} ${formatTime(date)}`
 }
@@ -75,23 +75,24 @@ const addHeader = (doc, hotel, title, auditDate) => {
   doc.rect(0, 0, doc.page.width, 80).fill(COLORS.primary)
 
   // Hotel name
-  doc.fontSize(20)
-     .fillColor(COLORS.white)
-     .text(hotel.name || 'Hotel', 50, 25, { width: 300 })
+  doc
+    .fontSize(20)
+    .fillColor(COLORS.white)
+    .text(hotel.name || 'Hotel', 50, 25, { width: 300 })
 
   // Report title
-  doc.fontSize(12)
-     .fillColor(COLORS.white)
-     .text(title, 50, 50)
+  doc.fontSize(12).fillColor(COLORS.white).text(title, 50, 50)
 
   // Date on right
-  doc.fontSize(10)
-     .fillColor(COLORS.white)
-     .text(formatDate(auditDate), 400, 30, { width: 150, align: 'right' })
+  doc
+    .fontSize(10)
+    .fillColor(COLORS.white)
+    .text(formatDate(auditDate), 400, 30, { width: 150, align: 'right' })
 
   // Generated at
-  doc.fontSize(8)
-     .text(`Olusturulma: ${formatDateTime(new Date())}`, 400, 50, { width: 150, align: 'right' })
+  doc
+    .fontSize(8)
+    .text(`Olusturulma: ${formatDateTime(new Date())}`, 400, 50, { width: 150, align: 'right' })
 
   // Reset position
   doc.fillColor(COLORS.dark)
@@ -104,14 +105,10 @@ const addHeader = (doc, hotel, title, auditDate) => {
 const addFooter = (doc, pageNumber) => {
   const bottom = doc.page.height - 30
 
-  doc.fontSize(8)
-     .fillColor(COLORS.secondary)
-     .text(
-       `Sayfa ${pageNumber}`,
-       50,
-       bottom,
-       { width: doc.page.width - 100, align: 'center' }
-     )
+  doc
+    .fontSize(8)
+    .fillColor(COLORS.secondary)
+    .text(`Sayfa ${pageNumber}`, 50, bottom, { width: doc.page.width - 100, align: 'center' })
 }
 
 /**
@@ -121,12 +118,12 @@ const addSectionTitle = (doc, title, icon = null) => {
   doc.moveDown(0.5)
 
   // Section bar
-  doc.rect(50, doc.y, doc.page.width - 100, 25)
-     .fill(COLORS.light)
+  doc.rect(50, doc.y, doc.page.width - 100, 25).fill(COLORS.light)
 
-  doc.fontSize(12)
-     .fillColor(COLORS.primary)
-     .text(title, 60, doc.y - 18)
+  doc
+    .fontSize(12)
+    .fillColor(COLORS.primary)
+    .text(title, 60, doc.y - 18)
 
   doc.fillColor(COLORS.dark)
   doc.moveDown(0.5)
@@ -137,18 +134,19 @@ const addSectionTitle = (doc, title, icon = null) => {
  */
 const addStatBox = (doc, x, y, width, label, value, color = COLORS.primary) => {
   // Box background
-  doc.rect(x, y, width, 50)
-     .fill(COLORS.light)
+  doc.rect(x, y, width, 50).fill(COLORS.light)
 
   // Value
-  doc.fontSize(18)
-     .fillColor(color)
-     .text(value, x + 10, y + 10, { width: width - 20, align: 'center' })
+  doc
+    .fontSize(18)
+    .fillColor(color)
+    .text(value, x + 10, y + 10, { width: width - 20, align: 'center' })
 
   // Label
-  doc.fontSize(9)
-     .fillColor(COLORS.secondary)
-     .text(label, x + 10, y + 32, { width: width - 20, align: 'center' })
+  doc
+    .fontSize(9)
+    .fillColor(COLORS.secondary)
+    .text(label, x + 10, y + 32, { width: width - 20, align: 'center' })
 
   doc.fillColor(COLORS.dark)
 }
@@ -171,9 +169,10 @@ const addTable = (doc, headers, rows, options = {}) => {
 
   let x = startX
   headers.forEach((header, i) => {
-    doc.fontSize(9)
-       .fillColor(COLORS.white)
-       .text(header, x + 5, y + 6, { width: widths[i] - 10 })
+    doc
+      .fontSize(9)
+      .fillColor(COLORS.white)
+      .text(header, x + 5, y + 6, { width: widths[i] - 10 })
     x += widths[i]
   })
 
@@ -195,9 +194,10 @@ const addTable = (doc, headers, rows, options = {}) => {
 
     x = startX
     row.forEach((cell, i) => {
-      doc.fontSize(9)
-         .fillColor(COLORS.dark)
-         .text(String(cell || '-'), x + 5, y + 5, { width: widths[i] - 10 })
+      doc
+        .fontSize(9)
+        .fillColor(COLORS.dark)
+        .text(String(cell || '-'), x + 5, y + 5, { width: widths[i] - 10 })
       x += widths[i]
     })
 
@@ -228,10 +228,42 @@ export const generateDailyReport = async (audit, hotel, data) => {
       const statWidth = (doc.page.width - 120) / 4
       const statY = doc.y
 
-      addStatBox(doc, 50, statY, statWidth, 'Doluluk', `%${data.occupancyRate || 0}`, COLORS.primary)
-      addStatBox(doc, 60 + statWidth, statY, statWidth, 'Toplam Gelir', formatCurrency(data.totalRevenue), COLORS.success)
-      addStatBox(doc, 70 + statWidth * 2, statY, statWidth, 'Giris/Cikis', `${data.arrivals || 0}/${data.departures || 0}`, COLORS.primary)
-      addStatBox(doc, 80 + statWidth * 3, statY, statWidth, 'Misafir', `${data.inHouseGuests || 0}`, COLORS.primary)
+      addStatBox(
+        doc,
+        50,
+        statY,
+        statWidth,
+        'Doluluk',
+        `%${data.occupancyRate || 0}`,
+        COLORS.primary
+      )
+      addStatBox(
+        doc,
+        60 + statWidth,
+        statY,
+        statWidth,
+        'Toplam Gelir',
+        formatCurrency(data.totalRevenue),
+        COLORS.success
+      )
+      addStatBox(
+        doc,
+        70 + statWidth * 2,
+        statY,
+        statWidth,
+        'Giris/Cikis',
+        `${data.arrivals || 0}/${data.departures || 0}`,
+        COLORS.primary
+      )
+      addStatBox(
+        doc,
+        80 + statWidth * 3,
+        statY,
+        statWidth,
+        'Misafir',
+        `${data.inHouseGuests || 0}`,
+        COLORS.primary
+      )
 
       doc.y = statY + 70
 
@@ -248,11 +280,20 @@ export const generateDailyReport = async (audit, hotel, data) => {
       // Revenue breakdown
       addSectionTitle(doc, 'GELIR DAGILIMI')
 
-      addTable(doc,
+      addTable(
+        doc,
         ['Kategori', 'Tutar', 'Oran'],
         [
-          ['Oda Geliri', formatCurrency(data.roomRevenue), `%${Math.round((data.roomRevenue / (data.totalRevenue || 1)) * 100)}`],
-          ['Ekstra Gelir', formatCurrency(data.extraRevenue), `%${Math.round((data.extraRevenue / (data.totalRevenue || 1)) * 100)}`],
+          [
+            'Oda Geliri',
+            formatCurrency(data.roomRevenue),
+            `%${Math.round((data.roomRevenue / (data.totalRevenue || 1)) * 100)}`
+          ],
+          [
+            'Ekstra Gelir',
+            formatCurrency(data.extraRevenue),
+            `%${Math.round((data.extraRevenue / (data.totalRevenue || 1)) * 100)}`
+          ],
           ['TOPLAM', formatCurrency(data.totalRevenue), '%100']
         ],
         { columnWidths: [200, 150, 100] }
@@ -261,7 +302,8 @@ export const generateDailyReport = async (audit, hotel, data) => {
       // Operations summary
       addSectionTitle(doc, 'OPERASYON OZETI')
 
-      addTable(doc,
+      addTable(
+        doc,
         ['Islem', 'Sayi', 'Detay'],
         [
           ['Check-in', data.arrivals || 0, 'Bugun giris yapan'],
@@ -277,11 +319,13 @@ export const generateDailyReport = async (audit, hotel, data) => {
         addSectionTitle(doc, 'AUDIT UYARILARI')
 
         audit.preAuditCheck.issues.forEach(issue => {
-          const color = issue.severity === 'error' ? COLORS.danger :
-                        issue.severity === 'warning' ? COLORS.warning : COLORS.secondary
-          doc.fontSize(9)
-             .fillColor(color)
-             .text(`• ${issue.message}`, 60)
+          const color =
+            issue.severity === 'error'
+              ? COLORS.danger
+              : issue.severity === 'warning'
+                ? COLORS.warning
+                : COLORS.secondary
+          doc.fontSize(9).fillColor(color).text(`• ${issue.message}`, 60)
         })
         doc.fillColor(COLORS.dark)
       }
@@ -317,9 +361,33 @@ export const generateRevenueReport = async (audit, hotel, data) => {
       const statWidth = (doc.page.width - 110) / 3
       const statY = doc.y
 
-      addStatBox(doc, 50, statY, statWidth, 'Oda Geliri', formatCurrency(data.roomRevenue), COLORS.success)
-      addStatBox(doc, 60 + statWidth, statY, statWidth, 'Ekstra Gelir', formatCurrency(data.extraRevenue), COLORS.primary)
-      addStatBox(doc, 70 + statWidth * 2, statY, statWidth, 'Toplam Gelir', formatCurrency(data.totalRevenue), COLORS.success)
+      addStatBox(
+        doc,
+        50,
+        statY,
+        statWidth,
+        'Oda Geliri',
+        formatCurrency(data.roomRevenue),
+        COLORS.success
+      )
+      addStatBox(
+        doc,
+        60 + statWidth,
+        statY,
+        statWidth,
+        'Ekstra Gelir',
+        formatCurrency(data.extraRevenue),
+        COLORS.primary
+      )
+      addStatBox(
+        doc,
+        70 + statWidth * 2,
+        statY,
+        statWidth,
+        'Toplam Gelir',
+        formatCurrency(data.totalRevenue),
+        COLORS.success
+      )
 
       doc.y = statY + 70
 
@@ -327,7 +395,8 @@ export const generateRevenueReport = async (audit, hotel, data) => {
       addSectionTitle(doc, 'ODA GELIRLERI')
 
       if (data.roomCharges?.length > 0) {
-        addTable(doc,
+        addTable(
+          doc,
           ['Oda', 'Misafir', 'Oda Tipi', 'Geceler', 'Tutar'],
           data.roomCharges.map(c => [
             c.roomNumber,
@@ -346,7 +415,8 @@ export const generateRevenueReport = async (audit, hotel, data) => {
       addSectionTitle(doc, 'EKSTRA GELIRLER')
 
       if (data.extras?.length > 0) {
-        addTable(doc,
+        addTable(
+          doc,
           ['Oda', 'Misafir', 'Aciklama', 'Tutar'],
           data.extras.map(e => [
             e.roomNumber,
@@ -363,12 +433,25 @@ export const generateRevenueReport = async (audit, hotel, data) => {
       // Payment methods breakdown
       addSectionTitle(doc, 'ODEME YONTEMLERI')
 
-      addTable(doc,
+      addTable(
+        doc,
         ['Yontem', 'Islem Sayisi', 'Tutar'],
         [
-          ['Nakit', data.paymentMethods?.cash?.count || 0, formatCurrency(data.paymentMethods?.cash?.total)],
-          ['Kredi Karti', data.paymentMethods?.card?.count || 0, formatCurrency(data.paymentMethods?.card?.total)],
-          ['Banka Transferi', data.paymentMethods?.transfer?.count || 0, formatCurrency(data.paymentMethods?.transfer?.total)]
+          [
+            'Nakit',
+            data.paymentMethods?.cash?.count || 0,
+            formatCurrency(data.paymentMethods?.cash?.total)
+          ],
+          [
+            'Kredi Karti',
+            data.paymentMethods?.card?.count || 0,
+            formatCurrency(data.paymentMethods?.card?.total)
+          ],
+          [
+            'Banka Transferi',
+            data.paymentMethods?.transfer?.count || 0,
+            formatCurrency(data.paymentMethods?.transfer?.total)
+          ]
         ],
         { columnWidths: [200, 100, 150] }
       )
@@ -404,10 +487,42 @@ export const generateOccupancyReport = async (audit, hotel, data) => {
       const statWidth = (doc.page.width - 120) / 4
       const statY = doc.y
 
-      addStatBox(doc, 50, statY, statWidth, 'Toplam Oda', `${data.totalRooms || 0}`, COLORS.secondary)
-      addStatBox(doc, 60 + statWidth, statY, statWidth, 'Dolu', `${data.occupiedRooms || 0}`, COLORS.success)
-      addStatBox(doc, 70 + statWidth * 2, statY, statWidth, 'Bos', `${data.availableRooms || 0}`, COLORS.primary)
-      addStatBox(doc, 80 + statWidth * 3, statY, statWidth, 'Doluluk', `%${data.occupancyRate || 0}`, COLORS.primary)
+      addStatBox(
+        doc,
+        50,
+        statY,
+        statWidth,
+        'Toplam Oda',
+        `${data.totalRooms || 0}`,
+        COLORS.secondary
+      )
+      addStatBox(
+        doc,
+        60 + statWidth,
+        statY,
+        statWidth,
+        'Dolu',
+        `${data.occupiedRooms || 0}`,
+        COLORS.success
+      )
+      addStatBox(
+        doc,
+        70 + statWidth * 2,
+        statY,
+        statWidth,
+        'Bos',
+        `${data.availableRooms || 0}`,
+        COLORS.primary
+      )
+      addStatBox(
+        doc,
+        80 + statWidth * 3,
+        statY,
+        statWidth,
+        'Doluluk',
+        `%${data.occupancyRate || 0}`,
+        COLORS.primary
+      )
 
       doc.y = statY + 70
 
@@ -415,7 +530,8 @@ export const generateOccupancyReport = async (audit, hotel, data) => {
       addSectionTitle(doc, 'ODA TIPLERINE GORE DOLULUK')
 
       if (data.roomTypes?.length > 0) {
-        addTable(doc,
+        addTable(
+          doc,
           ['Oda Tipi', 'Toplam', 'Dolu', 'Bos', 'Doluluk'],
           data.roomTypes.map(rt => [
             rt.name,
@@ -432,7 +548,8 @@ export const generateOccupancyReport = async (audit, hotel, data) => {
       addSectionTitle(doc, 'KATLARA GORE DOLULUK')
 
       if (data.floors?.length > 0) {
-        addTable(doc,
+        addTable(
+          doc,
           ['Kat', 'Toplam Oda', 'Dolu', 'Bos', 'Doluluk'],
           data.floors.map(f => [
             `Kat ${f.floor}`,
@@ -448,7 +565,8 @@ export const generateOccupancyReport = async (audit, hotel, data) => {
       // Room status
       addSectionTitle(doc, 'ODA DURUMLARI')
 
-      addTable(doc,
+      addTable(
+        doc,
         ['Durum', 'Sayi', 'Oran'],
         [
           ['Dolu - Temiz', data.roomStatus?.occupiedClean || 0, '-'],
@@ -492,9 +610,33 @@ export const generateCashierReport = async (audit, hotel, data) => {
       const statWidth = (doc.page.width - 110) / 3
       const statY = doc.y
 
-      addStatBox(doc, 50, statY, statWidth, 'Nakit Islem', formatCurrency(data.totalCash), COLORS.success)
-      addStatBox(doc, 60 + statWidth, statY, statWidth, 'Kart Islem', formatCurrency(data.totalCard), COLORS.primary)
-      addStatBox(doc, 70 + statWidth * 2, statY, statWidth, 'Toplam', formatCurrency(data.totalTransactions), COLORS.success)
+      addStatBox(
+        doc,
+        50,
+        statY,
+        statWidth,
+        'Nakit Islem',
+        formatCurrency(data.totalCash),
+        COLORS.success
+      )
+      addStatBox(
+        doc,
+        60 + statWidth,
+        statY,
+        statWidth,
+        'Kart Islem',
+        formatCurrency(data.totalCard),
+        COLORS.primary
+      )
+      addStatBox(
+        doc,
+        70 + statWidth * 2,
+        statY,
+        statWidth,
+        'Toplam',
+        formatCurrency(data.totalTransactions),
+        COLORS.success
+      )
 
       doc.y = statY + 70
 
@@ -503,18 +645,19 @@ export const generateCashierReport = async (audit, hotel, data) => {
 
       if (data.shifts?.length > 0) {
         data.shifts.forEach((shift, index) => {
-          doc.fontSize(11)
-             .fillColor(COLORS.primary)
-             .text(`${shift.cashierName} - ${shift.shiftNumber}`, 60)
+          doc
+            .fontSize(11)
+            .fillColor(COLORS.primary)
+            .text(`${shift.cashierName} - ${shift.shiftNumber}`, 60)
 
-          doc.fontSize(9)
-             .fillColor(COLORS.dark)
+          doc.fontSize(9).fillColor(COLORS.dark)
 
           doc.text(`Acilis: ${formatDateTime(shift.openedAt)}`, 70)
           doc.text(`Kapanis: ${formatDateTime(shift.closedAt)}`, 70)
           doc.moveDown(0.3)
 
-          addTable(doc,
+          addTable(
+            doc,
             ['Islem', 'Tutar'],
             [
               ['Acilis Bakiyesi', formatCurrency(shift.openingBalance)],
@@ -528,9 +671,10 @@ export const generateCashierReport = async (audit, hotel, data) => {
           )
 
           if (shift.discrepancy !== 0 && shift.discrepancyNote) {
-            doc.fontSize(9)
-               .fillColor(COLORS.warning)
-               .text(`Fark Aciklamasi: ${shift.discrepancyNote}`, 60)
+            doc
+              .fontSize(9)
+              .fillColor(COLORS.warning)
+              .text(`Fark Aciklamasi: ${shift.discrepancyNote}`, 60)
             doc.fillColor(COLORS.dark)
           }
 
@@ -543,10 +687,15 @@ export const generateCashierReport = async (audit, hotel, data) => {
       // Transaction summary
       addSectionTitle(doc, 'ISLEM OZETI')
 
-      addTable(doc,
+      addTable(
+        doc,
         ['Islem Tipi', 'Adet', 'Tutar'],
         [
-          ['Odeme', data.summary?.payments?.count || 0, formatCurrency(data.summary?.payments?.total)],
+          [
+            'Odeme',
+            data.summary?.payments?.count || 0,
+            formatCurrency(data.summary?.payments?.total)
+          ],
           ['Iade', data.summary?.refunds?.count || 0, formatCurrency(data.summary?.refunds?.total)],
           ['Iptal', data.summary?.voids?.count || 0, formatCurrency(data.summary?.voids?.total)]
         ],
@@ -598,7 +747,7 @@ export const getReportData = async (hotelId, auditId, reportType) => {
         cancellations: audit.summary?.cancellations || 0
       }
 
-    case 'revenue':
+    case 'revenue': {
       const stays = await Stay.find({
         hotel: hotelId,
         status: 'checked_in',
@@ -612,7 +761,9 @@ export const getReportData = async (hotelId, auditId, reportType) => {
         roomCharges: stays.map(stay => {
           // Get main guest from embedded guests array
           const mainGuest = stay.guests?.find(g => g.isMainGuest) || stay.guests?.[0]
-          const guestName = mainGuest ? `${mainGuest.firstName || ''} ${mainGuest.lastName || ''}`.trim() : 'N/A'
+          const guestName = mainGuest
+            ? `${mainGuest.firstName || ''} ${mainGuest.lastName || ''}`.trim()
+            : 'N/A'
           return {
             roomNumber: stay.room?.roomNumber,
             guestName,
@@ -628,8 +779,9 @@ export const getReportData = async (hotelId, auditId, reportType) => {
           transfer: { count: 0, total: 0 }
         }
       }
+    }
 
-    case 'occupancy':
+    case 'occupancy': {
       const rooms = await Room.find({ hotel: hotelId })
       const activeStays = await Stay.find({
         hotel: hotelId,
@@ -679,12 +831,13 @@ export const getReportData = async (hotelId, auditId, reportType) => {
           blocked: 0
         }
       }
+    }
 
-    case 'cashier':
+    case 'cashier': {
       const shifts = audit.cashierReconciliation?.shifts || []
 
       let totalCash = 0
-      let totalCard = 0
+      const totalCard = 0
 
       shifts.forEach(shift => {
         totalCash += shift.actualCash || shift.expectedCash || 0
@@ -713,6 +866,7 @@ export const getReportData = async (hotelId, auditId, reportType) => {
           voids: { count: 0, total: 0 }
         }
       }
+    }
 
     default:
       throw new Error(`Unknown report type: ${reportType}`)

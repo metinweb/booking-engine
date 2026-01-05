@@ -1,16 +1,25 @@
 <template>
-  <div class="relative" ref="dropdownRef">
+  <div ref="dropdownRef" class="relative">
     <button
       type="button"
-      @click="toggleDropdown"
       :disabled="disabled"
       class="flex items-center gap-2 px-3 py-2 w-full rounded-lg border transition-colors text-left"
       :class="buttonClasses"
+      @click="toggleDropdown"
     >
-      <span class="material-icons text-lg" :class="selectedRoomType ? 'text-indigo-500' : 'text-gray-400'">hotel</span>
+      <span
+        class="material-icons text-lg"
+        :class="selectedRoomType ? 'text-indigo-500' : 'text-gray-400'"
+        >hotel</span
+      >
       <div class="flex-1 min-w-0">
-        <div class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.reservation.roomInfo') }}</div>
-        <div class="text-sm font-medium truncate" :class="selectedRoomType ? 'text-gray-900 dark:text-white' : 'text-gray-400'">
+        <div class="text-xs text-gray-500 dark:text-slate-400">
+          {{ $t('pms.reservation.roomInfo') }}
+        </div>
+        <div
+          class="text-sm font-medium truncate"
+          :class="selectedRoomType ? 'text-gray-900 dark:text-white' : 'text-gray-400'"
+        >
           {{ selectedRoomType ? getLocalizedName(selectedRoomType.name) : $t('common.select') }}
         </div>
       </div>
@@ -22,7 +31,11 @@
       >
         {{ selectedRoomType.available }}/{{ selectedRoomType.total }}
       </span>
-      <span class="material-icons text-gray-400 transition-transform" :class="isOpen ? 'rotate-180' : ''">expand_more</span>
+      <span
+        class="material-icons text-gray-400 transition-transform"
+        :class="isOpen ? 'rotate-180' : ''"
+        >expand_more</span
+      >
     </button>
 
     <!-- Dropdown -->
@@ -49,16 +62,18 @@
             v-for="rt in roomTypesWithOccupancy"
             :key="rt._id"
             type="button"
-            @click="selectRoomType(rt)"
             class="w-full px-3 py-2.5 text-left text-sm flex items-center gap-3 border-b border-gray-100 dark:border-slate-700 last:border-b-0 transition-colors"
             :class="getItemClasses(rt)"
+            @click="selectRoomType(rt)"
           >
             <!-- Icon -->
             <div
               class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
               :style="{ backgroundColor: rt.color ? `${rt.color}20` : '#e5e7eb' }"
             >
-              <span class="material-icons text-base" :style="{ color: rt.color || '#6b7280' }">{{ getRoomIcon(rt) }}</span>
+              <span class="material-icons text-base" :style="{ color: rt.color || '#6b7280' }">{{
+                getRoomIcon(rt)
+              }}</span>
             </div>
 
             <!-- Info -->
@@ -84,11 +99,16 @@
             </div>
 
             <!-- Check -->
-            <span v-if="modelValue === rt._id" class="material-icons text-indigo-500 text-lg">check</span>
+            <span v-if="modelValue === rt._id" class="material-icons text-indigo-500 text-lg"
+              >check</span
+            >
           </button>
 
           <!-- No Room Types -->
-          <div v-if="roomTypesWithOccupancy.length === 0" class="px-4 py-6 text-center text-gray-500 text-sm">
+          <div
+            v-if="roomTypesWithOccupancy.length === 0"
+            class="px-4 py-6 text-center text-gray-500 text-sm"
+          >
             {{ $t('pms.reservation.noRoomTypes') }}
           </div>
         </div>
@@ -121,7 +141,7 @@ const loading = ref(false)
 const roomTypes = ref([])
 const rooms = ref([])
 
-const getLocalizedName = (nameObj) => {
+const getLocalizedName = nameObj => {
   if (!nameObj) return ''
   if (typeof nameObj === 'string') return nameObj
   return nameObj[locale.value] || nameObj.tr || nameObj.en || Object.values(nameObj)[0] || ''
@@ -131,7 +151,9 @@ const roomTypesWithOccupancy = computed(() => {
   return roomTypes.value.map(rt => {
     const roomsOfType = rooms.value.filter(r => r.roomType?._id === rt._id || r.roomType === rt._id)
     const total = roomsOfType.length
-    const occupiedCount = roomsOfType.filter(r => r.status === 'occupied' || r.status === 'checkout').length
+    const occupiedCount = roomsOfType.filter(
+      r => r.status === 'occupied' || r.status === 'checkout'
+    ).length
     return { ...rt, total, available: total - occupiedCount }
   })
 })
@@ -142,13 +164,15 @@ const selectedRoomType = computed(() => {
 })
 
 const buttonClasses = computed(() => {
-  if (props.disabled) return 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 cursor-not-allowed opacity-60'
+  if (props.disabled)
+    return 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 cursor-not-allowed opacity-60'
   if (props.error) return 'border-red-500 bg-red-50 dark:bg-red-900/10'
-  if (selectedRoomType.value) return 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20'
+  if (selectedRoomType.value)
+    return 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20'
   return 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-indigo-400'
 })
 
-const getRoomIcon = (rt) => {
+const getRoomIcon = rt => {
   const code = (rt.code || '').toLowerCase()
   if (code.includes('suite')) return 'king_bed'
   if (code.includes('family')) return 'family_restroom'
@@ -157,13 +181,14 @@ const getRoomIcon = (rt) => {
   return 'hotel'
 }
 
-const getAvailabilityBadgeClass = (rt) => {
+const getAvailabilityBadgeClass = rt => {
   if (rt.available === 0) return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-  if (rt.available <= 2) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+  if (rt.available <= 2)
+    return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
   return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
 }
 
-const getItemClasses = (rt) => {
+const getItemClasses = rt => {
   if (props.modelValue === rt._id) return 'bg-indigo-50 dark:bg-indigo-900/20'
   return 'hover:bg-gray-50 dark:hover:bg-slate-700'
 }
@@ -173,7 +198,7 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value
 }
 
-const selectRoomType = (rt) => {
+const selectRoomType = rt => {
   emit('update:modelValue', rt._id)
   emit('select', rt)
   isOpen.value = false
@@ -196,7 +221,7 @@ const fetchData = async () => {
   }
 }
 
-const handleClickOutside = (e) => {
+const handleClickOutside = e => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
     isOpen.value = false
   }

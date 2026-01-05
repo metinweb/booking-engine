@@ -1,4 +1,5 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { socketLogger } from '@/utils/logger'
 
 /**
  * Offline Sync Composable
@@ -22,7 +23,7 @@ const openDatabase = () => {
     request.onerror = () => reject(request.error)
     request.onsuccess = () => resolve(request.result)
 
-    request.onupgradeneeded = (event) => {
+    request.onupgradeneeded = event => {
       const db = event.target.result
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true })
@@ -47,13 +48,13 @@ const loadPendingOperations = async () => {
       }
     })
   } catch (error) {
-    console.error('[OfflineSync] Failed to load pending operations:', error)
+    socketLogger.error('[OfflineSync] Failed to load pending operations:', error)
     return []
   }
 }
 
 // Save operation to IndexedDB
-const saveOperation = async (operation) => {
+const saveOperation = async operation => {
   try {
     const db = await openDatabase()
     const tx = db.transaction(STORE_NAME, 'readwrite')
@@ -71,13 +72,13 @@ const saveOperation = async (operation) => {
       }
     })
   } catch (error) {
-    console.error('[OfflineSync] Failed to save operation:', error)
+    socketLogger.error('[OfflineSync] Failed to save operation:', error)
     throw error
   }
 }
 
 // Remove operation from IndexedDB
-const removeOperation = async (id) => {
+const removeOperation = async id => {
   try {
     const db = await openDatabase()
     const tx = db.transaction(STORE_NAME, 'readwrite')
@@ -92,7 +93,7 @@ const removeOperation = async (id) => {
       }
     })
   } catch (error) {
-    console.error('[OfflineSync] Failed to remove operation:', error)
+    socketLogger.error('[OfflineSync] Failed to remove operation:', error)
     throw error
   }
 }
@@ -104,7 +105,7 @@ const syncPendingOperations = async () => {
   }
 
   isSyncing.value = true
-  console.log('[OfflineSync] Syncing', pendingOperations.value.length, 'operations')
+  socketLogger.debug('[OfflineSync] Syncing', pendingOperations.value.length, 'operations')
 
   for (const operation of pendingOperations.value) {
     try {
@@ -116,12 +117,12 @@ const syncPendingOperations = async () => {
 
       if (response.ok) {
         await removeOperation(operation.id)
-        console.log('[OfflineSync] Synced:', operation.id)
+        socketLogger.debug('[OfflineSync] Synced:', operation.id)
       } else {
-        console.error('[OfflineSync] Failed to sync:', operation.id, response.status)
+        socketLogger.error('[OfflineSync] Failed to sync:', operation.id, response.status)
       }
     } catch (error) {
-      console.error('[OfflineSync] Sync error:', operation.id, error)
+      socketLogger.error('[OfflineSync] Sync error:', operation.id, error)
     }
   }
 
@@ -157,8 +158,8 @@ export function useOfflineSync() {
         if (response.ok) {
           return await response.json()
         }
-      } catch (error) {
-        console.log('[OfflineSync] Network error, queueing operation')
+      } catch {
+        socketLogger.debug('[OfflineSync] Network error, queueing operation')
       }
     }
 
@@ -177,7 +178,7 @@ export function useOfflineSync() {
   // Force sync now
   const forceSync = async () => {
     if (!isOnline.value) {
-      console.log('[OfflineSync] Cannot sync while offline')
+      socketLogger.debug('[OfflineSync] Cannot sync while offline')
       return false
     }
 
@@ -194,20 +195,20 @@ export function useOfflineSync() {
       await store.clear()
       pendingOperations.value = []
     } catch (error) {
-      console.error('[OfflineSync] Failed to clear operations:', error)
+      socketLogger.error('[OfflineSync] Failed to clear operations:', error)
     }
   }
 
   // Online/offline event handlers
   const handleOnline = () => {
     isOnline.value = true
-    console.log('[OfflineSync] Back online')
+    socketLogger.debug('[OfflineSync] Back online')
     syncPendingOperations()
   }
 
   const handleOffline = () => {
     isOnline.value = false
-    console.log('[OfflineSync] Gone offline')
+    socketLogger.debug('[OfflineSync] Gone offline')
   }
 
   // Setup listeners
@@ -255,12 +256,12 @@ export async function offlineFetch(url, options = {}) {
     try {
       const response = await fetch(url, options)
       return response
-    } catch (error) {
+    } catch {
       // Return offline indicator
-      return new Response(
-        JSON.stringify({ success: false, offline: true, error: 'Cevrimdisi' }),
-        { status: 503, headers: { 'Content-Type': 'application/json' } }
-      )
+      return new Response(JSON.stringify({ success: false, offline: true, error: 'Cevrimdisi' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' }
+      })
     }
   }
 
@@ -276,10 +277,10 @@ export async function offlineFetch(url, options = {}) {
       }
     })
 
-    return new Response(
-      JSON.stringify({ success: true, queued: true, offline: true }),
-      { status: 202, headers: { 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ success: true, queued: true, offline: true }), {
+      status: 202,
+      headers: { 'Content-Type': 'application/json' }
+    })
   }
 
   // Online - execute normally

@@ -2,54 +2,88 @@
   <div class="space-y-6">
     <!-- Header with Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700"
+      >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">{{ $t('agencies.totalAgencies') }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">
+              {{ $t('agencies.totalAgencies') }}
+            </p>
             <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1">{{ stats.total }}</p>
           </div>
-          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center"
+          >
             <span class="material-icons text-purple-600 dark:text-purple-400">storefront</span>
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700"
+      >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">{{ $t('agencies.activeAgencies') }}</p>
-            <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ stats.active }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">
+              {{ $t('agencies.activeAgencies') }}
+            </p>
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
+              {{ stats.active }}
+            </p>
           </div>
-          <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center"
+          >
             <span class="material-icons text-green-600 dark:text-green-400">check_circle</span>
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700"
+      >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">{{ $t('agencies.pendingAgencies') }}</p>
-            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{{ stats.pending }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">
+              {{ $t('agencies.pendingAgencies') }}
+            </p>
+            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">
+              {{ stats.pending }}
+            </p>
           </div>
-          <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center">
+          <div
+            class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/30 rounded-xl flex items-center justify-center"
+          >
             <span class="material-icons text-yellow-600 dark:text-yellow-400">pending</span>
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-5 border border-gray-100 dark:border-slate-700"
+      >
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">{{ $t('agencies.totalCredit') }}</p>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ formatCurrency(stats.totalCredit) }}</p>
+            <p class="text-sm font-medium text-gray-500 dark:text-slate-400">
+              {{ $t('agencies.totalCredit') }}
+            </p>
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
+              {{ formatCurrency(stats.totalCredit) }}
+            </p>
           </div>
-          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-            <span class="material-icons text-blue-600 dark:text-blue-400">account_balance_wallet</span>
+          <div
+            class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center"
+          >
+            <span class="material-icons text-blue-600 dark:text-blue-400"
+              >account_balance_wallet</span
+            >
           </div>
         </div>
       </div>
     </div>
 
     <!-- Main Content Card -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700"
+    >
       <!-- Toolbar -->
       <div class="p-4 border-b border-gray-200 dark:border-slate-700">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -57,7 +91,9 @@
           <div class="flex flex-col sm:flex-row gap-3 flex-1">
             <!-- Search -->
             <div class="relative flex-1 max-w-md">
-              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+              <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >search</span
+              >
               <input
                 v-model="searchQuery"
                 type="text"
@@ -67,15 +103,15 @@
               />
               <button
                 v-if="searchQuery"
-                @click="searchQuery = ''; applyFilters()"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                @click="searchQuery = ''; applyFilters()"
               >
                 <span class="material-icons text-sm">close</span>
               </button>
             </div>
 
             <!-- Status Filter -->
-            <select v-model="statusFilter" @change="applyFilters" class="form-input w-full sm:w-40">
+            <select v-model="statusFilter" class="form-input w-full sm:w-40" @change="applyFilters">
               <option value="">{{ $t('agencies.allStatuses') }}</option>
               <option value="active">{{ $t('common.active') }}</option>
               <option value="inactive">{{ $t('common.inactive') }}</option>
@@ -84,7 +120,7 @@
             </select>
 
             <!-- Credit Filter -->
-            <select v-model="creditFilter" @change="applyFilters" class="form-input w-full sm:w-44">
+            <select v-model="creditFilter" class="form-input w-full sm:w-44" @change="applyFilters">
               <option value="">{{ $t('agencies.allCredits') }}</option>
               <option value="enabled">{{ $t('agencies.creditEnabled') }}</option>
               <option value="disabled">{{ $t('agencies.creditDisabled') }}</option>
@@ -95,16 +131,13 @@
           <!-- Actions -->
           <div class="flex items-center gap-2">
             <button
-              @click="fetchAgencies"
               class="p-2.5 text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               :title="$t('common.refresh')"
+              @click="fetchAgencies"
             >
               <span class="material-icons" :class="{ 'animate-spin': loading }">refresh</span>
             </button>
-            <button
-              @click="openCreateModal"
-              class="btn-primary flex items-center gap-2"
-            >
+            <button class="btn-primary flex items-center gap-2" @click="openCreateModal">
               <span class="material-icons text-lg">add</span>
               <span class="hidden sm:inline">{{ $t('agencies.addAgency') }}</span>
             </button>
@@ -112,14 +145,22 @@
         </div>
 
         <!-- Active Filters -->
-        <div v-if="hasActiveFilters" class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
-          <span class="text-sm text-gray-500 dark:text-slate-400">{{ $t('common.activeFilters') }}:</span>
+        <div
+          v-if="hasActiveFilters"
+          class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-slate-700"
+        >
+          <span class="text-sm text-gray-500 dark:text-slate-400"
+            >{{ $t('common.activeFilters') }}:</span
+          >
           <span
             v-if="searchQuery"
             class="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm"
           >
             {{ $t('common.search') }}: "{{ searchQuery }}"
-            <button @click="searchQuery = ''; applyFilters()" class="hover:text-purple-900 dark:hover:text-purple-100">
+            <button
+              class="hover:text-purple-900 dark:hover:text-purple-100"
+              @click="searchQuery = ''; applyFilters()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
@@ -128,7 +169,10 @@
             class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm"
           >
             {{ $t('common.status.label') }}: {{ getStatusLabel(statusFilter) }}
-            <button @click="statusFilter = ''; applyFilters()" class="hover:text-blue-900 dark:hover:text-blue-100">
+            <button
+              class="hover:text-blue-900 dark:hover:text-blue-100"
+              @click="statusFilter = ''; applyFilters()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
@@ -137,11 +181,17 @@
             class="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm"
           >
             {{ $t('agencies.creditLimit') }}: {{ getCreditFilterLabel(creditFilter) }}
-            <button @click="creditFilter = ''; applyFilters()" class="hover:text-green-900 dark:hover:text-green-100">
+            <button
+              class="hover:text-green-900 dark:hover:text-green-100"
+              @click="creditFilter = ''; applyFilters()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
-          <button @click="clearAllFilters" class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 flex items-center gap-1">
+          <button
+            class="text-sm text-red-600 hover:text-red-700 dark:text-red-400 flex items-center gap-1"
+            @click="clearAllFilters"
+          >
             <span class="material-icons text-sm">clear_all</span>
             {{ $t('common.clearAll') }}
           </button>
@@ -153,22 +203,34 @@
         <table class="w-full">
           <thead class="bg-gray-50 dark:bg-slate-700/50">
             <tr>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('agencies.agency') }}
               </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('agencies.contact') }}
               </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('common.status.label') }}
               </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('agencies.creditLimit') }}
               </th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('agencies.commission') }}
               </th>
-              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+              <th
+                class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+              >
                 {{ $t('common.actions') }}
               </th>
             </tr>
@@ -178,7 +240,9 @@
             <tr v-if="loading">
               <td colspan="6" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center justify-center">
-                  <span class="material-icons text-4xl text-purple-600 animate-spin mb-2">refresh</span>
+                  <span class="material-icons text-4xl text-purple-600 animate-spin mb-2"
+                    >refresh</span
+                  >
                   <span class="text-gray-500 dark:text-slate-400">{{ $t('common.loading') }}</span>
                 </div>
               </td>
@@ -188,12 +252,18 @@
             <tr v-else-if="!filteredAgencies.length">
               <td colspan="6" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center justify-center">
-                  <div class="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                  <div
+                    class="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4"
+                  >
                     <span class="material-icons text-3xl text-gray-400">storefront</span>
                   </div>
-                  <p class="text-gray-500 dark:text-slate-400 font-medium">{{ $t('agencies.noAgencies') }}</p>
-                  <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">{{ $t('agencies.noAgenciesDesc') }}</p>
-                  <button @click="openCreateModal" class="btn-primary mt-4">
+                  <p class="text-gray-500 dark:text-slate-400 font-medium">
+                    {{ $t('agencies.noAgencies') }}
+                  </p>
+                  <p class="text-sm text-gray-400 dark:text-slate-500 mt-1">
+                    {{ $t('agencies.noAgenciesDesc') }}
+                  </p>
+                  <button class="btn-primary mt-4" @click="openCreateModal">
                     <span class="material-icons mr-2">add</span>
                     {{ $t('agencies.addAgency') }}
                   </button>
@@ -203,21 +273,29 @@
 
             <!-- Data Rows -->
             <tr
-              v-else
               v-for="agency in filteredAgencies"
+              v-else
               :key="agency._id"
               class="hover:bg-gray-50 dark:hover:bg-slate-700/30 transition-colors"
             >
               <!-- Agency Info -->
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm"
+                  >
                     {{ getInitials(agency.companyName || agency.name) }}
                   </div>
                   <div>
-                    <div class="font-semibold text-gray-900 dark:text-white">{{ agency.companyName || agency.name }}</div>
-                    <div v-if="agency.tradeName" class="text-xs text-gray-500 dark:text-slate-400">{{ agency.tradeName }}</div>
-                    <div v-if="agency.taxNumber" class="text-xs text-gray-400 dark:text-slate-500">VKN: {{ agency.taxNumber }}</div>
+                    <div class="font-semibold text-gray-900 dark:text-white">
+                      {{ agency.companyName || agency.name }}
+                    </div>
+                    <div v-if="agency.tradeName" class="text-xs text-gray-500 dark:text-slate-400">
+                      {{ agency.tradeName }}
+                    </div>
+                    <div v-if="agency.taxNumber" class="text-xs text-gray-400 dark:text-slate-500">
+                      VKN: {{ agency.taxNumber }}
+                    </div>
                   </div>
                 </div>
               </td>
@@ -229,7 +307,10 @@
                     <span class="material-icons text-sm text-gray-400">email</span>
                     {{ agency.email }}
                   </div>
-                  <div v-if="agency.phone" class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
+                  <div
+                    v-if="agency.phone"
+                    class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400"
+                  >
                     <span class="material-icons text-sm text-gray-400">phone</span>
                     {{ agency.phone }}
                   </div>
@@ -242,7 +323,10 @@
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
                   :class="getStatusClass(agency.status)"
                 >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="getStatusDotClass(agency.status)"></span>
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    :class="getStatusDotClass(agency.status)"
+                  ></span>
                   {{ getStatusLabel(agency.status) }}
                 </span>
               </td>
@@ -251,28 +335,46 @@
               <td class="px-6 py-4">
                 <div v-if="agency.creditLimit?.enabled">
                   <div class="flex items-center gap-2">
-                    <div class="flex-1 h-2 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden max-w-[100px]">
+                    <div
+                      class="flex-1 h-2 bg-gray-200 dark:bg-slate-600 rounded-full overflow-hidden max-w-[100px]"
+                    >
                       <div
                         class="h-full rounded-full transition-all"
                         :class="getCreditBarClass(agency.creditLimit)"
                         :style="{ width: getCreditPercentage(agency.creditLimit) + '%' }"
                       ></div>
                     </div>
-                    <span class="text-xs text-gray-500 dark:text-slate-400">{{ getCreditPercentage(agency.creditLimit) }}%</span>
+                    <span class="text-xs text-gray-500 dark:text-slate-400"
+                      >{{ getCreditPercentage(agency.creditLimit) }}%</span
+                    >
                   </div>
                   <div class="mt-1 text-sm">
-                    <span class="font-medium text-gray-900 dark:text-white">{{ formatCurrency(getAvailableCredit(agency.creditLimit), agency.creditLimit.currency) }}</span>
-                    <span class="text-gray-400 dark:text-slate-500"> / {{ formatCurrency(agency.creditLimit.amount, agency.creditLimit.currency) }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{
+                      formatCurrency(
+                        getAvailableCredit(agency.creditLimit),
+                        agency.creditLimit.currency
+                      )
+                    }}</span>
+                    <span class="text-gray-400 dark:text-slate-500">
+                      /
+                      {{
+                        formatCurrency(agency.creditLimit.amount, agency.creditLimit.currency)
+                      }}</span
+                    >
                   </div>
                 </div>
-                <span v-else class="text-sm text-gray-400 dark:text-slate-500">{{ $t('agencies.noCredit') }}</span>
+                <span v-else class="text-sm text-gray-400 dark:text-slate-500">{{
+                  $t('agencies.noCredit')
+                }}</span>
               </td>
 
               <!-- Commission -->
               <td class="px-6 py-4">
                 <div class="flex items-center gap-1">
                   <span class="material-icons text-sm text-green-500">percent</span>
-                  <span class="font-medium text-gray-900 dark:text-white">{{ agency.commission?.default || 10 }}%</span>
+                  <span class="font-medium text-gray-900 dark:text-white"
+                    >{{ agency.commission?.default || 10 }}%</span
+                  >
                 </div>
               </td>
 
@@ -281,30 +383,30 @@
                 <div class="flex items-center justify-end gap-1">
                   <button
                     v-if="agency.status === 'pending'"
-                    @click="confirmApprove(agency)"
                     class="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
                     :title="$t('agencies.approve')"
+                    @click="confirmApprove(agency)"
                   >
                     <span class="material-icons">check_circle</span>
                   </button>
                   <button
-                    @click="goToUsers(agency)"
                     class="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                     :title="$t('agencies.users')"
+                    @click="goToUsers(agency)"
                   >
                     <span class="material-icons">group</span>
                   </button>
                   <button
-                    @click="openEditModal(agency)"
                     class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                     :title="$t('common.edit')"
+                    @click="openEditModal(agency)"
                   >
                     <span class="material-icons">edit</span>
                   </button>
                   <button
-                    @click="confirmDelete(agency)"
                     class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     :title="$t('common.delete')"
+                    @click="confirmDelete(agency)"
                   >
                     <span class="material-icons">delete</span>
                   </button>
@@ -316,9 +418,14 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="filteredAgencies.length" class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <div
+        v-if="filteredAgencies.length"
+        class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between"
+      >
         <p class="text-sm text-gray-500 dark:text-slate-400">
-          {{ $t('common.showing') }} <span class="font-medium">{{ filteredAgencies.length }}</span> {{ $t('common.of') }} <span class="font-medium">{{ agencies.length }}</span> {{ $t('agencies.agencies') }}
+          {{ $t('common.showing') }} <span class="font-medium">{{ filteredAgencies.length }}</span>
+          {{ $t('common.of') }} <span class="font-medium">{{ agencies.length }}</span>
+          {{ $t('agencies.agencies') }}
         </p>
       </div>
     </div>
@@ -332,17 +439,21 @@
     >
       <div class="flex flex-col h-[600px] -mx-6 -my-4">
         <!-- Tabs Header -->
-        <div class="flex-shrink-0 border-b border-gray-200 dark:border-slate-700 px-6 bg-gray-50 dark:bg-slate-700/50">
+        <div
+          class="flex-shrink-0 border-b border-gray-200 dark:border-slate-700 px-6 bg-gray-50 dark:bg-slate-700/50"
+        >
           <nav class="flex gap-1 overflow-x-auto py-2 -mb-px">
             <button
               v-for="tab in tabs"
               :key="tab.id"
               type="button"
-              @click="activeTab = tab.id"
               class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-all whitespace-nowrap border-b-2 -mb-[2px]"
-              :class="activeTab === tab.id
-                ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 border-purple-600 dark:border-purple-400'
-                : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border-transparent hover:border-gray-300'"
+              :class="
+                activeTab === tab.id
+                  ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 border-purple-600 dark:border-purple-400'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white border-transparent hover:border-gray-300'
+              "
+              @click="activeTab = tab.id"
             >
               <span class="material-icons text-lg">{{ tab.icon }}</span>
               <span>{{ tab.label }}</span>
@@ -362,7 +473,9 @@
             <div>
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-icons text-purple-600">business</span>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.basicInfo') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                  {{ $t('agencies.basicInfo') }}
+                </h3>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField :label="$t('agencies.companyName')" :error="errors.companyName" required>
@@ -387,7 +500,10 @@
 
                 <FormField :label="$t('agencies.email')" :error="errors.email" required>
                   <div class="relative">
-                    <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">email</span>
+                    <span
+                      class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
+                      >email</span
+                    >
                     <input
                       v-model="form.email"
                       type="email"
@@ -401,7 +517,10 @@
 
                 <FormField :label="$t('agencies.phone')">
                   <div class="relative">
-                    <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">phone</span>
+                    <span
+                      class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg"
+                      >phone</span
+                    >
                     <input
                       v-model="form.phone"
                       type="text"
@@ -412,11 +531,21 @@
                 </FormField>
 
                 <FormField :label="$t('agencies.taxOffice')">
-                  <input v-model="form.taxOffice" type="text" class="form-input" :placeholder="$t('agencies.taxOfficePlaceholder')" />
+                  <input
+                    v-model="form.taxOffice"
+                    type="text"
+                    class="form-input"
+                    :placeholder="$t('agencies.taxOfficePlaceholder')"
+                  />
                 </FormField>
 
                 <FormField :label="$t('agencies.taxNumber')">
-                  <input v-model="form.taxNumber" type="text" class="form-input" placeholder="1234567890" />
+                  <input
+                    v-model="form.taxNumber"
+                    type="text"
+                    class="form-input"
+                    placeholder="1234567890"
+                  />
                 </FormField>
 
                 <FormField :label="$t('common.status.label')">
@@ -433,12 +562,19 @@
             <div>
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-icons text-purple-600">location_on</span>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.addressTitle') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                  {{ $t('agencies.addressTitle') }}
+                </h3>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="md:col-span-2">
                   <FormField :label="$t('agencies.street')">
-                    <input v-model="form.address.street" type="text" class="form-input" :placeholder="$t('agencies.streetPlaceholder')" />
+                    <input
+                      v-model="form.address.street"
+                      type="text"
+                      class="form-input"
+                      :placeholder="$t('agencies.streetPlaceholder')"
+                    />
                   </FormField>
                 </div>
                 <FormField :label="$t('agencies.city')">
@@ -460,79 +596,105 @@
             <div>
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-icons text-green-600">settings</span>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.workingMode') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                  {{ $t('agencies.workingMode') }}
+                </h3>
               </div>
-              <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('agencies.workingModeDesc') }}</p>
+              <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+                {{ $t('agencies.workingModeDesc') }}
+              </p>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Net Option -->
                 <label
                   class="relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all"
-                  :class="form.commission.mode === 'net'
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'"
+                  :class="
+                    form.commission.mode === 'net'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
+                  "
                 >
-                  <input
-                    type="radio"
-                    v-model="form.commission.mode"
-                    value="net"
-                    class="sr-only"
-                  />
+                  <input v-model="form.commission.mode" type="radio" value="net" class="sr-only" />
                   <div class="flex items-center gap-3">
                     <div
                       class="w-10 h-10 rounded-lg flex items-center justify-center"
-                      :class="form.commission.mode === 'net' ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-500'"
+                      :class="
+                        form.commission.mode === 'net'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-gray-200 dark:bg-slate-600 text-gray-500'
+                      "
                     >
                       <span class="material-icons">monetization_on</span>
                     </div>
                     <div>
-                      <p class="font-semibold text-gray-800 dark:text-white">{{ $t('agencies.workingModes.net') }}</p>
-                      <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('agencies.workingModes.netDesc') }}</p>
+                      <p class="font-semibold text-gray-800 dark:text-white">
+                        {{ $t('agencies.workingModes.net') }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-slate-400">
+                        {{ $t('agencies.workingModes.netDesc') }}
+                      </p>
                     </div>
                   </div>
                   <span
                     v-if="form.commission.mode === 'net'"
                     class="absolute top-3 right-3 material-icons text-blue-500"
-                  >check_circle</span>
+                    >check_circle</span
+                  >
                 </label>
 
                 <!-- Commission Option -->
                 <label
                   class="relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all"
-                  :class="form.commission.mode === 'commission'
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                    : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'"
+                  :class="
+                    form.commission.mode === 'commission'
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                      : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
+                  "
                 >
                   <input
-                    type="radio"
                     v-model="form.commission.mode"
+                    type="radio"
                     value="commission"
                     class="sr-only"
                   />
                   <div class="flex items-center gap-3">
                     <div
                       class="w-10 h-10 rounded-lg flex items-center justify-center"
-                      :class="form.commission.mode === 'commission' ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-500'"
+                      :class="
+                        form.commission.mode === 'commission'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-gray-200 dark:bg-slate-600 text-gray-500'
+                      "
                     >
                       <span class="material-icons">percent</span>
                     </div>
                     <div>
-                      <p class="font-semibold text-gray-800 dark:text-white">{{ $t('agencies.workingModes.commission') }}</p>
-                      <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('agencies.workingModes.commissionDesc') }}</p>
+                      <p class="font-semibold text-gray-800 dark:text-white">
+                        {{ $t('agencies.workingModes.commission') }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-slate-400">
+                        {{ $t('agencies.workingModes.commissionDesc') }}
+                      </p>
                     </div>
                   </div>
                   <span
                     v-if="form.commission.mode === 'commission'"
                     class="absolute top-3 right-3 material-icons text-green-500"
-                  >check_circle</span>
+                    >check_circle</span
+                  >
                 </label>
               </div>
 
               <!-- Commission Rate (only shown when commission mode is selected) -->
-              <div v-if="form.commission.mode === 'commission'" class="mt-6 bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border border-green-200 dark:border-green-800">
+              <div
+                v-if="form.commission.mode === 'commission'"
+                class="mt-6 bg-green-50 dark:bg-green-900/20 rounded-xl p-5 border border-green-200 dark:border-green-800"
+              >
                 <div class="flex items-center gap-2 mb-4">
                   <span class="material-icons text-green-600">percent</span>
-                  <h4 class="font-semibold text-gray-800 dark:text-white">{{ $t('agencies.commissionRate') }}</h4>
+                  <h4 class="font-semibold text-gray-800 dark:text-white">
+                    {{ $t('agencies.commissionRate') }}
+                  </h4>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <FormField :label="$t('agencies.hotelCommission')">
@@ -545,7 +707,10 @@
                         step="0.5"
                         class="form-input pr-10"
                       />
-                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">%</span>
+                      <span
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+                        >%</span
+                      >
                     </div>
                   </FormField>
                   <FormField :label="$t('agencies.tourCommission')">
@@ -558,7 +723,10 @@
                         step="0.5"
                         class="form-input pr-10"
                       />
-                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">%</span>
+                      <span
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+                        >%</span
+                      >
                     </div>
                   </FormField>
                   <FormField :label="$t('agencies.transferCommission')">
@@ -571,7 +739,10 @@
                         step="0.5"
                         class="form-input pr-10"
                       />
-                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">%</span>
+                      <span
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium"
+                        >%</span
+                      >
                     </div>
                   </FormField>
                 </div>
@@ -582,18 +753,31 @@
             <div>
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-icons text-blue-600">account_balance_wallet</span>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.creditLimit') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                  {{ $t('agencies.creditLimit') }}
+                </h3>
               </div>
               <div class="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-5">
                 <label class="flex items-center gap-3 cursor-pointer mb-5">
                   <div class="relative">
-                    <input type="checkbox" v-model="form.creditLimit.enabled" class="sr-only peer" />
-                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    <input
+                      v-model="form.creditLimit.enabled"
+                      type="checkbox"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"
+                    ></div>
                   </div>
-                  <span class="font-medium text-gray-700 dark:text-slate-300">{{ $t('agencies.enableCreditLimit') }}</span>
+                  <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                    $t('agencies.enableCreditLimit')
+                  }}</span>
                 </label>
 
-                <div v-if="form.creditLimit.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-gray-200 dark:border-slate-600">
+                <div
+                  v-if="form.creditLimit.enabled"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-gray-200 dark:border-slate-600"
+                >
                   <FormField :label="$t('agencies.creditAmount')">
                     <div class="relative">
                       <input
@@ -622,32 +806,55 @@
             <div>
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-icons text-blue-600">public</span>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.allowedCountries') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                  {{ $t('agencies.allowedCountries') }}
+                </h3>
               </div>
-              <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">{{ $t('agencies.allowedCountriesDesc') }}</p>
-              <div v-if="form.salesRestrictions.allowedCountries.length" class="flex flex-wrap gap-2 mb-3">
+              <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">
+                {{ $t('agencies.allowedCountriesDesc') }}
+              </p>
+              <div
+                v-if="form.salesRestrictions.allowedCountries.length"
+                class="flex flex-wrap gap-2 mb-3"
+              >
                 <span
                   v-for="code in form.salesRestrictions.allowedCountries"
                   :key="code"
                   class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm"
                 >
-                  <img :src="`/flags/${code.toLowerCase()}.svg`" :alt="code" class="w-5 h-3.5 object-contain" />
+                  <img
+                    :src="`/flags/${code.toLowerCase()}.svg`"
+                    :alt="code"
+                    class="w-5 h-3.5 object-contain"
+                  />
                   {{ getCountryLabel(code) }}
-                  <button type="button" @click="removeCountry(code)" class="p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800 rounded">
+                  <button
+                    type="button"
+                    class="p-0.5 hover:bg-blue-200 dark:hover:bg-blue-800 rounded"
+                    @click="removeCountry(code)"
+                  >
                     <span class="material-icons text-sm">close</span>
                   </button>
                 </span>
               </div>
-              <CountrySelect v-model="selectedCountryToAdd" @update:model-value="addCountry" :placeholder="$t('agencies.selectCountryToAdd')" />
+              <CountrySelect
+                v-model="selectedCountryToAdd"
+                :placeholder="$t('agencies.selectCountryToAdd')"
+                @update:model-value="addCountry"
+              />
             </div>
 
             <!-- Allowed Hotels -->
             <div>
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-icons text-green-600">hotel</span>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.allowedHotels') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                  {{ $t('agencies.allowedHotels') }}
+                </h3>
               </div>
-              <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">{{ $t('agencies.allowedHotelsDesc') }}</p>
+              <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">
+                {{ $t('agencies.allowedHotelsDesc') }}
+              </p>
               <HotelAutocomplete
                 v-model="form.salesRestrictions.allowedHotels"
                 :hotels="hotels"
@@ -660,9 +867,13 @@
             <div>
               <div class="flex items-center gap-2 mb-4">
                 <span class="material-icons text-red-600">block</span>
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.blockedHotels') }}</h3>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                  {{ $t('agencies.blockedHotels') }}
+                </h3>
               </div>
-              <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">{{ $t('agencies.blockedHotelsDesc') }}</p>
+              <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">
+                {{ $t('agencies.blockedHotelsDesc') }}
+              </p>
               <HotelAutocomplete
                 v-model="form.salesRestrictions.blockedHotels"
                 :hotels="hotels"
@@ -676,7 +887,9 @@
           <div v-show="activeTab === 'payment'" class="space-y-6">
             <div class="flex items-center gap-2 mb-4">
               <span class="material-icons text-purple-600">payment</span>
-              <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.paymentSettingsTab') }}</h3>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                {{ $t('agencies.paymentSettingsTab') }}
+              </h3>
             </div>
 
             <div class="space-y-4">
@@ -687,17 +900,24 @@
                     <input
                       type="checkbox"
                       :checked="form.paymentSettings.allowedMethods.includes('creditCard')"
-                      @change="togglePaymentMethod('creditCard')"
                       class="sr-only peer"
+                      @change="togglePaymentMethod('creditCard')"
                     />
-                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    <div
+                      class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"
+                    ></div>
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-purple-600">credit_card</span>
-                    <span class="font-medium text-gray-700 dark:text-slate-300">{{ $t('agencies.paymentMethods.creditCard') }}</span>
+                    <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                      $t('agencies.paymentMethods.creditCard')
+                    }}</span>
                   </div>
                 </label>
-                <div v-if="form.paymentSettings.allowedMethods.includes('creditCard')" class="mt-4 pl-14">
+                <div
+                  v-if="form.paymentSettings.allowedMethods.includes('creditCard')"
+                  class="mt-4 pl-14"
+                >
                   <FormField :label="$t('agencies.maxInstallments')">
                     <div class="flex items-center gap-3">
                       <input
@@ -708,10 +928,16 @@
                         class="form-input w-24 text-center"
                       />
                       <span class="text-sm text-gray-500 dark:text-slate-400">
-                        {{ form.paymentSettings.maxInstallments === 1 ? $t('agencies.singlePayment') : $t('agencies.installments') }}
+                        {{
+                          form.paymentSettings.maxInstallments === 1
+                            ? $t('agencies.singlePayment')
+                            : $t('agencies.installments')
+                        }}
                       </span>
                     </div>
-                    <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">{{ $t('agencies.installmentsHint') }}</p>
+                    <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                      {{ $t('agencies.installmentsHint') }}
+                    </p>
                   </FormField>
                 </div>
               </div>
@@ -723,14 +949,18 @@
                     <input
                       type="checkbox"
                       :checked="form.paymentSettings.allowedMethods.includes('bankTransfer')"
-                      @change="togglePaymentMethod('bankTransfer')"
                       class="sr-only peer"
+                      @change="togglePaymentMethod('bankTransfer')"
                     />
-                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    <div
+                      class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+                    ></div>
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-blue-600">account_balance</span>
-                    <span class="font-medium text-gray-700 dark:text-slate-300">{{ $t('agencies.paymentMethods.bankTransfer') }}</span>
+                    <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                      $t('agencies.paymentMethods.bankTransfer')
+                    }}</span>
                   </div>
                 </label>
               </div>
@@ -742,14 +972,18 @@
                     <input
                       type="checkbox"
                       :checked="form.paymentSettings.allowedMethods.includes('cash')"
-                      @change="togglePaymentMethod('cash')"
                       class="sr-only peer"
+                      @change="togglePaymentMethod('cash')"
                     />
-                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                    <div
+                      class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"
+                    ></div>
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-green-600">payments</span>
-                    <span class="font-medium text-gray-700 dark:text-slate-300">{{ $t('agencies.paymentMethods.cash') }}</span>
+                    <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                      $t('agencies.paymentMethods.cash')
+                    }}</span>
                   </div>
                 </label>
               </div>
@@ -761,17 +995,23 @@
                     <input
                       type="checkbox"
                       :checked="form.paymentSettings.allowedMethods.includes('payAtProperty')"
-                      @change="togglePaymentMethod('payAtProperty')"
                       class="sr-only peer"
+                      @change="togglePaymentMethod('payAtProperty')"
                     />
-                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+                    <div
+                      class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"
+                    ></div>
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="material-icons text-orange-600">hotel</span>
-                    <span class="font-medium text-gray-700 dark:text-slate-300">{{ $t('agencies.paymentMethods.payAtProperty') }}</span>
+                    <span class="font-medium text-gray-700 dark:text-slate-300">{{
+                      $t('agencies.paymentMethods.payAtProperty')
+                    }}</span>
                   </div>
                 </label>
-                <p class="text-xs text-gray-400 dark:text-slate-500 mt-2 pl-14">{{ $t('agencies.payAtPropertyDesc') }}</p>
+                <p class="text-xs text-gray-400 dark:text-slate-500 mt-2 pl-14">
+                  {{ $t('agencies.payAtPropertyDesc') }}
+                </p>
               </div>
             </div>
           </div>
@@ -780,21 +1020,27 @@
           <div v-show="activeTab === 'documents'">
             <div class="flex items-center gap-2 mb-4">
               <span class="material-icons text-orange-600">folder</span>
-              <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('agencies.documentsTab') }}</h3>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+                {{ $t('agencies.documentsTab') }}
+              </h3>
             </div>
             <div v-if="isEditing && selectedAgency">
               <DocumentUpload
                 :partner-id="selectedAgency._id"
                 :documents="selectedAgency.documents"
                 :uploading="uploading"
+                base-url="/agencies"
                 @upload="uploadDocument"
                 @delete="confirmDeleteDocument"
-                base-url="/agencies"
               />
             </div>
             <div v-else class="text-center py-12 bg-gray-50 dark:bg-slate-700/50 rounded-xl">
-              <span class="material-icons text-5xl text-gray-300 dark:text-slate-600 mb-3">description</span>
-              <p class="text-gray-500 dark:text-slate-400">{{ $t('agencies.saveFirstForDocuments') }}</p>
+              <span class="material-icons text-5xl text-gray-300 dark:text-slate-600 mb-3"
+                >description</span
+              >
+              <p class="text-gray-500 dark:text-slate-400">
+                {{ $t('agencies.saveFirstForDocuments') }}
+              </p>
             </div>
           </div>
         </div>
@@ -802,12 +1048,19 @@
 
       <template #footer>
         <div class="flex items-center justify-between w-full">
-          <button type="button" @click="showModal = false" class="btn-secondary">
+          <button type="button" class="btn-secondary" @click="showModal = false">
             {{ $t('common.cancel') }}
           </button>
-          <button type="button" @click="handleSubmit" :disabled="submitting" class="btn-primary min-w-[120px]">
+          <button
+            type="button"
+            :disabled="submitting"
+            class="btn-primary min-w-[120px]"
+            @click="handleSubmit"
+          >
             <span v-if="submitting" class="material-icons animate-spin mr-2 text-lg">sync</span>
-            {{ submitting ? $t('common.saving') : (isEditing ? $t('common.save') : $t('common.create')) }}
+            {{
+              submitting ? $t('common.saving') : isEditing ? $t('common.save') : $t('common.create')
+            }}
           </button>
         </div>
       </template>
@@ -816,15 +1069,21 @@
     <!-- Delete Confirmation Modal -->
     <Modal v-model="showDeleteModal" :title="$t('common.confirmDelete')" size="sm">
       <div class="text-center py-4">
-        <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div
+          class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
           <span class="material-icons text-3xl text-red-600">delete_forever</span>
         </div>
         <p class="text-gray-600 dark:text-slate-400">{{ $t('agencies.deleteConfirmation') }}</p>
-        <p class="text-sm text-gray-500 dark:text-slate-500 mt-2">{{ selectedAgency?.companyName }}</p>
+        <p class="text-sm text-gray-500 dark:text-slate-500 mt-2">
+          {{ selectedAgency?.companyName }}
+        </p>
       </div>
       <template #footer>
-        <button @click="showDeleteModal = false" class="btn-secondary">{{ $t('common.cancel') }}</button>
-        <button @click="deleteAgency" :disabled="deleting" class="btn-danger">
+        <button class="btn-secondary" @click="showDeleteModal = false">
+          {{ $t('common.cancel') }}
+        </button>
+        <button :disabled="deleting" class="btn-danger" @click="deleteAgency">
           <span v-if="deleting" class="material-icons animate-spin mr-2">sync</span>
           {{ $t('common.delete') }}
         </button>
@@ -834,15 +1093,25 @@
     <!-- Approve Confirmation Modal -->
     <Modal v-model="showApproveModal" :title="$t('agencies.approveAgency')" size="sm">
       <div class="text-center py-4">
-        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div
+          class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
           <span class="material-icons text-3xl text-green-600">check_circle</span>
         </div>
         <p class="text-gray-600 dark:text-slate-400">{{ $t('agencies.approveConfirmation') }}</p>
-        <p class="text-sm text-gray-500 dark:text-slate-500 mt-2">{{ selectedAgency?.companyName }}</p>
+        <p class="text-sm text-gray-500 dark:text-slate-500 mt-2">
+          {{ selectedAgency?.companyName }}
+        </p>
       </div>
       <template #footer>
-        <button @click="showApproveModal = false" class="btn-secondary">{{ $t('common.cancel') }}</button>
-        <button @click="approveAgency" :disabled="approving" class="btn-primary bg-green-600 hover:bg-green-700">
+        <button class="btn-secondary" @click="showApproveModal = false">
+          {{ $t('common.cancel') }}
+        </button>
+        <button
+          :disabled="approving"
+          class="btn-primary bg-green-600 hover:bg-green-700"
+          @click="approveAgency"
+        >
           <span v-if="approving" class="material-icons animate-spin mr-2">sync</span>
           {{ $t('agencies.approve') }}
         </button>
@@ -912,11 +1181,12 @@ const filteredAgencies = computed(() => {
   // Search filter
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    result = result.filter(a =>
-      (a.companyName || a.name || '').toLowerCase().includes(query) ||
-      (a.email || '').toLowerCase().includes(query) ||
-      (a.phone || '').includes(query) ||
-      (a.taxNumber || '').includes(query)
+    result = result.filter(
+      a =>
+        (a.companyName || a.name || '').toLowerCase().includes(query) ||
+        (a.email || '').toLowerCase().includes(query) ||
+        (a.phone || '').includes(query) ||
+        (a.taxNumber || '').includes(query)
     )
   }
 
@@ -943,7 +1213,9 @@ const filteredAgencies = computed(() => {
   return result
 })
 
-const hasActiveFilters = computed(() => searchQuery.value || statusFilter.value || creditFilter.value)
+const hasActiveFilters = computed(
+  () => searchQuery.value || statusFilter.value || creditFilter.value
+)
 
 // Tabs
 const tabs = computed(() => [
@@ -958,8 +1230,6 @@ const hasBasicErrors = computed(() => !!errors.value.companyName || !!errors.val
 
 // Selection helpers
 const selectedCountryToAdd = ref('')
-const selectedHotelToAdd = ref('')
-const selectedBlockedHotelToAdd = ref('')
 
 // Form
 const getDefaultForm = () => ({
@@ -974,7 +1244,11 @@ const getDefaultForm = () => ({
   commission: { mode: 'net', hotel: 10, tour: 10, transfer: 10 },
   creditLimit: { enabled: false, amount: 0, currency: 'TRY', used: 0 },
   salesRestrictions: { allowedCountries: [], allowedHotels: [], blockedHotels: [] },
-  paymentSettings: { allowedMethods: ['creditCard', 'bankTransfer'], defaultMethod: 'creditCard', maxInstallments: 12 }
+  paymentSettings: {
+    allowedMethods: ['creditCard', 'bankTransfer'],
+    defaultMethod: 'creditCard',
+    maxInstallments: 12
+  }
 })
 
 const form = ref(getDefaultForm())
@@ -992,30 +1266,39 @@ const validateForm = () => {
   return Object.keys(errors.value).length === 0
 }
 
-// Computed
-const availableHotelsForAllowed = computed(() => hotels.value.filter(h => !form.value.salesRestrictions.allowedHotels.includes(h._id)))
-const availableHotelsForBlocked = computed(() => hotels.value.filter(h => !form.value.salesRestrictions.blockedHotels.includes(h._id)))
-
 // Helper functions
-const getInitials = (name) => {
+const getInitials = name => {
   if (!name) return '?'
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  return name
+    .split(' ')
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 }
 
-const getCountryLabel = (code) => getCountryName(code, locale.value)
-const getHotelName = (hotelId) => hotels.value.find(h => h._id === hotelId)?.name || hotelId
+const getCountryLabel = code => getCountryName(code, locale.value)
 
-const getStatusLabel = (status) => {
-  const labels = { active: t('common.active'), inactive: t('common.inactive'), pending: t('common.pending'), suspended: t('agencies.suspended') }
+const getStatusLabel = status => {
+  const labels = {
+    active: t('common.active'),
+    inactive: t('common.inactive'),
+    pending: t('common.pending'),
+    suspended: t('agencies.suspended')
+  }
   return labels[status] || status
 }
 
-const getCreditFilterLabel = (filter) => {
-  const labels = { enabled: t('agencies.creditEnabled'), disabled: t('agencies.creditDisabled'), low: t('agencies.lowCredit') }
+const getCreditFilterLabel = filter => {
+  const labels = {
+    enabled: t('agencies.creditEnabled'),
+    disabled: t('agencies.creditDisabled'),
+    low: t('agencies.lowCredit')
+  }
   return labels[filter] || filter
 }
 
-const getStatusClass = (status) => {
+const getStatusClass = status => {
   const classes = {
     active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
     inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400',
@@ -1025,28 +1308,37 @@ const getStatusClass = (status) => {
   return classes[status] || classes.inactive
 }
 
-const getStatusDotClass = (status) => {
-  const classes = { active: 'bg-green-500', inactive: 'bg-gray-500', pending: 'bg-yellow-500', suspended: 'bg-red-500' }
+const getStatusDotClass = status => {
+  const classes = {
+    active: 'bg-green-500',
+    inactive: 'bg-gray-500',
+    pending: 'bg-yellow-500',
+    suspended: 'bg-red-500'
+  }
   return classes[status] || 'bg-gray-500'
 }
 
-const getCreditBarClass = (creditLimit) => {
+const getCreditBarClass = creditLimit => {
   const percentage = getCreditPercentage(creditLimit)
   if (percentage < 20) return 'bg-red-500'
   if (percentage < 50) return 'bg-yellow-500'
   return 'bg-green-500'
 }
 
-const getCreditPercentage = (creditLimit) => {
+const getCreditPercentage = creditLimit => {
   if (!creditLimit?.amount) return 0
   const available = creditLimit.amount - (creditLimit.used || 0)
   return Math.round((available / creditLimit.amount) * 100)
 }
 
-const getAvailableCredit = (creditLimit) => creditLimit.amount - (creditLimit.used || 0)
+const getAvailableCredit = creditLimit => creditLimit.amount - (creditLimit.used || 0)
 
 const formatCurrency = (amount, currency = 'TRY') => {
-  return new Intl.NumberFormat(locale.value, { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount)
+  return new Intl.NumberFormat(locale.value, {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0
+  }).format(amount)
 }
 
 // Filter functions
@@ -1066,41 +1358,20 @@ const clearAllFilters = () => {
 }
 
 // Country/Hotel selection
-const addCountry = (code) => {
+const addCountry = code => {
   if (code && !form.value.salesRestrictions.allowedCountries.includes(code)) {
     form.value.salesRestrictions.allowedCountries.push(code)
   }
   selectedCountryToAdd.value = ''
 }
 
-const removeCountry = (code) => {
-  form.value.salesRestrictions.allowedCountries = form.value.salesRestrictions.allowedCountries.filter(c => c !== code)
-}
-
-const addAllowedHotel = () => {
-  if (selectedHotelToAdd.value && !form.value.salesRestrictions.allowedHotels.includes(selectedHotelToAdd.value)) {
-    form.value.salesRestrictions.allowedHotels.push(selectedHotelToAdd.value)
-  }
-  selectedHotelToAdd.value = ''
-}
-
-const removeAllowedHotel = (hotelId) => {
-  form.value.salesRestrictions.allowedHotels = form.value.salesRestrictions.allowedHotels.filter(id => id !== hotelId)
-}
-
-const addBlockedHotel = () => {
-  if (selectedBlockedHotelToAdd.value && !form.value.salesRestrictions.blockedHotels.includes(selectedBlockedHotelToAdd.value)) {
-    form.value.salesRestrictions.blockedHotels.push(selectedBlockedHotelToAdd.value)
-  }
-  selectedBlockedHotelToAdd.value = ''
-}
-
-const removeBlockedHotel = (hotelId) => {
-  form.value.salesRestrictions.blockedHotels = form.value.salesRestrictions.blockedHotels.filter(id => id !== hotelId)
+const removeCountry = code => {
+  form.value.salesRestrictions.allowedCountries =
+    form.value.salesRestrictions.allowedCountries.filter(c => c !== code)
 }
 
 // Payment method toggle
-const togglePaymentMethod = (method) => {
+const togglePaymentMethod = method => {
   const index = form.value.paymentSettings.allowedMethods.indexOf(method)
   if (index === -1) {
     form.value.paymentSettings.allowedMethods.push(method)
@@ -1115,7 +1386,9 @@ const fetchAgencies = async () => {
   try {
     const response = await agencyService.getAgencies()
     if (response.success) {
-      agencies.value = Array.isArray(response.data) ? response.data : (response.data.agencies || response.data.items || [])
+      agencies.value = Array.isArray(response.data)
+        ? response.data
+        : response.data.agencies || response.data.items || []
     }
   } catch (error) {
     toast.error(error.response?.data?.message || t('common.loadFailed'))
@@ -1144,7 +1417,7 @@ const openCreateModal = () => {
   showModal.value = true
 }
 
-const openEditModal = (agency) => {
+const openEditModal = agency => {
   isEditing.value = true
   selectedAgency.value = agency
   activeTab.value = 'basic'
@@ -1157,11 +1430,34 @@ const openEditModal = (agency) => {
     taxOffice: agency.taxOffice || '',
     taxNumber: agency.taxNumber || '',
     status: agency.status || 'active',
-    address: { street: agency.address?.street || '', city: agency.address?.city || '', country: agency.address?.country || '', postalCode: agency.address?.postalCode || '' },
-    commission: { mode: agency.commission?.mode || 'net', hotel: agency.commission?.hotel ?? 10, tour: agency.commission?.tour ?? 10, transfer: agency.commission?.transfer ?? 10 },
-    creditLimit: { enabled: agency.creditLimit?.enabled || false, amount: agency.creditLimit?.amount || 0, currency: agency.creditLimit?.currency || 'TRY', used: agency.creditLimit?.used || 0 },
-    salesRestrictions: { allowedCountries: agency.salesRestrictions?.allowedCountries || [], allowedHotels: agency.salesRestrictions?.allowedHotels || [], blockedHotels: agency.salesRestrictions?.blockedHotels || [] },
-    paymentSettings: { allowedMethods: agency.paymentSettings?.allowedMethods || ['creditCard', 'bankTransfer'], defaultMethod: agency.paymentSettings?.defaultMethod || 'creditCard', maxInstallments: agency.paymentSettings?.maxInstallments || 12 }
+    address: {
+      street: agency.address?.street || '',
+      city: agency.address?.city || '',
+      country: agency.address?.country || '',
+      postalCode: agency.address?.postalCode || ''
+    },
+    commission: {
+      mode: agency.commission?.mode || 'net',
+      hotel: agency.commission?.hotel ?? 10,
+      tour: agency.commission?.tour ?? 10,
+      transfer: agency.commission?.transfer ?? 10
+    },
+    creditLimit: {
+      enabled: agency.creditLimit?.enabled || false,
+      amount: agency.creditLimit?.amount || 0,
+      currency: agency.creditLimit?.currency || 'TRY',
+      used: agency.creditLimit?.used || 0
+    },
+    salesRestrictions: {
+      allowedCountries: agency.salesRestrictions?.allowedCountries || [],
+      allowedHotels: agency.salesRestrictions?.allowedHotels || [],
+      blockedHotels: agency.salesRestrictions?.blockedHotels || []
+    },
+    paymentSettings: {
+      allowedMethods: agency.paymentSettings?.allowedMethods || ['creditCard', 'bankTransfer'],
+      defaultMethod: agency.paymentSettings?.defaultMethod || 'creditCard',
+      maxInstallments: agency.paymentSettings?.maxInstallments || 12
+    }
   }
   showModal.value = true
 }
@@ -1191,7 +1487,7 @@ const handleSubmit = async () => {
   }
 }
 
-const confirmDelete = (agency) => {
+const confirmDelete = agency => {
   selectedAgency.value = agency
   showDeleteModal.value = true
 }
@@ -1210,7 +1506,7 @@ const deleteAgency = async () => {
   }
 }
 
-const confirmApprove = (agency) => {
+const confirmApprove = agency => {
   selectedAgency.value = agency
   showApproveModal.value = true
 }
@@ -1229,11 +1525,11 @@ const approveAgency = async () => {
   }
 }
 
-const goToUsers = (agency) => {
+const goToUsers = agency => {
   router.push({ name: 'agency-users', params: { agencyId: agency._id } })
 }
 
-const uploadDocument = async (file) => {
+const uploadDocument = async file => {
   if (!selectedAgency.value) return
   uploading.value = true
   try {
@@ -1252,7 +1548,7 @@ const uploadDocument = async (file) => {
   }
 }
 
-const confirmDeleteDocument = async (documentId) => {
+const confirmDeleteDocument = async documentId => {
   if (!selectedAgency.value) return
   try {
     await agencyService.deleteDocument(selectedAgency.value._id, documentId)
@@ -1270,7 +1566,7 @@ onMounted(() => {
 })
 
 usePartnerContext({
-  onPartnerChange: (partner) => {
+  onPartnerChange: partner => {
     if (partner) {
       fetchAgencies()
       fetchHotels()

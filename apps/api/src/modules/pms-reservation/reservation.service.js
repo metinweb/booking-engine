@@ -297,26 +297,30 @@ export const createReservation = asyncHandler(async (req, res) => {
     checkIn: checkInDate,
     checkOut: checkOutDate,
     nights,
-    rooms: [{
-      roomType: roomTypeId,
-      roomTypeCode: roomType.code,
-      roomTypeName: roomType.name,
-      mealPlan: mealPlanId,
-      mealPlanCode: mealPlan.code,
-      mealPlanName: mealPlan.name,
-      guests: [{
-        type: 'adult',
-        firstName: leadGuest.firstName,
-        lastName: leadGuest.lastName,
-        isLead: true
-      }],
-      pricing: {
-        currency: pricing?.currency || 'TRY',
-        originalTotal: pricing?.total || 0,
-        discount: 0,
-        finalTotal: pricing?.total || 0
+    rooms: [
+      {
+        roomType: roomTypeId,
+        roomTypeCode: roomType.code,
+        roomTypeName: roomType.name,
+        mealPlan: mealPlanId,
+        mealPlanCode: mealPlan.code,
+        mealPlanName: mealPlan.name,
+        guests: [
+          {
+            type: 'adult',
+            firstName: leadGuest.firstName,
+            lastName: leadGuest.lastName,
+            isLead: true
+          }
+        ],
+        pricing: {
+          currency: pricing?.currency || 'TRY',
+          originalTotal: pricing?.total || 0,
+          discount: 0,
+          finalTotal: pricing?.total || 0
+        }
       }
-    }],
+    ],
     totalRooms: 1,
     totalAdults: adults,
     totalChildren: children,
@@ -345,13 +349,18 @@ export const createReservation = asyncHandler(async (req, res) => {
       method: paymentMethod || 'cash',
       paidAmount: paymentAmount || 0,
       dueAmount: (pricing?.total || 0) - (paymentAmount || 0),
-      transactions: paymentAmount > 0 ? [{
-        type: 'payment',
-        amount: paymentAmount,
-        currency: pricing?.currency || 'TRY',
-        status: 'completed',
-        reference: 'PMS Direct'
-      }] : []
+      transactions:
+        paymentAmount > 0
+          ? [
+              {
+                type: 'payment',
+                amount: paymentAmount,
+                currency: pricing?.currency || 'TRY',
+                status: 'completed',
+                reference: 'PMS Direct'
+              }
+            ]
+          : []
     },
     status: 'confirmed',
     confirmedAt: new Date(),

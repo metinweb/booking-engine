@@ -1,18 +1,12 @@
 <template>
-  <div
-    class="p-4 rounded-xl border transition-all duration-300"
-    :class="containerClass"
-  >
+  <div class="p-4 rounded-xl border transition-all duration-300" :class="containerClass">
     <div class="flex items-start gap-3">
       <!-- Icon -->
       <div
         class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300"
         :class="iconContainerClass"
       >
-        <span
-          class="material-icons text-lg"
-          :class="{ 'animate-spin': status === 'loading' }"
-        >
+        <span class="material-icons text-lg" :class="{ 'animate-spin': status === 'loading' }">
           {{ iconName }}
         </span>
       </div>
@@ -30,10 +24,7 @@
 
       <!-- Badge -->
       <div v-if="badge" class="flex-shrink-0">
-        <span
-          class="px-2 py-1 text-xs font-medium rounded-full"
-          :class="badgeClass"
-        >
+        <span class="px-2 py-1 text-xs font-medium rounded-full" :class="badgeClass">
           {{ badge }}
         </span>
       </div>
@@ -59,7 +50,8 @@ const props = defineProps({
   status: {
     type: String,
     default: 'pending',
-    validator: (value) => ['loading', 'success', 'warning', 'error', 'pending', 'info'].includes(value)
+    validator: value =>
+      ['loading', 'success', 'warning', 'error', 'pending', 'info'].includes(value)
   },
   icon: {
     type: String,

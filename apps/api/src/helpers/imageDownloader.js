@@ -24,7 +24,7 @@ if (!fs.existsSync(hotelsDir)) {
  * @returns {Promise<{success: boolean, path?: string, filename?: string, error?: string}>}
  */
 export const downloadImage = async (imageUrl, hotelId, prefix = 'img') => {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     try {
       if (!imageUrl || !imageUrl.startsWith('http')) {
         return resolve({ success: false, error: 'Invalid URL' })
@@ -53,53 +53,62 @@ export const downloadImage = async (imageUrl, hotelId, prefix = 'img') => {
       const protocol = imageUrl.startsWith('https') ? https : http
       const urlObj = new URL(imageUrl)
 
-      const request = protocol.get(imageUrl, {
-        timeout: 30000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.9,tr;q=0.8',
-          'Referer': `${urlObj.protocol}//${urlObj.host}/`,
-          'Sec-Fetch-Dest': 'image',
-          'Sec-Fetch-Mode': 'no-cors',
-          'Sec-Fetch-Site': 'same-origin'
+      const request = protocol.get(
+        imageUrl,
+        {
+          timeout: 30000,
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9,tr;q=0.8',
+            Referer: `${urlObj.protocol}//${urlObj.host}/`,
+            'Sec-Fetch-Dest': 'image',
+            'Sec-Fetch-Mode': 'no-cors',
+            'Sec-Fetch-Site': 'same-origin'
+          }
+        },
+        response => {
+          // Handle redirects
+          if (
+            response.statusCode >= 300 &&
+            response.statusCode < 400 &&
+            response.headers.location
+          ) {
+            const redirectUrl = response.headers.location.startsWith('http')
+              ? response.headers.location
+              : new URL(response.headers.location, imageUrl).href
+            return downloadImage(redirectUrl, hotelId, prefix).then(resolve)
+          }
+
+          if (response.statusCode !== 200) {
+            return resolve({ success: false, error: `HTTP ${response.statusCode}` })
+          }
+
+          // Check content type
+          const contentType = response.headers['content-type'] || ''
+          if (!contentType.includes('image')) {
+            return resolve({ success: false, error: 'Not an image' })
+          }
+
+          const fileStream = fs.createWriteStream(filePath)
+          response.pipe(fileStream)
+
+          fileStream.on('finish', () => {
+            fileStream.close()
+            // Return relative path for storage
+            const relativePath = `/uploads/hotels/${hotelId}/${filename}`
+            resolve({ success: true, path: relativePath, filename })
+          })
+
+          fileStream.on('error', err => {
+            fs.unlink(filePath, () => {})
+            resolve({ success: false, error: err.message })
+          })
         }
-      }, (response) => {
-        // Handle redirects
-        if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-          const redirectUrl = response.headers.location.startsWith('http')
-            ? response.headers.location
-            : new URL(response.headers.location, imageUrl).href
-          return downloadImage(redirectUrl, hotelId, prefix).then(resolve)
-        }
+      )
 
-        if (response.statusCode !== 200) {
-          return resolve({ success: false, error: `HTTP ${response.statusCode}` })
-        }
-
-        // Check content type
-        const contentType = response.headers['content-type'] || ''
-        if (!contentType.includes('image')) {
-          return resolve({ success: false, error: 'Not an image' })
-        }
-
-        const fileStream = fs.createWriteStream(filePath)
-        response.pipe(fileStream)
-
-        fileStream.on('finish', () => {
-          fileStream.close()
-          // Return relative path for storage
-          const relativePath = `/uploads/hotels/${hotelId}/${filename}`
-          resolve({ success: true, path: relativePath, filename })
-        })
-
-        fileStream.on('error', (err) => {
-          fs.unlink(filePath, () => {})
-          resolve({ success: false, error: err.message })
-        })
-      })
-
-      request.on('error', (err) => {
+      request.on('error', err => {
         resolve({ success: false, error: err.message })
       })
 
@@ -107,7 +116,6 @@ export const downloadImage = async (imageUrl, hotelId, prefix = 'img') => {
         request.destroy()
         resolve({ success: false, error: 'Timeout' })
       })
-
     } catch (error) {
       resolve({ success: false, error: error.message })
     }
@@ -209,7 +217,9 @@ export const downloadRoomTemplateImages = async (images, hotelId, roomCode) => {
           order: i
         })
         successCount++
-        logger.info(`Downloaded room image ${i + 1} for ${roomCode}: ${img.url.substring(0, 50)}...`)
+        logger.info(
+          `Downloaded room image ${i + 1} for ${roomCode}: ${img.url.substring(0, 50)}...`
+        )
       } else {
         logger.warn(`Failed to download room image: ${img.url} - ${result.error}`)
       }
@@ -230,7 +240,7 @@ export const downloadRoomTemplateImages = async (images, hotelId, roomCode) => {
  * @returns {Promise<{success: boolean, path?: string, filename?: string, error?: string}>}
  */
 const downloadImageToPath = async (imageUrl, targetDir, prefix) => {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     try {
       if (!imageUrl || !imageUrl.startsWith('http')) {
         return resolve({ success: false, error: 'Invalid URL' })
@@ -253,51 +263,60 @@ const downloadImageToPath = async (imageUrl, targetDir, prefix) => {
       const protocol = imageUrl.startsWith('https') ? https : http
       const urlObj = new URL(imageUrl)
 
-      const request = protocol.get(imageUrl, {
-        timeout: 30000,
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.9,tr;q=0.8',
-          'Referer': `${urlObj.protocol}//${urlObj.host}/`,
-          'Sec-Fetch-Dest': 'image',
-          'Sec-Fetch-Mode': 'no-cors',
-          'Sec-Fetch-Site': 'same-origin'
+      const request = protocol.get(
+        imageUrl,
+        {
+          timeout: 30000,
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            Accept: 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9,tr;q=0.8',
+            Referer: `${urlObj.protocol}//${urlObj.host}/`,
+            'Sec-Fetch-Dest': 'image',
+            'Sec-Fetch-Mode': 'no-cors',
+            'Sec-Fetch-Site': 'same-origin'
+          }
+        },
+        response => {
+          // Handle redirects
+          if (
+            response.statusCode >= 300 &&
+            response.statusCode < 400 &&
+            response.headers.location
+          ) {
+            const redirectUrl = response.headers.location.startsWith('http')
+              ? response.headers.location
+              : new URL(response.headers.location, imageUrl).href
+            return downloadImageToPath(redirectUrl, targetDir, prefix).then(resolve)
+          }
+
+          if (response.statusCode !== 200) {
+            return resolve({ success: false, error: `HTTP ${response.statusCode}` })
+          }
+
+          // Check content type
+          const contentType = response.headers['content-type'] || ''
+          if (!contentType.includes('image')) {
+            return resolve({ success: false, error: 'Not an image' })
+          }
+
+          const fileStream = fs.createWriteStream(filePath)
+          response.pipe(fileStream)
+
+          fileStream.on('finish', () => {
+            fileStream.close()
+            resolve({ success: true, path: filePath, filename })
+          })
+
+          fileStream.on('error', err => {
+            fs.unlink(filePath, () => {})
+            resolve({ success: false, error: err.message })
+          })
         }
-      }, (response) => {
-        // Handle redirects
-        if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-          const redirectUrl = response.headers.location.startsWith('http')
-            ? response.headers.location
-            : new URL(response.headers.location, imageUrl).href
-          return downloadImageToPath(redirectUrl, targetDir, prefix).then(resolve)
-        }
+      )
 
-        if (response.statusCode !== 200) {
-          return resolve({ success: false, error: `HTTP ${response.statusCode}` })
-        }
-
-        // Check content type
-        const contentType = response.headers['content-type'] || ''
-        if (!contentType.includes('image')) {
-          return resolve({ success: false, error: 'Not an image' })
-        }
-
-        const fileStream = fs.createWriteStream(filePath)
-        response.pipe(fileStream)
-
-        fileStream.on('finish', () => {
-          fileStream.close()
-          resolve({ success: true, path: filePath, filename })
-        })
-
-        fileStream.on('error', (err) => {
-          fs.unlink(filePath, () => {})
-          resolve({ success: false, error: err.message })
-        })
-      })
-
-      request.on('error', (err) => {
+      request.on('error', err => {
         resolve({ success: false, error: err.message })
       })
 
@@ -305,7 +324,6 @@ const downloadImageToPath = async (imageUrl, targetDir, prefix) => {
         request.destroy()
         resolve({ success: false, error: 'Timeout' })
       })
-
     } catch (error) {
       resolve({ success: false, error: error.message })
     }

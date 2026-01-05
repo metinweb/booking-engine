@@ -351,12 +351,16 @@ export const getEmailSettings = asyncHandler(async (req, res) => {
     success: true,
     data: {
       useOwnSES: emailSettings.useOwnSES || false,
-      aws: emailSettings.aws ? {
-        region: emailSettings.aws.region,
-        accessKeyId: emailSettings.aws.accessKeyId ? '***' + emailSettings.aws.accessKeyId.slice(-4) : null,
-        fromEmail: emailSettings.aws.fromEmail,
-        fromName: emailSettings.aws.fromName
-      } : null,
+      aws: emailSettings.aws
+        ? {
+            region: emailSettings.aws.region,
+            accessKeyId: emailSettings.aws.accessKeyId
+              ? '***' + emailSettings.aws.accessKeyId.slice(-4)
+              : null,
+            fromEmail: emailSettings.aws.fromEmail,
+            fromName: emailSettings.aws.fromName
+          }
+        : null,
       domainVerification: emailSettings.domainVerification || null
     }
   })

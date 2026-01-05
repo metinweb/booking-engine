@@ -23,15 +23,17 @@
             ></div>
           </div>
 
-          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center animate-bounce-once">
-            <span class="material-icons text-4xl text-green-600 dark:text-green-400">celebration</span>
+          <div
+            class="w-20 h-20 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center animate-bounce-once"
+          >
+            <span class="material-icons text-4xl text-green-600 dark:text-green-400"
+              >celebration</span
+            >
           </div>
         </div>
       </Transition>
 
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        Audit Tamamlandi!
-      </h2>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Audit Tamamlandi!</h2>
       <p class="text-gray-500 dark:text-slate-400">
         Tum kontroller basariyla tamamlandi. Raporlari indirip gunu kapatabilirsiniz.
       </p>
@@ -53,37 +55,51 @@
     <div v-else>
       <!-- Summary Stats -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-4 text-white text-center">
+        <div
+          class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl p-4 text-white text-center"
+        >
           <p class="text-4xl font-bold">%{{ summary.occupancyRate }}</p>
           <p class="text-sm opacity-80">Doluluk</p>
         </div>
-        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-4 text-white text-center">
+        <div
+          class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-4 text-white text-center"
+        >
           <p class="text-2xl font-bold">{{ formatCurrency(summary.totalRevenue) }}</p>
           <p class="text-sm opacity-80">Toplam Gelir</p>
         </div>
-        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-4 text-white text-center">
+        <div
+          class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl p-4 text-white text-center"
+        >
           <p class="text-4xl font-bold">{{ summary.arrivals }} / {{ summary.departures }}</p>
           <p class="text-sm opacity-80">Giris / Cikis</p>
         </div>
-        <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 text-white text-center">
+        <div
+          class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 text-white text-center"
+        >
           <p class="text-4xl font-bold">{{ summary.inHouseGuests }}</p>
           <p class="text-sm opacity-80">Misafir</p>
         </div>
       </div>
 
       <!-- Revenue Breakdown -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 mb-6">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 mb-6"
+      >
         <h3 class="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <span class="material-icons text-emerald-600">trending_up</span>
           Gelir Dagilimi
         </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="text-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(summary.roomRevenue) }}</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">
+              {{ formatCurrency(summary.roomRevenue) }}
+            </p>
             <p class="text-sm text-gray-500 dark:text-slate-400">Oda Geliri</p>
           </div>
           <div class="text-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(summary.extraRevenue) }}</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">
+              {{ formatCurrency(summary.extraRevenue) }}
+            </p>
             <p class="text-sm text-gray-500 dark:text-slate-400">Ekstra Gelir</p>
           </div>
           <div class="text-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
@@ -91,14 +107,18 @@
             <p class="text-sm text-gray-500 dark:text-slate-400">No-Show</p>
           </div>
           <div class="text-center p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-            <p class="text-xl font-bold text-gray-900 dark:text-white">{{ summary.cancellations }}</p>
+            <p class="text-xl font-bold text-gray-900 dark:text-white">
+              {{ summary.cancellations }}
+            </p>
             <p class="text-sm text-gray-500 dark:text-slate-400">Iptal</p>
           </div>
         </div>
       </div>
 
       <!-- Reports Download -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 mb-6">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 mb-6"
+      >
         <h3 class="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <span class="material-icons text-indigo-600">description</span>
           Raporlari Indir
@@ -107,15 +127,25 @@
           <button
             v-for="report in reports"
             :key="report.type"
-            @click="downloadReport(report)"
             :disabled="downloadingReport === report.type"
             class="flex flex-col items-center gap-2 p-4 bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-xl transition-colors group"
+            @click="downloadReport(report)"
           >
-            <div class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow flex items-center justify-center group-hover:scale-110 transition-transform">
-              <span v-if="downloadingReport === report.type" class="material-icons text-indigo-600 animate-spin">refresh</span>
-              <span v-else class="material-icons text-2xl" :class="report.iconColor">{{ report.icon }}</span>
+            <div
+              class="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 shadow flex items-center justify-center group-hover:scale-110 transition-transform"
+            >
+              <span
+                v-if="downloadingReport === report.type"
+                class="material-icons text-indigo-600 animate-spin"
+                >refresh</span
+              >
+              <span v-else class="material-icons text-2xl" :class="report.iconColor">{{
+                report.icon
+              }}</span>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ report.label }}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{
+              report.label
+            }}</span>
           </button>
         </div>
 
@@ -152,8 +182,8 @@
                   @keydown.enter="addEmail"
                 />
                 <button
-                  @click="addEmail"
                   class="px-3 py-2 text-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+                  @click="addEmail"
                 >
                   <span class="material-icons text-lg">add</span>
                 </button>
@@ -167,16 +197,16 @@
                   class="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm rounded-lg"
                 >
                   {{ email }}
-                  <button
-                    @click="removeEmail(index)"
-                    class="hover:text-red-500 transition-colors"
-                  >
+                  <button class="hover:text-red-500 transition-colors" @click="removeEmail(index)">
                     <span class="material-icons text-sm">close</span>
                   </button>
                 </span>
               </div>
 
-              <p v-if="emailRecipients.length === 0" class="text-xs text-gray-400 dark:text-slate-500">
+              <p
+                v-if="emailRecipients.length === 0"
+                class="text-xs text-gray-400 dark:text-slate-500"
+              >
                 Ornek: manager@hotel.com, reception@hotel.com
               </p>
             </div>
@@ -185,14 +215,16 @@
       </div>
 
       <!-- Day Close Warning -->
-      <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6">
+      <div
+        class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 mb-6"
+      >
         <div class="flex items-start gap-3">
           <span class="material-icons text-amber-600 dark:text-amber-400">info</span>
           <div>
             <h4 class="font-medium text-amber-800 dark:text-amber-300">Gun Kapatma Hakkinda</h4>
             <p class="text-sm text-amber-700 dark:text-amber-400 mt-1">
-              Bu islem geri alinamaz. Sistem tarihi <strong>{{ getNextDay() }}</strong> tarihine gecistirilecek.
-              Lutfen tum raporlari indirdiginizden emin olun.
+              Bu islem geri alinamaz. Sistem tarihi <strong>{{ getNextDay() }}</strong> tarihine
+              gecistirilecek. Lutfen tum raporlari indirdiginizden emin olun.
             </p>
           </div>
         </div>
@@ -208,17 +240,17 @@
 
         <div class="flex items-center gap-3">
           <button
-            @click="emit('back')"
             class="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="emit('back')"
           >
             <span class="material-icons">arrow_back</span>
             Geri
           </button>
 
           <button
-            @click="handleDayClose"
             :disabled="loading || completing"
             class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:from-indigo-400 disabled:to-purple-400 text-white font-medium rounded-xl transition-all shadow-lg hover:shadow-xl"
+            @click="handleDayClose"
           >
             <span v-if="completing" class="material-icons animate-spin">refresh</span>
             <span v-else class="material-icons">wb_sunny</span>
@@ -242,22 +274,27 @@
           v-if="showCompletionModal"
           class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
         >
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md text-center p-8 transform animate-scale-in">
-            <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <span class="material-icons text-5xl text-green-600 dark:text-green-400 animate-pulse">check_circle</span>
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md text-center p-8 transform animate-scale-in"
+          >
+            <div
+              class="w-24 h-24 mx-auto mb-6 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+            >
+              <span class="material-icons text-5xl text-green-600 dark:text-green-400 animate-pulse"
+                >check_circle</span
+              >
             </div>
 
             <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Gun Basariyla Kapatildi!
             </h3>
             <p class="text-gray-500 dark:text-slate-400 mb-6">
-              {{ formatDate(audit.auditDate) }} tarihi kapatildi.
-              Yeni is gunu basladi.
+              {{ formatDate(audit.auditDate) }} tarihi kapatildi. Yeni is gunu basladi.
             </p>
 
             <button
-              @click="finishAudit"
               class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-xl transition-colors"
+              @click="finishAudit"
             >
               <span class="material-icons">home</span>
               Ana Sayfaya Don
@@ -322,11 +359,11 @@ const reports = [
 ]
 
 // Methods
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return nightAuditService.formatCurrency(amount)
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('tr-TR', {
     weekday: 'long',
@@ -373,16 +410,12 @@ const fetchSummary = async () => {
   }
 }
 
-const downloadReport = async (report) => {
+const downloadReport = async report => {
   try {
     downloadingReport.value = report.type
 
     // Download the PDF report
-    await nightAuditService.downloadReport(
-      props.hotelId,
-      props.audit._id,
-      report.type
-    )
+    await nightAuditService.downloadReport(props.hotelId, props.audit._id, report.type)
 
     toast.success(`${report.label} indirildi`)
   } catch (error) {
@@ -401,7 +434,10 @@ const addEmail = () => {
   if (!input) return
 
   // Split by comma and process each email
-  const emails = input.split(',').map(e => e.trim()).filter(e => e)
+  const emails = input
+    .split(',')
+    .map(e => e.trim())
+    .filter(e => e)
 
   for (const email of emails) {
     if (!emailRegex.test(email)) {
@@ -420,7 +456,7 @@ const addEmail = () => {
   emailInput.value = ''
 }
 
-const removeEmail = (index) => {
+const removeEmail = index => {
   emailRecipients.value.splice(index, 1)
 }
 
@@ -495,8 +531,13 @@ onMounted(() => {
 }
 
 @keyframes bounce-once {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .animate-bounce-once {
@@ -504,8 +545,14 @@ onMounted(() => {
 }
 
 @keyframes scale-in {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .animate-scale-in {

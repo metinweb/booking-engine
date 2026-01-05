@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.output
+.nuxt
+.next
+
+# Package manager
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# IDE
+.idea
+.vscode
+
+# Uploads
+uploads
+
+# Logs
+*.log
+logs
+
+# Coverage
+coverage
+
+# Generated files
+*.min.js
+*.min.css

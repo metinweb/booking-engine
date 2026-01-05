@@ -4,6 +4,7 @@
  */
 
 import mongoose from 'mongoose'
+import logger from '../../core/logger.js'
 
 // Transaction types
 export const TRANSACTION_TYPES = {
@@ -57,214 +58,216 @@ export const TRANSACTION_CATEGORIES = {
   ADJUSTMENTS: 'adjustments'
 }
 
-const transactionSchema = new mongoose.Schema({
-  // Multi-tenant
-  partner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Partner',
-    required: true,
-    index: true
+const transactionSchema = new mongoose.Schema(
+  {
+    // Multi-tenant
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Partner',
+      required: true,
+      index: true
+    },
+
+    hotel: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Hotel',
+      required: true,
+      index: true
+    },
+
+    // Transaction number (auto-generated)
+    transactionNumber: {
+      type: String,
+      unique: true,
+      sparse: true, // Allow null/undefined for pre-save hook to generate
+      index: true
+    },
+
+    // Transaction type
+    type: {
+      type: String,
+      enum: Object.values(TRANSACTION_TYPES),
+      required: true,
+      index: true
+    },
+
+    // Category for reporting
+    category: {
+      type: String,
+      enum: Object.values(TRANSACTION_CATEGORIES),
+      required: true
+    },
+
+    // Description
+    description: {
+      type: String,
+      required: true,
+      trim: true
+    },
+
+    // Amount (positive for income, negative for expense/refund)
+    amount: {
+      type: Number,
+      required: true
+    },
+
+    // Currency
+    currency: {
+      type: String,
+      default: 'TRY',
+      uppercase: true
+    },
+
+    // Amount converted to TRY (for unified reporting)
+    amountInTRY: {
+      type: Number
+    },
+
+    // Conversion details (when currency is not TRY)
+    convertedAmount: {
+      amount: { type: Number },
+      currency: { type: String, uppercase: true },
+      rate: { type: Number },
+      convertedAt: { type: Date }
+    },
+
+    // Exchange rate at time of transaction
+    exchangeRate: {
+      type: Number
+    },
+
+    // Payment method (for payments)
+    paymentMethod: {
+      type: String,
+      enum: Object.values(PAYMENT_METHODS)
+    },
+
+    // Reference to related entities
+    stay: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Stay',
+      index: true
+    },
+
+    booking: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Booking'
+    },
+
+    guest: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Guest'
+    },
+
+    room: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Room'
+    },
+
+    // Cash register/shift reference
+    cashRegister: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CashRegister'
+    },
+
+    // Invoice/Receipt number
+    invoiceNumber: {
+      type: String,
+      trim: true
+    },
+
+    receiptNumber: {
+      type: String,
+      trim: true
+    },
+
+    // Reference (for card transactions, bank transfers, etc.)
+    reference: {
+      type: String,
+      trim: true
+    },
+
+    // Card details (masked)
+    cardDetails: {
+      lastFourDigits: { type: String },
+      cardType: { type: String }, // visa, mastercard, etc.
+      authCode: { type: String }
+    },
+
+    // Quantity and unit price (for itemized transactions)
+    quantity: {
+      type: Number,
+      default: 1
+    },
+
+    unitPrice: {
+      type: Number
+    },
+
+    // Tax
+    taxRate: {
+      type: Number,
+      default: 0
+    },
+
+    taxAmount: {
+      type: Number,
+      default: 0
+    },
+
+    // Status
+    status: {
+      type: String,
+      enum: ['pending', 'completed', 'cancelled', 'refunded'],
+      default: 'completed',
+      index: true
+    },
+
+    // Voided/cancelled info
+    voidedAt: { type: Date },
+    voidedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    voidReason: { type: String, trim: true },
+
+    // Original transaction (for refunds/voids)
+    originalTransaction: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Transaction'
+    },
+
+    // Created by
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+
+    // POS terminal ID
+    terminalId: { type: String, trim: true },
+
+    // Notes
+    notes: { type: String, trim: true },
+
+    // Metadata
+    metadata: mongoose.Schema.Types.Mixed
   },
-
-  hotel: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Hotel',
-    required: true,
-    index: true
-  },
-
-  // Transaction number (auto-generated)
-  transactionNumber: {
-    type: String,
-    unique: true,
-    sparse: true,  // Allow null/undefined for pre-save hook to generate
-    index: true
-  },
-
-  // Transaction type
-  type: {
-    type: String,
-    enum: Object.values(TRANSACTION_TYPES),
-    required: true,
-    index: true
-  },
-
-  // Category for reporting
-  category: {
-    type: String,
-    enum: Object.values(TRANSACTION_CATEGORIES),
-    required: true
-  },
-
-  // Description
-  description: {
-    type: String,
-    required: true,
-    trim: true
-  },
-
-  // Amount (positive for income, negative for expense/refund)
-  amount: {
-    type: Number,
-    required: true
-  },
-
-  // Currency
-  currency: {
-    type: String,
-    default: 'TRY',
-    uppercase: true
-  },
-
-  // Amount converted to TRY (for unified reporting)
-  amountInTRY: {
-    type: Number
-  },
-
-  // Conversion details (when currency is not TRY)
-  convertedAmount: {
-    amount: { type: Number },
-    currency: { type: String, uppercase: true },
-    rate: { type: Number },
-    convertedAt: { type: Date }
-  },
-
-  // Exchange rate at time of transaction
-  exchangeRate: {
-    type: Number
-  },
-
-  // Payment method (for payments)
-  paymentMethod: {
-    type: String,
-    enum: Object.values(PAYMENT_METHODS)
-  },
-
-  // Reference to related entities
-  stay: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Stay',
-    index: true
-  },
-
-  booking: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Booking'
-  },
-
-  guest: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Guest'
-  },
-
-  room: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room'
-  },
-
-  // Cash register/shift reference
-  cashRegister: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'CashRegister'
-  },
-
-  // Invoice/Receipt number
-  invoiceNumber: {
-    type: String,
-    trim: true
-  },
-
-  receiptNumber: {
-    type: String,
-    trim: true
-  },
-
-  // Reference (for card transactions, bank transfers, etc.)
-  reference: {
-    type: String,
-    trim: true
-  },
-
-  // Card details (masked)
-  cardDetails: {
-    lastFourDigits: { type: String },
-    cardType: { type: String }, // visa, mastercard, etc.
-    authCode: { type: String }
-  },
-
-  // Quantity and unit price (for itemized transactions)
-  quantity: {
-    type: Number,
-    default: 1
-  },
-
-  unitPrice: {
-    type: Number
-  },
-
-  // Tax
-  taxRate: {
-    type: Number,
-    default: 0
-  },
-
-  taxAmount: {
-    type: Number,
-    default: 0
-  },
-
-  // Status
-  status: {
-    type: String,
-    enum: ['pending', 'completed', 'cancelled', 'refunded'],
-    default: 'completed',
-    index: true
-  },
-
-  // Voided/cancelled info
-  voidedAt: { type: Date },
-  voidedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-  voidReason: { type: String, trim: true },
-
-  // Original transaction (for refunds/voids)
-  originalTransaction: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Transaction'
-  },
-
-  // Created by
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  },
-
-  // POS terminal ID
-  terminalId: { type: String, trim: true },
-
-  // Notes
-  notes: { type: String, trim: true },
-
-  // Metadata
-  metadata: mongoose.Schema.Types.Mixed
-
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-})
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+  }
+)
 
 // Indexes
 transactionSchema.index({ hotel: 1, createdAt: -1 })
 transactionSchema.index({ hotel: 1, type: 1, createdAt: -1 })
 transactionSchema.index({ hotel: 1, cashRegister: 1 })
 transactionSchema.index({ hotel: 1, stay: 1 })
-transactionSchema.index({ hotel: 1, 'status': 1, createdAt: -1 })
+transactionSchema.index({ hotel: 1, status: 1, createdAt: -1 })
 
 // Pre-save: Generate transaction number and calculate amountInTRY
-transactionSchema.pre('save', async function(next) {
+transactionSchema.pre('save', async function (next) {
   if (this.isNew && !this.transactionNumber) {
     const date = new Date()
     const prefix = 'TXN'
@@ -310,7 +313,7 @@ transactionSchema.pre('save', async function(next) {
 })
 
 // Virtual: Is income
-transactionSchema.virtual('isIncome').get(function() {
+transactionSchema.virtual('isIncome').get(function () {
   const incomeTypes = [
     TRANSACTION_TYPES.ROOM_CHARGE,
     TRANSACTION_TYPES.EXTRA_CHARGE,
@@ -330,7 +333,7 @@ transactionSchema.virtual('isIncome').get(function() {
 })
 
 // Static: Get daily summary with multi-currency support
-transactionSchema.statics.getDailySummary = async function(hotelId, date = new Date()) {
+transactionSchema.statics.getDailySummary = async function (hotelId, date = new Date()) {
   const startOfDay = new Date(date)
   startOfDay.setHours(0, 0, 0, 0)
   const endOfDay = new Date(startOfDay)
@@ -409,21 +412,21 @@ transactionSchema.statics.getDailySummary = async function(hotelId, date = new D
 }
 
 // Static: Get transactions by shift
-transactionSchema.statics.getByShift = function(cashRegisterId) {
+transactionSchema.statics.getByShift = function (cashRegisterId) {
   return this.find({ cashRegister: cashRegisterId, status: { $ne: 'cancelled' } })
     .sort({ createdAt: -1 })
     .lean()
 }
 
 // Static: Get stay transactions
-transactionSchema.statics.getByStay = function(stayId) {
+transactionSchema.statics.getByStay = function (stayId) {
   return this.find({ stay: stayId, status: { $ne: 'cancelled' } })
     .sort({ createdAt: -1 })
     .lean()
 }
 
 // Method: Void transaction
-transactionSchema.methods.void = async function(reason, userId) {
+transactionSchema.methods.void = async function (reason, userId) {
   this.status = 'cancelled'
   this.voidedAt = new Date()
   this.voidedBy = userId
@@ -432,7 +435,7 @@ transactionSchema.methods.void = async function(reason, userId) {
 }
 
 // Method: Create refund
-transactionSchema.methods.createRefund = async function(amount, reason, userId) {
+transactionSchema.methods.createRefund = async function (amount, reason, userId) {
   const refund = new this.constructor({
     partner: this.partner,
     hotel: this.hotel,
@@ -468,7 +471,7 @@ transactionSchema.methods.createRefund = async function(amount, reason, userId) 
  * Post-save: Auto-sync with CashRegister
  * When a new transaction is created, automatically record it in the active shift
  */
-transactionSchema.post('save', async function(doc) {
+transactionSchema.post('save', async function (doc) {
   // Skip if not a new document or if already has cashRegister assigned and was just updating
   if (!doc.wasNew) return
 
@@ -495,7 +498,7 @@ transactionSchema.post('save', async function(doc) {
     }
   } catch (error) {
     // Log error but don't fail the transaction save
-    console.error('[Transaction Post-Save] CashRegister sync error:', error.message)
+    logger.error('[Transaction Post-Save] CashRegister sync error:', error.message)
   }
 })
 
@@ -503,7 +506,7 @@ transactionSchema.post('save', async function(doc) {
  * Post-save: Auto-sync with Stay for payment transactions
  * When a payment transaction is created, update Stay.payments array
  */
-transactionSchema.post('save', async function(doc) {
+transactionSchema.post('save', async function (doc) {
   // Only process new payment-type transactions
   if (!doc.wasNew) return
   if (!doc.stay) return
@@ -533,36 +536,42 @@ transactionSchema.post('save', async function(doc) {
 
     if (paymentTypes.includes(doc.type)) {
       // Add payment to Stay using model method
-      await stay.addPayment({
-        amount: doc.amountInTRY || doc.amount,
-        method: doc.paymentMethod,
-        currency: doc.currency,
-        exchangeRate: doc.exchangeRate,
-        amountInBaseCurrency: doc.amountInTRY,
-        reference: doc.reference,
-        notes: doc.notes
-      }, doc.createdBy)
+      await stay.addPayment(
+        {
+          amount: doc.amountInTRY || doc.amount,
+          method: doc.paymentMethod,
+          currency: doc.currency,
+          exchangeRate: doc.exchangeRate,
+          amountInBaseCurrency: doc.amountInTRY,
+          reference: doc.reference,
+          notes: doc.notes
+        },
+        doc.createdBy
+      )
     } else if (chargeTypes.includes(doc.type)) {
       // Add extra charge to Stay using model method
-      await stay.addExtra({
-        description: doc.description,
-        amount: doc.amountInTRY || doc.amount,
-        quantity: doc.quantity || 1,
-        category: mapTransactionTypeToExtraCategory(doc.type),
-        currency: doc.currency,
-        exchangeRate: doc.exchangeRate,
-        amountInBaseCurrency: doc.amountInTRY
-      }, doc.createdBy)
+      await stay.addExtra(
+        {
+          description: doc.description,
+          amount: doc.amountInTRY || doc.amount,
+          quantity: doc.quantity || 1,
+          category: mapTransactionTypeToExtraCategory(doc.type),
+          currency: doc.currency,
+          exchangeRate: doc.exchangeRate,
+          amountInBaseCurrency: doc.amountInTRY
+        },
+        doc.createdBy
+      )
     }
   } catch (error) {
-    console.error('[Transaction Post-Save] Stay sync error:', error.message)
+    logger.error('[Transaction Post-Save] Stay sync error:', error.message)
   }
 })
 
 /**
  * Post-save: Handle void/cancel - reverse CashRegister counters
  */
-transactionSchema.post('findOneAndUpdate', async function(doc) {
+transactionSchema.post('findOneAndUpdate', async function (doc) {
   if (!doc) return
 
   // Check if status was changed to cancelled
@@ -590,15 +599,16 @@ transactionSchema.post('findOneAndUpdate', async function(doc) {
       const stay = await Stay.findById(doc.stay)
       if (stay) {
         // Remove the payment from Stay.payments array
-        stay.payments = stay.payments.filter(p =>
-          Math.abs(p.amount - (doc.amountInTRY || doc.amount)) > 0.01 ||
-          p.method !== doc.paymentMethod
+        stay.payments = stay.payments.filter(
+          p =>
+            Math.abs(p.amount - (doc.amountInTRY || doc.amount)) > 0.01 ||
+            p.method !== doc.paymentMethod
         )
         await stay.save()
       }
     }
   } catch (error) {
-    console.error('[Transaction Post-Update] Void rollback error:', error.message)
+    logger.error('[Transaction Post-Update] Void rollback error:', error.message)
   }
 })
 
@@ -619,7 +629,7 @@ function mapTransactionTypeToExtraCategory(type) {
 }
 
 // Pre-save: Mark as new for post-save hooks
-transactionSchema.pre('save', function(next) {
+transactionSchema.pre('save', function (next) {
   this.wasNew = this.isNew
   next()
 })

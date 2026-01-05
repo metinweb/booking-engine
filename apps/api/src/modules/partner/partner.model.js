@@ -2,252 +2,322 @@ import mongoose from 'mongoose'
 import auditPlugin from '../../plugins/auditPlugin.js'
 import { encrypt, decrypt, isEncrypted } from '../../helpers/encryption.js'
 
-const partnerSchema = new mongoose.Schema({
-  // Durum
-  status: {
-    type: String,
-    enum: {
-      values: ['active', 'inactive', 'pending'],
-      message: 'INVALID_STATUS'
-    },
-    default: 'pending'
-  },
-
-  // Partner Kodu (PMS girişi için)
-  code: {
-    type: String,
-    unique: true,
-    sparse: true,
-    uppercase: true,
-    trim: true,
-    minlength: [3, 'CODE_MIN_LENGTH'],
-    maxlength: [20, 'CODE_MAX_LENGTH'],
-    match: [/^[A-Z0-9_-]+$/, 'INVALID_CODE_FORMAT']
-  },
-
-  // Şirket Bilgileri
-  companyName: {
-    type: String,
-    required: [true, 'REQUIRED_COMPANY_NAME'],
-    trim: true,
-    minlength: [2, 'COMPANY_NAME_MIN_LENGTH'],
-    maxlength: [200, 'COMPANY_NAME_MAX_LENGTH']
-  },
-
-  email: {
-    type: String,
-    required: [true, 'REQUIRED_EMAIL'],
-    lowercase: true,
-    trim: true,
-    match: [/^\S+@\S+\.\S+$/, 'INVALID_EMAIL']
-  },
-
-  phone: {
-    type: String,
-    trim: true
-  },
-
-  // Vergi Bilgileri
-  taxOffice: {
-    type: String,
-    trim: true
-  },
-
-  taxNumber: {
-    type: String,
-    trim: true
-  },
-
-  // Adres
-  address: {
-    street: String,
-    city: String,
-    country: String,
-    postalCode: String
-  },
-
-  // Belgeler
-  documents: [{
-    type: {
+const partnerSchema = new mongoose.Schema(
+  {
+    // Durum
+    status: {
       type: String,
-      enum: ['license', 'certificate', 'other'],
-      required: true
+      enum: {
+        values: ['active', 'inactive', 'pending'],
+        message: 'INVALID_STATUS'
+      },
+      default: 'pending'
     },
-    name: String,
-    url: String,
-    uploadedAt: {
-      type: Date,
-      default: Date.now
-    }
-  }],
 
-  // Branding
-  branding: {
-    logo: String,
-    favicon: String,
-
-    // B2C Site Domain (Müşterilerin rezervasyon yaptığı site)
-    siteDomain: {
+    // Partner Kodu (PMS girişi için)
+    code: {
       type: String,
-      lowercase: true,
-      trim: true
+      unique: true,
+      sparse: true,
+      uppercase: true,
+      trim: true,
+      minlength: [3, 'CODE_MIN_LENGTH'],
+      maxlength: [20, 'CODE_MAX_LENGTH'],
+      match: [/^[A-Z0-9_-]+$/, 'INVALID_CODE_FORMAT']
     },
 
-    // B2B Extranet Domain (Acentelerin giriş yaptığı platform)
-    extranetDomain: {
+    // Şirket Bilgileri
+    companyName: {
       type: String,
-      lowercase: true,
-      trim: true
+      required: [true, 'REQUIRED_COMPANY_NAME'],
+      trim: true,
+      minlength: [2, 'COMPANY_NAME_MIN_LENGTH'],
+      maxlength: [200, 'COMPANY_NAME_MAX_LENGTH']
     },
 
-    // PMS Domain (Otel personelinin giriş yaptığı platform)
-    pmsDomain: {
+    // Ticari İsim (resmi şirket unvanı)
+    tradeName: {
       type: String,
-      lowercase: true,
-      trim: true
-    }
-  },
-
-  // Para Birimi
-  currency: {
-    type: String,
-    default: 'TRY',
-    uppercase: true,
-    enum: {
-      values: ['TRY', 'USD', 'EUR', 'GBP'],
-      message: 'INVALID_CURRENCY'
-    }
-  },
-
-  // Markup/Komisyon (Yüzde)
-  markup: {
-    hotel: {
-      type: Number,
-      default: 0,
-      min: [0, 'MARKUP_MIN_ZERO'],
-      max: [100, 'MARKUP_MAX_HUNDRED']
+      trim: true,
+      maxlength: [300, 'TRADE_NAME_MAX_LENGTH']
     },
-    tour: {
-      type: Number,
-      default: 0,
-      min: [0, 'MARKUP_MIN_ZERO'],
-      max: [100, 'MARKUP_MAX_HUNDRED']
-    },
-    transfer: {
-      type: Number,
-      default: 0,
-      min: [0, 'MARKUP_MIN_ZERO'],
-      max: [100, 'MARKUP_MAX_HUNDRED']
-    }
-  },
 
-  // İstatistikler
-  stats: {
-    totalAgencies: { type: Number, default: 0 },
-    totalBookings: { type: Number, default: 0 },
-    totalRevenue: { type: Number, default: 0 }
-  },
-
-  // Bildirim Ayarları
-  notifications: {
-    // Email Ayarları
     email: {
-      // Partner kendi AWS SES hesabını kullanacak mı?
-      useOwnSES: {
+      type: String,
+      required: [true, 'REQUIRED_EMAIL'],
+      lowercase: true,
+      trim: true,
+      match: [/^\S+@\S+\.\S+$/, 'INVALID_EMAIL']
+    },
+
+    phone: {
+      type: String,
+      trim: true
+    },
+
+    // Vergi Bilgileri
+    taxOffice: {
+      type: String,
+      trim: true
+    },
+
+    taxNumber: {
+      type: String,
+      trim: true
+    },
+
+    // Adres
+    address: {
+      street: String,
+      city: String,
+      country: String,
+      postalCode: String
+    },
+
+    // Belgeler
+    documents: [
+      {
+        type: {
+          type: String,
+          enum: ['license', 'certificate', 'other'],
+          required: true
+        },
+        name: String,
+        url: String,
+        uploadedAt: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
+
+    // Branding
+    branding: {
+      logo: String,
+      favicon: String,
+
+      // B2C Site Domain (Müşterilerin rezervasyon yaptığı site)
+      siteDomain: {
+        type: String,
+        lowercase: true,
+        trim: true
+      },
+
+      // B2B Extranet Domain (Acentelerin giriş yaptığı platform)
+      extranetDomain: {
+        type: String,
+        lowercase: true,
+        trim: true
+      },
+
+      // PMS Domain (Otel personelinin giriş yaptığı platform)
+      pmsDomain: {
+        type: String,
+        lowercase: true,
+        trim: true
+      }
+    },
+
+    // Para Birimi
+    currency: {
+      type: String,
+      default: 'TRY',
+      uppercase: true,
+      enum: {
+        values: ['TRY', 'USD', 'EUR', 'GBP'],
+        message: 'INVALID_CURRENCY'
+      }
+    },
+
+    // Markup/Komisyon (Yüzde)
+    markup: {
+      hotel: {
+        type: Number,
+        default: 0,
+        min: [0, 'MARKUP_MIN_ZERO'],
+        max: [100, 'MARKUP_MAX_HUNDRED']
+      },
+      tour: {
+        type: Number,
+        default: 0,
+        min: [0, 'MARKUP_MIN_ZERO'],
+        max: [100, 'MARKUP_MAX_HUNDRED']
+      },
+      transfer: {
+        type: Number,
+        default: 0,
+        min: [0, 'MARKUP_MIN_ZERO'],
+        max: [100, 'MARKUP_MAX_HUNDRED']
+      }
+    },
+
+    // İstatistikler
+    stats: {
+      totalAgencies: { type: Number, default: 0 },
+      totalBookings: { type: Number, default: 0 },
+      totalRevenue: { type: Number, default: 0 }
+    },
+
+    // Bildirim Ayarları
+    notifications: {
+      // Email Ayarları
+      email: {
+        // Partner kendi AWS SES hesabını kullanacak mı?
+        useOwnSES: {
+          type: Boolean,
+          default: false
+        },
+        // Partner'ın AWS SES bilgileri
+        aws: {
+          region: {
+            type: String,
+            default: 'eu-west-1'
+          },
+          accessKeyId: {
+            type: String
+          },
+          secretAccessKey: {
+            type: String
+          },
+          fromEmail: {
+            type: String,
+            lowercase: true,
+            trim: true
+          },
+          fromName: {
+            type: String,
+            trim: true
+          }
+        },
+        // Domain doğrulama durumu
+        domainVerification: {
+          domain: {
+            type: String,
+            lowercase: true,
+            trim: true
+          },
+          status: {
+            type: String,
+            enum: ['none', 'pending', 'verified', 'failed'],
+            default: 'none'
+          },
+          dkimTokens: [
+            {
+              type: String
+            }
+          ],
+          verificationToken: {
+            type: String
+          },
+          lastCheckedAt: {
+            type: Date
+          },
+          verifiedAt: {
+            type: Date
+          }
+        }
+      },
+      // SMS Ayarları
+      sms: {
+        enabled: {
+          type: Boolean,
+          default: true
+        },
+        // Hangi provider kullanılacak
+        provider: {
+          type: String,
+          enum: ['platform', 'netgsm', 'iletimerkezi', 'twilio', 'vonage'],
+          default: 'platform' // Platform ayarlarını kullan
+        },
+        // Provider-specific config (encrypted where needed)
+        config: {
+          // NetGSM
+          usercode: { type: String },
+          password: { type: String },
+          msgheader: { type: String },
+          // İleti Merkezi
+          apiKey: { type: String },
+          apiHash: { type: String },
+          sender: { type: String },
+          // Twilio
+          accountSid: { type: String },
+          authToken: { type: String },
+          // Vonage
+          apiSecret: { type: String },
+          // Common
+          fromNumber: { type: String }
+        }
+      },
+      // Push Notification Ayarları
+      push: {
+        enabled: {
+          type: Boolean,
+          default: true
+        }
+      }
+    },
+
+    // Güvenlik Ayarları
+    securitySettings: {
+      // 2FA zorunlu mu?
+      require2FA: {
         type: Boolean,
         default: false
       },
-      // Partner'ın AWS SES bilgileri
-      aws: {
-        region: {
-          type: String,
-          default: 'eu-west-1'
+      // Şifre politikası
+      passwordPolicy: {
+        minLength: {
+          type: Number,
+          default: 12,
+          min: 8,
+          max: 128
         },
-        accessKeyId: {
-          type: String
+        requireUppercase: {
+          type: Boolean,
+          default: true
         },
-        secretAccessKey: {
-          type: String
+        requireLowercase: {
+          type: Boolean,
+          default: true
         },
-        fromEmail: {
-          type: String,
-          lowercase: true,
-          trim: true
+        requireNumbers: {
+          type: Boolean,
+          default: true
         },
-        fromName: {
-          type: String,
-          trim: true
+        requireSpecialChars: {
+          type: Boolean,
+          default: true
+        },
+        // Şifre geçerlilik süresi (gün, 0 = sınırsız)
+        expiryDays: {
+          type: Number,
+          default: 0
         }
       },
-      // Domain doğrulama durumu
-      domainVerification: {
-        domain: {
-          type: String,
-          lowercase: true,
-          trim: true
+      // Oturum ayarları
+      sessionSettings: {
+        // Maksimum eşzamanlı oturum sayısı (0 = sınırsız)
+        maxConcurrentSessions: {
+          type: Number,
+          default: 0
         },
-        status: {
-          type: String,
-          enum: ['none', 'pending', 'verified', 'failed'],
-          default: 'none'
+        // Oturum zaman aşımı (dakika, 0 = sınırsız)
+        sessionTimeout: {
+          type: Number,
+          default: 0
         },
-        dkimTokens: [{
-          type: String
-        }],
-        verificationToken: {
-          type: String
-        },
-        lastCheckedAt: {
-          type: Date
-        },
-        verifiedAt: {
-          type: Date
+        // Hareketsizlik sonrası çıkış (dakika, 0 = devre dışı)
+        inactivityTimeout: {
+          type: Number,
+          default: 0
         }
-      }
-    },
-    // SMS Ayarları
-    sms: {
-      enabled: {
-        type: Boolean,
-        default: true
-      },
-      // Hangi provider kullanılacak
-      provider: {
-        type: String,
-        enum: ['platform', 'netgsm', 'iletimerkezi', 'twilio', 'vonage'],
-        default: 'platform' // Platform ayarlarını kullan
-      },
-      // Provider-specific config (encrypted where needed)
-      config: {
-        // NetGSM
-        usercode: { type: String },
-        password: { type: String },
-        msgheader: { type: String },
-        // İleti Merkezi
-        apiKey: { type: String },
-        apiHash: { type: String },
-        sender: { type: String },
-        // Twilio
-        accountSid: { type: String },
-        authToken: { type: String },
-        // Vonage
-        apiSecret: { type: String },
-        // Common
-        fromNumber: { type: String }
-      }
-    },
-    // Push Notification Ayarları
-    push: {
-      enabled: {
-        type: Boolean,
-        default: true
       }
     }
+  },
+  {
+    timestamps: true
   }
-
-}, {
-  timestamps: true
-})
+)
 
 // Indexes
 partnerSchema.index({ status: 1 })
@@ -264,22 +334,22 @@ partnerSchema.virtual('agencies', {
 })
 
 // Methods
-partnerSchema.methods.isActive = function() {
+partnerSchema.methods.isActive = function () {
   return this.status === 'active'
 }
 
-partnerSchema.methods.activate = async function() {
+partnerSchema.methods.activate = async function () {
   this.status = 'active'
   return await this.save()
 }
 
-partnerSchema.methods.deactivate = async function() {
+partnerSchema.methods.deactivate = async function () {
   this.status = 'inactive'
   return await this.save()
 }
 
 // Get decrypted SMS credentials
-partnerSchema.methods.getSMSCredentials = function() {
+partnerSchema.methods.getSMSCredentials = function () {
   const sms = this.notifications?.sms
   if (!sms || sms.provider === 'platform' || !sms.enabled) {
     return null
@@ -323,7 +393,7 @@ partnerSchema.methods.getSMSCredentials = function() {
 }
 
 // Get decrypted email credentials
-partnerSchema.methods.getEmailCredentials = function() {
+partnerSchema.methods.getEmailCredentials = function () {
   if (!this.notifications?.email?.useOwnSES) {
     return null
   }
@@ -347,28 +417,28 @@ partnerSchema.methods.getEmailCredentials = function() {
 }
 
 // Statics
-partnerSchema.statics.findByEmail = function(email) {
+partnerSchema.statics.findByEmail = function (email) {
   return this.findOne({ email: email.toLowerCase() })
 }
 
-partnerSchema.statics.findBySiteDomain = function(domain) {
+partnerSchema.statics.findBySiteDomain = function (domain) {
   return this.findOne({ 'branding.siteDomain': domain.toLowerCase() })
 }
 
-partnerSchema.statics.findByExtranetDomain = function(domain) {
+partnerSchema.statics.findByExtranetDomain = function (domain) {
   return this.findOne({ 'branding.extranetDomain': domain.toLowerCase() })
 }
 
-partnerSchema.statics.findByPmsDomain = function(domain) {
+partnerSchema.statics.findByPmsDomain = function (domain) {
   return this.findOne({ 'branding.pmsDomain': domain.toLowerCase() })
 }
 
-partnerSchema.statics.findActive = function() {
+partnerSchema.statics.findActive = function () {
   return this.find({ status: 'active' })
 }
 
 // Pre-save middleware
-partnerSchema.pre('save', function(next) {
+partnerSchema.pre('save', function (next) {
   // Track previous status for post-save hook
   if (this.isModified('status')) {
     this._previousStatus = this.constructor.findOne({ _id: this._id }).then(doc => doc?.status)
@@ -403,7 +473,15 @@ partnerSchema.pre('save', function(next) {
   const smsConfig = this.notifications?.sms?.config
   if (smsConfig) {
     // Encrypt sensitive SMS fields
-    const sensitiveFields = ['password', 'apiKey', 'apiHash', 'authToken', 'apiSecret', 'accountSid', 'usercode']
+    const sensitiveFields = [
+      'password',
+      'apiKey',
+      'apiHash',
+      'authToken',
+      'apiSecret',
+      'accountSid',
+      'usercode'
+    ]
     for (const field of sensitiveFields) {
       if (this.isModified(`notifications.sms.config.${field}`)) {
         const value = smsConfig[field]
@@ -418,7 +496,7 @@ partnerSchema.pre('save', function(next) {
 })
 
 // Post-save middleware - Send email when partner is activated
-partnerSchema.post('save', async function(doc) {
+partnerSchema.post('save', async function (doc) {
   // Check if status changed to active (from any other status, typically pending)
   if (doc.status === 'active' && doc._previousStatus) {
     const previousStatus = await doc._previousStatus

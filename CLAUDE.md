@@ -51,6 +51,28 @@ booking-engine/
 3. **Yeni Özellik**: İlgili `modules/` klasöründe çalış (DDD yapısı)
 4. **Çeviri Ekleme**: Hem `tr.json` hem `en.json`'a ekle
 5. **Component Seçimi**: Önce UI → Common → PMS Shared sırasıyla kontrol et
+6. **E-posta Şablonları**: Tüm e-postalar Maizzle ile hazırlanmalı (`packages/emails/`)
+
+---
+
+## 📧 E-POSTA ŞABLONLARI (MAİZZLE)
+
+**Konum:** `packages/emails/`
+
+**Kurallar:**
+- Tüm transactional e-postalar Maizzle ile hazırlanmalı
+- Modern, responsive ve güzel tasarımlar kullanılmalı
+- Tailwind CSS ile stil verilmeli
+- Dark mode desteği eklenmeli
+- Build sonrası `apps/api/src/templates/emails/` klasörüne kopyalanmalı
+
+**Mevcut Şablonlar:**
+- `activation.html` - Hesap aktivasyonu
+- `password-reset.html` - Şifre sıfırlama
+- `booking-confirmation.html` - Rezervasyon onayı
+- `welcome.html` - Hoşgeldin e-postası
+
+**Build:** `pnpm --filter emails build`
 
 ---
 
@@ -75,4 +97,4 @@ booking-engine/
 
 ---
 
-**Son Güncelleme:** 2026-01-04
+**Son Güncelleme:** 2026-01-05

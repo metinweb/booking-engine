@@ -93,7 +93,7 @@ async function makeRequest(path, data, options = {}) {
   try {
     const response = await axios.post(`${endpoint}${path}`, data, {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       timeout: options.timeout || 60000
@@ -122,7 +122,7 @@ async function makeRequest(path, data, options = {}) {
  * Apply markup to price
  */
 function applyMarkup(amount, markupPercent) {
-  return parseFloat((amount + (amount * markupPercent / 100)).toFixed(2))
+  return parseFloat((amount + (amount * markupPercent) / 100).toFixed(2))
 }
 
 /**
@@ -213,7 +213,11 @@ async function searchHotels(params, markupPercent = 10) {
   if (!result.header?.success) {
     const message = result.header?.messages?.[0]?.message || ''
     // "No price found" messages are valid - just return empty result
-    if (message.includes('fiyat bulunamadı') || message.includes('price') || message.includes('bulunamadı')) {
+    if (
+      message.includes('fiyat bulunamadı') ||
+      message.includes('price') ||
+      message.includes('bulunamadı')
+    ) {
       logger.info('Paximum: No hotels found for criteria', { message })
       return { hotels: [], searchId: null }
     }
@@ -362,7 +366,12 @@ async function addServices(transactionId, offers, currency = 'TRY', culture = 't
 /**
  * Set reservation info (travelers and customer)
  */
-async function setReservationInfo(transactionId, travellers, customerInfo, agencyReservationNumber) {
+async function setReservationInfo(
+  transactionId,
+  travellers,
+  customerInfo,
+  agencyReservationNumber
+) {
   const result = await makeRequest(`${BOOKING_SERVICE}/setreservationinfo`, {
     TransactionId: transactionId,
     Travellers: travellers,
@@ -393,7 +402,7 @@ async function commitTransaction(transactionId) {
     },
     {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       timeout: 60000

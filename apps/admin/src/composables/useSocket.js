@@ -14,6 +14,7 @@
 
 import { ref, readonly } from 'vue'
 import { io } from 'socket.io-client'
+import { socketLogger } from '@/utils/logger'
 
 // ============================================================================
 // SINGLETON STATE
@@ -55,11 +56,14 @@ const getSocketInstance = () => {
   if (socketInstance) return socketInstance
 
   // Socket URL - API URL'den /api prefix'ini çıkar
-  let baseUrl = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_BASE_URL || 'https://api.minires.com'
+  let baseUrl =
+    import.meta.env.VITE_SOCKET_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'https://api.minires.com'
   // Socket.IO /api prefix'siz çalışır
   baseUrl = baseUrl.replace(/\/api\/?$/, '')
 
-  console.log('[Socket] Creating new instance, connecting to:', baseUrl)
+  socketLogger.debug('[Socket] Creating new instance, connecting to:', baseUrl)
 
   socketInstance = io(baseUrl, SOCKET_CONFIG)
 
@@ -68,11 +72,11 @@ const getSocketInstance = () => {
     isConnected.value = true
     connectionError.value = null
     connectionAttempts.value = 0
-    console.log('[Socket] Connected:', socketInstance.id)
+    socketLogger.debug('[Socket] Connected:', socketInstance.id)
 
     // Re-join previously joined rooms
     if (joinedRooms.value.size > 0) {
-      console.log('[Socket] Re-joining rooms:', Array.from(joinedRooms.value))
+      socketLogger.debug('[Socket] Re-joining rooms:', Array.from(joinedRooms.value))
       joinedRooms.value.forEach(room => {
         socketInstance.emit('join', room)
       })
@@ -87,35 +91,39 @@ const getSocketInstance = () => {
     }
   })
 
-  socketInstance.on('disconnect', (reason) => {
+  socketInstance.on('disconnect', reason => {
     isConnected.value = false
-    console.log('[Socket] Disconnected:', reason)
+    socketLogger.debug('[Socket] Disconnected:', reason)
 
     // Don't clear rooms on temporary disconnection
     if (reason === 'io server disconnect') {
       // Server disconnected us - might need to re-auth
-      console.log('[Socket] Server initiated disconnect')
+      socketLogger.debug('[Socket] Server initiated disconnect')
     }
   })
 
-  socketInstance.on('connect_error', (error) => {
+  socketInstance.on('connect_error', error => {
     connectionError.value = error.message
     connectionAttempts.value++
-    console.error('[Socket] Connection error:', error.message, `(attempt ${connectionAttempts.value})`)
+    socketLogger.error(
+      '[Socket] Connection error:',
+      error.message,
+      `(attempt ${connectionAttempts.value})`
+    )
   })
 
-  socketInstance.on('reconnect', (attemptNumber) => {
-    console.log('[Socket] Reconnected after', attemptNumber, 'attempts')
+  socketInstance.on('reconnect', attemptNumber => {
+    socketLogger.debug('[Socket] Reconnected after', attemptNumber, 'attempts')
   })
 
   socketInstance.on('reconnect_failed', () => {
-    console.error('[Socket] Reconnection failed after max attempts')
+    socketLogger.error('[Socket] Reconnection failed after max attempts')
     connectionError.value = 'Reconnection failed'
   })
 
   // Auth acknowledgment
-  socketInstance.on('authenticated', (data) => {
-    console.log('[Socket] Authenticated:', data)
+  socketInstance.on('authenticated', data => {
+    socketLogger.debug('[Socket] Authenticated:', data)
   })
 
   return socketInstance
@@ -127,7 +135,7 @@ const getSocketInstance = () => {
 const connect = () => {
   const socket = getSocketInstance()
   if (!socket.connected) {
-    console.log('[Socket] Connecting...')
+    socketLogger.debug('[Socket] Connecting...')
     socket.connect()
   }
   return socket
@@ -139,7 +147,7 @@ const connect = () => {
 const disconnect = () => {
   if (!socketInstance) return
 
-  console.log('[Socket] Disconnecting and cleaning up...')
+  socketLogger.debug('[Socket] Disconnecting and cleaning up...')
 
   // Remove all registered listeners
   registeredListeners.forEach((callbacks, event) => {
@@ -159,7 +167,7 @@ const disconnect = () => {
   socketInstance.disconnect()
   socketInstance = null
 
-  console.log('[Socket] Disconnected and cleaned up')
+  socketLogger.debug('[Socket] Disconnected and cleaned up')
 }
 
 // ============================================================================
@@ -181,23 +189,23 @@ export function useSocket() {
    */
   const authenticate = (userId, userType = 'User') => {
     if (!userId) {
-      console.warn('[Socket] Cannot authenticate: no userId')
+      socketLogger.warn('[Socket] Cannot authenticate: no userId')
       return
     }
 
     const socket = ensureConnected()
     authenticatedUserId.value = { id: userId, type: userType }
     socket.emit('authenticate', { userId, userType })
-    console.log(`[Socket] Authenticating as ${userType}:${userId}`)
+    socketLogger.debug(`[Socket] Authenticating as ${userType}:${userId}`)
   }
 
   /**
    * Join a room
    * @param {string} room - Room name
    */
-  const join = (room) => {
+  const join = room => {
     if (!room) {
-      console.warn('[Socket] Cannot join: no room name')
+      socketLogger.warn('[Socket] Cannot join: no room name')
       return
     }
 
@@ -205,7 +213,7 @@ export function useSocket() {
     if (!joinedRooms.value.has(room)) {
       socket.emit('join', room)
       joinedRooms.value.add(room)
-      console.log('[Socket] Joined room:', room)
+      socketLogger.debug('[Socket] Joined room:', room)
     }
   }
 
@@ -213,13 +221,13 @@ export function useSocket() {
    * Leave a room
    * @param {string} room - Room name
    */
-  const leave = (room) => {
+  const leave = room => {
     if (!room || !socketInstance) return
 
     if (joinedRooms.value.has(room)) {
       socketInstance.emit('leave', room)
       joinedRooms.value.delete(room)
-      console.log('[Socket] Left room:', room)
+      socketLogger.debug('[Socket] Left room:', room)
     }
   }
 
@@ -233,7 +241,7 @@ export function useSocket() {
       socketInstance.emit('leave', room)
     })
     joinedRooms.value.clear()
-    console.log('[Socket] Left all rooms')
+    socketLogger.debug('[Socket] Left all rooms')
   }
 
   /**
@@ -305,15 +313,14 @@ export function useSocket() {
    * Debug info
    */
   const debug = () => {
-    console.group('[Socket Debug]')
-    console.log('Connected:', isConnected.value)
-    console.log('Socket ID:', socketInstance?.id)
-    console.log('Joined Rooms:', Array.from(joinedRooms.value))
-    console.log('Authenticated User:', authenticatedUserId.value)
-    console.log('Registered Events:', Array.from(registeredListeners.keys()))
-    console.log('Connection Error:', connectionError.value)
-    console.log('Connection Attempts:', connectionAttempts.value)
-    console.groupEnd()
+    socketLogger.debug('[Socket Debug]')
+    socketLogger.debug('Connected:', isConnected.value)
+    socketLogger.debug('Socket ID:', socketInstance?.id)
+    socketLogger.debug('Joined Rooms:', Array.from(joinedRooms.value))
+    socketLogger.debug('Authenticated User:', authenticatedUserId.value)
+    socketLogger.debug('Registered Events:', Array.from(registeredListeners.keys()))
+    socketLogger.debug('Connection Error:', connectionError.value)
+    socketLogger.debug('Connection Attempts:', connectionAttempts.value)
   }
 
   return {

@@ -36,7 +36,9 @@
           class="absolute w-0.5 h-2 -translate-x-1/2 bg-gray-400 dark:bg-slate-500"
           :style="{ left: `${getMarkPosition(mark.value)}%` }"
         ></div>
-        <div class="absolute w-full flex justify-between mt-6 text-xs text-gray-500 dark:text-slate-400">
+        <div
+          class="absolute w-full flex justify-between mt-6 text-xs text-gray-500 dark:text-slate-400"
+        >
           <span
             v-for="mark in marks"
             :key="mark.value"
@@ -61,8 +63,7 @@
 
       <!-- Thumb -->
       <div
-        class="absolute -translate-x-1/2 rounded-full shadow-md transition-transform
-               hover:scale-110 focus:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
+        class="absolute -translate-x-1/2 rounded-full shadow-md transition-transform hover:scale-110 focus:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2"
         :class="[thumbClasses, thumbSizeClasses]"
         :style="{ left: `${percentage}%` }"
         role="slider"
@@ -76,17 +77,21 @@
         <!-- Tooltip -->
         <div
           v-if="showTooltip && (isDragging || tooltipAlways)"
-          class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1
-                 bg-gray-900 dark:bg-slate-700 text-white text-xs rounded whitespace-nowrap"
+          class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 dark:bg-slate-700 text-white text-xs rounded whitespace-nowrap"
         >
           {{ formatValue(modelValue) }}
-          <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-slate-700"></div>
+          <div
+            class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-slate-700"
+          ></div>
         </div>
       </div>
     </div>
 
     <!-- Range display -->
-    <div v-if="showRange" class="flex justify-between mt-1 text-xs text-gray-500 dark:text-slate-400">
+    <div
+      v-if="showRange"
+      class="flex justify-between mt-1 text-xs text-gray-500 dark:text-slate-400"
+    >
       <span>{{ formatValue(min) }}</span>
       <span>{{ formatValue(max) }}</span>
     </div>
@@ -119,13 +124,13 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'blue', 'green', 'red', 'amber', 'purple'].includes(v)
+    validator: v => ['indigo', 'blue', 'green', 'red', 'amber', 'purple'].includes(v)
   },
   // Label
   label: {
@@ -197,13 +202,13 @@ const stepMarks = computed(() => {
 })
 
 // Get mark position
-const getMarkPosition = (value) => {
+const getMarkPosition = value => {
   if (props.max === props.min) return 0
   return ((value - props.min) / (props.max - props.min)) * 100
 }
 
 // Format value
-const formatValue = (value) => {
+const formatValue = value => {
   if (props.formatter) {
     return props.formatter(value)
   }
@@ -272,7 +277,7 @@ const thumbClasses = computed(() => {
 })
 
 // Calculate value from position
-const calculateValue = (clientX) => {
+const calculateValue = clientX => {
   if (!sliderRef.value || props.disabled) return
 
   const rect = sliderRef.value.getBoundingClientRect()
@@ -294,7 +299,7 @@ const calculateValue = (clientX) => {
 }
 
 // Update value
-const updateValue = (clientX) => {
+const updateValue = clientX => {
   const value = calculateValue(clientX)
   if (value !== props.modelValue) {
     emit('update:modelValue', value)
@@ -302,7 +307,7 @@ const updateValue = (clientX) => {
 }
 
 // Mouse handlers
-const handleMouseDown = (event) => {
+const handleMouseDown = event => {
   if (props.disabled) return
   isDragging.value = true
   updateValue(event.clientX)
@@ -311,7 +316,7 @@ const handleMouseDown = (event) => {
   document.addEventListener('mouseup', handleMouseUp)
 }
 
-const handleMouseMove = (event) => {
+const handleMouseMove = event => {
   if (isDragging.value) {
     updateValue(event.clientX)
   }
@@ -327,7 +332,7 @@ const handleMouseUp = () => {
 }
 
 // Touch handlers
-const handleTouchStart = (event) => {
+const handleTouchStart = event => {
   if (props.disabled) return
   isDragging.value = true
   updateValue(event.touches[0].clientX)
@@ -336,7 +341,7 @@ const handleTouchStart = (event) => {
   document.addEventListener('touchend', handleTouchEnd)
 }
 
-const handleTouchMove = (event) => {
+const handleTouchMove = event => {
   if (isDragging.value) {
     updateValue(event.touches[0].clientX)
   }
@@ -352,7 +357,7 @@ const handleTouchEnd = () => {
 }
 
 // Keyboard handler
-const handleKeyDown = (event) => {
+const handleKeyDown = event => {
   if (props.disabled) return
 
   let newValue = props.modelValue

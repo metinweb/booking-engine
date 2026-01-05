@@ -1,25 +1,40 @@
 <template>
-  <div class="relative" ref="dropdownRef">
+  <div ref="dropdownRef" class="relative">
     <button
       type="button"
-      @click="toggleDropdown"
       :disabled="disabled"
       class="flex items-center gap-2 px-3 py-2 w-full rounded-lg border transition-colors text-left"
       :class="buttonClasses"
+      @click="toggleDropdown"
     >
-      <span class="material-icons text-lg" :class="selectedPlan ? 'text-indigo-500' : 'text-gray-400'">
+      <span
+        class="material-icons text-lg"
+        :class="selectedPlan ? 'text-indigo-500' : 'text-gray-400'"
+      >
         {{ selectedPlan ? getPlanIcon(selectedPlan) : 'restaurant' }}
       </span>
       <div class="flex-1 min-w-0">
-        <div class="text-xs text-gray-500 dark:text-slate-400">{{ $t('pms.reservation.mealPlan') }}</div>
-        <div class="text-sm font-medium truncate" :class="selectedPlan ? 'text-gray-900 dark:text-white' : 'text-gray-400'">
+        <div class="text-xs text-gray-500 dark:text-slate-400">
+          {{ $t('pms.reservation.mealPlan') }}
+        </div>
+        <div
+          class="text-sm font-medium truncate"
+          :class="selectedPlan ? 'text-gray-900 dark:text-white' : 'text-gray-400'"
+        >
           {{ selectedPlan ? getLocalizedName(selectedPlan.name) : $t('common.select') }}
         </div>
       </div>
-      <span v-if="selectedPlan" class="text-xs font-mono px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300">
+      <span
+        v-if="selectedPlan"
+        class="text-xs font-mono px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300"
+      >
         {{ selectedPlan.code }}
       </span>
-      <span class="material-icons text-gray-400 transition-transform" :class="isOpen ? 'rotate-180' : ''">expand_more</span>
+      <span
+        class="material-icons text-gray-400 transition-transform"
+        :class="isOpen ? 'rotate-180' : ''"
+        >expand_more</span
+      >
     </button>
 
     <!-- Dropdown -->
@@ -46,16 +61,18 @@
             v-for="plan in mealPlans"
             :key="plan._id"
             type="button"
-            @click="selectPlan(plan)"
             class="w-full px-3 py-2.5 text-left text-sm flex items-center gap-3 border-b border-gray-100 dark:border-slate-700 last:border-b-0 transition-colors"
             :class="getItemClasses(plan)"
+            @click="selectPlan(plan)"
           >
             <!-- Icon -->
             <div
               class="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
               :class="getIconBgClass(plan)"
             >
-              <span class="material-icons text-base" :class="getIconColorClass(plan)">{{ getPlanIcon(plan) }}</span>
+              <span class="material-icons text-base" :class="getIconColorClass(plan)">{{
+                getPlanIcon(plan)
+              }}</span>
             </div>
 
             <!-- Info -->
@@ -65,7 +82,9 @@
             </div>
 
             <!-- Check -->
-            <span v-if="modelValue === plan._id" class="material-icons text-indigo-500 text-lg">check</span>
+            <span v-if="modelValue === plan._id" class="material-icons text-indigo-500 text-lg"
+              >check</span
+            >
           </button>
 
           <!-- No Meal Plans -->
@@ -101,7 +120,7 @@ const isOpen = ref(false)
 const loading = ref(false)
 const mealPlans = ref([])
 
-const getLocalizedName = (nameObj) => {
+const getLocalizedName = nameObj => {
   if (!nameObj) return ''
   if (typeof nameObj === 'string') return nameObj
   return nameObj[locale.value] || nameObj.tr || nameObj.en || Object.values(nameObj)[0] || ''
@@ -113,13 +132,15 @@ const selectedPlan = computed(() => {
 })
 
 const buttonClasses = computed(() => {
-  if (props.disabled) return 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 cursor-not-allowed opacity-60'
+  if (props.disabled)
+    return 'bg-gray-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700 cursor-not-allowed opacity-60'
   if (props.error) return 'border-red-500 bg-red-50 dark:bg-red-900/10'
-  if (selectedPlan.value) return 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20'
+  if (selectedPlan.value)
+    return 'border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-900/20'
   return 'border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 hover:border-indigo-400'
 })
 
-const getPlanIcon = (plan) => {
+const getPlanIcon = plan => {
   const code = (plan.code || '').toUpperCase()
   switch (code) {
     case 'RO':
@@ -139,7 +160,7 @@ const getPlanIcon = (plan) => {
   }
 }
 
-const getIconBgClass = (plan) => {
+const getIconBgClass = plan => {
   const code = (plan.code || '').toUpperCase()
   switch (code) {
     case 'RO':
@@ -159,7 +180,7 @@ const getIconBgClass = (plan) => {
   }
 }
 
-const getIconColorClass = (plan) => {
+const getIconColorClass = plan => {
   const code = (plan.code || '').toUpperCase()
   switch (code) {
     case 'RO':
@@ -179,7 +200,7 @@ const getIconColorClass = (plan) => {
   }
 }
 
-const getItemClasses = (plan) => {
+const getItemClasses = plan => {
   if (props.modelValue === plan._id) return 'bg-indigo-50 dark:bg-indigo-900/20'
   return 'hover:bg-gray-50 dark:hover:bg-slate-700'
 }
@@ -189,7 +210,7 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value
 }
 
-const selectPlan = (plan) => {
+const selectPlan = plan => {
   emit('update:modelValue', plan._id)
   emit('select', plan)
   isOpen.value = false
@@ -208,7 +229,7 @@ const fetchMealPlans = async () => {
   }
 }
 
-const handleClickOutside = (e) => {
+const handleClickOutside = e => {
   if (dropdownRef.value && !dropdownRef.value.contains(e.target)) {
     isOpen.value = false
   }

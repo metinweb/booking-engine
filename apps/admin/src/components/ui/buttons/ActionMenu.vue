@@ -1,12 +1,7 @@
 <template>
-  <div class="relative" ref="containerRef">
+  <div ref="containerRef" class="relative">
     <!-- Trigger Button -->
-    <button
-      type="button"
-      :class="triggerClasses"
-      :disabled="disabled"
-      @click="toggle"
-    >
+    <button type="button" :class="triggerClasses" :disabled="disabled" @click="toggle">
       <slot name="trigger">
         <span class="material-icons">{{ triggerIcon }}</span>
       </slot>
@@ -19,8 +14,7 @@
           v-if="isOpen"
           ref="menuRef"
           :style="menuStyle"
-          class="fixed z-50 min-w-[180px] py-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg
-                 border border-gray-200 dark:border-slate-700"
+          class="fixed z-50 min-w-[180px] py-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700"
           @click.stop
         >
           <template v-for="(item, index) in items" :key="item.key || index">
@@ -66,11 +60,7 @@
     </Teleport>
 
     <!-- Backdrop -->
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-40"
-      @click="close"
-    ></div>
+    <div v-if="isOpen" class="fixed inset-0 z-40" @click="close"></div>
   </div>
 </template>
 
@@ -90,7 +80,7 @@ const props = defineProps({
   placement: {
     type: String,
     default: 'bottom-end',
-    validator: (v) => ['bottom-start', 'bottom-end', 'top-start', 'top-end'].includes(v)
+    validator: v => ['bottom-start', 'bottom-end', 'top-start', 'top-end'].includes(v)
   },
   disabled: {
     type: Boolean,
@@ -99,7 +89,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   }
 })
 
@@ -206,7 +196,7 @@ const close = () => {
 }
 
 // Handle item click
-const handleItemClick = (item) => {
+const handleItemClick = item => {
   if (item.disabled) return
 
   emit('select', item)
@@ -217,7 +207,7 @@ const handleItemClick = (item) => {
 }
 
 // Handle escape key
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (e.key === 'Escape' && isOpen.value) {
     close()
   }
@@ -247,7 +237,9 @@ defineExpose({ open, close, toggle })
 <style scoped>
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .dropdown-enter-from,

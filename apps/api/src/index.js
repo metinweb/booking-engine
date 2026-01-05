@@ -5,10 +5,14 @@ import logger from './core/logger.js'
 import { connectDB } from './core/mongoose.js'
 import bootstrap from './core/bootstrap.js'
 import { initSocket } from './core/socket.js'
+import { initRedis, closeRedis } from './core/redis.js'
 import { startExchangeScheduler, stopExchangeScheduler } from './services/exchangeScheduler.js'
 
 // Connect to database
 await connectDB()
+
+// Initialize Redis (optional - for distributed rate limiting)
+await initRedis()
 
 // Run bootstrap (initial setup)
 await bootstrap()
@@ -23,20 +27,23 @@ initSocket(httpServer)
 const server = httpServer.listen(config.port, () => {
   logger.info(`🚀 Server running in ${config.env} mode`)
   logger.info(`📡 Listening on port ${config.port}`)
-  logger.info(`🔌 Socket.IO enabled`)
-  logger.info(`🌍 CORS enabled: dynamic origin validation (multi-tenant)`)
+  logger.info('🔌 Socket.IO enabled')
+  logger.info('🌍 CORS enabled: dynamic origin validation (multi-tenant)')
 
   // Start exchange rate scheduler
   startExchangeScheduler()
-  logger.info(`💱 Exchange rate scheduler started`)
+  logger.info('💱 Exchange rate scheduler started')
 })
 
 // Graceful shutdown
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = async signal => {
   logger.info(`${signal} received, shutting down gracefully...`)
 
   // Stop exchange scheduler
   stopExchangeScheduler()
+
+  // Close Redis connection
+  await closeRedis()
 
   server.close(() => {
     logger.info('Server closed')

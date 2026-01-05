@@ -28,7 +28,7 @@ const getKey = () => {
  * @param {string} text - Plain text to encrypt
  * @returns {string} Encrypted string in format: iv:authTag:encryptedData (all hex)
  */
-export const encrypt = (text) => {
+export const encrypt = text => {
   if (!text) return null
 
   try {
@@ -54,7 +54,7 @@ export const encrypt = (text) => {
  * @param {string} encryptedText - Encrypted string in format: iv:authTag:encryptedData
  * @returns {string} Decrypted plain text
  */
-export const decrypt = (encryptedText) => {
+export const decrypt = encryptedText => {
   if (!encryptedText) return null
 
   try {
@@ -87,7 +87,7 @@ export const decrypt = (encryptedText) => {
  * @param {string} text - Text to check
  * @returns {boolean} True if text appears to be encrypted
  */
-export const isEncrypted = (text) => {
+export const isEncrypted = text => {
   if (!text || typeof text !== 'string') return false
 
   const parts = text.split(':')
@@ -119,7 +119,7 @@ export const generateEncryptionKey = () => {
  * @param {string} text - Text to hash
  * @returns {string} Hex hash
  */
-export const hash = (text) => {
+export const hash = text => {
   return crypto.createHash('sha256').update(text).digest('hex')
 }
 

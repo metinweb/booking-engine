@@ -1,34 +1,53 @@
-<h2>Two-Factor Authentication Setup</h2>
-
-<p>Hello {{NAME}},</p>
-
-<p>You have enabled Two-Factor Authentication (2FA) for your account. This adds an extra layer of security to protect your account.</p>
-
-<div class="credentials-box">
-  <h3 style="margin: 0 0 12px; font-size: 16px; color: #2d3748;">Setup Instructions</h3>
-  <p style="margin-bottom: 16px;">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):</p>
-
-  <div style="text-align: center; margin: 20px 0;">
-    <img src="{{QR_CODE_URL}}" alt="2FA QR Code" style="max-width: 200px; height: auto; border: 2px solid #e2e8f0; border-radius: 8px;">
-  </div>
-
-  <p style="margin-top: 16px;"><strong>Manual Entry Code:</strong></p>
-  <p style="font-family: monospace; font-size: 18px; background: #e2e8f0; padding: 12px; border-radius: 4px; text-align: center; letter-spacing: 2px;">
-    {{SECRET_CODE}}
-  </p>
-</div>
-
-<div class="alert">
-  <p><strong>⚠️ Security Tips:</strong></p>
-  <ul style="margin: 8px 0; padding-left: 20px;">
-    <li>Keep your secret code in a safe place</li>
-    <li>Never share your 2FA codes with anyone</li>
-    <li>Save backup codes in a secure location</li>
-  </ul>
-</div>
-
-<p>Once you've set up your authenticator app, you'll need to enter the 6-digit code from the app each time you log in.</p>
-
-<p style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 14px; color: #718096;">
-  If you didn't request this change, please contact our support team immediately.
-</p>
+<!doctype html>
+<html lang="%% LANG %%" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<meta charset="utf-8">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no, url=no">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<!--[if mso]> <noscript><xml><o:OfficeDocumentSettings xmlns:o="urn:schemas-microsoft-com:office:office"><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+<style>td,th,div,p,a,h1,h2,h3,h4,h5,h6{font-family:"Segoe UI",sans-serif;mso-line-height-rule:exactly;}
+</style>
+<![endif]-->
+<title>%% TITLE %%</title>
+<style>
+@media (max-width:600px){.sm-w-full{width:100%!important;}.sm-px-4{padding-left:16px!important;padding-right:16px!important;}.sm-py-8{padding-top:32px!important;padding-bottom:32px!important;}}
+</style>
+</head>
+<body style="word-break:break-word;-webkit-font-smoothing:antialiased;"><div style="mso-hide:all;"> %% PREVIEW_TEXT %% &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; &#847; </div><div role="article" aria-roledescription="email" aria-label="%% TITLE %%" lang="%% LANG %%" style="font-size:16px;font-size:1rem;">
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center" class="sm-px-4 sm-py-8" style="padding:48px 16px">
+<table style="max-width:600px;" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center"> <a href="%% SITE_URL %%"> <img src="%% LOGO_URL %%" alt="%% COMPANY_NAME %%" width="180" style="max-width:180px;height:auto;border:0;"></a>
+</td></tr></table>
+<table class="sm-w-full" style="max-width:600px" cellpadding="0" cellspacing="0" role="presentation"><tr><td class="sm-px-4">
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center"><div> <img src="https://cdn-icons-png.flaticon.com/512/6997/6997660.png" alt="2FA" width="48" height="48" style="display:block;"></div>
+</td></tr></table><h1> %% TITLE %% </h1><p> %% SUBTITLE %% </p>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td><p> ✓ %% SUCCESS_MESSAGE %% </p>
+</td></tr></table>
+<table cellpadding="0" cellspacing="0" role="presentation" if="%% BACKUP_CODES %%"><tr><td><h3>%% BACKUP_CODES_TITLE %%</h3><p>%% BACKUP_CODES_DESC %%</p>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td> <code style="font-family: monospace; white-space: pre-wrap;">
+%% BACKUP_CODES %%
+              </code>
+</td></tr></table>
+</td></tr></table>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td><p> ⚠️ %% WARNING_MESSAGE %% </p>
+</td></tr></table>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td><h3>%% NEXT_STEPS_TITLE %%</h3>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td>1. %% STEP_1 %%
+</td></tr><tr><td>2. %% STEP_2 %%
+</td></tr><tr><td>3. %% STEP_3 %%
+</td></tr></table>
+</td></tr></table>
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center">
+<table cellpadding="0" cellspacing="0" role="presentation"><tr><td style="mso-padding-alt:12px 32px;"> <a href="%% SECURITY_URL %%" style="mso-text-raise:3px;"> %% SECURITY_BUTTON %% </a>
+</td></tr></table>
+</td></tr></table><p> %% HELP_TEXT %%<br> <a href="mailto:%% SUPPORT_EMAIL %%">%% SUPPORT_EMAIL %%</a></p>
+</td></tr></table>
+<table style="max-width:600px;" cellpadding="0" cellspacing="0" role="presentation"><tr><td><p> %% FOOTER_TEXT %% </p>
+</td></tr><tr><td><p> %% COMPANY_NAME %%<br> %% COMPANY_ADDRESS %% </p>
+</td></tr><tr><td><p> <a href="%% UNSUBSCRIBE_URL %%">%% UNSUBSCRIBE_TEXT %%</a></p>
+</td></tr></table>
+</td></tr></table></div>
+</body>
+</html>

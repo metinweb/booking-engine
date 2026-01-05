@@ -2,13 +2,15 @@
   <div>
     <!-- Header with label and translate button -->
     <div class="flex items-center justify-between mb-2">
-      <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-slate-300">{{ label }}</label>
+      <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-slate-300">{{
+        label
+      }}</label>
       <button
         v-if="showTranslate && languages.length > 1"
         type="button"
-        @click="handleTranslate"
         :disabled="translating || !modelValue[selectedLang]"
         class="text-xs text-purple-600 hover:text-purple-700 dark:text-purple-400 flex items-center gap-1 disabled:opacity-50"
+        @click="handleTranslate"
       >
         <span v-if="translating" class="material-icons text-sm animate-spin">sync</span>
         <span v-else class="material-icons text-sm">translate</span>
@@ -18,12 +20,13 @@
 
     <!-- Language tabs -->
     <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden">
-      <div class="flex border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 overflow-x-auto">
+      <div
+        class="flex border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 overflow-x-auto"
+      >
         <button
           v-for="lang in visibleLanguages"
           :key="lang"
           type="button"
-          @click="selectedLang = lang"
           :title="getLanguageName(lang)"
           class="relative px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors"
           :class="[
@@ -33,48 +36,60 @@
                 ? 'text-green-600 dark:text-green-400 font-semibold'
                 : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
           ]"
+          @click="selectedLang = lang"
         >
-          <span v-if="modelValue[lang] && modelValue[lang].trim() && selectedLang !== lang"
-                class="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full"></span>
+          <span
+            v-if="modelValue[lang] && modelValue[lang].trim() && selectedLang !== lang"
+            class="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full"
+          ></span>
           {{ lang.toUpperCase() }}
         </button>
         <button
           v-if="!showAllLanguages && languages.length > 5"
           type="button"
-          @click="showAllLanguages = true"
           class="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 dark:text-slate-500"
+          @click="showAllLanguages = true"
         >
           +{{ languages.length - 5 }}
         </button>
       </div>
 
       <!-- Toolbar -->
-      <div v-if="editor" class="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/30">
+      <div
+        v-if="editor"
+        class="flex flex-wrap items-center gap-1 p-2 border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/30"
+      >
         <!-- Text formatting -->
         <button
           type="button"
-          @click="editor.chain().focus().toggleBold().run()"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('bold') }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('bold')
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           title="Bold"
+          @click="editor.chain().focus().toggleBold().run()"
         >
           <span class="material-icons text-lg">format_bold</span>
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleItalic().run()"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('italic') }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('italic')
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           title="Italic"
+          @click="editor.chain().focus().toggleItalic().run()"
         >
           <span class="material-icons text-lg">format_italic</span>
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleUnderline().run()"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('underline') }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('underline')
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           title="Underline"
+          @click="editor.chain().focus().toggleUnderline().run()"
         >
           <span class="material-icons text-lg">format_underlined</span>
         </button>
@@ -84,19 +99,27 @@
         <!-- Headings -->
         <button
           type="button"
-          @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('heading', { level: 2 }) }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('heading', {
+              level: 2
+            })
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors text-sm font-bold"
           title="Heading 2"
+          @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
         >
           H2
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('heading', { level: 3 }) }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('heading', {
+              level: 3
+            })
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors text-sm font-bold"
           title="Heading 3"
+          @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
         >
           H3
         </button>
@@ -106,19 +129,23 @@
         <!-- Lists -->
         <button
           type="button"
-          @click="editor.chain().focus().toggleBulletList().run()"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('bulletList') }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('bulletList')
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           title="Bullet List"
+          @click="editor.chain().focus().toggleBulletList().run()"
         >
           <span class="material-icons text-lg">format_list_bulleted</span>
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().toggleOrderedList().run()"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('orderedList') }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('orderedList')
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           title="Numbered List"
+          @click="editor.chain().focus().toggleOrderedList().run()"
         >
           <span class="material-icons text-lg">format_list_numbered</span>
         </button>
@@ -128,19 +155,21 @@
         <!-- Link -->
         <button
           type="button"
-          @click="setLink"
-          :class="{ 'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('link') }"
+          :class="{
+            'bg-purple-100 dark:bg-purple-900/30 text-purple-600': editor.isActive('link')
+          }"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
           title="Add Link"
+          @click="setLink"
         >
           <span class="material-icons text-lg">link</span>
         </button>
         <button
           v-if="editor.isActive('link')"
           type="button"
-          @click="editor.chain().focus().unsetLink().run()"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors text-red-500"
           title="Remove Link"
+          @click="editor.chain().focus().unsetLink().run()"
         >
           <span class="material-icons text-lg">link_off</span>
         </button>
@@ -150,19 +179,19 @@
         <!-- Undo/Redo -->
         <button
           type="button"
-          @click="editor.chain().focus().undo().run()"
           :disabled="!editor.can().undo()"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-30"
           title="Undo"
+          @click="editor.chain().focus().undo().run()"
         >
           <span class="material-icons text-lg">undo</span>
         </button>
         <button
           type="button"
-          @click="editor.chain().focus().redo().run()"
           :disabled="!editor.can().redo()"
           class="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-30"
           title="Redo"
+          @click="editor.chain().focus().redo().run()"
         >
           <span class="material-icons text-lg">redo</span>
         </button>
@@ -183,7 +212,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, computed, onBeforeUnmount } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
@@ -273,7 +302,7 @@ const availableLanguages = [
   { code: 'az', name: 'Azerbaijani', flag: '' }
 ]
 
-const getLanguageName = (code) => {
+const getLanguageName = code => {
   const translatedName = t(`common.languages.${code}`)
   if (translatedName && !translatedName.includes('common.languages.')) {
     return translatedName
@@ -316,7 +345,7 @@ const editor = useEditor({
 })
 
 // Watch language change
-watch(selectedLang, (newLang) => {
+watch(selectedLang, newLang => {
   if (editor.value) {
     const content = props.modelValue[newLang] || ''
     editor.value.commands.setContent(content)
@@ -324,23 +353,31 @@ watch(selectedLang, (newLang) => {
 })
 
 // Watch modelValue changes from outside
-watch(() => props.modelValue, (newValue) => {
-  if (editor.value) {
-    const currentContent = editor.value.getHTML()
-    const newContent = newValue[selectedLang.value] || ''
-    // Only update if content is different (avoid cursor jump)
-    if (currentContent !== newContent && newContent !== '<p></p>') {
-      editor.value.commands.setContent(newContent)
+watch(
+  () => props.modelValue,
+  newValue => {
+    if (editor.value) {
+      const currentContent = editor.value.getHTML()
+      const newContent = newValue[selectedLang.value] || ''
+      // Only update if content is different (avoid cursor jump)
+      if (currentContent !== newContent && newContent !== '<p></p>') {
+        editor.value.commands.setContent(newContent)
+      }
     }
-  }
-}, { deep: true })
+  },
+  { deep: true }
+)
 
 // Watch languages prop
-watch(() => props.languages, (newLangs) => {
-  if (!newLangs.includes(selectedLang.value)) {
-    selectedLang.value = newLangs[0] || 'tr'
-  }
-}, { immediate: true })
+watch(
+  () => props.languages,
+  newLangs => {
+    if (!newLangs.includes(selectedLang.value)) {
+      selectedLang.value = newLangs[0] || 'tr'
+    }
+  },
+  { immediate: true }
+)
 
 // Set link
 const setLink = () => {

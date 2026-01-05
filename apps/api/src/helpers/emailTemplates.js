@@ -16,35 +16,68 @@ const MAIZZLE_DIR = path.join(__dirname, '../templates/maizzle')
  */
 export const TEMPLATE_VARIABLES = {
   'booking-confirmation': [
-    'BOOKING_NUMBER', 'STATUS', 'HOTEL_NAME', 'HOTEL_ADDRESS',
-    'CHECKIN_DATE', 'CHECKOUT_DATE', 'NIGHTS', 'ROOM_TYPE',
-    'GUESTS', 'BOARD_TYPE', 'TOTAL_PRICE', 'GUEST_NAME',
-    'GUEST_EMAIL', 'GUEST_PHONE', 'BOOKING_URL'
+    'BOOKING_NUMBER',
+    'STATUS',
+    'HOTEL_NAME',
+    'HOTEL_ADDRESS',
+    'CHECKIN_DATE',
+    'CHECKOUT_DATE',
+    'NIGHTS',
+    'ROOM_TYPE',
+    'GUESTS',
+    'BOARD_TYPE',
+    'TOTAL_PRICE',
+    'GUEST_NAME',
+    'GUEST_EMAIL',
+    'GUEST_PHONE',
+    'BOOKING_URL'
   ],
   'booking-cancelled': [
-    'BOOKING_NUMBER', 'HOTEL_NAME', 'CHECKIN_DATE', 'CHECKOUT_DATE',
-    'CANCELLED_AT', 'CANCELLATION_REASON', 'ORIGINAL_AMOUNT',
-    'CANCELLATION_FEE', 'REFUND_AMOUNT'
+    'BOOKING_NUMBER',
+    'HOTEL_NAME',
+    'CHECKIN_DATE',
+    'CHECKOUT_DATE',
+    'CANCELLED_AT',
+    'CANCELLATION_REASON',
+    'ORIGINAL_AMOUNT',
+    'CANCELLATION_FEE',
+    'REFUND_AMOUNT'
   ],
-  'welcome': [
-    'USER_NAME', 'USER_EMAIL', 'ACCOUNT_TYPE', 'COMPANY_NAME',
-    'DASHBOARD_URL'
-  ],
-  'password-reset': [
-    'RESET_URL', 'EXPIRY_TIME'
-  ],
-  '2fa-setup': [
-    'BACKUP_CODES', 'SECURITY_URL'
-  ],
+  welcome: ['USER_NAME', 'USER_EMAIL', 'ACCOUNT_TYPE', 'COMPANY_NAME', 'DASHBOARD_URL'],
+  'password-reset': ['RESET_URL', 'EXPIRY_TIME'],
+  '2fa-setup': ['BACKUP_CODES', 'SECURITY_URL'],
   'payment-reminder': [
-    'BOOKING_NUMBER', 'HOTEL_NAME', 'CHECKIN_DATE', 'CHECKOUT_DATE',
-    'TOTAL_AMOUNT', 'PAID_AMOUNT', 'REMAINING_AMOUNT', 'PAYMENT_DEADLINE',
+    'BOOKING_NUMBER',
+    'HOTEL_NAME',
+    'CHECKIN_DATE',
+    'CHECKOUT_DATE',
+    'TOTAL_AMOUNT',
+    'PAID_AMOUNT',
+    'REMAINING_AMOUNT',
+    'PAYMENT_DEADLINE',
     'PAYMENT_URL'
   ],
   'checkin-reminder': [
-    'BOOKING_NUMBER', 'HOTEL_NAME', 'HOTEL_ADDRESS', 'HOTEL_PHONE',
-    'CHECKIN_DATE', 'CHECKIN_TIME', 'CHECKOUT_DATE', 'CHECKOUT_TIME',
-    'ROOM_TYPE', 'GUESTS', 'MAP_URL', 'DAYS_LEFT'
+    'BOOKING_NUMBER',
+    'HOTEL_NAME',
+    'HOTEL_ADDRESS',
+    'HOTEL_PHONE',
+    'CHECKIN_DATE',
+    'CHECKIN_TIME',
+    'CHECKOUT_DATE',
+    'CHECKOUT_TIME',
+    'ROOM_TYPE',
+    'GUESTS',
+    'MAP_URL',
+    'DAYS_LEFT'
+  ],
+  activation: [
+    'USER_NAME',
+    'USER_EMAIL',
+    'INVITER_NAME',
+    'ACCOUNT_NAME',
+    'USER_ROLE',
+    'ACTIVATION_URL'
   ]
 }
 
@@ -53,11 +86,14 @@ export const TEMPLATE_VARIABLES = {
  */
 export const TEMPLATE_LABELS = {
   tr: {
-    // Common
+    // Common - Layout
     COMPANY_NAME: 'Booking Engine',
+    COMPANY_ADDRESS: 'İstanbul, Türkiye',
     FOOTER_TEXT: 'Bu e-posta otomatik olarak gönderilmiştir.',
     UNSUBSCRIBE_TEXT: 'E-posta bildirimlerinden çık',
+    UNSUBSCRIBE_URL: '#',
     HELP_TEXT: 'Yardıma mı ihtiyacınız var? Bize ulaşın:',
+    LANG: 'tr',
 
     // Booking Confirmation
     GREETING_TITLE: 'Rezervasyonunuz Onaylandı!',
@@ -105,7 +141,8 @@ export const TEMPLATE_LABELS = {
     // Password Reset
     PASSWORD_RESET_TITLE: 'Şifre Sıfırlama',
     PASSWORD_RESET_SUBTITLE: 'Şifrenizi sıfırlamak için aşağıdaki butona tıklayın.',
-    PASSWORD_RESET_DESC: 'Hesabınız için şifre sıfırlama talebinde bulundunuz. Bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.',
+    PASSWORD_RESET_DESC:
+      'Hesabınız için şifre sıfırlama talebinde bulundunuz. Bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.',
     RESET_BUTTON: 'Şifremi Sıfırla',
     ALTERNATIVE_TEXT: 'Buton çalışmıyorsa aşağıdaki linki kullanın:',
     EXPIRY_WARNING: 'Bu link 1 saat içinde geçerliliğini yitirecektir.',
@@ -116,8 +153,10 @@ export const TEMPLATE_LABELS = {
     TWO_FA_SUBTITLE: 'Hesabınız artık daha güvende!',
     SUCCESS_MESSAGE: 'İki faktörlü doğrulama başarıyla etkinleştirildi.',
     BACKUP_CODES_TITLE: 'Yedek Kodlarınız',
-    BACKUP_CODES_DESC: 'Bu kodları güvenli bir yerde saklayın. Telefonunuza erişemezseniz bu kodları kullanabilirsiniz.',
-    WARNING_MESSAGE: 'Her kod yalnızca bir kez kullanılabilir. Bu kodları asla kimseyle paylaşmayın.',
+    BACKUP_CODES_DESC:
+      'Bu kodları güvenli bir yerde saklayın. Telefonunuza erişemezseniz bu kodları kullanabilirsiniz.',
+    WARNING_MESSAGE:
+      'Her kod yalnızca bir kez kullanılabilir. Bu kodları asla kimseyle paylaşmayın.',
     NEXT_STEPS_TITLE: 'Sonraki Adımlar',
     STEP_1: 'Authenticator uygulamanızı (Google Authenticator, Authy vb.) açık tutun',
     STEP_2: 'Yedek kodlarınızı güvenli bir yerde saklayın',
@@ -139,18 +178,34 @@ export const TEMPLATE_LABELS = {
     // Check-in Reminder
     CHECKIN_TITLE: 'Check-in Hatırlatması',
     CHECKIN_SUBTITLE: 'Tatiliniz yaklaşıyor! İşte rezervasyon detaylarınız.',
-    COUNTDOWN_LABEL: 'Check-in\'e kalan',
+    COUNTDOWN_LABEL: "Check-in'e kalan",
     DAYS_TEXT: 'gün',
     IMPORTANT_INFO_TITLE: 'Önemli Bilgiler',
     DIRECTIONS_BUTTON: 'Yol Tarifi Al',
-    HOTEL_CONTACT_LABEL: 'Otel İletişim'
+    HOTEL_CONTACT_LABEL: 'Otel İletişim',
+
+    // Account Activation
+    ACTIVATION_GREETING: 'Hoş Geldiniz',
+    ACTIVATION_SUBTITLE: 'Hesabınızı aktifleştirmek için şifrenizi belirleyin.',
+    ACTIVATION_INVITER_MESSAGE: 'sizi hesaba kullanıcı olarak ekledi',
+    ACTIVATION_ACCOUNT_INFO_TITLE: 'Hesap Bilgileri',
+    ACTIVATION_ACCOUNT_LABEL: 'Hesap',
+    ACTIVATION_ROLE_LABEL: 'Rol',
+    ACTIVATION_DESCRIPTION: 'Aşağıdaki butona tıklayarak hesabınızı aktifleştirin ve şifrenizi belirleyin.',
+    ACTIVATION_ACTIVATE_BUTTON: 'Hesabı Aktifleştir',
+    ACTIVATION_ALTERNATIVE_TEXT: 'Buton çalışmıyorsa aşağıdaki linki kullanın:',
+    ACTIVATION_EXPIRY_WARNING: 'Bu link 7 gün içinde geçerliliğini yitirecektir.',
+    ACTIVATION_SECURITY_NOTE: 'Bu linki kimseyle paylaşmayın.'
   },
   en: {
-    // Common
+    // Common - Layout
     COMPANY_NAME: 'Booking Engine',
+    COMPANY_ADDRESS: 'Istanbul, Turkey',
     FOOTER_TEXT: 'This email was sent automatically.',
     UNSUBSCRIBE_TEXT: 'Unsubscribe from emails',
+    UNSUBSCRIBE_URL: '#',
     HELP_TEXT: 'Need help? Contact us:',
+    LANG: 'en',
 
     // Booking Confirmation
     GREETING_TITLE: 'Your Booking is Confirmed!',
@@ -198,9 +253,10 @@ export const TEMPLATE_LABELS = {
     // Password Reset
     PASSWORD_RESET_TITLE: 'Password Reset',
     PASSWORD_RESET_SUBTITLE: 'Click the button below to reset your password.',
-    PASSWORD_RESET_DESC: 'You have requested a password reset for your account. If you did not make this request, you can ignore this email.',
+    PASSWORD_RESET_DESC:
+      'You have requested a password reset for your account. If you did not make this request, you can ignore this email.',
     RESET_BUTTON: 'Reset Password',
-    ALTERNATIVE_TEXT: 'If the button doesn\'t work, use the link below:',
+    ALTERNATIVE_TEXT: "If the button doesn't work, use the link below:",
     EXPIRY_WARNING: 'This link will expire in 1 hour.',
     SECURITY_NOTE: 'For your security, do not share this link with anyone.',
 
@@ -209,7 +265,8 @@ export const TEMPLATE_LABELS = {
     TWO_FA_SUBTITLE: 'Your account is now more secure!',
     SUCCESS_MESSAGE: 'Two-factor authentication has been successfully enabled.',
     BACKUP_CODES_TITLE: 'Your Backup Codes',
-    BACKUP_CODES_DESC: 'Keep these codes in a safe place. You can use them if you can\'t access your phone.',
+    BACKUP_CODES_DESC:
+      "Keep these codes in a safe place. You can use them if you can't access your phone.",
     WARNING_MESSAGE: 'Each code can only be used once. Never share these codes with anyone.',
     NEXT_STEPS_TITLE: 'Next Steps',
     STEP_1: 'Keep your authenticator app (Google Authenticator, Authy, etc.) ready',
@@ -236,7 +293,20 @@ export const TEMPLATE_LABELS = {
     DAYS_TEXT: 'days',
     IMPORTANT_INFO_TITLE: 'Important Information',
     DIRECTIONS_BUTTON: 'Get Directions',
-    HOTEL_CONTACT_LABEL: 'Hotel Contact'
+    HOTEL_CONTACT_LABEL: 'Hotel Contact',
+
+    // Account Activation
+    ACTIVATION_GREETING: 'Welcome',
+    ACTIVATION_SUBTITLE: 'Set your password to activate your account.',
+    ACTIVATION_INVITER_MESSAGE: 'has added you as a user',
+    ACTIVATION_ACCOUNT_INFO_TITLE: 'Account Information',
+    ACTIVATION_ACCOUNT_LABEL: 'Account',
+    ACTIVATION_ROLE_LABEL: 'Role',
+    ACTIVATION_DESCRIPTION: 'Click the button below to activate your account and set your password.',
+    ACTIVATION_ACTIVATE_BUTTON: 'Activate Account',
+    ACTIVATION_ALTERNATIVE_TEXT: "If the button doesn't work, use the link below:",
+    ACTIVATION_EXPIRY_WARNING: 'This link will expire in 7 days.',
+    ACTIVATION_SECURITY_NOTE: 'Do not share this link with anyone.'
   }
 }
 
@@ -278,11 +348,14 @@ export const renderEmailTemplate = async (templateName, variables = {}, language
       ...variables
     }
 
-    // Replace all variables
+    // Replace all variables - support both %% KEY %% and {{ KEY }} formats
     Object.keys(allVariables).forEach(key => {
-      // Support both {{ KEY }} and {{KEY}} formats
-      const regex1 = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g')
+      // New Maizzle format: %% KEY %%
+      const regex1 = new RegExp(`%%\\s*${key}\\s*%%`, 'g')
       html = html.replace(regex1, allVariables[key] ?? '')
+      // Legacy format: {{ KEY }}
+      const regex2 = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g')
+      html = html.replace(regex2, allVariables[key] ?? '')
     })
 
     return html
@@ -339,7 +412,7 @@ const renderLegacyTemplate = async (templateName, variables = {}) => {
  * @param {string} html - HTML content
  * @returns {string} Plain text
  */
-export const htmlToText = (html) => {
+export const htmlToText = html => {
   return html
     .replace(/<style[^>]*>.*?<\/style>/gs, '')
     .replace(/<script[^>]*>.*?<\/script>/gs, '')

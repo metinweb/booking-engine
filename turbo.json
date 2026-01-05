@@ -10,7 +10,24 @@
                 ".output/**"
             ]
         },
-        "lint": {},
+        "test": {
+            "cache": true,
+            "outputs": [
+                "coverage/**"
+            ]
+        },
+        "test:coverage": {
+            "cache": false,
+            "outputs": [
+                "coverage/**"
+            ]
+        },
+        "lint": {
+            "cache": true
+        },
+        "lint:fix": {
+            "cache": false
+        },
         "dev": {
             "cache": false,
             "persistent": true

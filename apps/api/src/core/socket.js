@@ -8,7 +8,7 @@ let io = null
  * Initialize Socket.IO server
  * @param {http.Server} httpServer - The HTTP server instance
  */
-export const initSocket = (httpServer) => {
+export const initSocket = httpServer => {
   io = new Server(httpServer, {
     cors: {
       origin: config.cors.origin,
@@ -20,12 +20,12 @@ export const initSocket = (httpServer) => {
   })
 
   // Connection handler
-  io.on('connection', (socket) => {
+  io.on('connection', socket => {
     logger.info(`Socket connected: ${socket.id}`)
 
     // Authenticate user and join user-specific room
     // Used for notifications and user-specific events
-    socket.on('authenticate', (data) => {
+    socket.on('authenticate', data => {
       const { userId, userType = 'User' } = typeof data === 'string' ? { userId: data } : data
       if (userId) {
         const room = `user:${userId}`
@@ -40,19 +40,19 @@ export const initSocket = (httpServer) => {
     })
 
     // Join a specific room (for user-specific events)
-    socket.on('join', (room) => {
+    socket.on('join', room => {
       socket.join(room)
       logger.info(`Socket ${socket.id} joined room: ${room}`)
     })
 
     // Leave a room
-    socket.on('leave', (room) => {
+    socket.on('leave', room => {
       socket.leave(room)
       logger.info(`Socket ${socket.id} left room: ${room}`)
     })
 
     // Handle disconnection
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', reason => {
       logger.info(`Socket disconnected: ${socket.id}, reason: ${reason}`)
     })
   })

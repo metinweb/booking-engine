@@ -1,10 +1,7 @@
 <template>
-  <div class="ui-time-picker relative" ref="containerRef">
+  <div ref="containerRef" class="ui-time-picker relative">
     <!-- Label -->
-    <label
-      v-if="label"
-      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-    >
+    <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
@@ -16,21 +13,20 @@
         inputClasses,
         sizeClasses,
         error ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-slate-600',
-        disabled ? 'bg-gray-100 dark:bg-slate-700 cursor-not-allowed opacity-60' : 'bg-white dark:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-500'
+        disabled
+          ? 'bg-gray-100 dark:bg-slate-700 cursor-not-allowed opacity-60'
+          : 'bg-white dark:bg-slate-800 hover:border-gray-400 dark:hover:border-slate-500'
       ]"
       @click="togglePicker"
     >
-      <span class="material-icons text-gray-400 dark:text-slate-500 pl-3">
-        schedule
-      </span>
+      <span class="material-icons text-gray-400 dark:text-slate-500 pl-3"> schedule </span>
       <input
         type="text"
         readonly
         :value="displayValue"
         :placeholder="placeholder"
         :disabled="disabled"
-        class="flex-1 bg-transparent border-none outline-none cursor-pointer
-               text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500"
+        class="flex-1 bg-transparent border-none outline-none cursor-pointer text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500"
         :class="inputPaddingClasses"
       />
       <button
@@ -55,158 +51,156 @@
           v-if="isOpen"
           ref="dropdownRef"
           :style="dropdownStyle"
-          class="fixed z-[9999] bg-white dark:bg-slate-800 rounded-xl shadow-xl
-                 border border-gray-200 dark:border-slate-700 p-4"
+          class="fixed z-[9999] bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-gray-200 dark:border-slate-700 p-4"
         >
-        <div class="flex gap-4">
-          <!-- Hours -->
-          <div class="flex flex-col items-center">
-            <span class="text-xs text-gray-500 dark:text-slate-400 mb-2">
-              {{ hourLabel }}
-            </span>
+          <div class="flex gap-4">
+            <!-- Hours -->
             <div class="flex flex-col items-center">
-              <button
-                type="button"
-                class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
-                @click="incrementHour"
-              >
-                <span class="material-icons">keyboard_arrow_up</span>
-              </button>
-              <input
-                type="text"
-                :value="displayHour"
-                class="w-12 h-10 text-center text-xl font-semibold bg-gray-100 dark:bg-slate-700
-                       rounded-lg border-none outline-none text-gray-900 dark:text-white"
-                @input="handleHourInput"
-                @blur="validateHour"
-              />
-              <button
-                type="button"
-                class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
-                @click="decrementHour"
-              >
-                <span class="material-icons">keyboard_arrow_down</span>
-              </button>
+              <span class="text-xs text-gray-500 dark:text-slate-400 mb-2">
+                {{ hourLabel }}
+              </span>
+              <div class="flex flex-col items-center">
+                <button
+                  type="button"
+                  class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  @click="incrementHour"
+                >
+                  <span class="material-icons">keyboard_arrow_up</span>
+                </button>
+                <input
+                  type="text"
+                  :value="displayHour"
+                  class="w-12 h-10 text-center text-xl font-semibold bg-gray-100 dark:bg-slate-700 rounded-lg border-none outline-none text-gray-900 dark:text-white"
+                  @input="handleHourInput"
+                  @blur="validateHour"
+                />
+                <button
+                  type="button"
+                  class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  @click="decrementHour"
+                >
+                  <span class="material-icons">keyboard_arrow_down</span>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <!-- Separator -->
-          <div class="flex items-center text-2xl font-semibold text-gray-400 dark:text-slate-500">
-            :
-          </div>
+            <!-- Separator -->
+            <div class="flex items-center text-2xl font-semibold text-gray-400 dark:text-slate-500">
+              :
+            </div>
 
-          <!-- Minutes -->
-          <div class="flex flex-col items-center">
-            <span class="text-xs text-gray-500 dark:text-slate-400 mb-2">
-              {{ minuteLabel }}
-            </span>
+            <!-- Minutes -->
             <div class="flex flex-col items-center">
+              <span class="text-xs text-gray-500 dark:text-slate-400 mb-2">
+                {{ minuteLabel }}
+              </span>
+              <div class="flex flex-col items-center">
+                <button
+                  type="button"
+                  class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  @click="incrementMinute"
+                >
+                  <span class="material-icons">keyboard_arrow_up</span>
+                </button>
+                <input
+                  type="text"
+                  :value="displayMinute"
+                  class="w-12 h-10 text-center text-xl font-semibold bg-gray-100 dark:bg-slate-700 rounded-lg border-none outline-none text-gray-900 dark:text-white"
+                  @input="handleMinuteInput"
+                  @blur="validateMinute"
+                />
+                <button
+                  type="button"
+                  class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
+                  @click="decrementMinute"
+                >
+                  <span class="material-icons">keyboard_arrow_down</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- AM/PM (12-hour format) -->
+            <div v-if="!use24Hour" class="flex flex-col items-center">
+              <span class="text-xs text-gray-500 dark:text-slate-400 mb-2">&nbsp;</span>
+              <div class="flex flex-col gap-1 mt-2">
+                <button
+                  type="button"
+                  class="px-3 py-1 text-sm font-medium rounded-lg transition-colors"
+                  :class="
+                    period === 'AM'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                  "
+                  @click="period = 'AM'"
+                >
+                  AM
+                </button>
+                <button
+                  type="button"
+                  class="px-3 py-1 text-sm font-medium rounded-lg transition-colors"
+                  :class="
+                    period === 'PM'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+                  "
+                  @click="period = 'PM'"
+                >
+                  PM
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick select presets -->
+          <div
+            v-if="presets && presets.length"
+            class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700"
+          >
+            <div class="flex flex-wrap gap-2">
               <button
+                v-for="preset in presets"
+                :key="preset.value"
                 type="button"
-                class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
-                @click="incrementMinute"
+                class="px-2 py-1 text-xs font-medium rounded-lg transition-colors bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400"
+                @click="selectPreset(preset.value)"
               >
-                <span class="material-icons">keyboard_arrow_up</span>
-              </button>
-              <input
-                type="text"
-                :value="displayMinute"
-                class="w-12 h-10 text-center text-xl font-semibold bg-gray-100 dark:bg-slate-700
-                       rounded-lg border-none outline-none text-gray-900 dark:text-white"
-                @input="handleMinuteInput"
-                @blur="validateMinute"
-              />
-              <button
-                type="button"
-                class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
-                @click="decrementMinute"
-              >
-                <span class="material-icons">keyboard_arrow_down</span>
+                {{ preset.label }}
               </button>
             </div>
           </div>
 
-          <!-- AM/PM (12-hour format) -->
-          <div v-if="!use24Hour" class="flex flex-col items-center">
-            <span class="text-xs text-gray-500 dark:text-slate-400 mb-2">&nbsp;</span>
-            <div class="flex flex-col gap-1 mt-2">
-              <button
-                type="button"
-                class="px-3 py-1 text-sm font-medium rounded-lg transition-colors"
-                :class="period === 'AM'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'"
-                @click="period = 'AM'"
-              >
-                AM
-              </button>
-              <button
-                type="button"
-                class="px-3 py-1 text-sm font-medium rounded-lg transition-colors"
-                :class="period === 'PM'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'"
-                @click="period = 'PM'"
-              >
-                PM
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick select presets -->
-        <div v-if="presets && presets.length" class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-          <div class="flex flex-wrap gap-2">
+          <!-- Actions -->
+          <div
+            class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700"
+          >
             <button
-              v-for="preset in presets"
-              :key="preset.value"
               type="button"
-              class="px-2 py-1 text-xs font-medium rounded-lg transition-colors
-                     bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300
-                     hover:bg-indigo-100 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400"
-              @click="selectPreset(preset.value)"
+              class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
+              @click="cancel"
             >
-              {{ preset.label }}
+              {{ cancelLabel }}
+            </button>
+            <button
+              type="button"
+              class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors bg-indigo-600 text-white hover:bg-indigo-700"
+              @click="confirm"
+            >
+              {{ confirmLabel }}
             </button>
           </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
-          <button
-            type="button"
-            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors
-                   text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
-            @click="cancel"
-          >
-            {{ cancelLabel }}
-          </button>
-          <button
-            type="button"
-            class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors
-                   bg-indigo-600 text-white hover:bg-indigo-700"
-            @click="confirm"
-          >
-            {{ confirmLabel }}
-          </button>
-        </div>
         </div>
       </Transition>
     </Teleport>
 
     <!-- Click outside handler -->
     <Teleport to="body">
-      <div
-        v-if="isOpen"
-        class="fixed inset-0 z-[9998]"
-        @click="cancel"
-      ></div>
+      <div v-if="isOpen" class="fixed inset-0 z-[9998]" @click="cancel"></div>
     </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -225,7 +219,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // 24-hour format
   use24Hour: {
@@ -339,7 +333,7 @@ const minute = ref(0)
 const period = ref('AM')
 
 // Parse modelValue
-const parseTime = (timeStr) => {
+const parseTime = timeStr => {
   if (!timeStr) {
     const now = new Date()
     return { hour: now.getHours(), minute: now.getMinutes() }
@@ -353,21 +347,25 @@ const parseTime = (timeStr) => {
 }
 
 // Initialize from modelValue
-watch(() => props.modelValue, (value) => {
-  const parsed = parseTime(value)
-  hour.value = parsed.hour
-  minute.value = parsed.minute
+watch(
+  () => props.modelValue,
+  value => {
+    const parsed = parseTime(value)
+    hour.value = parsed.hour
+    minute.value = parsed.minute
 
-  if (!props.use24Hour) {
-    if (hour.value >= 12) {
-      period.value = 'PM'
-      if (hour.value > 12) hour.value -= 12
-    } else {
-      period.value = 'AM'
-      if (hour.value === 0) hour.value = 12
+    if (!props.use24Hour) {
+      if (hour.value >= 12) {
+        period.value = 'PM'
+        if (hour.value > 12) hour.value -= 12
+      } else {
+        period.value = 'AM'
+        if (hour.value === 0) hour.value = 12
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
 // Display values
 const displayHour = computed(() => {
@@ -432,14 +430,14 @@ const decrementMinute = () => {
 }
 
 // Input handlers
-const handleHourInput = (event) => {
+const handleHourInput = event => {
   let value = parseInt(event.target.value) || 0
   const max = props.use24Hour ? 23 : 12
   const min = props.use24Hour ? 0 : 1
   hour.value = Math.min(max, Math.max(min, value))
 }
 
-const handleMinuteInput = (event) => {
+const handleMinuteInput = event => {
   let value = parseInt(event.target.value) || 0
   minute.value = Math.min(59, Math.max(0, value))
 }
@@ -455,7 +453,7 @@ const validateMinute = () => {
 }
 
 // Select preset
-const selectPreset = (value) => {
+const selectPreset = value => {
   const parsed = parseTime(value)
   hour.value = parsed.hour
   minute.value = parsed.minute
@@ -522,7 +520,9 @@ const clearValue = () => {
 <style scoped>
 .picker-enter-active,
 .picker-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .picker-enter-from,

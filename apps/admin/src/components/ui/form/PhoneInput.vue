@@ -1,7 +1,11 @@
 <template>
   <div class="ui-phone-input">
     <!-- Label -->
-    <label v-if="label" :for="inputId" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+    <label
+      v-if="label"
+      :for="inputId"
+      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+    >
       {{ label }}
       <span v-if="required" class="text-red-500 ml-0.5">*</span>
     </label>
@@ -13,12 +17,14 @@
           v-if="showCountryCode"
           ref="triggerRef"
           type="button"
-          @click="toggleCountryDropdown"
           class="h-full px-3 flex items-center gap-1 border-r border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 rounded-l-lg transition-colors"
           :class="{ 'bg-gray-50 dark:bg-slate-700': showCountrySelector }"
+          @click="toggleCountryDropdown"
         >
           <span class="text-lg">{{ selectedCountry.flag }}</span>
-          <span class="text-sm text-gray-600 dark:text-gray-400">{{ selectedCountry.dialCode }}</span>
+          <span class="text-sm text-gray-600 dark:text-gray-400">{{
+            selectedCountry.dialCode
+          }}</span>
           <span class="material-icons text-sm text-gray-400">expand_more</span>
         </button>
       </div>
@@ -30,11 +36,6 @@
         type="tel"
         inputmode="numeric"
         :value="formattedValue"
-        @input="handleInput"
-        @focus="handleFocus"
-        @blur="handleBlur"
-        @paste="handlePaste"
-        @keydown="handleKeydown"
         :placeholder="placeholder || selectedCountry.placeholder"
         :disabled="disabled"
         :readonly="readonly"
@@ -49,29 +50,38 @@
           disabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-slate-800' : ''
         ]"
         autocomplete="tel"
+        @input="handleInput"
+        @focus="handleFocus"
+        @blur="handleBlur"
+        @paste="handlePaste"
+        @keydown="handleKeydown"
       />
 
       <!-- Phone Icon (no country code) -->
-      <div v-if="!showCountryCode" class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <div
+        v-if="!showCountryCode"
+        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+      >
         <span class="material-icons text-gray-400">phone</span>
       </div>
 
       <!-- Clear / Valid Icon -->
       <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1">
         <!-- Valid indicator -->
-        <span v-if="isValid && modelValue" class="material-icons text-green-500 text-lg">check_circle</span>
+        <span v-if="isValid && modelValue" class="material-icons text-green-500 text-lg"
+          >check_circle</span
+        >
 
         <!-- Clear button -->
         <button
           v-if="clearable && modelValue && !disabled"
           type="button"
-          @click="clearValue"
           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          @click="clearValue"
         >
           <span class="material-icons text-lg">close</span>
         </button>
       </div>
-
     </div>
 
     <!-- Country Selector Dropdown (Teleport to body) -->
@@ -105,16 +115,18 @@
           <!-- Country List -->
           <div class="overflow-y-auto max-h-48">
             <button
-              v-for="country in filteredCountries"
-              :key="country.code"
+              v-for="countryItem in filteredCountries"
+              :key="countryItem.code"
               type="button"
-              @click="selectCountry(country)"
               class="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors text-left"
-              :class="{ 'bg-indigo-50 dark:bg-indigo-900/20': country.code === selectedCountry.code }"
+              :class="{
+                'bg-indigo-50 dark:bg-indigo-900/20': countryItem.code === selectedCountry.code
+              }"
+              @click="selectCountry(countryItem)"
             >
-              <span class="text-xl">{{ country.flag }}</span>
-              <span class="flex-1 text-sm text-gray-900 dark:text-white">{{ country.name }}</span>
-              <span class="text-sm text-gray-500 dark:text-gray-400">{{ country.dialCode }}</span>
+              <span class="text-xl">{{ countryItem.flag }}</span>
+              <span class="flex-1 text-sm text-gray-900 dark:text-white">{{ countryItem.name }}</span>
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ countryItem.dialCode }}</span>
             </button>
           </div>
         </div>
@@ -135,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -189,7 +201,14 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'change', 'focus', 'blur', 'country-change', 'valid'])
+const emit = defineEmits([
+  'update:modelValue',
+  'change',
+  'focus',
+  'blur',
+  'country-change',
+  'valid'
+])
 
 // Refs
 const inputRef = ref(null)
@@ -246,24 +265,168 @@ const inputId = `phone-${Math.random().toString(36).substr(2, 9)}`
 
 // Countries data
 const countries = [
-  { code: 'TR', name: 'Türkiye', dialCode: '+90', flag: '🇹🇷', placeholder: '5XX XXX XX XX', format: 'XXX XXX XX XX', maxLength: 10 },
-  { code: 'US', name: 'United States', dialCode: '+1', flag: '🇺🇸', placeholder: '(XXX) XXX-XXXX', format: '(XXX) XXX-XXXX', maxLength: 10 },
-  { code: 'GB', name: 'United Kingdom', dialCode: '+44', flag: '🇬🇧', placeholder: 'XXXX XXXXXX', format: 'XXXX XXXXXX', maxLength: 10 },
-  { code: 'DE', name: 'Germany', dialCode: '+49', flag: '🇩🇪', placeholder: 'XXX XXXXXXXX', format: 'XXX XXXXXXXX', maxLength: 11 },
-  { code: 'FR', name: 'France', dialCode: '+33', flag: '🇫🇷', placeholder: 'X XX XX XX XX', format: 'X XX XX XX XX', maxLength: 9 },
-  { code: 'IT', name: 'Italy', dialCode: '+39', flag: '🇮🇹', placeholder: 'XXX XXX XXXX', format: 'XXX XXX XXXX', maxLength: 10 },
-  { code: 'ES', name: 'Spain', dialCode: '+34', flag: '🇪🇸', placeholder: 'XXX XXX XXX', format: 'XXX XXX XXX', maxLength: 9 },
-  { code: 'NL', name: 'Netherlands', dialCode: '+31', flag: '🇳🇱', placeholder: 'X XXXXXXXX', format: 'X XXXXXXXX', maxLength: 9 },
-  { code: 'RU', name: 'Russia', dialCode: '+7', flag: '🇷🇺', placeholder: 'XXX XXX-XX-XX', format: 'XXX XXX-XX-XX', maxLength: 10 },
-  { code: 'UA', name: 'Ukraine', dialCode: '+380', flag: '🇺🇦', placeholder: 'XX XXX XX XX', format: 'XX XXX XX XX', maxLength: 9 },
-  { code: 'SA', name: 'Saudi Arabia', dialCode: '+966', flag: '🇸🇦', placeholder: 'XX XXX XXXX', format: 'XX XXX XXXX', maxLength: 9 },
-  { code: 'AE', name: 'UAE', dialCode: '+971', flag: '🇦🇪', placeholder: 'XX XXX XXXX', format: 'XX XXX XXXX', maxLength: 9 },
-  { code: 'EG', name: 'Egypt', dialCode: '+20', flag: '🇪🇬', placeholder: 'XX XXXX XXXX', format: 'XX XXXX XXXX', maxLength: 10 },
-  { code: 'GR', name: 'Greece', dialCode: '+30', flag: '🇬🇷', placeholder: 'XXX XXX XXXX', format: 'XXX XXX XXXX', maxLength: 10 },
-  { code: 'IL', name: 'Israel', dialCode: '+972', flag: '🇮🇱', placeholder: 'XX-XXX-XXXX', format: 'XX-XXX-XXXX', maxLength: 9 },
-  { code: 'IR', name: 'Iran', dialCode: '+98', flag: '🇮🇷', placeholder: 'XXX XXX XXXX', format: 'XXX XXX XXXX', maxLength: 10 },
-  { code: 'AZ', name: 'Azerbaijan', dialCode: '+994', flag: '🇦🇿', placeholder: 'XX XXX XX XX', format: 'XX XXX XX XX', maxLength: 9 },
-  { code: 'GE', name: 'Georgia', dialCode: '+995', flag: '🇬🇪', placeholder: 'XXX XX XX XX', format: 'XXX XX XX XX', maxLength: 9 },
+  {
+    code: 'TR',
+    name: 'Türkiye',
+    dialCode: '+90',
+    flag: '🇹🇷',
+    placeholder: '5XX XXX XX XX',
+    format: 'XXX XXX XX XX',
+    maxLength: 10
+  },
+  {
+    code: 'US',
+    name: 'United States',
+    dialCode: '+1',
+    flag: '🇺🇸',
+    placeholder: '(XXX) XXX-XXXX',
+    format: '(XXX) XXX-XXXX',
+    maxLength: 10
+  },
+  {
+    code: 'GB',
+    name: 'United Kingdom',
+    dialCode: '+44',
+    flag: '🇬🇧',
+    placeholder: 'XXXX XXXXXX',
+    format: 'XXXX XXXXXX',
+    maxLength: 10
+  },
+  {
+    code: 'DE',
+    name: 'Germany',
+    dialCode: '+49',
+    flag: '🇩🇪',
+    placeholder: 'XXX XXXXXXXX',
+    format: 'XXX XXXXXXXX',
+    maxLength: 11
+  },
+  {
+    code: 'FR',
+    name: 'France',
+    dialCode: '+33',
+    flag: '🇫🇷',
+    placeholder: 'X XX XX XX XX',
+    format: 'X XX XX XX XX',
+    maxLength: 9
+  },
+  {
+    code: 'IT',
+    name: 'Italy',
+    dialCode: '+39',
+    flag: '🇮🇹',
+    placeholder: 'XXX XXX XXXX',
+    format: 'XXX XXX XXXX',
+    maxLength: 10
+  },
+  {
+    code: 'ES',
+    name: 'Spain',
+    dialCode: '+34',
+    flag: '🇪🇸',
+    placeholder: 'XXX XXX XXX',
+    format: 'XXX XXX XXX',
+    maxLength: 9
+  },
+  {
+    code: 'NL',
+    name: 'Netherlands',
+    dialCode: '+31',
+    flag: '🇳🇱',
+    placeholder: 'X XXXXXXXX',
+    format: 'X XXXXXXXX',
+    maxLength: 9
+  },
+  {
+    code: 'RU',
+    name: 'Russia',
+    dialCode: '+7',
+    flag: '🇷🇺',
+    placeholder: 'XXX XXX-XX-XX',
+    format: 'XXX XXX-XX-XX',
+    maxLength: 10
+  },
+  {
+    code: 'UA',
+    name: 'Ukraine',
+    dialCode: '+380',
+    flag: '🇺🇦',
+    placeholder: 'XX XXX XX XX',
+    format: 'XX XXX XX XX',
+    maxLength: 9
+  },
+  {
+    code: 'SA',
+    name: 'Saudi Arabia',
+    dialCode: '+966',
+    flag: '🇸🇦',
+    placeholder: 'XX XXX XXXX',
+    format: 'XX XXX XXXX',
+    maxLength: 9
+  },
+  {
+    code: 'AE',
+    name: 'UAE',
+    dialCode: '+971',
+    flag: '🇦🇪',
+    placeholder: 'XX XXX XXXX',
+    format: 'XX XXX XXXX',
+    maxLength: 9
+  },
+  {
+    code: 'EG',
+    name: 'Egypt',
+    dialCode: '+20',
+    flag: '🇪🇬',
+    placeholder: 'XX XXXX XXXX',
+    format: 'XX XXXX XXXX',
+    maxLength: 10
+  },
+  {
+    code: 'GR',
+    name: 'Greece',
+    dialCode: '+30',
+    flag: '🇬🇷',
+    placeholder: 'XXX XXX XXXX',
+    format: 'XXX XXX XXXX',
+    maxLength: 10
+  },
+  {
+    code: 'IL',
+    name: 'Israel',
+    dialCode: '+972',
+    flag: '🇮🇱',
+    placeholder: 'XX-XXX-XXXX',
+    format: 'XX-XXX-XXXX',
+    maxLength: 9
+  },
+  {
+    code: 'IR',
+    name: 'Iran',
+    dialCode: '+98',
+    flag: '🇮🇷',
+    placeholder: 'XXX XXX XXXX',
+    format: 'XXX XXX XXXX',
+    maxLength: 10
+  },
+  {
+    code: 'AZ',
+    name: 'Azerbaijan',
+    dialCode: '+994',
+    flag: '🇦🇿',
+    placeholder: 'XX XXX XX XX',
+    format: 'XX XXX XX XX',
+    maxLength: 9
+  },
+  {
+    code: 'GE',
+    name: 'Georgia',
+    dialCode: '+995',
+    flag: '🇬🇪',
+    placeholder: 'XXX XX XX XX',
+    format: 'XXX XX XX XX',
+    maxLength: 9
+  }
 ]
 
 // Selected country
@@ -276,10 +439,11 @@ const selectedCountry = computed(() => {
 const filteredCountries = computed(() => {
   if (!countrySearch.value) return countries
   const search = countrySearch.value.toLowerCase()
-  return countries.filter(c =>
-    c.name.toLowerCase().includes(search) ||
-    c.dialCode.includes(search) ||
-    c.code.toLowerCase().includes(search)
+  return countries.filter(
+    c =>
+      c.name.toLowerCase().includes(search) ||
+      c.dialCode.includes(search) ||
+      c.code.toLowerCase().includes(search)
   )
 })
 
@@ -302,7 +466,7 @@ const e164Value = computed(() => {
 // Geçerlilik
 const isValid = computed(() => {
   if (!rawValue.value) return false
-  return rawValue.value.length >= (selectedCountry.value.maxLength - 1)
+  return rawValue.value.length >= selectedCountry.value.maxLength - 1
 })
 
 // Telefon formatla
@@ -470,28 +634,37 @@ function handleClickOutside(event) {
 }
 
 // Props'tan gelen değeri parse et
-watch(() => props.modelValue, (newValue) => {
-  if (!newValue) {
-    rawValue.value = ''
-    return
-  }
-
-  let digits = newValue.replace(/\D/g, '')
-
-  // E.164 format ise ülke kodunu çıkar
-  if (newValue.startsWith('+')) {
-    const dialCode = selectedCountry.value.dialCode.replace('+', '')
-    if (digits.startsWith(dialCode)) {
-      digits = digits.substr(dialCode.length)
+watch(
+  () => props.modelValue,
+  newValue => {
+    if (!newValue) {
+      rawValue.value = ''
+      return
     }
+
+    let digits = newValue.replace(/\D/g, '')
+
+    // E.164 format ise ülke kodunu çıkar
+    if (newValue.startsWith('+')) {
+      const dialCode = selectedCountry.value.dialCode.replace('+', '')
+      if (digits.startsWith(dialCode)) {
+        digits = digits.substr(dialCode.length)
+      }
+    }
+
+    rawValue.value = digits
+  },
+  { immediate: true }
+)
+
+watch(
+  () => props.country,
+  newCountry => {
+    selectedCountryCode.value = newCountry
   }
+)
 
-  rawValue.value = digits
-}, { immediate: true })
-
-watch(() => props.country, (newCountry) => {
-  selectedCountryCode.value = newCountry
-})
+import { onMounted, onUnmounted } from 'vue'
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)

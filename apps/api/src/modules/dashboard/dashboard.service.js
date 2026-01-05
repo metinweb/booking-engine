@@ -13,7 +13,7 @@ import Booking from '../booking/booking.model.js'
 export const getPlatformDashboard = asyncHandler(async (req, res) => {
   const today = new Date()
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-  const startOfYear = new Date(today.getFullYear(), 0, 1)
+  const _startOfYear = new Date(today.getFullYear(), 0, 1)
 
   // Paralel sorgular
   const [
@@ -45,7 +45,9 @@ export const getPlatformDashboard = asyncHandler(async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5)
       .populate('hotel', 'name')
-      .select('bookingNumber hotel checkIn checkOut pricing.grandTotal pricing.currency status createdAt'),
+      .select(
+        'bookingNumber hotel checkIn checkOut pricing.grandTotal pricing.currency status createdAt'
+      ),
     Booking.aggregate([
       { $match: { createdAt: { $gte: startOfMonth } } },
       { $group: { _id: '$partner', count: { $sum: 1 }, revenue: { $sum: '$pricing.grandTotal' } } },
@@ -135,7 +137,13 @@ export const getPartnerDashboard = asyncHandler(async (req, res) => {
     Booking.countDocuments({ partner: partnerId, createdAt: { $gte: startOfWeek } }),
     Booking.countDocuments({ partner: partnerId, status: 'pending' }),
     Booking.aggregate([
-      { $match: { partner: partnerId, createdAt: { $gte: startOfMonth }, status: { $ne: 'cancelled' } } },
+      {
+        $match: {
+          partner: partnerId,
+          createdAt: { $gte: startOfMonth },
+          status: { $ne: 'cancelled' }
+        }
+      },
       { $group: { _id: null, total: { $sum: '$pricing.grandTotal' } } }
     ]),
     Booking.find({ partner: partnerId })
@@ -143,10 +151,18 @@ export const getPartnerDashboard = asyncHandler(async (req, res) => {
       .limit(10)
       .populate('hotel', 'name')
       .populate('source.agencyId', 'name')
-      .select('bookingNumber hotel source.agencyId source.agencyName checkIn checkOut pricing.grandTotal pricing.currency status createdAt leadGuest'),
+      .select(
+        'bookingNumber hotel source.agencyId source.agencyName checkIn checkOut pricing.grandTotal pricing.currency status createdAt leadGuest'
+      ),
     Booking.aggregate([
       { $match: { partner: partnerId, createdAt: { $gte: startOfMonth } } },
-      { $group: { _id: '$source.agencyId', count: { $sum: 1 }, revenue: { $sum: '$pricing.grandTotal' } } },
+      {
+        $group: {
+          _id: '$source.agencyId',
+          count: { $sum: 1 },
+          revenue: { $sum: '$pricing.grandTotal' }
+        }
+      },
       { $sort: { revenue: -1 } },
       { $limit: 5 },
       { $lookup: { from: 'agencies', localField: '_id', foreignField: '_id', as: 'agency' } },
@@ -198,7 +214,12 @@ export const getPartnerDashboard = asyncHandler(async (req, res) => {
         agencies: { total: totalAgencies, active: activeAgencies },
         users: { total: totalUsers },
         hotels: { total: totalHotels, active: activeHotels },
-        bookings: { total: totalBookings, monthly: monthlyBookings, weekly: weeklyBookings, pending: pendingBookings },
+        bookings: {
+          total: totalBookings,
+          monthly: monthlyBookings,
+          weekly: weeklyBookings,
+          pending: pendingBookings
+        },
         revenue: { monthly: monthlyRevenue[0]?.total || 0 },
         today: { checkIns: todayCheckIns, checkOuts: todayCheckOuts }
       },
@@ -244,18 +265,32 @@ export const getAgencyDashboard = asyncHandler(async (req, res) => {
     Booking.countDocuments({ 'source.agencyId': agencyId, status: 'pending' }),
     Booking.countDocuments({ 'source.agencyId': agencyId, status: 'confirmed' }),
     Booking.aggregate([
-      { $match: { 'source.agencyId': agencyId, createdAt: { $gte: startOfMonth }, status: { $ne: 'cancelled' } } },
+      {
+        $match: {
+          'source.agencyId': agencyId,
+          createdAt: { $gte: startOfMonth },
+          status: { $ne: 'cancelled' }
+        }
+      },
       { $group: { _id: null, total: { $sum: '$pricing.grandTotal' } } }
     ]),
     Booking.aggregate([
-      { $match: { 'source.agencyId': agencyId, createdAt: { $gte: startOfMonth }, status: { $ne: 'cancelled' } } },
+      {
+        $match: {
+          'source.agencyId': agencyId,
+          createdAt: { $gte: startOfMonth },
+          status: { $ne: 'cancelled' }
+        }
+      },
       { $group: { _id: null, total: { $sum: '$pricing.commission' } } }
     ]),
     Booking.find({ 'source.agencyId': agencyId })
       .sort({ createdAt: -1 })
       .limit(10)
       .populate('hotel', 'name')
-      .select('bookingNumber hotel checkIn checkOut pricing.grandTotal pricing.currency pricing.commission status createdAt leadGuest')
+      .select(
+        'bookingNumber hotel checkIn checkOut pricing.grandTotal pricing.currency pricing.commission status createdAt leadGuest'
+      )
   ])
 
   // Günlük trend (son 14 gün)
@@ -293,7 +328,13 @@ export const getAgencyDashboard = asyncHandler(async (req, res) => {
     data: {
       stats: {
         users: { total: totalUsers },
-        bookings: { total: totalBookings, monthly: monthlyBookings, weekly: weeklyBookings, pending: pendingBookings, confirmed: confirmedBookings },
+        bookings: {
+          total: totalBookings,
+          monthly: monthlyBookings,
+          weekly: weeklyBookings,
+          pending: pendingBookings,
+          confirmed: confirmedBookings
+        },
         revenue: { monthly: monthlyRevenue[0]?.total || 0 },
         commission: { monthly: monthlyCommission[0]?.total || 0 }
       },

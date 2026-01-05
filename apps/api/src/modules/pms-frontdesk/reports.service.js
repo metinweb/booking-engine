@@ -63,7 +63,7 @@ export const getOccupancyReport = asyncHandler(async (req, res) => {
       checkOutDate: { $gte: dayStart, $lte: dayEnd }
     })
 
-    const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms * 100).toFixed(1) : 0
+    const occupancyRate = totalRooms > 0 ? ((occupiedRooms / totalRooms) * 100).toFixed(1) : 0
 
     days.push({
       date: dayStart.toISOString().split('T')[0],
@@ -79,9 +79,10 @@ export const getOccupancyReport = asyncHandler(async (req, res) => {
   }
 
   // Calculate averages
-  const avgOccupancy = days.length > 0
-    ? (days.reduce((sum, d) => sum + d.occupancyRate, 0) / days.length).toFixed(1)
-    : 0
+  const avgOccupancy =
+    days.length > 0
+      ? (days.reduce((sum, d) => sum + d.occupancyRate, 0) / days.length).toFixed(1)
+      : 0
 
   res.json({
     success: true,
@@ -174,7 +175,7 @@ export const getRoomTypeOccupancy = asyncHandler(async (req, res) => {
   const report = roomsByType.map(rt => {
     const occupied = occupiedMap.get(rt._id?.toString()) || 0
     const available = rt.totalRooms - occupied
-    const occupancyRate = rt.totalRooms > 0 ? (occupied / rt.totalRooms * 100).toFixed(1) : 0
+    const occupancyRate = rt.totalRooms > 0 ? ((occupied / rt.totalRooms) * 100).toFixed(1) : 0
 
     return {
       roomType: rt.roomTypeInfo?.name?.tr || rt.roomTypeInfo?.name?.en || 'Bilinmiyor',
@@ -226,7 +227,7 @@ export const getArrivalsReport = asyncHandler(async (req, res) => {
     .lean()
 
   // Helper to get main guest from embedded guests array
-  const getMainGuest = (stay) => {
+  const getMainGuest = stay => {
     if (!stay.guests || stay.guests.length === 0) return null
     return stay.guests.find(g => g.isMainGuest) || stay.guests[0]
   }
@@ -301,7 +302,7 @@ export const getDeparturesReport = asyncHandler(async (req, res) => {
     .lean()
 
   // Helper to get main guest from embedded guests array
-  const getMainGuest = (stay) => {
+  const getMainGuest = stay => {
     if (!stay.guests || stay.guests.length === 0) return null
     return stay.guests.find(g => g.isMainGuest) || stay.guests[0]
   }
@@ -357,7 +358,7 @@ export const getInHouseReport = asyncHandler(async (req, res) => {
     .lean()
 
   // Helper to get main guest from embedded guests array
-  const getMainGuest = (stay) => {
+  const getMainGuest = stay => {
     if (!stay.guests || stay.guests.length === 0) return null
     return stay.guests.find(g => g.isMainGuest) || stay.guests[0]
   }
@@ -374,7 +375,10 @@ export const getInHouseReport = asyncHandler(async (req, res) => {
     success: true,
     data: {
       summary: {
-        totalGuests: inHouse.reduce((sum, s) => sum + (s.adultsCount || 0) + (s.childrenCount || 0), 0),
+        totalGuests: inHouse.reduce(
+          (sum, s) => sum + (s.adultsCount || 0) + (s.childrenCount || 0),
+          0
+        ),
         totalRooms: inHouse.length,
         vipGuests: inHouse.filter(s => s.isVip).length
       },
@@ -392,7 +396,9 @@ export const getInHouseReport = asyncHandler(async (req, res) => {
           children: s.childrenCount,
           checkInDate: s.checkInDate,
           checkOutDate: s.checkOutDate,
-          remainingNights: Math.ceil((new Date(s.checkOutDate) - new Date()) / (1000 * 60 * 60 * 24)),
+          remainingNights: Math.ceil(
+            (new Date(s.checkOutDate) - new Date()) / (1000 * 60 * 60 * 24)
+          ),
           balance: s.balance
         }
       }),
@@ -635,7 +641,14 @@ export const getHousekeepingReport = asyncHandler(async (req, res) => {
   rooms.forEach(r => {
     const floor = r.floor || 0
     if (!byFloor[floor]) {
-      byFloor[floor] = { clean: 0, dirty: 0, inspected: 0, out_of_order: 0, in_progress: 0, total: 0 }
+      byFloor[floor] = {
+        clean: 0,
+        dirty: 0,
+        inspected: 0,
+        out_of_order: 0,
+        in_progress: 0,
+        total: 0
+      }
     }
     byFloor[floor][r.housekeepingStatus]++
     byFloor[floor].total++
@@ -651,9 +664,12 @@ export const getHousekeepingReport = asyncHandler(async (req, res) => {
         inspected: byStatus.inspected.length,
         outOfOrder: byStatus.out_of_order.length,
         inProgress: byStatus.in_progress.length,
-        cleanPercentage: rooms.length > 0
-          ? ((byStatus.clean.length + byStatus.inspected.length) / rooms.length * 100).toFixed(1)
-          : 0
+        cleanPercentage:
+          rooms.length > 0
+            ? (((byStatus.clean.length + byStatus.inspected.length) / rooms.length) * 100).toFixed(
+                1
+              )
+            : 0
       },
       byFloor,
       rooms: rooms.map(r => ({
@@ -730,7 +746,7 @@ export const getGuestNationalityReport = asyncHandler(async (req, res) => {
       nationalities: byNationality.map(n => ({
         nationality: n._id || 'Bilinmiyor',
         guestCount: n.guestCount,
-        percentage: totalGuests > 0 ? (n.guestCount / totalGuests * 100).toFixed(1) : 0,
+        percentage: totalGuests > 0 ? ((n.guestCount / totalGuests) * 100).toFixed(1) : 0,
         totalNights: n.totalNights,
         totalRevenue: n.totalRevenue
       }))
@@ -888,12 +904,15 @@ export const getDashboardReport = asyncHandler(async (req, res) => {
 
   const guestCount = inHouseGuests[0] || { totalGuests: 0, adults: 0, children: 0, roomCount: 0 }
   // Use guests array count if available, otherwise fall back to adults+children
-  const totalGuestsCount = guestCount.totalGuests > 0
-    ? guestCount.totalGuests
-    : (guestCount.adults || 0) + (guestCount.children || 0)
-  const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms * 100).toFixed(1) : 0
+  const totalGuestsCount =
+    guestCount.totalGuests > 0
+      ? guestCount.totalGuests
+      : (guestCount.adults || 0) + (guestCount.children || 0)
+  const occupancyRate = totalRooms > 0 ? ((occupiedRooms / totalRooms) * 100).toFixed(1) : 0
   const hkStatus = {}
-  housekeepingStatus.forEach(h => { hkStatus[h._id] = h.count })
+  housekeepingStatus.forEach(h => {
+    hkStatus[h._id] = h.count
+  })
 
   res.json({
     success: true,

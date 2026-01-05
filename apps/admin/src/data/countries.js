@@ -32,7 +32,11 @@ export const COUNTRIES = [
   { code: 'CM', name: { en: 'Cameroon', tr: 'Kamerun' }, region: 'africa' },
   { code: 'CA', name: { en: 'Canada', tr: 'Kanada' }, region: 'americas' },
   { code: 'CV', name: { en: 'Cape Verde', tr: 'Yeşil Burun' }, region: 'africa' },
-  { code: 'CF', name: { en: 'Central African Republic', tr: 'Orta Afrika Cumhuriyeti' }, region: 'africa' },
+  {
+    code: 'CF',
+    name: { en: 'Central African Republic', tr: 'Orta Afrika Cumhuriyeti' },
+    region: 'africa'
+  },
   { code: 'TD', name: { en: 'Chad', tr: 'Çad' }, region: 'africa' },
   { code: 'CL', name: { en: 'Chile', tr: 'Şili' }, region: 'americas' },
   { code: 'CN', name: { en: 'China', tr: 'Çin' }, region: 'asia' },
@@ -142,12 +146,24 @@ export const COUNTRIES = [
   { code: 'RO', name: { en: 'Romania', tr: 'Romanya' }, region: 'europe' },
   { code: 'RU', name: { en: 'Russia', tr: 'Rusya' }, region: 'europe' },
   { code: 'RW', name: { en: 'Rwanda', tr: 'Ruanda' }, region: 'africa' },
-  { code: 'KN', name: { en: 'Saint Kitts and Nevis', tr: 'Saint Kitts ve Nevis' }, region: 'americas' },
+  {
+    code: 'KN',
+    name: { en: 'Saint Kitts and Nevis', tr: 'Saint Kitts ve Nevis' },
+    region: 'americas'
+  },
   { code: 'LC', name: { en: 'Saint Lucia', tr: 'Saint Lucia' }, region: 'americas' },
-  { code: 'VC', name: { en: 'Saint Vincent and the Grenadines', tr: 'Saint Vincent ve Grenadinler' }, region: 'americas' },
+  {
+    code: 'VC',
+    name: { en: 'Saint Vincent and the Grenadines', tr: 'Saint Vincent ve Grenadinler' },
+    region: 'americas'
+  },
   { code: 'WS', name: { en: 'Samoa', tr: 'Samoa' }, region: 'oceania' },
   { code: 'SM', name: { en: 'San Marino', tr: 'San Marino' }, region: 'europe' },
-  { code: 'ST', name: { en: 'Sao Tome and Principe', tr: 'Sao Tome ve Principe' }, region: 'africa' },
+  {
+    code: 'ST',
+    name: { en: 'Sao Tome and Principe', tr: 'Sao Tome ve Principe' },
+    region: 'africa'
+  },
   { code: 'SA', name: { en: 'Saudi Arabia', tr: 'Suudi Arabistan' }, region: 'asia' },
   { code: 'SN', name: { en: 'Senegal', tr: 'Senegal' }, region: 'africa' },
   { code: 'RS', name: { en: 'Serbia', tr: 'Sırbistan' }, region: 'europe' },
@@ -183,9 +199,17 @@ export const COUNTRIES = [
   { code: 'TV', name: { en: 'Tuvalu', tr: 'Tuvalu' }, region: 'oceania' },
   { code: 'UG', name: { en: 'Uganda', tr: 'Uganda' }, region: 'africa' },
   { code: 'UA', name: { en: 'Ukraine', tr: 'Ukrayna' }, region: 'europe' },
-  { code: 'AE', name: { en: 'United Arab Emirates', tr: 'Birleşik Arap Emirlikleri' }, region: 'asia' },
+  {
+    code: 'AE',
+    name: { en: 'United Arab Emirates', tr: 'Birleşik Arap Emirlikleri' },
+    region: 'asia'
+  },
   { code: 'GB', name: { en: 'United Kingdom', tr: 'Birleşik Krallık' }, region: 'europe' },
-  { code: 'US', name: { en: 'United States', tr: 'Amerika Birleşik Devletleri' }, region: 'americas' },
+  {
+    code: 'US',
+    name: { en: 'United States', tr: 'Amerika Birleşik Devletleri' },
+    region: 'americas'
+  },
   { code: 'UY', name: { en: 'Uruguay', tr: 'Uruguay' }, region: 'americas' },
   { code: 'UZ', name: { en: 'Uzbekistan', tr: 'Özbekistan' }, region: 'asia' },
   { code: 'VU', name: { en: 'Vanuatu', tr: 'Vanuatu' }, region: 'oceania' },
@@ -208,16 +232,108 @@ export const REGIONS = [
 
 // Common/popular countries for quick selection (global)
 export const POPULAR_COUNTRIES = [
-  'TR', 'DE', 'GB', 'RU', 'NL', 'BE', 'FR', 'IT', 'ES', 'AT',
-  'CH', 'PL', 'UA', 'SA', 'AE', 'US', 'CA', 'AU', 'JP', 'CN'
+  'TR',
+  'DE',
+  'GB',
+  'RU',
+  'NL',
+  'BE',
+  'FR',
+  'IT',
+  'ES',
+  'AT',
+  'CH',
+  'PL',
+  'UA',
+  'SA',
+  'AE',
+  'US',
+  'CA',
+  'AU',
+  'JP',
+  'CN'
 ]
 
 // Popular countries by region
 export const POPULAR_COUNTRIES_BY_REGION = {
-  europe: ['TR', 'DE', 'GB', 'RU', 'NL', 'BE', 'FR', 'IT', 'ES', 'AT', 'CH', 'PL', 'UA', 'GR', 'PT', 'SE', 'NO', 'DK', 'FI', 'CZ'],
-  asia: ['SA', 'AE', 'CN', 'JP', 'KR', 'IN', 'ID', 'MY', 'TH', 'SG', 'PH', 'VN', 'IL', 'QA', 'KW', 'BH', 'IR', 'PK', 'KZ', 'UZ'],
-  americas: ['US', 'CA', 'MX', 'BR', 'AR', 'CL', 'CO', 'PE', 'VE', 'EC', 'CU', 'DO', 'JM', 'PA', 'CR'],
-  africa: ['EG', 'MA', 'TN', 'ZA', 'NG', 'KE', 'TZ', 'GH', 'ET', 'DZ', 'LY', 'SN', 'RW', 'MU', 'CM'],
+  europe: [
+    'TR',
+    'DE',
+    'GB',
+    'RU',
+    'NL',
+    'BE',
+    'FR',
+    'IT',
+    'ES',
+    'AT',
+    'CH',
+    'PL',
+    'UA',
+    'GR',
+    'PT',
+    'SE',
+    'NO',
+    'DK',
+    'FI',
+    'CZ'
+  ],
+  asia: [
+    'SA',
+    'AE',
+    'CN',
+    'JP',
+    'KR',
+    'IN',
+    'ID',
+    'MY',
+    'TH',
+    'SG',
+    'PH',
+    'VN',
+    'IL',
+    'QA',
+    'KW',
+    'BH',
+    'IR',
+    'PK',
+    'KZ',
+    'UZ'
+  ],
+  americas: [
+    'US',
+    'CA',
+    'MX',
+    'BR',
+    'AR',
+    'CL',
+    'CO',
+    'PE',
+    'VE',
+    'EC',
+    'CU',
+    'DO',
+    'JM',
+    'PA',
+    'CR'
+  ],
+  africa: [
+    'EG',
+    'MA',
+    'TN',
+    'ZA',
+    'NG',
+    'KE',
+    'TZ',
+    'GH',
+    'ET',
+    'DZ',
+    'LY',
+    'SN',
+    'RW',
+    'MU',
+    'CM'
+  ],
   oceania: ['AU', 'NZ', 'FJ', 'PG', 'WS', 'TO', 'VU', 'SB', 'KI', 'MH']
 }
 
@@ -230,7 +346,7 @@ export const CURRENCIES = [
 ]
 
 // Helper to convert country code to flag emoji
-export const getCountryFlag = (countryCode) => {
+export const getCountryFlag = countryCode => {
   if (!countryCode || countryCode.length !== 2) return ''
   const codePoints = countryCode
     .toUpperCase()
@@ -247,9 +363,10 @@ COUNTRIES.forEach(country => {
 // Get popular countries as full objects with flags
 // If region is specified, returns popular countries for that region
 export const getPopularCountries = (region = null) => {
-  const codes = region && POPULAR_COUNTRIES_BY_REGION[region]
-    ? POPULAR_COUNTRIES_BY_REGION[region]
-    : POPULAR_COUNTRIES
+  const codes =
+    region && POPULAR_COUNTRIES_BY_REGION[region]
+      ? POPULAR_COUNTRIES_BY_REGION[region]
+      : POPULAR_COUNTRIES
   return codes.map(code => COUNTRIES.find(c => c.code === code)).filter(Boolean)
 }
 
@@ -266,6 +383,6 @@ export const getRegionName = (code, locale = 'en') => {
 }
 
 // Helper to get currency info
-export const getCurrencyInfo = (code) => {
+export const getCurrencyInfo = code => {
   return CURRENCIES.find(c => c.code === code)
 }

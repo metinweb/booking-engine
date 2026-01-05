@@ -1,9 +1,16 @@
 import AuditLog from '../modules/audit/audit.model.js'
+import logger from '../core/logger.js'
 
 // Hassas alanlar - loglanmayacak
 const SENSITIVE_FIELDS = [
-  'password', 'passwordHash', 'token', 'secret', 'apiKey',
-  'twoFactorSecret', 'refreshToken', 'accessToken'
+  'password',
+  'passwordHash',
+  'token',
+  'secret',
+  'apiKey',
+  'twoFactorSecret',
+  'refreshToken',
+  'accessToken'
 ]
 
 // Büyük alanlar - kısaltılacak
@@ -30,9 +37,10 @@ const sanitizeObject = (obj, depth = 0) => {
 
     // Büyük array'leri kısalt
     if (Array.isArray(value) && LARGE_FIELDS.includes(key)) {
-      sanitized[key] = value.length > MAX_ARRAY_LENGTH
-        ? [...value.slice(0, MAX_ARRAY_LENGTH), `... +${value.length - MAX_ARRAY_LENGTH} more`]
-        : value
+      sanitized[key] =
+        value.length > MAX_ARRAY_LENGTH
+          ? [...value.slice(0, MAX_ARRAY_LENGTH), `... +${value.length - MAX_ARRAY_LENGTH} more`]
+          : value
       continue
     }
 
@@ -61,10 +69,7 @@ const getDiff = (before, after) => {
   const diff = []
   if (!before && !after) return diff
 
-  const allKeys = new Set([
-    ...Object.keys(before || {}),
-    ...Object.keys(after || {})
-  ])
+  const allKeys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})])
 
   for (const key of allKeys) {
     // Hassas ve meta alanları atla
@@ -93,7 +98,7 @@ const getDiff = (before, after) => {
 /**
  * Tek bir değeri sanitize et
  */
-const sanitizeValue = (value) => {
+const sanitizeValue = value => {
   if (value === undefined) return undefined
   if (value === null) return null
 
@@ -119,17 +124,17 @@ const sanitizeValue = (value) => {
  * Mongoose Audit Plugin
  * Document seviyesinde değişiklikleri otomatik loglar
  */
-const auditPlugin = function(schema, options = {}) {
+const auditPlugin = function (schema, options = {}) {
   const {
     module = 'unknown',
     subModule = null,
-    nameField = 'name'  // Okunabilir isim için alan
+    nameField = 'name' // Okunabilir isim için alan
   } = options
 
   /**
    * Document adını al (multilingual desteği ile)
    */
-  const getDocumentName = (doc) => {
+  const getDocumentName = doc => {
     if (!doc) return null
 
     const nameValue = doc[nameField]
@@ -146,7 +151,7 @@ const auditPlugin = function(schema, options = {}) {
   /**
    * CREATE - Yeni kayıt oluşturulduğunda
    */
-  schema.post('save', async function(doc, next) {
+  schema.post('save', async function (doc, next) {
     // Sadece yeni kayıtlar (isNew pre-save'de true, post-save'de false)
     // Bu yüzden _wasNew flag kullanıyoruz
     if (!this._wasNew) return next ? next() : undefined
@@ -171,14 +176,14 @@ const auditPlugin = function(schema, options = {}) {
         status: 'success'
       })
     } catch (error) {
-      console.error('Audit plugin error (create):', error.message)
+      logger.error('Audit plugin error (create):', error.message)
     }
 
     return next ? next() : undefined
   })
 
   // isNew flag'ini kaydet (post-save'de erişebilmek için)
-  schema.pre('save', function(next) {
+  schema.pre('save', function (next) {
     this._wasNew = this.isNew
     next()
   })
@@ -186,15 +191,15 @@ const auditPlugin = function(schema, options = {}) {
   /**
    * UPDATE - findOneAndUpdate kullanıldığında
    */
-  schema.pre('findOneAndUpdate', async function() {
+  schema.pre('findOneAndUpdate', async function () {
     try {
       this._auditBefore = await this.model.findOne(this.getQuery()).lean()
     } catch (error) {
-      console.error('Audit plugin error (pre-update):', error.message)
+      logger.error('Audit plugin error (pre-update):', error.message)
     }
   })
 
-  schema.post('findOneAndUpdate', async function(doc, next) {
+  schema.post('findOneAndUpdate', async function (doc, next) {
     if (!doc || !this._auditBefore) return next ? next() : undefined
 
     try {
@@ -226,7 +231,7 @@ const auditPlugin = function(schema, options = {}) {
         status: 'success'
       })
     } catch (error) {
-      console.error('Audit plugin error (update):', error.message)
+      logger.error('Audit plugin error (update):', error.message)
     }
 
     return next ? next() : undefined
@@ -235,15 +240,15 @@ const auditPlugin = function(schema, options = {}) {
   /**
    * DELETE - findOneAndDelete kullanıldığında
    */
-  schema.pre('findOneAndDelete', async function() {
+  schema.pre('findOneAndDelete', async function () {
     try {
       this._auditBefore = await this.model.findOne(this.getQuery()).lean()
     } catch (error) {
-      console.error('Audit plugin error (pre-delete):', error.message)
+      logger.error('Audit plugin error (pre-delete):', error.message)
     }
   })
 
-  schema.post('findOneAndDelete', async function(doc, next) {
+  schema.post('findOneAndDelete', async function (doc, next) {
     if (!this._auditBefore) return next ? next() : undefined
 
     try {
@@ -266,7 +271,7 @@ const auditPlugin = function(schema, options = {}) {
         status: 'success'
       })
     } catch (error) {
-      console.error('Audit plugin error (delete):', error.message)
+      logger.error('Audit plugin error (delete):', error.message)
     }
 
     return next ? next() : undefined
@@ -275,15 +280,15 @@ const auditPlugin = function(schema, options = {}) {
   /**
    * DELETE - deleteOne kullanıldığında
    */
-  schema.pre('deleteOne', { document: false, query: true }, async function() {
+  schema.pre('deleteOne', { document: false, query: true }, async function () {
     try {
       this._auditBefore = await this.model.findOne(this.getQuery()).lean()
     } catch (error) {
-      console.error('Audit plugin error (pre-deleteOne):', error.message)
+      logger.error('Audit plugin error (pre-deleteOne):', error.message)
     }
   })
 
-  schema.post('deleteOne', { document: false, query: true }, async function(result, next) {
+  schema.post('deleteOne', { document: false, query: true }, async function (result, next) {
     if (!this._auditBefore || result.deletedCount === 0) return next ? next() : undefined
 
     try {
@@ -306,7 +311,7 @@ const auditPlugin = function(schema, options = {}) {
         status: 'success'
       })
     } catch (error) {
-      console.error('Audit plugin error (deleteOne):', error.message)
+      logger.error('Audit plugin error (deleteOne):', error.message)
     }
 
     return next ? next() : undefined

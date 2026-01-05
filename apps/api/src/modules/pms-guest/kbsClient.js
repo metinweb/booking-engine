@@ -5,6 +5,7 @@
 
 import soap from 'soap'
 import PmsSettings from '../pms-settings/pmsSettings.model.js'
+import logger from '../../core/logger.js'
 
 // KBS Error Codes
 export const KBS_ERROR_CODES = {
@@ -28,7 +29,7 @@ export const KBS_RESPONSE_STATUS = {
  * @param {string} wsdlUrl - WSDL URL
  * @returns {Promise<object>} SOAP client
  */
-const createClient = async (wsdlUrl) => {
+const createClient = async wsdlUrl => {
   try {
     const client = await soap.createClientAsync(wsdlUrl, {
       wsdl_options: {
@@ -37,7 +38,7 @@ const createClient = async (wsdlUrl) => {
     })
     return client
   } catch (error) {
-    console.error('[KBS Client] Failed to create SOAP client:', error.message)
+    logger.error('[KBS Client] Failed to create SOAP client:', error.message)
     throw new Error(`KBS bağlantısı kurulamadı: ${error.message}`)
   }
 }
@@ -47,7 +48,7 @@ const createClient = async (wsdlUrl) => {
  * @param {string} hotelId - Hotel ID
  * @returns {Promise<object>} KBS settings
  */
-const getKbsSettings = async (hotelId) => {
+const getKbsSettings = async hotelId => {
   const settings = await PmsSettings.findOne({ hotel: hotelId })
   if (!settings || !settings.kbs) {
     throw new Error('KBS ayarları bulunamadı')
@@ -63,11 +64,17 @@ const getKbsSettings = async (hotelId) => {
  * @param {object} kbsSettings - KBS settings
  * @returns {string} WSDL URL
  */
-const getWsdlUrl = (kbsSettings) => {
+const getWsdlUrl = kbsSettings => {
   if (kbsSettings.type === 'jandarma') {
-    return kbsSettings.endpoints?.jandarmaWsdl || 'https://kbs.jandarma.gov.tr/KBS_Tesis_2/services/KBS?wsdl'
+    return (
+      kbsSettings.endpoints?.jandarmaWsdl ||
+      'https://kbs.jandarma.gov.tr/KBS_Tesis_2/services/KBS?wsdl'
+    )
   }
-  return kbsSettings.endpoints?.egmWsdl || 'https://kbs.egm.gov.tr/kbstesis/services/KbsTesisService?wsdl'
+  return (
+    kbsSettings.endpoints?.egmWsdl ||
+    'https://kbs.egm.gov.tr/kbstesis/services/KbsTesisService?wsdl'
+  )
 }
 
 /**
@@ -75,7 +82,7 @@ const getWsdlUrl = (kbsSettings) => {
  * @param {object} kbsSettings - KBS settings
  * @returns {object} Auth parameters
  */
-const buildAuthParams = (kbsSettings) => {
+const buildAuthParams = kbsSettings => {
   return {
     tesisKodu: kbsSettings.facilityCode,
     kullaniciAdi: kbsSettings.username,
@@ -89,7 +96,7 @@ const buildAuthParams = (kbsSettings) => {
  * @param {Date|string} date - Date to format
  * @returns {string} Formatted date
  */
-const formatDate = (date) => {
+const formatDate = date => {
   const d = new Date(date)
   const day = d.getDate().toString().padStart(2, '0')
   const month = (d.getMonth() + 1).toString().padStart(2, '0')
@@ -102,7 +109,7 @@ const formatDate = (date) => {
  * @param {Date|string} date - Date to format
  * @returns {string} Formatted datetime
  */
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   const d = new Date(date)
   const day = d.getDate().toString().padStart(2, '0')
   const month = (d.getMonth() + 1).toString().padStart(2, '0')
@@ -117,9 +124,14 @@ const formatDateTime = (date) => {
  * @param {object} guest - Guest object
  * @returns {boolean}
  */
-const isTurkishCitizen = (guest) => {
+const isTurkishCitizen = guest => {
   const nationality = (guest.nationality || '').toLowerCase()
-  return nationality === 'tr' || nationality === 'tc' || nationality === 'türkiye' || nationality === 'turkey'
+  return (
+    nationality === 'tr' ||
+    nationality === 'tc' ||
+    nationality === 'türkiye' ||
+    nationality === 'turkey'
+  )
 }
 
 /**
@@ -166,9 +178,10 @@ const buildForeignGuestData = (guest, stay, room) => {
  * @param {object} result - SOAP response
  * @returns {object} Parsed response
  */
-const parseResponse = (result) => {
+const parseResponse = result => {
   // KBS typically returns sonucKodu and mesaj
-  const sonucKodu = result?.sonucKodu || result?.return?.sonucKodu || result?.result?.sonucKodu || '99'
+  const sonucKodu =
+    result?.sonucKodu || result?.return?.sonucKodu || result?.result?.sonucKodu || '99'
   const mesaj = result?.mesaj || result?.return?.mesaj || result?.result?.mesaj || 'Bilinmeyen hata'
 
   return {
@@ -188,7 +201,7 @@ const parseResponse = (result) => {
  * @param {string} hotelId - Hotel ID
  * @returns {Promise<object>} Connection status
  */
-export const testConnection = async (hotelId) => {
+export const testConnection = async hotelId => {
   try {
     const kbsSettings = await getKbsSettings(hotelId)
     const wsdlUrl = getWsdlUrl(kbsSettings)
@@ -263,7 +276,7 @@ export const sendTurkishCheckIn = async (hotelId, guest, stay, room) => {
 
     return parseResponse(result)
   } catch (error) {
-    console.error('[KBS Client] Turkish check-in error:', error)
+    logger.error('[KBS Client] Turkish check-in error:', error)
     return {
       status: KBS_RESPONSE_STATUS.ERROR,
       code: KBS_ERROR_CODES.CONNECTION_ERROR,
@@ -299,7 +312,7 @@ export const sendTurkishCheckOut = async (hotelId, guest, stay, room) => {
 
     return parseResponse(result)
   } catch (error) {
-    console.error('[KBS Client] Turkish check-out error:', error)
+    logger.error('[KBS Client] Turkish check-out error:', error)
     return {
       status: KBS_RESPONSE_STATUS.ERROR,
       code: KBS_ERROR_CODES.CONNECTION_ERROR,
@@ -337,7 +350,7 @@ export const sendTurkishRoomChange = async (hotelId, guest, stay, oldRoom, newRo
 
     return parseResponse(result)
   } catch (error) {
-    console.error('[KBS Client] Turkish room change error:', error)
+    logger.error('[KBS Client] Turkish room change error:', error)
     return {
       status: KBS_RESPONSE_STATUS.ERROR,
       code: KBS_ERROR_CODES.CONNECTION_ERROR,
@@ -373,7 +386,7 @@ export const sendForeignCheckIn = async (hotelId, guest, stay, room) => {
 
     return parseResponse(result)
   } catch (error) {
-    console.error('[KBS Client] Foreign check-in error:', error)
+    logger.error('[KBS Client] Foreign check-in error:', error)
     return {
       status: KBS_RESPONSE_STATUS.ERROR,
       code: KBS_ERROR_CODES.CONNECTION_ERROR,
@@ -409,7 +422,7 @@ export const sendForeignCheckOut = async (hotelId, guest, stay, room) => {
 
     return parseResponse(result)
   } catch (error) {
-    console.error('[KBS Client] Foreign check-out error:', error)
+    logger.error('[KBS Client] Foreign check-out error:', error)
     return {
       status: KBS_RESPONSE_STATUS.ERROR,
       code: KBS_ERROR_CODES.CONNECTION_ERROR,
@@ -450,7 +463,7 @@ export const sendForeignRoomChange = async (hotelId, guest, stay, oldRoom, newRo
 
     return parseResponse(result)
   } catch (error) {
-    console.error('[KBS Client] Foreign room change error:', error)
+    logger.error('[KBS Client] Foreign room change error:', error)
     return {
       status: KBS_RESPONSE_STATUS.ERROR,
       code: KBS_ERROR_CODES.CONNECTION_ERROR,
@@ -600,9 +613,7 @@ export const scheduleAutoSend = async (hotelId, stay, room) => {
 
         for (const detail of result.details) {
           if (detail.status === KBS_RESPONSE_STATUS.SUCCESS) {
-            const guest = stay.guests.find(g =>
-              `${g.firstName} ${g.lastName}` === detail.guestName
-            )
+            const guest = stay.guests.find(g => `${g.firstName} ${g.lastName}` === detail.guestName)
             if (guest?.idNumber) {
               await Guest.findOneAndUpdate(
                 { hotel: hotelId, idNumber: guest.idNumber },
@@ -617,12 +628,11 @@ export const scheduleAutoSend = async (hotelId, stay, room) => {
           }
         }
       } catch (error) {
-        console.error('[KBS AutoSend] Error sending notifications:', error)
+        logger.error('[KBS AutoSend] Error sending notifications:', error)
       }
     }, delayMs)
-
   } catch (error) {
-    console.error('[KBS AutoSend] Error scheduling:', error)
+    logger.error('[KBS AutoSend] Error scheduling:', error)
   }
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="ui-tooltip relative inline-block" ref="containerRef">
+  <div ref="containerRef" class="ui-tooltip relative inline-block">
     <!-- Trigger element -->
     <div
       @mouseenter="showOnHover && show()"
@@ -55,19 +55,19 @@ const props = defineProps({
   position: {
     type: String,
     default: 'top',
-    validator: (v) => ['top', 'bottom', 'left', 'right'].includes(v)
+    validator: v => ['top', 'bottom', 'left', 'right'].includes(v)
   },
   // Color variant
   color: {
     type: String,
     default: 'dark',
-    validator: (v) => ['dark', 'light', 'indigo', 'blue', 'green', 'red', 'amber'].includes(v)
+    validator: v => ['dark', 'light', 'indigo', 'blue', 'green', 'red', 'amber'].includes(v)
   },
   // Size
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Show arrow
   arrow: {
@@ -129,14 +129,17 @@ let showTimeout = null
 let hideTimeout = null
 
 // Watch for manual control
-watch(() => props.modelValue, (value) => {
-  if (value !== null) {
-    isVisible.value = value
-    if (value) {
-      nextTick(updatePosition)
+watch(
+  () => props.modelValue,
+  value => {
+    if (value !== null) {
+      isVisible.value = value
+      if (value) {
+        nextTick(updatePosition)
+      }
     }
   }
-})
+)
 
 // Show tooltip
 const show = () => {
@@ -317,7 +320,9 @@ defineExpose({ show, hide, toggle })
 /* Top */
 .tooltip-top-enter-active,
 .tooltip-top-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .tooltip-top-enter-from,
 .tooltip-top-leave-to {
@@ -328,7 +333,9 @@ defineExpose({ show, hide, toggle })
 /* Bottom */
 .tooltip-bottom-enter-active,
 .tooltip-bottom-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .tooltip-bottom-enter-from,
 .tooltip-bottom-leave-to {
@@ -339,7 +346,9 @@ defineExpose({ show, hide, toggle })
 /* Left */
 .tooltip-left-enter-active,
 .tooltip-left-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .tooltip-left-enter-from,
 .tooltip-left-leave-to {
@@ -350,7 +359,9 @@ defineExpose({ show, hide, toggle })
 /* Right */
 .tooltip-right-enter-active,
 .tooltip-right-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .tooltip-right-enter-from,
 .tooltip-right-leave-to {

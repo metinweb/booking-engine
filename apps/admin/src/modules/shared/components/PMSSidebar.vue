@@ -4,13 +4,16 @@
     :class="expanded ? 'w-56' : 'w-16'"
   >
     <!-- Logo / PMS Brand -->
-    <div class="flex items-center px-3 mb-6" :class="expanded ? 'justify-between' : 'justify-center'">
-      <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0">
+    <div
+      class="flex items-center px-3 mb-6"
+      :class="expanded ? 'justify-between' : 'justify-center'"
+    >
+      <div
+        class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center flex-shrink-0"
+      >
         <span class="material-icons text-white text-xl">hotel</span>
       </div>
-      <span v-if="expanded" class="text-lg font-semibold text-white ml-3 truncate">
-        PMS
-      </span>
+      <span v-if="expanded" class="text-lg font-semibold text-white ml-3 truncate"> PMS </span>
     </div>
 
     <!-- Hotel Info -->
@@ -67,16 +70,17 @@
     <div class="mt-auto pt-4 px-2 border-t border-slate-700">
       <!-- Toggle Expand -->
       <button
-        @click="toggleExpanded"
         class="w-full flex items-center rounded-lg transition-colors duration-200 cursor-pointer text-slate-400 hover:text-white hover:bg-slate-700 mb-2"
         :class="expanded ? 'px-3 py-2.5' : 'p-3 justify-center'"
+        @click="toggleExpanded"
       >
-        <span class="material-icons flex-shrink-0 transition-transform" :class="{ 'rotate-180': expanded }">
+        <span
+          class="material-icons flex-shrink-0 transition-transform"
+          :class="{ 'rotate-180': expanded }"
+        >
           chevron_right
         </span>
-        <span v-if="expanded" class="ml-3 text-sm font-medium truncate">
-          Daralt
-        </span>
+        <span v-if="expanded" class="ml-3 text-sm font-medium truncate"> Daralt </span>
       </button>
 
       <!-- Back to Admin (Partner only) -->
@@ -88,23 +92,19 @@
         :title="!expanded ? 'Admin Panel' : ''"
       >
         <span class="material-icons flex-shrink-0 text-xl">arrow_back</span>
-        <span v-if="expanded" class="ml-3 text-sm font-medium truncate">
-          Admin Panel
-        </span>
+        <span v-if="expanded" class="ml-3 text-sm font-medium truncate"> Admin Panel </span>
       </RouterLink>
 
       <!-- Logout (PMS user only) -->
       <button
         v-if="isPmsUser"
-        @click="pmsAuthStore.logout()"
         class="w-full flex items-center rounded-lg transition-colors duration-200 cursor-pointer text-slate-400 hover:text-white hover:bg-slate-700"
         :class="expanded ? 'px-3 py-2.5' : 'p-3 justify-center'"
         :title="!expanded ? 'Cikis Yap' : ''"
+        @click="pmsAuthStore.logout()"
       >
         <span class="material-icons flex-shrink-0 text-xl">logout</span>
-        <span v-if="expanded" class="ml-3 text-sm font-medium truncate">
-          Cikis Yap
-        </span>
+        <span v-if="expanded" class="ml-3 text-sm font-medium truncate"> Cikis Yap </span>
       </button>
     </div>
   </aside>
@@ -132,7 +132,7 @@ const toggleExpanded = () => {
   expanded.value = !expanded.value
 }
 
-const isActive = (path) => {
+const isActive = path => {
   return route.path === path || route.path.startsWith(path + '/')
 }
 
@@ -143,24 +143,90 @@ const hotelName = computed(() => {
 })
 
 // Permission check helper - Partner users have full access
-const hasAccess = (permissions) => {
+const hasAccess = permissions => {
   if (!isPmsUser.value) return true // Partner has full access
   return pmsAuthStore.hasAnyPermission(permissions)
 }
 
 // All menu items with permission requirements
 const allMenuItems = [
-  { name: 'dashboard', to: '/pms/dashboard', icon: 'dashboard', label: 'Dashboard', permissions: [] },
-  { name: 'reservations', to: '/pms/reservations', icon: 'event_note', label: 'Rezervasyonlar', permissions: ['reservations.view'] },
-  { name: 'front-desk', to: '/pms/front-desk', icon: 'meeting_room', label: 'Front Desk', permissions: ['frontdesk.checkin', 'frontdesk.checkout', 'frontdesk.walkin'] },
-  { name: 'housekeeping', to: '/pms/housekeeping', icon: 'cleaning_services', label: 'Housekeeping', permissions: ['housekeeping.view'] },
-  { name: 'guests', to: '/pms/guests', icon: 'people', label: 'Misafirler', permissions: ['guests.view'] },
-  { name: 'billing', to: '/pms/billing', icon: 'receipt_long', label: 'Faturalandirma', permissions: ['billing.view', 'billing.invoice'] },
-  { name: 'cashier', to: '/pms/cashier', icon: 'point_of_sale', label: 'Kasa', permissions: ['billing.view', 'billing.payment'] },
-  { name: 'room-plan', to: '/pms/room-plan', icon: 'calendar_view_month', label: 'Oda Plani', permissions: ['reservations.view', 'frontdesk.roomMove'] },
-  { name: 'kbs', to: '/pms/kbs', icon: 'badge', label: 'KBS Bildirimi', permissions: ['guests.view'] },
-  { name: 'night-audit', to: '/pms/night-audit', icon: 'nightlight', label: 'Gece Audit', permissions: ['reports.operational', 'reports.financial'] },
-  { name: 'reports', to: '/pms/reports', icon: 'assessment', label: 'Raporlar', permissions: ['reports.operational', 'reports.financial'] },
+  {
+    name: 'dashboard',
+    to: '/pms/dashboard',
+    icon: 'dashboard',
+    label: 'Dashboard',
+    permissions: []
+  },
+  {
+    name: 'reservations',
+    to: '/pms/reservations',
+    icon: 'event_note',
+    label: 'Rezervasyonlar',
+    permissions: ['reservations.view']
+  },
+  {
+    name: 'front-desk',
+    to: '/pms/front-desk',
+    icon: 'meeting_room',
+    label: 'Front Desk',
+    permissions: ['frontdesk.checkin', 'frontdesk.checkout', 'frontdesk.walkin']
+  },
+  {
+    name: 'housekeeping',
+    to: '/pms/housekeeping',
+    icon: 'cleaning_services',
+    label: 'Housekeeping',
+    permissions: ['housekeeping.view']
+  },
+  {
+    name: 'guests',
+    to: '/pms/guests',
+    icon: 'people',
+    label: 'Misafirler',
+    permissions: ['guests.view']
+  },
+  {
+    name: 'billing',
+    to: '/pms/billing',
+    icon: 'receipt_long',
+    label: 'Faturalandirma',
+    permissions: ['billing.view', 'billing.invoice']
+  },
+  {
+    name: 'cashier',
+    to: '/pms/cashier',
+    icon: 'point_of_sale',
+    label: 'Kasa',
+    permissions: ['billing.view', 'billing.payment']
+  },
+  {
+    name: 'room-plan',
+    to: '/pms/room-plan',
+    icon: 'calendar_view_month',
+    label: 'Oda Plani',
+    permissions: ['reservations.view', 'frontdesk.roomMove']
+  },
+  {
+    name: 'kbs',
+    to: '/pms/kbs',
+    icon: 'badge',
+    label: 'KBS Bildirimi',
+    permissions: ['guests.view']
+  },
+  {
+    name: 'night-audit',
+    to: '/pms/night-audit',
+    icon: 'nightlight',
+    label: 'Gece Audit',
+    permissions: ['reports.operational', 'reports.financial']
+  },
+  {
+    name: 'reports',
+    to: '/pms/reports',
+    icon: 'assessment',
+    label: 'Raporlar',
+    permissions: ['reports.operational', 'reports.financial']
+  },
   { name: 'settings', to: '/pms/settings', icon: 'settings', label: 'Ayarlar', partnerOnly: true }
 ]
 

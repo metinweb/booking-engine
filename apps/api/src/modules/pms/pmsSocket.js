@@ -4,6 +4,7 @@
  */
 
 import { emitToRoom } from '../../core/socket.js'
+import logger from '../../core/logger.js'
 
 // PMS Event Types
 export const PMS_EVENTS = {
@@ -24,7 +25,7 @@ export const PMS_EVENTS = {
  */
 export const emitPMSEvent = (hotelId, event, data) => {
   if (!hotelId) {
-    console.warn('[PMS Socket] Cannot emit event: hotelId is required')
+    logger.warn('[PMS Socket] Cannot emit event: hotelId is required')
     return
   }
 
@@ -37,7 +38,7 @@ export const emitPMSEvent = (hotelId, event, data) => {
 
   try {
     emitToRoom(roomName, event, payload)
-  } catch (error) {
+  } catch {
     // Socket emit errors are non-critical, silently ignore
   }
 }
@@ -161,7 +162,7 @@ export const emitNotification = (hotelId, data) => {
 /**
  * Helper to get guest display name
  */
-export const getGuestDisplayName = (guest) => {
+export const getGuestDisplayName = guest => {
   if (!guest) return 'Misafir'
   if (typeof guest === 'string') return guest
   return `${guest.firstName || ''} ${guest.lastName || ''}`.trim() || 'Misafir'

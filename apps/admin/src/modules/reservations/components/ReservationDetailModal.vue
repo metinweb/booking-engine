@@ -12,11 +12,13 @@
           <button
             v-for="tab in tabs"
             :key="tab.key"
-            @click="activeTab = tab.key"
             class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
-            :class="activeTab === tab.key
-              ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-              : 'border-transparent text-gray-500 dark:text-gray-400'"
+            :class="
+              activeTab === tab.key
+                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-gray-500 dark:text-gray-400'
+            "
+            @click="activeTab = tab.key"
           >
             {{ tab.label }}
           </button>
@@ -28,10 +30,7 @@
         <!-- Status & Source -->
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span
-              class="px-3 py-1 rounded-full text-sm font-medium"
-              :class="statusClasses"
-            >
+            <span class="px-3 py-1 rounded-full text-sm font-medium" :class="statusClasses">
               {{ statusLabel }}
             </span>
             <span class="text-sm text-gray-500 dark:text-slate-400">
@@ -46,18 +45,29 @@
         <!-- Guest & Room Info -->
         <div class="grid grid-cols-2 gap-4">
           <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
-            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">Misafir</h4>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">
+              Misafir
+            </h4>
             <p class="font-medium text-gray-900 dark:text-white">
               {{ reservation.leadGuest?.firstName }} {{ reservation.leadGuest?.lastName }}
             </p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ reservation.contact?.phone }}</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ reservation.contact?.email }}</p>
-            <p v-if="reservation.leadGuest?.nationality" class="text-sm text-gray-500 dark:text-slate-400">
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ reservation.contact?.phone }}
+            </p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ reservation.contact?.email }}
+            </p>
+            <p
+              v-if="reservation.leadGuest?.nationality"
+              class="text-sm text-gray-500 dark:text-slate-400"
+            >
               Uyruk: {{ reservation.leadGuest?.nationality }}
             </p>
           </div>
           <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
-            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">Konaklama</h4>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">
+              Konaklama
+            </h4>
             <p class="font-medium text-gray-900 dark:text-white">
               {{ reservation.rooms?.[0]?.roomTypeName?.tr || reservation.rooms?.[0]?.roomTypeCode }}
             </p>
@@ -75,11 +85,15 @@
         <div class="grid grid-cols-3 gap-4">
           <div class="text-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-slate-400">Giris</p>
-            <p class="font-medium text-gray-900 dark:text-white">{{ formatDate(reservation.checkIn) }}</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ formatDate(reservation.checkIn) }}
+            </p>
           </div>
           <div class="text-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-slate-400">Cikis</p>
-            <p class="font-medium text-gray-900 dark:text-white">{{ formatDate(reservation.checkOut) }}</p>
+            <p class="font-medium text-gray-900 dark:text-white">
+              {{ formatDate(reservation.checkOut) }}
+            </p>
           </div>
           <div class="text-center p-3 border border-gray-200 dark:border-slate-600 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-slate-400">Gece</p>
@@ -93,24 +107,28 @@
           <div class="grid grid-cols-4 gap-4 text-center">
             <div>
               <p class="text-xs text-gray-500 dark:text-slate-400">Toplam</p>
-              <p class="font-bold text-gray-900 dark:text-white">{{ formatCurrency(reservation.pricing?.grandTotal) }}</p>
+              <p class="font-bold text-gray-900 dark:text-white">
+                {{ formatCurrency(reservation.pricing?.grandTotal) }}
+              </p>
             </div>
             <div>
               <p class="text-xs text-gray-500 dark:text-slate-400">Odenen</p>
-              <p class="font-bold text-green-600">{{ formatCurrency(reservation.payment?.paidAmount) }}</p>
+              <p class="font-bold text-green-600">
+                {{ formatCurrency(reservation.payment?.paidAmount) }}
+              </p>
             </div>
             <div>
               <p class="text-xs text-gray-500 dark:text-slate-400">Kalan</p>
-              <p class="font-bold" :class="reservation.payment?.dueAmount > 0 ? 'text-red-600' : 'text-green-600'">
+              <p
+                class="font-bold"
+                :class="reservation.payment?.dueAmount > 0 ? 'text-red-600' : 'text-green-600'"
+              >
                 {{ formatCurrency(reservation.payment?.dueAmount) }}
               </p>
             </div>
             <div>
               <p class="text-xs text-gray-500 dark:text-slate-400">Durum</p>
-              <span
-                class="px-2 py-0.5 rounded text-xs font-medium"
-                :class="paymentStatusClasses"
-              >
+              <span class="px-2 py-0.5 rounded text-xs font-medium" :class="paymentStatusClasses">
                 {{ paymentStatusLabel }}
               </span>
             </div>
@@ -118,8 +136,13 @@
         </div>
 
         <!-- Special Requests -->
-        <div v-if="reservation.specialRequests" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-          <h4 class="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase mb-2">Ozel Istekler</h4>
+        <div
+          v-if="reservation.specialRequests"
+          class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4"
+        >
+          <h4 class="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase mb-2">
+            Ozel Istekler
+          </h4>
           <p class="text-sm text-blue-700 dark:text-blue-300">{{ reservation.specialRequests }}</p>
         </div>
       </div>
@@ -160,9 +183,9 @@
             </div>
             <div>
               <button
-                @click="addPayment"
                 :disabled="!paymentForm.amount"
                 class="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 text-sm"
+                @click="addPayment"
               >
                 Odeme Ekle
               </button>
@@ -171,7 +194,10 @@
         </div>
 
         <!-- Payments List -->
-        <div v-if="reservation.payment?.transactions?.length > 0" class="divide-y divide-gray-200 dark:divide-slate-700">
+        <div
+          v-if="reservation.payment?.transactions?.length > 0"
+          class="divide-y divide-gray-200 dark:divide-slate-700"
+        >
           <div
             v-for="(tx, index) in reservation.payment.transactions"
             :key="index"
@@ -186,14 +212,15 @@
                 <span v-if="tx.reference"> - {{ tx.reference }}</span>
               </p>
             </div>
-            <span class="font-medium" :class="tx.type === 'refund' ? 'text-red-600' : 'text-green-600'">
+            <span
+              class="font-medium"
+              :class="tx.type === 'refund' ? 'text-red-600' : 'text-green-600'"
+            >
               {{ tx.type === 'refund' ? '-' : '+' }}{{ formatCurrency(tx.amount) }}
             </span>
           </div>
         </div>
-        <div v-else class="text-center py-8 text-gray-500 dark:text-slate-400">
-          Henuz odeme yok
-        </div>
+        <div v-else class="text-center py-8 text-gray-500 dark:text-slate-400">Henuz odeme yok</div>
       </div>
 
       <!-- Notes Tab -->
@@ -209,9 +236,9 @@
               class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-600 text-gray-900 dark:text-white text-sm"
             ></textarea>
             <button
-              @click="addNote"
               :disabled="!noteForm.content"
               class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm self-end"
+              @click="addNote"
             >
               Ekle
             </button>
@@ -231,9 +258,7 @@
             </p>
           </div>
         </div>
-        <div v-else class="text-center py-8 text-gray-500 dark:text-slate-400">
-          Henuz not yok
-        </div>
+        <div v-else class="text-center py-8 text-gray-500 dark:text-slate-400">Henuz not yok</div>
       </div>
 
       <!-- History Tab -->
@@ -244,12 +269,16 @@
             :key="index"
             class="flex items-start gap-3 py-3 border-b border-gray-100 dark:border-slate-700 last:border-0"
           >
-            <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+            <div
+              class="w-8 h-8 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center"
+            >
               <span class="material-icons text-sm text-gray-500">history</span>
             </div>
             <div class="flex-1">
               <p class="text-sm text-gray-900 dark:text-white">{{ mod.description }}</p>
-              <p class="text-xs text-gray-500 dark:text-slate-400">{{ formatDateTime(mod.modifiedAt) }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">
+                {{ formatDateTime(mod.modifiedAt) }}
+              </p>
             </div>
           </div>
         </div>
@@ -264,32 +293,32 @@
         <div class="flex items-center gap-2">
           <button
             v-if="reservation?.status === 'pending'"
-            @click="confirmReservation"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+            @click="confirmReservation"
           >
             <span class="material-icons text-sm">check_circle</span>
             Onayla
           </button>
           <button
             v-if="reservation?.status === 'confirmed' && canCheckIn"
-            @click="goToCheckIn"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            @click="goToCheckIn"
           >
             <span class="material-icons text-sm">login</span>
             Check-in
           </button>
           <button
             v-if="['pending', 'confirmed'].includes(reservation?.status)"
-            @click="markNoShow"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg flex items-center gap-2"
+            @click="markNoShow"
           >
             <span class="material-icons text-sm">person_off</span>
             No-Show
           </button>
         </div>
         <button
-          @click="close"
           class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+          @click="close"
         >
           Kapat
         </button>
@@ -345,7 +374,7 @@ const noteForm = ref({
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const tabs = [
@@ -366,7 +395,10 @@ const statusClasses = computed(() => {
 })
 
 const paymentStatusLabel = computed(() => {
-  return PAYMENT_STATUS_INFO[props.reservation?.payment?.status]?.label || props.reservation?.payment?.status
+  return (
+    PAYMENT_STATUS_INFO[props.reservation?.payment?.status]?.label ||
+    props.reservation?.payment?.status
+  )
 })
 
 const paymentStatusClasses = computed(() => {
@@ -389,7 +421,7 @@ const canCheckIn = computed(() => {
   return checkIn <= today
 })
 
-const getPaymentMethodLabel = (method) => {
+const getPaymentMethodLabel = method => {
   return PAYMENT_METHODS.find(m => m.value === method)?.label || method
 }
 
@@ -419,7 +451,11 @@ const addPayment = async () => {
   if (!paymentForm.value.amount) return
 
   try {
-    const response = await reservationService.addPayment(props.hotelId, props.reservation._id, paymentForm.value)
+    const response = await reservationService.addPayment(
+      props.hotelId,
+      props.reservation._id,
+      paymentForm.value
+    )
     toast.success('Odeme eklendi')
     paymentForm.value = { amount: null, method: 'cash', reference: '' }
     // Emit with updated reservation data so parent can update local state
@@ -433,7 +469,11 @@ const addNote = async () => {
   if (!noteForm.value.content) return
 
   try {
-    const response = await reservationService.addNote(props.hotelId, props.reservation._id, noteForm.value)
+    const response = await reservationService.addNote(
+      props.hotelId,
+      props.reservation._id,
+      noteForm.value
+    )
     toast.success('Not eklendi')
     noteForm.value = { content: '' }
     // Emit with updated reservation data so parent can update local state
@@ -448,7 +488,7 @@ const goToCheckIn = () => {
   router.push({ name: 'pms-frontdesk', query: { booking: props.reservation._id } })
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -457,7 +497,7 @@ const formatDate = (date) => {
   })
 }
 
-const formatDateTime = (date) => {
+const formatDateTime = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('tr-TR', {
     day: '2-digit',
@@ -468,7 +508,7 @@ const formatDateTime = (date) => {
   })
 }
 
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
     currency: 'TRY'
@@ -480,11 +520,14 @@ const close = () => {
   activeTab.value = 'overview'
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    activeTab.value = 'overview'
-    paymentForm.value = { amount: null, method: 'cash', reference: '' }
-    noteForm.value = { content: '' }
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      activeTab.value = 'overview'
+      paymentForm.value = { amount: null, method: 'cash', reference: '' }
+      noteForm.value = { content: '' }
+    }
   }
-})
+)
 </script>

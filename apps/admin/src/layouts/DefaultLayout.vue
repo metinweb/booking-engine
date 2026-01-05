@@ -1,5 +1,7 @@
 <template>
-  <div class="flex h-screen overflow-hidden bg-gray-100 dark:bg-slate-900 print:block print:h-auto print:overflow-visible print:bg-white">
+  <div
+    class="flex h-screen overflow-hidden bg-gray-100 dark:bg-slate-900 print:block print:h-auto print:overflow-visible print:bg-white"
+  >
     <!-- Mobile Backdrop (not shown for PMS users on PMS routes) -->
     <Transition
       enter-active-class="transition-opacity ease-linear duration-300"
@@ -27,10 +29,7 @@
     >
       <Sidebar
         v-show="showSidebar"
-        :class="[
-          uiStore.isMobile ? 'fixed left-0 top-0 z-50 h-full' : '',
-          'print:hidden'
-        ]"
+        :class="[uiStore.isMobile ? 'fixed left-0 top-0 z-50 h-full' : '', 'print:hidden']"
         @navigate="handleNavigate"
       />
     </Transition>
@@ -38,20 +37,18 @@
     <!-- Main Content Area -->
     <div class="flex-1 min-h-0 flex flex-col overflow-hidden print:block print:overflow-visible">
       <!-- Header (hidden in print) -->
-      <Header
-        :page-title="pageTitle"
-        :page-description="pageDescription"
-        class="print:hidden"
-      >
+      <Header :page-title="pageTitle" :page-description="pageDescription" class="print:hidden">
         <template #actions>
           <slot name="headerActions"></slot>
         </template>
       </Header>
 
       <!-- Page Content -->
-      <main class="flex-1 min-h-0 overflow-y-auto bg-gray-100 dark:bg-slate-900 print:overflow-visible print:bg-white">
+      <main
+        class="flex-1 min-h-0 overflow-y-auto bg-gray-100 dark:bg-slate-900 print:overflow-visible print:bg-white"
+      >
         <div class="px-4 md:px-6 py-4 md:py-8 print:px-0 print:py-0">
-          <router-view v-slot="{ Component }">
+          <router-view v-slot="{ Component, route }">
             <Transition
               enter-active-class="transition ease-out duration-200"
               enter-from-class="opacity-0 transform translate-y-4"
@@ -61,7 +58,7 @@
               leave-to-class="opacity-0 transform -translate-y-4"
               mode="out-in"
             >
-              <component :is="Component" />
+              <component :is="Component" :key="route.path" />
             </Transition>
           </router-view>
         </div>
@@ -112,11 +109,14 @@ onUnmounted(() => {
 })
 
 // Close sidebar on route change (mobile only)
-watch(() => route.path, () => {
-  if (uiStore.isMobile) {
-    uiStore.closeSidebar()
+watch(
+  () => route.path,
+  () => {
+    if (uiStore.isMobile) {
+      uiStore.closeSidebar()
+    }
   }
-})
+)
 
 // Handle navigation from sidebar
 const handleNavigate = () => {
@@ -126,7 +126,7 @@ const handleNavigate = () => {
 }
 
 // Base titles by route name
-const getBaseTitle = (routeName) => {
+const getBaseTitle = routeName => {
   if (route.meta?.titleKey) {
     return t(route.meta.titleKey)
   }
@@ -146,15 +146,15 @@ const getBaseTitle = (routeName) => {
     'market-new': t('planning.title'),
     'region-management': t('locations.title'),
     'site-settings': t('siteSettings.title'),
-    'developers': t('developers.title'),
-    'bookings': t('booking.bookings'),
+    developers: t('developers.title'),
+    bookings: t('booking.bookings'),
     'booking-new': t('booking.newBooking'),
     'booking-detail': t('booking.bookingDetails')
   }
   return titles[routeName] || 'Booking Engine'
 }
 
-const getBaseDescription = (routeName) => {
+const getBaseDescription = routeName => {
   if (route.meta?.descriptionKey) {
     return t(route.meta.descriptionKey)
   }
@@ -167,8 +167,8 @@ const getBaseDescription = (routeName) => {
     hotels: t('hotels.description'),
     'region-management': t('locations.description'),
     'site-settings': t('siteSettings.description'),
-    'developers': t('developers.description'),
-    'bookings': t('booking.bookingsDescription')
+    developers: t('developers.description'),
+    bookings: t('booking.bookingsDescription')
   }
   return descriptions[routeName] || ''
 }
@@ -199,14 +199,21 @@ const pageDescription = computed(() => {
 })
 
 // Update browser title
-watch(pageTitle, (newTitle) => {
-  document.title = newTitle ? `${newTitle} | Booking Engine` : 'Booking Engine'
-}, { immediate: true })
+watch(
+  pageTitle,
+  newTitle => {
+    document.title = newTitle ? `${newTitle} | Booking Engine` : 'Booking Engine'
+  },
+  { immediate: true }
+)
 
 // Clear custom title on route change
-watch(() => route.name, () => {
-  uiStore.clearPageTitle()
-})
+watch(
+  () => route.name,
+  () => {
+    uiStore.clearPageTitle()
+  }
+)
 </script>
 
 <style>
@@ -222,7 +229,8 @@ watch(() => route.name, () => {
     size: A4;
   }
 
-  html, body {
+  html,
+  body {
     height: auto !important;
     overflow: visible !important;
     background: white !important;
@@ -236,41 +244,89 @@ watch(() => route.name, () => {
   }
 
   /* Hide all fixed/sticky elements */
-  .fixed, .sticky {
+  .fixed,
+  .sticky {
     position: static !important;
   }
 
   /* Ensure content is visible */
-  .overflow-hidden, .overflow-y-auto {
+  .overflow-hidden,
+  .overflow-y-auto {
     overflow: visible !important;
   }
 
   /* Compact spacing */
-  .p-6 { padding: 0.75rem !important; }
-  .p-5 { padding: 0.625rem !important; }
-  .p-4 { padding: 0.5rem !important; }
-  .p-3 { padding: 0.375rem !important; }
-  .py-6 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-  .py-4 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
-  .px-6 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-  .px-4 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
-  .mb-6 { margin-bottom: 0.5rem !important; }
-  .mb-4 { margin-bottom: 0.375rem !important; }
-  .mt-6 { margin-top: 0.5rem !important; }
-  .mt-4 { margin-top: 0.375rem !important; }
-  .gap-6 { gap: 0.5rem !important; }
-  .gap-4 { gap: 0.375rem !important; }
-  .space-y-6 > * + * { margin-top: 0.5rem !important; }
-  .space-y-4 > * + * { margin-top: 0.375rem !important; }
+  .p-6 {
+    padding: 0.75rem !important;
+  }
+  .p-5 {
+    padding: 0.625rem !important;
+  }
+  .p-4 {
+    padding: 0.5rem !important;
+  }
+  .p-3 {
+    padding: 0.375rem !important;
+  }
+  .py-6 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  .py-4 {
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+  }
+  .px-6 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .px-4 {
+    padding-left: 0.375rem !important;
+    padding-right: 0.375rem !important;
+  }
+  .mb-6 {
+    margin-bottom: 0.5rem !important;
+  }
+  .mb-4 {
+    margin-bottom: 0.375rem !important;
+  }
+  .mt-6 {
+    margin-top: 0.5rem !important;
+  }
+  .mt-4 {
+    margin-top: 0.375rem !important;
+  }
+  .gap-6 {
+    gap: 0.5rem !important;
+  }
+  .gap-4 {
+    gap: 0.375rem !important;
+  }
+  .space-y-6 > * + * {
+    margin-top: 0.5rem !important;
+  }
+  .space-y-4 > * + * {
+    margin-top: 0.375rem !important;
+  }
 
   /* Smaller text */
-  .text-2xl { font-size: 1.25rem !important; }
-  .text-xl { font-size: 1rem !important; }
-  .text-lg { font-size: 0.875rem !important; }
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+  .text-xl {
+    font-size: 1rem !important;
+  }
+  .text-lg {
+    font-size: 0.875rem !important;
+  }
 
   /* Compact rounded corners */
-  .rounded-xl { border-radius: 0.5rem !important; }
-  .rounded-lg { border-radius: 0.375rem !important; }
+  .rounded-xl {
+    border-radius: 0.5rem !important;
+  }
+  .rounded-lg {
+    border-radius: 0.375rem !important;
+  }
 
   /* Reset dark mode colors for print */
   .dark\:bg-slate-800,

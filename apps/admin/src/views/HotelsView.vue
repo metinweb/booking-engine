@@ -5,7 +5,9 @@
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.statistics.total') }}</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('hotels.statistics.total') }}
+            </p>
             <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ stats.total }}</p>
           </div>
           <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-full">
@@ -16,7 +18,9 @@
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.statistics.active') }}</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('hotels.statistics.active') }}
+            </p>
             <p class="text-2xl font-bold text-green-600">{{ stats.active }}</p>
           </div>
           <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-full">
@@ -27,7 +31,9 @@
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.statistics.inactive') }}</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('hotels.statistics.inactive') }}
+            </p>
             <p class="text-2xl font-bold text-red-600">{{ stats.inactive }}</p>
           </div>
           <div class="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
@@ -38,7 +44,9 @@
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.statistics.draft') }}</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('hotels.statistics.draft') }}
+            </p>
             <p class="text-2xl font-bold text-yellow-600">{{ stats.draft }}</p>
           </div>
           <div class="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
@@ -49,7 +57,9 @@
       <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.statistics.featured') }}</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('hotels.statistics.featured') }}
+            </p>
             <p class="text-2xl font-bold text-orange-600">{{ stats.featured }}</p>
           </div>
           <div class="p-3 bg-orange-100 dark:bg-orange-900/30 rounded-full">
@@ -65,9 +75,9 @@
         <div class="flex flex-wrap justify-end items-center gap-2">
           <!-- Export Button -->
           <button
-            @click="exportToCSV"
             class="btn-secondary flex items-center"
             :title="$t('hotels.exportCSV')"
+            @click="exportToCSV"
           >
             <span class="material-icons text-lg mr-1">download</span>
             <span class="hidden sm:inline">{{ $t('hotels.export') }}</span>
@@ -96,8 +106,8 @@
               />
               <button
                 v-if="filters.search"
-                @click="filters.search = ''; fetchHotels()"
                 class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                @click="filters.search = ''; fetchHotels()"
               >
                 <span class="material-icons text-lg">close</span>
               </button>
@@ -107,18 +117,26 @@
           <!-- View Mode Toggle -->
           <div class="flex items-center bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
             <button
-              @click="viewMode = 'table'"
               class="p-2 rounded-md transition-colors"
-              :class="viewMode === 'table' ? 'bg-white dark:bg-slate-600 shadow' : 'hover:bg-gray-200 dark:hover:bg-slate-600'"
+              :class="
+                viewMode === 'table'
+                  ? 'bg-white dark:bg-slate-600 shadow'
+                  : 'hover:bg-gray-200 dark:hover:bg-slate-600'
+              "
               :title="$t('hotels.tableView')"
+              @click="viewMode = 'table'"
             >
               <span class="material-icons text-lg">view_list</span>
             </button>
             <button
-              @click="viewMode = 'grid'"
               class="p-2 rounded-md transition-colors"
-              :class="viewMode === 'grid' ? 'bg-white dark:bg-slate-600 shadow' : 'hover:bg-gray-200 dark:hover:bg-slate-600'"
+              :class="
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-slate-600 shadow'
+                  : 'hover:bg-gray-200 dark:hover:bg-slate-600'
+              "
               :title="$t('hotels.gridView')"
+              @click="viewMode = 'grid'"
             >
               <span class="material-icons text-lg">grid_view</span>
             </button>
@@ -141,10 +159,7 @@
 
           <!-- Bulk Actions -->
           <div v-if="selectedHotels.length > 0" class="relative">
-            <button
-              @click="showBulkMenu = !showBulkMenu"
-              class="btn-secondary flex items-center"
-            >
+            <button class="btn-secondary flex items-center" @click="showBulkMenu = !showBulkMenu">
               <span class="material-icons text-lg mr-1">checklist</span>
               {{ $t('hotels.selected', { count: selectedHotels.length }) }}
               <span class="material-icons text-lg ml-1">expand_more</span>
@@ -154,23 +169,23 @@
               class="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-700 rounded-lg shadow-lg border border-gray-200 dark:border-slate-600 z-20"
             >
               <button
-                @click="bulkActivate"
                 class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-600 flex items-center"
+                @click="bulkActivate"
               >
                 <span class="material-icons text-lg mr-2 text-green-600">play_circle</span>
                 {{ $t('hotels.bulkActivate') }}
               </button>
               <button
-                @click="bulkDeactivate"
                 class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-600 flex items-center"
+                @click="bulkDeactivate"
               >
                 <span class="material-icons text-lg mr-2 text-orange-600">pause_circle</span>
                 {{ $t('hotels.bulkDeactivate') }}
               </button>
-              <hr class="border-gray-200 dark:border-slate-600">
+              <hr class="border-gray-200 dark:border-slate-600" />
               <button
-                @click="confirmBulkDelete"
                 class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center"
+                @click="confirmBulkDelete"
               >
                 <span class="material-icons text-lg mr-2">delete</span>
                 {{ $t('hotels.bulkDelete') }}
@@ -212,13 +227,18 @@
 
         <!-- Active Filters -->
         <div v-if="activeFilterCount > 0" class="mt-4 flex flex-wrap items-center gap-2">
-          <span class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.activeFilters') }}:</span>
+          <span class="text-sm text-gray-500 dark:text-slate-400"
+            >{{ $t('hotels.activeFilters') }}:</span
+          >
           <span
             v-if="filters.status"
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
           >
             {{ $t(`hotels.statuses.${filters.status}`) }}
-            <button @click="filters.status = ''; fetchHotels()" class="ml-1 hover:text-purple-900">
+            <button
+              class="ml-1 hover:text-purple-900"
+              @click="filters.status = ''; fetchHotels()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
@@ -227,7 +247,10 @@
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
           >
             {{ filters.stars }} {{ $t('hotels.stars') }}
-            <button @click="filters.stars = ''; fetchHotels()" class="ml-1 hover:text-yellow-900">
+            <button
+              class="ml-1 hover:text-yellow-900"
+              @click="filters.stars = ''; fetchHotels()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
@@ -236,7 +259,10 @@
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
           >
             {{ $t(`hotels.types.${filters.type}`) }}
-            <button @click="filters.type = ''; fetchHotels()" class="ml-1 hover:text-blue-900">
+            <button
+              class="ml-1 hover:text-blue-900"
+              @click="filters.type = ''; fetchHotels()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
@@ -245,7 +271,10 @@
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
           >
             {{ filters.city }}
-            <button @click="filters.city = ''; fetchHotels()" class="ml-1 hover:text-green-900">
+            <button
+              class="ml-1 hover:text-green-900"
+              @click="filters.city = ''; fetchHotels()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
@@ -254,7 +283,10 @@
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
           >
             {{ $t(`hotels.categories.${filters.category}`) }}
-            <button @click="filters.category = ''; fetchHotels()" class="ml-1 hover:text-indigo-900">
+            <button
+              class="ml-1 hover:text-indigo-900"
+              @click="filters.category = ''; fetchHotels()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
@@ -263,13 +295,16 @@
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
           >
             {{ filters.featured === 'true' ? $t('hotels.featuredOnly') : $t('hotels.notFeatured') }}
-            <button @click="filters.featured = ''; fetchHotels()" class="ml-1 hover:text-orange-900">
+            <button
+              class="ml-1 hover:text-orange-900"
+              @click="filters.featured = ''; fetchHotels()"
+            >
               <span class="material-icons text-sm">close</span>
             </button>
           </span>
           <button
-            @click="clearAllFilters"
             class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+            @click="clearAllFilters"
           >
             <span class="material-icons text-sm mr-1">clear_all</span>
             {{ $t('hotels.clearFilters') }}
@@ -280,7 +315,9 @@
       <div class="p-6">
         <!-- Loading State -->
         <div v-if="loading" class="py-12 text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+          <div
+            class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"
+          ></div>
           <p class="mt-4 text-gray-600 dark:text-slate-400">{{ $t('common.loading') }}</p>
         </div>
 
@@ -293,11 +330,7 @@
           <p v-if="activeFilterCount > 0" class="text-sm text-gray-500 dark:text-slate-500 mt-1">
             {{ $t('hotels.tryDifferentFilters') }}
           </p>
-          <button
-            v-if="activeFilterCount > 0"
-            @click="clearAllFilters"
-            class="btn-secondary mt-4"
-          >
+          <button v-if="activeFilterCount > 0" class="btn-secondary mt-4" @click="clearAllFilters">
             {{ $t('hotels.clearFilters') }}
           </button>
         </div>
@@ -312,48 +345,66 @@
                     type="checkbox"
                     :checked="isAllSelected"
                     :indeterminate="isPartialSelected"
-                    @change="toggleSelectAll"
                     class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    @change="toggleSelectAll"
                   />
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   {{ $t('hotels.name') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   {{ $t('hotels.city') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   {{ $t('hotels.stars') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   {{ $t('hotels.type') }}
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   {{ $t('common.status.label') }}
                 </th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   {{ $t('common.actions') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
+            <tbody
+              class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700"
+            >
               <tr
                 v-for="hotel in hotels"
                 :key="hotel._id"
                 class="hover:bg-gray-50 dark:hover:bg-slate-700/50"
-                :class="{ 'bg-purple-50 dark:bg-purple-900/10': selectedHotels.includes(hotel._id) }"
+                :class="{
+                  'bg-purple-50 dark:bg-purple-900/10': selectedHotels.includes(hotel._id)
+                }"
               >
                 <td class="px-4 py-4 whitespace-nowrap">
                   <input
                     type="checkbox"
                     :checked="selectedHotels.includes(hotel._id)"
-                    @change="toggleSelect(hotel._id)"
                     class="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                    @change="toggleSelect(hotel._id)"
                   />
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="h-12 w-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-700">
+                    <div
+                      class="h-12 w-12 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-700"
+                    >
                       <img
                         v-if="getHotelImage(hotel)"
                         :src="getHotelImage(hotel)"
@@ -381,11 +432,17 @@
                         </span>
                       </div>
                       <div class="flex items-center gap-2 mt-1">
-                        <span v-if="hotel.featured" class="inline-flex items-center text-xs text-orange-600">
+                        <span
+                          v-if="hotel.featured"
+                          class="inline-flex items-center text-xs text-orange-600"
+                        >
                           <span class="material-icons text-sm mr-0.5">star</span>
                           {{ $t('hotels.featured') }}
                         </span>
-                        <span v-if="hotel.totalRooms" class="text-xs text-gray-500 dark:text-slate-400">
+                        <span
+                          v-if="hotel.totalRooms"
+                          class="text-xs text-gray-500 dark:text-slate-400"
+                        >
                           {{ hotel.totalRooms }} {{ $t('hotels.rooms') }}
                         </span>
                       </div>
@@ -397,8 +454,15 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center text-yellow-500">
-                    <span v-for="n in hotel.stars" :key="n" class="material-icons text-sm">star</span>
-                    <span v-for="n in (5 - hotel.stars)" :key="'e' + n" class="material-icons text-sm text-gray-300 dark:text-slate-600">star</span>
+                    <span v-for="n in hotel.stars" :key="n" class="material-icons text-sm"
+                      >star</span
+                    >
+                    <span
+                      v-for="n in 5 - hotel.stars"
+                      :key="'e' + n"
+                      class="material-icons text-sm text-gray-300 dark:text-slate-600"
+                      >star</span
+                    >
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-slate-400">
@@ -419,14 +483,20 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end gap-1">
                     <button
-                      @click="toggleFeatured(hotel)"
                       class="p-2 rounded-lg transition-colors"
-                      :class="hotel.featured
-                        ? 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                        : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
-                      :title="hotel.featured ? $t('hotels.removeFeatured') : $t('hotels.makeFeatured')"
+                      :class="
+                        hotel.featured
+                          ? 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                          : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                      "
+                      :title="
+                        hotel.featured ? $t('hotels.removeFeatured') : $t('hotels.makeFeatured')
+                      "
+                      @click="toggleFeatured(hotel)"
                     >
-                      <span class="material-icons text-lg">{{ hotel.featured ? 'star' : 'star_border' }}</span>
+                      <span class="material-icons text-lg">{{
+                        hotel.featured ? 'star' : 'star_border'
+                      }}</span>
                     </button>
                     <router-link
                       :to="`/hotels/${hotel._id}`"
@@ -436,19 +506,25 @@
                       <span class="material-icons text-lg">edit</span>
                     </router-link>
                     <button
-                      @click="toggleStatus(hotel)"
                       class="p-2 rounded-lg transition-colors"
-                      :class="hotel.status === 'active'
-                        ? 'text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                        : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'"
-                      :title="hotel.status === 'active' ? $t('common.deactivate') : $t('common.activate')"
+                      :class="
+                        hotel.status === 'active'
+                          ? 'text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                          : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                      "
+                      :title="
+                        hotel.status === 'active' ? $t('common.deactivate') : $t('common.activate')
+                      "
+                      @click="toggleStatus(hotel)"
                     >
-                      <span class="material-icons text-lg">{{ hotel.status === 'active' ? 'pause_circle' : 'play_circle' }}</span>
+                      <span class="material-icons text-lg">{{
+                        hotel.status === 'active' ? 'pause_circle' : 'play_circle'
+                      }}</span>
                     </button>
                     <button
-                      @click="confirmDelete(hotel)"
                       class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                       :title="$t('common.delete')"
+                      @click="confirmDelete(hotel)"
                     >
                       <span class="material-icons text-lg">delete</span>
                     </button>
@@ -483,8 +559,8 @@
                 <input
                   type="checkbox"
                   :checked="selectedHotels.includes(hotel._id)"
-                  @change="toggleSelect(hotel._id)"
                   class="rounded border-gray-300 text-purple-600 focus:ring-purple-500 w-5 h-5"
+                  @change="toggleSelect(hotel._id)"
                 />
               </div>
               <!-- Status Badge -->
@@ -502,7 +578,9 @@
               </div>
               <!-- Featured Badge -->
               <div v-if="hotel.featured" class="absolute bottom-3 left-3">
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-500 text-white">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-500 text-white"
+                >
                   <span class="material-icons text-sm mr-0.5">star</span>
                   {{ $t('hotels.featured') }}
                 </span>
@@ -534,14 +612,23 @@
               <div class="flex items-center justify-between mt-3">
                 <div class="flex items-center text-yellow-500">
                   <span v-for="n in hotel.stars" :key="n" class="material-icons text-sm">star</span>
-                  <span v-for="n in (5 - hotel.stars)" :key="'e' + n" class="material-icons text-sm text-gray-300 dark:text-slate-600">star</span>
+                  <span
+                    v-for="n in 5 - hotel.stars"
+                    :key="'e' + n"
+                    class="material-icons text-sm text-gray-300 dark:text-slate-600"
+                    >star</span
+                  >
                 </div>
-                <span class="text-xs px-2 py-1 bg-gray-100 dark:bg-slate-600 rounded text-gray-600 dark:text-slate-300">
+                <span
+                  class="text-xs px-2 py-1 bg-gray-100 dark:bg-slate-600 rounded text-gray-600 dark:text-slate-300"
+                >
                   {{ $t(`hotels.types.${hotel.type}`) }}
                 </span>
               </div>
               <!-- Card Actions -->
-              <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-slate-600">
+              <div
+                class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-slate-600"
+              >
                 <router-link
                   :to="`/hotels/${hotel._id}`"
                   class="text-sm text-purple-600 hover:text-purple-700 font-medium flex items-center"
@@ -551,29 +638,41 @@
                 </router-link>
                 <div class="flex items-center gap-1">
                   <button
+                    class="p-1.5 rounded-lg transition-colors"
+                    :class="
+                      hotel.featured
+                        ? 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                        : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'
+                    "
+                    :title="
+                      hotel.featured ? $t('hotels.removeFeatured') : $t('hotels.makeFeatured')
+                    "
                     @click="toggleFeatured(hotel)"
-                    class="p-1.5 rounded-lg transition-colors"
-                    :class="hotel.featured
-                      ? 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                      : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-700'"
-                    :title="hotel.featured ? $t('hotels.removeFeatured') : $t('hotels.makeFeatured')"
                   >
-                    <span class="material-icons text-lg">{{ hotel.featured ? 'star' : 'star_border' }}</span>
+                    <span class="material-icons text-lg">{{
+                      hotel.featured ? 'star' : 'star_border'
+                    }}</span>
                   </button>
                   <button
+                    class="p-1.5 rounded-lg transition-colors"
+                    :class="
+                      hotel.status === 'active'
+                        ? 'text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                        : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'
+                    "
+                    :title="
+                      hotel.status === 'active' ? $t('common.deactivate') : $t('common.activate')
+                    "
                     @click="toggleStatus(hotel)"
-                    class="p-1.5 rounded-lg transition-colors"
-                    :class="hotel.status === 'active'
-                      ? 'text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20'
-                      : 'text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20'"
-                    :title="hotel.status === 'active' ? $t('common.deactivate') : $t('common.activate')"
                   >
-                    <span class="material-icons text-lg">{{ hotel.status === 'active' ? 'pause_circle' : 'play_circle' }}</span>
+                    <span class="material-icons text-lg">{{
+                      hotel.status === 'active' ? 'pause_circle' : 'play_circle'
+                    }}</span>
                   </button>
                   <button
-                    @click="confirmDelete(hotel)"
                     class="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     :title="$t('common.delete')"
+                    @click="confirmDelete(hotel)"
                   >
                     <span class="material-icons text-lg">delete</span>
                   </button>
@@ -584,18 +683,29 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="pagination.total > 0" class="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div
+          v-if="pagination.total > 0"
+          class="mt-6 flex flex-wrap items-center justify-between gap-4"
+        >
           <div class="flex items-center gap-4">
             <p class="text-sm text-gray-600 dark:text-slate-400">
-              {{ $t('hotels.showing', {
-                from: ((pagination.page - 1) * pagination.limit) + 1,
-                to: Math.min(pagination.page * pagination.limit, pagination.total),
-                total: pagination.total
-              }) }}
+              {{
+                $t('hotels.showing', {
+                  from: (pagination.page - 1) * pagination.limit + 1,
+                  to: Math.min(pagination.page * pagination.limit, pagination.total),
+                  total: pagination.total
+                })
+              }}
             </p>
             <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.perPage') }}:</span>
-              <select v-model="pagination.limit" class="form-input py-1 px-2 text-sm w-20" @change="fetchHotels">
+              <span class="text-sm text-gray-500 dark:text-slate-400"
+                >{{ $t('hotels.perPage') }}:</span
+              >
+              <select
+                v-model="pagination.limit"
+                class="form-input py-1 px-2 text-sm w-20"
+                @change="fetchHotels"
+              >
                 <option :value="10">10</option>
                 <option :value="20">20</option>
                 <option :value="50">50</option>
@@ -605,18 +715,18 @@
           </div>
           <div class="flex items-center gap-2">
             <button
-              @click="changePage(1)"
               :disabled="pagination.page <= 1"
               class="btn-secondary p-2"
               :class="{ 'opacity-50 cursor-not-allowed': pagination.page <= 1 }"
+              @click="changePage(1)"
             >
               <span class="material-icons text-lg">first_page</span>
             </button>
             <button
-              @click="changePage(pagination.page - 1)"
               :disabled="pagination.page <= 1"
               class="btn-secondary p-2"
               :class="{ 'opacity-50 cursor-not-allowed': pagination.page <= 1 }"
+              @click="changePage(pagination.page - 1)"
             >
               <span class="material-icons text-lg">chevron_left</span>
             </button>
@@ -624,18 +734,18 @@
               {{ pagination.page }} / {{ pagination.pages }}
             </span>
             <button
-              @click="changePage(pagination.page + 1)"
               :disabled="pagination.page >= pagination.pages"
               class="btn-secondary p-2"
               :class="{ 'opacity-50 cursor-not-allowed': pagination.page >= pagination.pages }"
+              @click="changePage(pagination.page + 1)"
             >
               <span class="material-icons text-lg">chevron_right</span>
             </button>
             <button
-              @click="changePage(pagination.pages)"
               :disabled="pagination.page >= pagination.pages"
               class="btn-secondary p-2"
               :class="{ 'opacity-50 cursor-not-allowed': pagination.page >= pagination.pages }"
+              @click="changePage(pagination.pages)"
             >
               <span class="material-icons text-lg">last_page</span>
             </button>
@@ -645,20 +755,16 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <Modal
-      v-model="showDeleteModal"
-      :title="$t('hotels.deleteHotel')"
-      size="sm"
-    >
+    <Modal v-model="showDeleteModal" :title="$t('hotels.deleteHotel')" size="sm">
       <p class="text-gray-600 dark:text-slate-400">
         {{ $t('hotels.deleteConfirm') }}
       </p>
 
       <template #footer>
-        <button @click="showDeleteModal = false" type="button" class="btn-secondary">
+        <button type="button" class="btn-secondary" @click="showDeleteModal = false">
           {{ $t('common.no') }}
         </button>
-        <button @click="handleDelete" type="button" class="btn-danger" :disabled="deleting">
+        <button type="button" class="btn-danger" :disabled="deleting" @click="handleDelete">
           <span v-if="deleting">{{ $t('common.loading') }}</span>
           <span v-else>{{ $t('common.yes') }}</span>
         </button>
@@ -666,20 +772,16 @@
     </Modal>
 
     <!-- Bulk Delete Confirmation Modal -->
-    <Modal
-      v-model="showBulkDeleteModal"
-      :title="$t('hotels.bulkDelete')"
-      size="sm"
-    >
+    <Modal v-model="showBulkDeleteModal" :title="$t('hotels.bulkDelete')" size="sm">
       <p class="text-gray-600 dark:text-slate-400">
         {{ $t('hotels.bulkDeleteConfirm', { count: selectedHotels.length }) }}
       </p>
 
       <template #footer>
-        <button @click="showBulkDeleteModal = false" type="button" class="btn-secondary">
+        <button type="button" class="btn-secondary" @click="showBulkDeleteModal = false">
           {{ $t('common.no') }}
         </button>
-        <button @click="handleBulkDelete" type="button" class="btn-danger" :disabled="bulkDeleting">
+        <button type="button" class="btn-danger" :disabled="bulkDeleting" @click="handleBulkDelete">
           <span v-if="bulkDeleting">{{ $t('common.loading') }}</span>
           <span v-else>{{ $t('common.yes') }}</span>
         </button>
@@ -689,8 +791,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, computed, watch } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/common/Modal.vue'
@@ -698,7 +799,6 @@ import hotelService from '@/services/hotelService'
 import { usePartnerContext } from '@/composables/usePartnerContext'
 import { getImageUrl } from '@/utils/imageUrl'
 
-const router = useRouter()
 const toast = useToast()
 const { t, locale } = useI18n()
 
@@ -870,7 +970,7 @@ const fetchStats = async () => {
   }
 }
 
-const getHotelName = (hotel) => {
+const getHotelName = hotel => {
   if (typeof hotel.name === 'string') {
     return hotel.name || '-'
   }
@@ -878,7 +978,7 @@ const getHotelName = (hotel) => {
   return hotel.name?.[lang] || hotel.name?.tr || hotel.name?.en || '-'
 }
 
-const getHotelImage = (hotel) => {
+const getHotelImage = hotel => {
   // First try logo, then main image from gallery
   if (hotel.logo) {
     return getImageUrl(hotel.logo)
@@ -890,7 +990,7 @@ const getHotelImage = (hotel) => {
 
 // getImageUrl imported from @/utils/imageUrl
 
-const toggleStatus = async (hotel) => {
+const toggleStatus = async hotel => {
   const newStatus = hotel.status === 'active' ? 'inactive' : 'active'
   try {
     const response = await hotelService.updateHotelStatus(hotel._id, newStatus)
@@ -904,7 +1004,7 @@ const toggleStatus = async (hotel) => {
   }
 }
 
-const toggleFeatured = async (hotel) => {
+const toggleFeatured = async hotel => {
   const newFeatured = !hotel.featured
   try {
     const response = await hotelService.toggleFeatured(hotel._id, newFeatured)
@@ -918,7 +1018,7 @@ const toggleFeatured = async (hotel) => {
   }
 }
 
-const confirmDelete = (hotel) => {
+const confirmDelete = hotel => {
   selectedHotel.value = hotel
   showDeleteModal.value = true
 }
@@ -940,7 +1040,7 @@ const handleDelete = async () => {
   }
 }
 
-const changePage = (page) => {
+const changePage = page => {
   pagination.page = page
   fetchHotels()
 }
@@ -967,7 +1067,7 @@ const toggleSelectAll = () => {
   }
 }
 
-const toggleSelect = (hotelId) => {
+const toggleSelect = hotelId => {
   const index = selectedHotels.value.indexOf(hotelId)
   if (index > -1) {
     selectedHotels.value.splice(index, 1)
@@ -1058,9 +1158,9 @@ const exportToCSV = () => {
 }
 
 // Close bulk menu when clicking outside
-watch(showBulkMenu, (val) => {
+watch(showBulkMenu, val => {
   if (val) {
-    const closeMenu = (e) => {
+    const closeMenu = e => {
       if (!e.target.closest('.relative')) {
         showBulkMenu.value = false
         document.removeEventListener('click', closeMenu)
@@ -1072,7 +1172,7 @@ watch(showBulkMenu, (val) => {
 
 // React to partner changes
 usePartnerContext({
-  onPartnerChange: (partner) => {
+  onPartnerChange: partner => {
     if (partner) {
       clearAllFilters()
       fetchCities()

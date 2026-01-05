@@ -11,7 +11,7 @@ export const getSettings = async () => {
 /**
  * Update platform settings
  */
-export const updateSettings = async (settings) => {
+export const updateSettings = async settings => {
   const response = await apiClient.put('/platform-settings', settings)
   return response.data.data
 }
@@ -19,7 +19,7 @@ export const updateSettings = async (settings) => {
 /**
  * Test email configuration
  */
-export const testEmail = async (email) => {
+export const testEmail = async email => {
   const response = await apiClient.post('/platform-settings/test-email', { email })
   return response.data
 }
@@ -27,7 +27,7 @@ export const testEmail = async (email) => {
 /**
  * Test SMS configuration
  */
-export const testSMS = async (phone) => {
+export const testSMS = async phone => {
   const response = await apiClient.post('/platform-settings/test-sms', { phone })
   return response.data
 }

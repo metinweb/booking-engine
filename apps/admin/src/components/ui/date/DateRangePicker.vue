@@ -1,10 +1,7 @@
 <template>
-  <div class="ui-date-range-picker" ref="containerRef">
+  <div ref="containerRef" class="ui-date-range-picker">
     <!-- Label -->
-    <label
-      v-if="label"
-      class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-    >
+    <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
       {{ label }}
       <span v-if="required" class="text-red-500 ml-0.5">*</span>
     </label>
@@ -52,8 +49,7 @@
       <button
         v-if="clearable && hasValue && !disabled"
         type="button"
-        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg
-               hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
         @click="clear"
       >
         <span class="material-icons">close</span>
@@ -67,9 +63,11 @@
         :key="preset.key"
         type="button"
         class="px-3 py-1 text-xs font-medium rounded-full transition-colors"
-        :class="isPresetActive(preset)
-          ? 'bg-indigo-600 text-white'
-          : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'"
+        :class="
+          isPresetActive(preset)
+            ? 'bg-indigo-600 text-white'
+            : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
+        "
         @click="applyPreset(preset)"
       >
         {{ preset.label }}
@@ -83,8 +81,7 @@
           v-if="isOpen"
           ref="calendarRef"
           :style="calendarStyle"
-          class="fixed z-50 bg-white dark:bg-slate-800 rounded-xl shadow-2xl
-                 border border-gray-200 dark:border-slate-700 p-4"
+          class="fixed z-50 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-4"
         >
           <!-- Two Month Calendar -->
           <div class="flex gap-6">
@@ -176,18 +173,16 @@
           </div>
 
           <!-- Footer -->
-          <div class="mt-4 pt-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+          <div
+            class="mt-4 pt-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between"
+          >
             <div class="text-sm text-gray-600 dark:text-gray-400">
               <template v-if="tempStartDate && tempEndDate">
                 {{ formatDate(tempStartDate) }} - {{ formatDate(tempEndDate) }}
                 <span class="text-gray-400 ml-2">({{ nightCount }} gece)</span>
               </template>
-              <template v-else-if="tempStartDate">
-                {{ formatDate(tempStartDate) }} - ?
-              </template>
-              <template v-else>
-                Tarih araligini seciniz
-              </template>
+              <template v-else-if="tempStartDate"> {{ formatDate(tempStartDate) }} - ? </template>
+              <template v-else> Tarih araligini seciniz </template>
             </div>
             <div class="flex gap-2">
               <button
@@ -212,11 +207,7 @@
     </Teleport>
 
     <!-- Backdrop -->
-    <div
-      v-if="isOpen"
-      class="fixed inset-0 z-40"
-      @click="close"
-    ></div>
+    <div v-if="isOpen" class="fixed inset-0 z-40" @click="close"></div>
 
     <!-- Error Message -->
     <p v-if="error" class="mt-1 text-sm text-red-500 flex items-center gap-1">
@@ -227,7 +218,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
@@ -316,10 +307,19 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'update:startDate', 'update:endDate', 'change', 'open', 'close'])
+const emit = defineEmits([
+  'update:modelValue',
+  'update:startDate',
+  'update:endDate',
+  'change',
+  'open',
+  'close'
+])
 
 // v-model veya legacy props kullanımını belirle
-const useModelValue = computed(() => props.modelValue !== null || (!props.startDate && !props.endDate))
+const useModelValue = computed(
+  () => props.modelValue !== null || (!props.startDate && !props.endDate)
+)
 
 const { locale } = useI18n()
 
@@ -400,7 +400,7 @@ const leftMonthDays = computed(() => getMonthDays(viewDate.value))
 const rightMonthDays = computed(() => getMonthDays(nextMonthDate.value))
 
 // Get month days
-const getMonthDays = (monthDate) => {
+const getMonthDays = monthDate => {
   const days = []
   const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1)
   const lastDay = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0)
@@ -425,9 +425,7 @@ const inputClasses = computed(() => [
   'text-gray-900 dark:text-white text-sm cursor-pointer transition-colors',
   'focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
   'disabled:opacity-50 disabled:cursor-not-allowed',
-  props.error
-    ? 'border-red-500'
-    : 'border-gray-300 dark:border-slate-600'
+  props.error ? 'border-red-500' : 'border-gray-300 dark:border-slate-600'
 ])
 
 // Calendar style
@@ -437,7 +435,7 @@ const calendarStyle = computed(() => ({
 }))
 
 // Format date
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   const day = String(date.getDate()).padStart(2, '0')
   const month = String(date.getMonth() + 1).padStart(2, '0')
@@ -446,12 +444,12 @@ const formatDate = (date) => {
 }
 
 // Format month year
-const formatMonthYear = (date) => {
+const formatMonthYear = date => {
   return new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }).format(date)
 }
 
 // Check if date is disabled
-const isDateDisabled = (date) => {
+const isDateDisabled = date => {
   if (!date) return true
 
   if (props.minDate) {
@@ -465,16 +463,19 @@ const isDateDisabled = (date) => {
   }
 
   const dateStr = date.toISOString().split('T')[0]
-  if (props.disabledDates.some(d => {
-    const disabledStr = d instanceof Date ? d.toISOString().split('T')[0] : d
-    return dateStr === disabledStr
-  })) return true
+  if (
+    props.disabledDates.some(d => {
+      const disabledStr = d instanceof Date ? d.toISOString().split('T')[0] : d
+      return dateStr === disabledStr
+    })
+  )
+    return true
 
   return false
 }
 
 // Check if date is in range
-const isInRange = (date) => {
+const isInRange = date => {
   if (!date) return false
 
   const start = tempStartDate.value
@@ -490,7 +491,7 @@ const isInRange = (date) => {
 }
 
 // Get day classes
-const getDayClasses = (date) => {
+const getDayClasses = date => {
   if (!date) return 'w-9 h-9'
 
   const isDisabled = isDateDisabled(date)
@@ -514,15 +515,17 @@ const getDayClasses = (date) => {
 }
 
 // Check if preset is active
-const isPresetActive = (preset) => {
+const isPresetActive = preset => {
   if (!parsedStartDate.value || !parsedEndDate.value) return false
   const { start, end } = getPresetDates(preset)
-  return parsedStartDate.value.toDateString() === start.toDateString() &&
-         parsedEndDate.value.toDateString() === end.toDateString()
+  return (
+    parsedStartDate.value.toDateString() === start.toDateString() &&
+    parsedEndDate.value.toDateString() === end.toDateString()
+  )
 }
 
 // Get preset dates
-const getPresetDates = (preset) => {
+const getPresetDates = preset => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -550,7 +553,7 @@ const emitDates = (startDate, endDate) => {
 }
 
 // Apply preset
-const applyPreset = (preset) => {
+const applyPreset = preset => {
   const { start, end } = getPresetDates(preset)
   emitDates(start, end)
 }
@@ -627,7 +630,7 @@ const clear = () => {
 }
 
 // Handle date click
-const handleDateClick = (date) => {
+const handleDateClick = date => {
   if (isDateDisabled(date)) return
 
   if (!tempStartDate.value || (tempStartDate.value && tempEndDate.value)) {
@@ -646,7 +649,7 @@ const handleDateClick = (date) => {
 }
 
 // Handle date hover
-const handleDateHover = (date) => {
+const handleDateHover = date => {
   if (tempStartDate.value && !tempEndDate.value) {
     hoverDate.value = date
   }
@@ -685,7 +688,9 @@ defineExpose({ open, close, clear })
 <style scoped>
 .calendar-enter-active,
 .calendar-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .calendar-enter-from,

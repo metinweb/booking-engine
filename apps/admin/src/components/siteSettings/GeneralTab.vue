@@ -4,12 +4,23 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <!-- Logo -->
       <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ $t('siteSettings.general.logo') }}</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          {{ $t('siteSettings.general.logo') }}
+        </h3>
 
         <div class="flex flex-col items-center">
-          <div class="w-48 h-24 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-slate-600 mb-4">
-            <img v-if="form.logo" :src="getImageUrl(form.logo)" alt="Logo" class="max-w-full max-h-full object-contain" />
-            <span v-else class="material-icons text-4xl text-gray-300 dark:text-slate-600">image</span>
+          <div
+            class="w-48 h-24 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-slate-600 mb-4"
+          >
+            <img
+              v-if="form.logo"
+              :src="getImageUrl(form.logo)"
+              alt="Logo"
+              class="max-w-full max-h-full object-contain"
+            />
+            <span v-else class="material-icons text-4xl text-gray-300 dark:text-slate-600"
+              >image</span
+            >
           </div>
 
           <div class="flex gap-2">
@@ -20,15 +31,15 @@
                 type="file"
                 accept="image/*"
                 class="hidden"
-                @change="handleLogoUpload"
                 :disabled="uploading"
+                @change="handleLogoUpload"
               />
             </label>
             <button
               v-if="form.logo"
-              @click="handleLogoDelete"
               class="btn-danger text-sm"
               :disabled="uploading"
+              @click="handleLogoDelete"
             >
               <span class="material-icons text-sm">delete</span>
             </button>
@@ -38,12 +49,23 @@
 
       <!-- Favicon -->
       <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">{{ $t('siteSettings.general.favicon') }}</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          {{ $t('siteSettings.general.favicon') }}
+        </h3>
 
         <div class="flex flex-col items-center">
-          <div class="w-24 h-24 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-slate-600 mb-4">
-            <img v-if="form.favicon" :src="getImageUrl(form.favicon)" alt="Favicon" class="max-w-full max-h-full object-contain" />
-            <span v-else class="material-icons text-4xl text-gray-300 dark:text-slate-600">tab</span>
+          <div
+            class="w-24 h-24 bg-white dark:bg-slate-800 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-slate-600 mb-4"
+          >
+            <img
+              v-if="form.favicon"
+              :src="getImageUrl(form.favicon)"
+              alt="Favicon"
+              class="max-w-full max-h-full object-contain"
+            />
+            <span v-else class="material-icons text-4xl text-gray-300 dark:text-slate-600"
+              >tab</span
+            >
           </div>
 
           <div class="flex gap-2">
@@ -54,15 +76,15 @@
                 type="file"
                 accept="image/*,.ico"
                 class="hidden"
-                @change="handleFaviconUpload"
                 :disabled="uploading"
+                @change="handleFaviconUpload"
               />
             </label>
             <button
               v-if="form.favicon"
-              @click="handleFaviconDelete"
               class="btn-danger text-sm"
               :disabled="uploading"
+              @click="handleFaviconDelete"
             >
               <span class="material-icons text-sm">delete</span>
             </button>
@@ -75,38 +97,41 @@
     <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $t('siteSettings.general.activeLanguages') }}</h3>
-          <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('siteSettings.general.languagesDescription') }}</p>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+            {{ $t('siteSettings.general.activeLanguages') }}
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-slate-400">
+            {{ $t('siteSettings.general.languagesDescription') }}
+          </p>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-600 dark:text-slate-400">{{ $t('siteSettings.general.defaultLanguage') }}:</span>
+          <span class="text-sm text-gray-600 dark:text-slate-400"
+            >{{ $t('siteSettings.general.defaultLanguage') }}:</span
+          >
           <select v-model="form.defaultLanguage" class="form-input w-auto text-sm py-1.5">
-            <option
-              v-for="lang in form.activeLanguages"
-              :key="lang"
-              :value="lang"
-            >
+            <option v-for="lang in form.activeLanguages" :key="lang" :value="lang">
               {{ getLanguageFlag(lang) }} {{ getLanguageName(lang) }}
             </option>
           </select>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+      <div
+        class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3"
+      >
         <button
           v-for="lang in availableLanguages"
           :key="lang.code"
-          @click="toggleLanguage(lang.code)"
           class="relative flex flex-col items-center p-3 rounded-lg transition-all border-2"
-          :class="form.activeLanguages.includes(lang.code)
-            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-            : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'"
+          :class="
+            form.activeLanguages.includes(lang.code)
+              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+              : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
+          "
+          @click="toggleLanguage(lang.code)"
         >
           <!-- Default Language Star -->
-          <span
-            v-if="isDefaultLanguage(lang.code)"
-            class="absolute top-1 left-1 text-yellow-500"
-          >
+          <span v-if="isDefaultLanguage(lang.code)" class="absolute top-1 left-1 text-yellow-500">
             <span class="material-icons text-sm">star</span>
           </span>
 
@@ -119,7 +144,14 @@
           </span>
 
           <span class="text-2xl mb-1">{{ lang.flag }}</span>
-          <span class="text-xs font-semibold" :class="form.activeLanguages.includes(lang.code) ? 'text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-slate-300'">
+          <span
+            class="text-xs font-semibold"
+            :class="
+              form.activeLanguages.includes(lang.code)
+                ? 'text-purple-700 dark:text-purple-300'
+                : 'text-gray-700 dark:text-slate-300'
+            "
+          >
             {{ lang.name }}
           </span>
           <span class="text-[10px] text-gray-500 dark:text-slate-400">
@@ -130,7 +162,9 @@
     </div>
 
     <!-- Maintenance Mode -->
-    <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+    <div
+      class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 flex items-center">
@@ -142,8 +176,10 @@
           </p>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" v-model="form.maintenanceMode" class="sr-only peer">
-          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500"></div>
+          <input v-model="form.maintenanceMode" type="checkbox" class="sr-only peer" />
+          <div
+            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-300 dark:peer-focus:ring-yellow-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-yellow-500"
+          ></div>
         </label>
       </div>
       <div v-if="form.maintenanceMode" class="mt-4">
@@ -170,11 +206,13 @@
             <button
               v-for="lang in form.activeLanguages"
               :key="lang"
-              @click="selectedLang = lang"
               class="px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1"
-              :class="selectedLang === lang
-                ? 'border-purple-600 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'"
+              :class="
+                selectedLang === lang
+                  ? 'border-purple-600 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              "
+              @click="selectedLang = lang"
             >
               <span>{{ getLanguageFlag(lang) }}</span>
               <span>{{ getLanguageName(lang) }}</span>
@@ -186,14 +224,18 @@
 
           <!-- AI Translation Button -->
           <button
-            @click="handleTranslate"
             :disabled="translating || form.activeLanguages.length < 2"
             class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium shadow-sm"
             :title="$t('siteSettings.general.translateTooltip')"
+            @click="handleTranslate"
           >
             <span v-if="translating" class="material-icons text-sm animate-spin">sync</span>
             <span v-else class="material-icons text-sm">translate</span>
-            <span>{{ translating ? $t('siteSettings.general.translating') : $t('siteSettings.general.translateAll') }}</span>
+            <span>{{
+              translating
+                ? $t('siteSettings.general.translating')
+                : $t('siteSettings.general.translateAll')
+            }}</span>
             <span class="material-icons text-xs">auto_awesome</span>
           </button>
         </div>
@@ -224,15 +266,22 @@
 
     <!-- Save Button -->
     <div class="flex justify-end">
-      <button
-        @click="handleSave"
-        class="btn-primary"
-        :disabled="saving"
-      >
+      <button class="btn-primary" :disabled="saving" @click="handleSave">
         <span v-if="saving" class="flex items-center">
           <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           {{ $t('common.loading') }}
         </span>
@@ -250,7 +299,7 @@ import siteSettingsService from '@/services/siteSettingsService'
 import translationService from '@/services/translationService'
 import { getImageUrl } from '@/utils/imageUrl'
 
-const { t } = useI18n()
+const { t: translate } = useI18n()
 const toast = useToast()
 
 const props = defineProps({
@@ -290,7 +339,7 @@ const selectedLang = ref('tr')
 
 const defaultLangData = () => {
   const obj = {}
-  availableLanguages.forEach(l => obj[l.code] = '')
+  availableLanguages.forEach(l => (obj[l.code] = ''))
   return obj
 }
 
@@ -305,43 +354,44 @@ const form = ref({
   siteDescription: defaultLangData()
 })
 
-watch(() => props.settings, (newSettings) => {
-  if (newSettings) {
-    form.value = {
-      logo: newSettings.logo || '',
-      favicon: newSettings.favicon || '',
-      activeLanguages: newSettings.activeLanguages || ['tr', 'en'],
-      defaultLanguage: newSettings.defaultLanguage || 'tr',
-      maintenanceMode: newSettings.maintenanceMode || false,
-      maintenanceMessage: newSettings.maintenanceMessage || '',
-      siteTitle: { ...defaultLangData(), ...(newSettings.siteTitle || {}) },
-      siteDescription: { ...defaultLangData(), ...(newSettings.siteDescription || {}) }
+watch(
+  () => props.settings,
+  newSettings => {
+    if (newSettings) {
+      form.value = {
+        logo: newSettings.logo || '',
+        favicon: newSettings.favicon || '',
+        activeLanguages: newSettings.activeLanguages || ['tr', 'en'],
+        defaultLanguage: newSettings.defaultLanguage || 'tr',
+        maintenanceMode: newSettings.maintenanceMode || false,
+        maintenanceMessage: newSettings.maintenanceMessage || '',
+        siteTitle: { ...defaultLangData(), ...(newSettings.siteTitle || {}) },
+        siteDescription: { ...defaultLangData(), ...(newSettings.siteDescription || {}) }
+      }
+      if (form.value.activeLanguages.length > 0) {
+        selectedLang.value = form.value.activeLanguages[0]
+      }
     }
-    if (form.value.activeLanguages.length > 0) {
-      selectedLang.value = form.value.activeLanguages[0]
-    }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
-const getLanguageName = (code) => {
+const getLanguageName = code => {
   return availableLanguages.find(l => l.code === code)?.name || code
 }
 
-const getLanguageNameTr = (code) => {
-  return availableLanguages.find(l => l.code === code)?.nameTr || code
-}
 
-const getLanguageFlag = (code) => {
+const getLanguageFlag = code => {
   return availableLanguages.find(l => l.code === code)?.flag || ''
 }
 
-const isDefaultLanguage = (code) => {
+const isDefaultLanguage = code => {
   return form.value.defaultLanguage === code
 }
 
 // getImageUrl imported from @/utils/imageUrl
 
-const toggleLanguage = (code) => {
+const toggleLanguage = code => {
   const index = form.value.activeLanguages.indexOf(code)
   if (index > -1) {
     // Don't allow removing last language
@@ -361,7 +411,7 @@ const toggleLanguage = (code) => {
   }
 }
 
-const handleLogoUpload = async (event) => {
+const handleLogoUpload = async event => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -370,18 +420,17 @@ const handleLogoUpload = async (event) => {
     const response = await siteSettingsService.uploadImage(file, 'logo')
     if (response.success) {
       form.value.logo = response.data.url
-      toast.success(t('siteSettings.general.logoUploaded'))
+      toast.success(translate('siteSettings.general.logoUploaded'))
       emit('refresh')
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || t('common.uploadFailed'))
+    toast.error(error.response?.data?.message || translate('common.uploadFailed'))
   } finally {
     uploading.value = false
-    event.target.value = ''
   }
 }
 
-const handleFaviconUpload = async (event) => {
+const handleFaviconUpload = async event => {
   const file = event.target.files[0]
   if (!file) return
 
@@ -390,14 +439,13 @@ const handleFaviconUpload = async (event) => {
     const response = await siteSettingsService.uploadImage(file, 'favicon')
     if (response.success) {
       form.value.favicon = response.data.url
-      toast.success(t('siteSettings.general.faviconUploaded'))
+      toast.success(translate('siteSettings.general.faviconUploaded'))
       emit('refresh')
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || t('common.uploadFailed'))
+    toast.error(error.response?.data?.message || translate('common.uploadFailed'))
   } finally {
     uploading.value = false
-    event.target.value = ''
   }
 }
 
@@ -409,10 +457,10 @@ const handleLogoDelete = async () => {
     const filename = form.value.logo.split('/').pop()
     await siteSettingsService.deleteImage(filename, 'logo')
     form.value.logo = ''
-    toast.success(t('siteSettings.general.logoDeleted'))
+    toast.success(translate('siteSettings.general.logoDeleted'))
     emit('refresh')
   } catch (error) {
-    toast.error(error.response?.data?.message || t('common.deleteFailed'))
+    toast.error(error.response?.data?.message || translate('common.deleteFailed'))
   } finally {
     uploading.value = false
   }
@@ -426,10 +474,10 @@ const handleFaviconDelete = async () => {
     const filename = form.value.favicon.split('/').pop()
     await siteSettingsService.deleteImage(filename, 'favicon')
     form.value.favicon = ''
-    toast.success(t('siteSettings.general.faviconDeleted'))
+    toast.success(translate('siteSettings.general.faviconDeleted'))
     emit('refresh')
   } catch (error) {
-    toast.error(error.response?.data?.message || t('common.deleteFailed'))
+    toast.error(error.response?.data?.message || translate('common.deleteFailed'))
   } finally {
     uploading.value = false
   }
@@ -437,6 +485,7 @@ const handleFaviconDelete = async () => {
 
 const handleSave = () => {
   // Don't include logo/favicon in save - they're uploaded separately
+  // eslint-disable-next-line no-unused-vars
   const { logo, favicon, ...rest } = form.value
   emit('save', rest)
 }
@@ -446,7 +495,7 @@ const handleTranslate = async () => {
   const sourceDescription = form.value.siteDescription[selectedLang.value]
 
   if (!sourceTitle && !sourceDescription) {
-    toast.warning(t('siteSettings.general.noContentToTranslate'))
+    toast.warning(translate('siteSettings.general.noContentToTranslate'))
     return
   }
 
@@ -461,11 +510,14 @@ const handleTranslate = async () => {
 
     if (response.success) {
       form.value.siteTitle = { ...form.value.siteTitle, ...response.data.siteTitle }
-      form.value.siteDescription = { ...form.value.siteDescription, ...response.data.siteDescription }
-      toast.success(t('siteSettings.general.translationSuccess'))
+      form.value.siteDescription = {
+        ...form.value.siteDescription,
+        ...response.data.siteDescription
+      }
+      toast.success(translate('siteSettings.general.translationSuccess'))
     }
   } catch (error) {
-    toast.error(error.response?.data?.message || t('siteSettings.general.translationFailed'))
+    toast.error(error.response?.data?.message || translate('siteSettings.general.translationFailed'))
   } finally {
     translating.value = false
   }

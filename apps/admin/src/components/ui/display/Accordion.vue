@@ -22,20 +22,20 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'default',
-    validator: (v) => ['default', 'bordered', 'separated'].includes(v)
+    validator: v => ['default', 'bordered', 'separated'].includes(v)
   },
   // Icon position
   iconPosition: {
     type: String,
     default: 'right',
-    validator: (v) => ['left', 'right'].includes(v)
+    validator: v => ['left', 'right'].includes(v)
   }
 })
 
 const openItems = ref(new Set(props.defaultOpen))
 
 // Toggle item
-const toggleItem = (key) => {
+const toggleItem = key => {
   if (props.multiple) {
     if (openItems.value.has(key)) {
       openItems.value.delete(key)
@@ -55,7 +55,7 @@ const toggleItem = (key) => {
 }
 
 // Check if item is open
-const isItemOpen = (key) => {
+const isItemOpen = key => {
   return openItems.value.has(key)
 }
 
@@ -63,7 +63,8 @@ const isItemOpen = (key) => {
 const containerClasses = computed(() => {
   const variants = {
     default: 'divide-y divide-gray-200 dark:divide-slate-700',
-    bordered: 'border border-gray-200 dark:border-slate-700 rounded-lg divide-y divide-gray-200 dark:divide-slate-700',
+    bordered:
+      'border border-gray-200 dark:border-slate-700 rounded-lg divide-y divide-gray-200 dark:divide-slate-700',
     separated: 'space-y-2'
   }
   return variants[props.variant]

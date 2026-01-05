@@ -17,7 +17,7 @@ import * as kbsClient from './kbsClient.js'
  * Turkish citizens: TC Kimlik, name, birth date
  * Foreign guests: Passport/ID, name, nationality, birth date, birth place, father/mother name
  */
-export const validateKBSFields = (guest) => {
+export const validateKBSFields = guest => {
   const errors = []
   const isTurkish = guest.nationality === 'TR' || guest.idType === ID_TYPES.TC_KIMLIK
 
@@ -84,10 +84,7 @@ export const getKBSPending = asyncHandler(async (req, res) => {
     }
 
     // Check both actualCheckIn and checkInDate
-    query.$or = [
-      { actualCheckIn: dateFilter },
-      { actualCheckIn: null, checkInDate: dateFilter }
-    ]
+    query.$or = [{ actualCheckIn: dateFilter }, { actualCheckIn: null, checkInDate: dateFilter }]
   }
 
   const stays = await Stay.find(query)
@@ -117,9 +114,8 @@ export const getKBSPending = asyncHandler(async (req, res) => {
       const kbsStatus = centralGuest?.kbsStatus || KBS_STATUS.PENDING
 
       // Include all guests if includeAll=true, otherwise only pending/failed
-      const shouldInclude = includeAll === 'true' ||
-        kbsStatus === KBS_STATUS.PENDING ||
-        kbsStatus === KBS_STATUS.FAILED
+      const shouldInclude =
+        includeAll === 'true' || kbsStatus === KBS_STATUS.PENDING || kbsStatus === KBS_STATUS.FAILED
 
       if (shouldInclude) {
         allGuests.push({
@@ -154,7 +150,9 @@ export const getKBSPending = asyncHandler(async (req, res) => {
   }
 
   // Calculate summary
-  const pendingGuests = allGuests.filter(g => g.kbsStatus === KBS_STATUS.PENDING || g.kbsStatus === KBS_STATUS.FAILED)
+  const pendingGuests = allGuests.filter(
+    g => g.kbsStatus === KBS_STATUS.PENDING || g.kbsStatus === KBS_STATUS.FAILED
+  )
   const sentGuests = allGuests.filter(g => g.kbsStatus === KBS_STATUS.SENT)
 
   res.json({
@@ -209,7 +207,7 @@ export const generateKBSXML = asyncHandler(async (req, res) => {
 
   // Build XML
   const now = new Date()
-  const formatDate = (date) => {
+  const formatDate = date => {
     if (!date) return ''
     const d = new Date(date)
     return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`
@@ -270,7 +268,10 @@ export const generateKBSXML = asyncHandler(async (req, res) => {
 
   // Set headers for XML download
   res.setHeader('Content-Type', 'application/xml')
-  res.setHeader('Content-Disposition', `attachment; filename="kbs_${formatDate(now).replace(/\./g, '')}.xml"`)
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="kbs_${formatDate(now).replace(/\./g, '')}.xml"`
+  )
 
   res.send(xml)
 })
@@ -338,7 +339,9 @@ export const getKBSReport = asyncHandler(async (req, res) => {
   const { hotelId } = req.params
   const { startDate, endDate } = req.query
 
-  const start = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30))
+  const start = startDate
+    ? new Date(startDate)
+    : new Date(new Date().setDate(new Date().getDate() - 30))
   const end = endDate ? new Date(endDate) : new Date()
 
   // Get all stays in date range
@@ -424,7 +427,8 @@ export const getKBSReport = asyncHandler(async (req, res) => {
 export const updateGuestKBSFields = asyncHandler(async (req, res) => {
   const { hotelId } = req.params
   const { stayId, guestId } = req.params
-  const { fatherName, motherName, birthPlace, dateOfBirth, nationality, idNumber, idType } = req.body
+  const { fatherName, motherName, birthPlace, dateOfBirth, nationality, idNumber, idType } =
+    req.body
 
   // Find the stay
   const stay = await Stay.findOne({
@@ -557,13 +561,7 @@ export const sendToKBS = asyncHandler(async (req, res) => {
   }
 
   // Send to KBS
-  const result = await kbsClient.sendGuestNotification(
-    hotelId,
-    action,
-    guest,
-    stay,
-    stay.room
-  )
+  const result = await kbsClient.sendGuestNotification(hotelId, action, guest, stay, stay.room)
 
   // Update guest KBS status
   if (result.status === kbsClient.KBS_RESPONSE_STATUS.SUCCESS) {
@@ -630,19 +628,12 @@ export const sendStayToKBS = asyncHandler(async (req, res) => {
   }
 
   // Send all guests to KBS
-  const result = await kbsClient.sendStayNotifications(
-    hotelId,
-    action,
-    stay,
-    stay.room
-  )
+  const result = await kbsClient.sendStayNotifications(hotelId, action, stay, stay.room)
 
   // Update guest records
   for (const detail of result.details) {
     if (detail.status === kbsClient.KBS_RESPONSE_STATUS.SUCCESS) {
-      const guest = stay.guests.find(g =>
-        `${g.firstName} ${g.lastName}` === detail.guestName
-      )
+      const guest = stay.guests.find(g => `${g.firstName} ${g.lastName}` === detail.guestName)
       if (guest?.idNumber) {
         await Guest.findOneAndUpdate(
           { hotel: hotelId, idNumber: guest.idNumber },
@@ -659,9 +650,10 @@ export const sendStayToKBS = asyncHandler(async (req, res) => {
 
   res.json({
     success: result.failed === 0,
-    message: result.failed === 0
-      ? `${result.success} misafir başarıyla KBS'ye gönderildi`
-      : `${result.success} başarılı, ${result.failed} başarısız`,
+    message:
+      result.failed === 0
+        ? `${result.success} misafir başarıyla KBS'ye gönderildi`
+        : `${result.success} başarılı, ${result.failed} başarısız`,
     data: result
   })
 })

@@ -24,7 +24,7 @@ export const getSettings = asyncHandler(async (req, res) => {
 export const updateSettings = asyncHandler(async (req, res) => {
   const { aws, netgsm, webPush, gemini, firecrawl } = req.body
 
-  let settings = await PlatformSettings.getSettings()
+  const settings = await PlatformSettings.getSettings()
 
   // Update AWS SES settings
   if (aws?.ses !== undefined) {
@@ -267,11 +267,11 @@ export const testSMS = asyncHandler(async (req, res) => {
       })
     } else {
       const errorMessages = {
-        '20': 'Message text is empty',
-        '30': 'Invalid user credentials',
-        '40': 'Message header not defined',
-        '50': 'Account is not active',
-        '70': 'Invalid parameters'
+        20: 'Message text is empty',
+        30: 'Invalid user credentials',
+        40: 'Message header not defined',
+        50: 'Account is not active',
+        70: 'Invalid parameters'
       }
 
       throw new Error(errorMessages[code] || `NetGSM error code: ${code}`)
@@ -396,7 +396,10 @@ export const testPaximum = asyncHandler(async (req, res) => {
 
     res.status(400).json({
       success: false,
-      error: error.response?.data?.header?.messages?.[0]?.message || error.message || 'Paximum bağlantı testi başarısız'
+      error:
+        error.response?.data?.header?.messages?.[0]?.message ||
+        error.message ||
+        'Paximum bağlantı testi başarısız'
     })
   }
 })

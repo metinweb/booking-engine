@@ -1,4 +1,4 @@
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 /**
  * Accessibility Composable
@@ -59,7 +59,7 @@ export function useAccessibility() {
   /**
    * Announce assertive message (interrupts other announcements)
    */
-  const announceAssertive = (message) => {
+  const announceAssertive = message => {
     announce(message, 'assertive')
   }
 
@@ -84,7 +84,7 @@ export function useAccessibility() {
    * Focus first focusable element in container
    * @param {HTMLElement} container - Container to search in
    */
-  const focusFirst = (container) => {
+  const focusFirst = container => {
     if (!container) return
 
     const focusableSelectors = [
@@ -106,7 +106,7 @@ export function useAccessibility() {
    * Focus last focusable element in container
    * @param {HTMLElement} container - Container to search in
    */
-  const focusLast = (container) => {
+  const focusLast = container => {
     if (!container) return
 
     const focusableSelectors = [
@@ -129,10 +129,10 @@ export function useAccessibility() {
    * @param {HTMLElement} container - Container to trap focus in
    * @returns {Function} Cleanup function
    */
-  const trapFocus = (container) => {
+  const trapFocus = container => {
     if (!container) return () => {}
 
-    const handleTab = (event) => {
+    const handleTab = event => {
       if (event.key !== 'Tab') return
 
       const focusableSelectors = [
@@ -216,7 +216,8 @@ export function useAccessibility() {
   /**
    * Screen reader only text (visually hidden)
    */
-  const srOnlyClass = 'sr-only absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0'
+  const srOnlyClass =
+    'sr-only absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0'
 
   return {
     // Announcements

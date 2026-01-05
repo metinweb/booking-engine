@@ -19,7 +19,8 @@ const getGeminiApiKey = async () => {
 
   try {
     // Dynamic import to avoid circular dependencies
-    const { default: PlatformSettings } = await import('../modules/platform-settings/platformSettings.model.js')
+    const { default: PlatformSettings } =
+      await import('../modules/platform-settings/platformSettings.model.js')
     const settings = await PlatformSettings.getSettings()
     const credentials = settings.getGeminiCredentials()
 
@@ -48,7 +49,7 @@ const getGeminiApiKey = async () => {
  * Pre-process content to extract room information and group images
  * This helps Gemini understand room structure better
  */
-const preprocessRoomContent = (content) => {
+const preprocessRoomContent = content => {
   if (!content) return { content, roomHints: null }
 
   // Reset used codes for this extraction
@@ -56,13 +57,14 @@ const preprocessRoomContent = (content) => {
 
   // Extract ALL hotel images - more permissive pattern
   const imagePattern = /https?:\/\/[^\s"'<>\]]+\.(jpg|jpeg|png|webp)/gi
-  const rawImages = [...new Set((content.match(imagePattern) || []))]
+  const rawImages = [...new Set(content.match(imagePattern) || [])]
 
   // Filter to keep only hotel-related images
   const allImages = rawImages.filter(img => {
     const imgLower = img.toLowerCase()
     // Must be hotel/room related
-    const isHotelImage = imgLower.includes('hotel') ||
+    const isHotelImage =
+      imgLower.includes('hotel') ||
       imgLower.includes('room') ||
       imgLower.includes('oda') ||
       imgLower.includes('ets') ||
@@ -73,7 +75,8 @@ const preprocessRoomContent = (content) => {
       imgLower.includes('photo') ||
       imgLower.includes('media')
     // Skip icons, logos, social media
-    const isExcluded = imgLower.includes('icon') ||
+    const isExcluded =
+      imgLower.includes('icon') ||
       imgLower.includes('logo') ||
       imgLower.includes('favicon') ||
       imgLower.includes('facebook') ||
@@ -94,7 +97,8 @@ const preprocessRoomContent = (content) => {
   allImages.forEach(img => {
     const imgLower = img.toLowerCase()
     // Room images: contain etsrooms, /room/, /oda/ in URL
-    const isRoomImage = imgLower.includes('etsrooms') ||
+    const isRoomImage =
+      imgLower.includes('etsrooms') ||
       imgLower.includes('/room/') ||
       imgLower.includes('/oda/') ||
       imgLower.includes('_room_') ||
@@ -114,9 +118,8 @@ const preprocessRoomContent = (content) => {
 
   roomImages.forEach(img => {
     // Try multiple timestamp patterns
-    const timestampMatch = img.match(/_(\d{14})_(\d+)/i) ||
-      img.match(/\/(\d{14})_/i) ||
-      img.match(/_(\d{12,14})[_\-]/i)
+    const timestampMatch =
+      img.match(/_(\d{14})_(\d+)/i) || img.match(/\/(\d{14})_/i) || img.match(/_(\d{12,14})[_-]/i)
     if (timestampMatch) {
       const ts = timestampMatch[1]
       if (!imageGroups[ts]) imageGroups[ts] = []
@@ -127,8 +130,7 @@ const preprocessRoomContent = (content) => {
   })
 
   // Sort groups by image count (larger groups are likely main room types)
-  const sortedGroups = Object.entries(imageGroups)
-    .sort((a, b) => b[1].length - a[1].length)
+  const sortedGroups = Object.entries(imageGroups).sort((a, b) => b[1].length - a[1].length)
 
   // Find room names in content - more comprehensive patterns
   const roomPatterns = [
@@ -137,7 +139,7 @@ const preprocessRoomContent = (content) => {
     // ETS Tur - room name with # header
     /###\s*([^\n#]+)/gi,
     // Room type with size
-    /\*\*([^\*\n]+(?:Oda|Room|Suite|Villa|Bungalow)[^\*\n]*)\*\*/gi,
+    /\*\*([^*\n]+(?:Oda|Room|Suite|Villa|Bungalow)[^*\n]*)\*\*/gi,
     // Generic room patterns - expanded
     /(?:^|\n)\s*((?:Luxury |Serenity |Laguna |Garden |Sea View |Land View |Deniz Manzaralı |Kara Manzaralı |Yandan |Pool |Beach |Mountain |City |Executive |Presidential |Premium )?(?:Suite|Superior|Süperior|Standard|Standart|Deluxe|Delüks|Family|Aile|Economy|Promo|Villa|Bungalow|Junior|King|Queen|Twin|Double|Single|Connect|Dublex|Duplex|Terrace|Penthouse|Residence)[^\n]{0,40}(?:\s*Oda|\s*Room)?)\s*\n/gi,
     // Turkish room types
@@ -155,16 +157,22 @@ const preprocessRoomContent = (content) => {
     while ((match = patternCopy.exec(content)) !== null) {
       let name = match[1].trim()
       // Clean up the name
-      name = name.replace(/^\*+|\*+$/g, '').replace(/^#+\s*/, '').trim()
-      if (name.length > 3 && name.length < 80 &&
-          !name.includes('http') &&
-          !name.includes('Otel') &&
-          !name.includes('Hotel') &&
-          !name.includes('Resort') &&
-          !name.includes('Puan') &&
-          !name.includes('TL') &&
-          !name.includes('€') &&
-          !name.includes('$')) {
+      name = name
+        .replace(/^\*+|\*+$/g, '')
+        .replace(/^#+\s*/, '')
+        .trim()
+      if (
+        name.length > 3 &&
+        name.length < 80 &&
+        !name.includes('http') &&
+        !name.includes('Otel') &&
+        !name.includes('Hotel') &&
+        !name.includes('Resort') &&
+        !name.includes('Puan') &&
+        !name.includes('TL') &&
+        !name.includes('€') &&
+        !name.includes('$')
+      ) {
         foundRooms.add(name)
       }
     }
@@ -174,7 +182,7 @@ const preprocessRoomContent = (content) => {
   const roomScoreCount = (content.match(/Tesisin Oda Puanı/gi) || []).length
 
   // Extract room sizes
-  const roomSizes = [...new Set((content.match(/\d+\s*m²/g) || []))]
+  const roomSizes = [...new Set(content.match(/\d+\s*m²/g) || [])]
 
   // Build room hints
   const roomList = [...foundRooms]
@@ -196,12 +204,16 @@ const preprocessRoomContent = (content) => {
       roomHints.push(`${i + 1}. ${name} (Kod: ${code})`)
     })
   } else {
-    roomHints.push(`DİKKAT: Oda isimleri regex ile bulunamadı ama ${roomScoreCount} oda bölümü var!`)
+    roomHints.push(
+      `DİKKAT: Oda isimleri regex ile bulunamadı ama ${roomScoreCount} oda bölümü var!`
+    )
     roomHints.push('Lütfen içerikten oda isimlerini manuel olarak çıkar.')
   }
 
   roomHints.push('')
-  roomHints.push(`*** TOPLAM ${allImages.length} GÖRSEL: ${propertyImages.length} otel görseli + ${roomImages.length} oda görseli ***`)
+  roomHints.push(
+    `*** TOPLAM ${allImages.length} GÖRSEL: ${propertyImages.length} otel görseli + ${roomImages.length} oda görseli ***`
+  )
   roomHints.push('')
 
   // Property/Hotel images section
@@ -231,7 +243,9 @@ const preprocessRoomContent = (content) => {
   }
 
   roomHints.push('')
-  roomHints.push('*** ÖNEMLİ: Otel görsellerini "images" dizisine, oda görsellerini "roomTemplates" içine koy! ***')
+  roomHints.push(
+    '*** ÖNEMLİ: Otel görsellerini "images" dizisine, oda görsellerini "roomTemplates" içine koy! ***'
+  )
   roomHints.push('*** Otel görselleri ile oda görsellerini KARIŞTIRMA! ***')
 
   return {
@@ -376,10 +390,12 @@ const generateContent = async (prompt, options = {}) => {
   const response = await client.models.generateContentStream({
     model: GEMINI_MODEL,
     config,
-    contents: [{
-      role: 'user',
-      parts: [{ text: prompt }]
-    }]
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: prompt }]
+      }
+    ]
   })
 
   // Collect all chunks
@@ -464,10 +480,12 @@ export const translateFields = async (fields, sourceLang, targetLangs) => {
   }
 
   // Build target languages list with names
-  const targetLangsList = actualTargets.map(code => {
-    const name = languageNames[code] || code
-    return `"${code}": "${name}"`
-  }).join(', ')
+  const targetLangsList = actualTargets
+    .map(code => {
+      const name = languageNames[code] || code
+      return `"${code}": "${name}"`
+    })
+    .join(', ')
 
   const sourceLangName = languageNames[sourceLang] || sourceLang
 
@@ -505,7 +523,10 @@ Return JSON format:
     }
 
     // Clean up response
-    let cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    let cleanedResponse = responseText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
 
     // Try to extract JSON
     const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/)
@@ -522,9 +543,10 @@ Return JSON format:
       }
     }
 
-    logger.info(`Fields translation completed: ${Object.keys(fieldsToTranslate).length} fields to ${actualTargets.length} languages`)
+    logger.info(
+      `Fields translation completed: ${Object.keys(fieldsToTranslate).length} fields to ${actualTargets.length} languages`
+    )
     return results
-
   } catch (error) {
     logger.error('Fields translation error:', error.message)
     return results
@@ -550,10 +572,12 @@ export const batchTranslate = async (content, sourceLang, allLangs) => {
   }
 
   // Build target languages list with names for better context
-  const targetLangsList = targetLangs.map(code => {
-    const name = languageNames[code] || code
-    return `"${code}": "${name}"`
-  }).join(', ')
+  const targetLangsList = targetLangs
+    .map(code => {
+      const name = languageNames[code] || code
+      return `"${code}": "${name}"`
+    })
+    .join(', ')
 
   const sourceLangName = languageNames[sourceLang] || sourceLang
 
@@ -586,7 +610,10 @@ Return JSON format:
     }
 
     // Clean up response - remove markdown code blocks if present
-    let cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    let cleanedResponse = responseText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
 
     // Try to extract JSON
     const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/)
@@ -608,7 +635,6 @@ Return JSON format:
 
     logger.info(`Batch translation completed: ${targetLangs.length} languages in single call`)
     return result
-
   } catch (error) {
     logger.error('Batch translation error:', error.message)
 
@@ -631,21 +657,45 @@ export const parsePricingCommand = async (command, context = {}) => {
   const currentYear = new Date().getFullYear()
 
   // Build context string for AI
-  const roomTypesStr = context.roomTypes?.map(rt => {
-    const statusTag = rt.status === 'inactive' ? ' [inaktif]' : ''
-    return `${rt.code}: ${rt.name}${statusTag}`
-  }).join(', ') || 'Belirtilmemiş'
-  const mealPlansStr = context.mealPlans?.map(mp => `${mp.code}: ${mp.name}`).join(', ') || 'Belirtilmemiş'
-  const seasonsStr = context.seasons?.map(s => {
-    const startDate = s.dateRanges?.[0]?.startDate ? new Date(s.dateRanges[0].startDate).toISOString().split('T')[0] : ''
-    const endDate = s.dateRanges?.[0]?.endDate ? new Date(s.dateRanges[0].endDate).toISOString().split('T')[0] : ''
-    return `${s.code}: ${s.name} (${startDate} - ${endDate})`
-  }).join(', ') || 'Belirtilmemiş'
+  const roomTypesStr =
+    context.roomTypes
+      ?.map(rt => {
+        const statusTag = rt.status === 'inactive' ? ' [inaktif]' : ''
+        return `${rt.code}: ${rt.name}${statusTag}`
+      })
+      .join(', ') || 'Belirtilmemiş'
+  const mealPlansStr =
+    context.mealPlans?.map(mp => `${mp.code}: ${mp.name}`).join(', ') || 'Belirtilmemiş'
+  const seasonsStr =
+    context.seasons
+      ?.map(s => {
+        const startDate = s.dateRanges?.[0]?.startDate
+          ? new Date(s.dateRanges[0].startDate).toISOString().split('T')[0]
+          : ''
+        const endDate = s.dateRanges?.[0]?.endDate
+          ? new Date(s.dateRanges[0].endDate).toISOString().split('T')[0]
+          : ''
+        return `${s.code}: ${s.name} (${startDate} - ${endDate})`
+      })
+      .join(', ') || 'Belirtilmemiş'
 
   // Build current month context
   let currentMonthStr = ''
   if (context.currentMonth?.year && context.currentMonth?.month) {
-    const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık']
+    const monthNames = [
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık'
+    ]
     const monthName = monthNames[context.currentMonth.month - 1]
     currentMonthStr = `${monthName} ${context.currentMonth.year}`
   }
@@ -685,13 +735,17 @@ export const parsePricingCommand = async (command, context = {}) => {
   const prompt = `Otel fiyatlandırma asistanısın. Komutu JSON'a çevir.
 
 Bugün: ${today}
-${currentMonthStr ? `
+${
+  currentMonthStr
+    ? `
 ###############################################
 # EKRANDA GÖRÜNTÜLENEN AY: ${currentMonthStr}
 # TARİH ARALIĞI: ${currentMonthDateRange}
 # "aşağıdaki" = BU AY = ${currentMonthStr}
 ###############################################
-` : ''}${selectionStr}
+`
+    : ''
+}${selectionStr}
 Odalar: ${roomTypesStr}
 Pansiyonlar: ${mealPlansStr}
 Sezonlar: ${seasonsStr}
@@ -752,7 +806,7 @@ DİĞER:
 
 ÖRNEK 1 - "aşağıdaki haftasonlarına %10 zam" (Görüntülenen: ${currentMonthStr || 'Haziran 2026'}):
 NOT: "aşağıdaki" dediği için SEZON DEĞİL, görüntülenen ayı kullandık!
-{"success":true,"actions":[{"action":"update_price","filters":{"roomTypes":"all","mealPlans":"all","daysOfWeek":["saturday","sunday"]},"value":10,"valueType":"percentage"}],"dateRange":{"startDate":"${context.currentMonth ? `${context.currentMonth.year}-${String(context.currentMonth.month).padStart(2,'0')}-01` : '2026-06-01'}","endDate":"${context.currentMonth ? `${context.currentMonth.year}-${String(context.currentMonth.month).padStart(2,'0')}-${new Date(context.currentMonth.year, context.currentMonth.month, 0).getDate()}` : '2026-06-30'}"},"summary":{"tr":"${currentMonthStr || 'Haziran 2026'} haftasonlarına %10 zam uygulanacak","en":"..."}}
+{"success":true,"actions":[{"action":"update_price","filters":{"roomTypes":"all","mealPlans":"all","daysOfWeek":["saturday","sunday"]},"value":10,"valueType":"percentage"}],"dateRange":{"startDate":"${context.currentMonth ? `${context.currentMonth.year}-${String(context.currentMonth.month).padStart(2, '0')}-01` : '2026-06-01'}","endDate":"${context.currentMonth ? `${context.currentMonth.year}-${String(context.currentMonth.month).padStart(2, '0')}-${new Date(context.currentMonth.year, context.currentMonth.month, 0).getDate()}` : '2026-06-30'}"},"summary":{"tr":"${currentMonthStr || 'Haziran 2026'} haftasonlarına %10 zam uygulanacak","en":"..."}}
 
 ÖRNEK 2 - "tüm sezon için fiyatları güncelle":
 NOT: "sezon" dediği için Sezonlar listesinden tarih aldık!
@@ -774,7 +828,10 @@ NOT: "seçili" dediği için SEÇİLİ HÜCRELERİN tarih aralığını ve filtr
     }
 
     // Clean up response - remove markdown code blocks if present
-    let cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    let cleanedResponse = responseText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
 
     // Try to extract JSON if there's extra text
     const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/)
@@ -803,7 +860,7 @@ NOT: "seçili" dediği için SEÇİLİ HÜCRELERİN tarih aralığını ve filtr
 /**
  * Check if JSON response is truncated (incomplete)
  */
-const isJsonTruncated = (jsonStr) => {
+const isJsonTruncated = jsonStr => {
   if (!jsonStr) return true
   const trimmed = jsonStr.trim()
   // JSON should end with } or ]
@@ -840,14 +897,16 @@ const isJsonTruncated = (jsonStr) => {
  * Attempt to repair truncated JSON by closing open brackets
  * This is a best-effort recovery for truncated responses
  */
-const repairTruncatedJson = (jsonStr) => {
+const repairTruncatedJson = jsonStr => {
   if (!jsonStr) return '{}'
 
   let repaired = jsonStr.trim()
 
   // Remove any trailing incomplete property (e.g., "name": "Some incomplete)
   // Find last complete property
-  const lastCompleteMatch = repaired.match(/^([\s\S]*"[^"]+"\s*:\s*(?:"[^"]*"|[\d.]+|true|false|null|\{[\s\S]*?\}|\[[\s\S]*?\]))\s*,?\s*"[^"]*$/m)
+  const lastCompleteMatch = repaired.match(
+    /^([\s\S]*"[^"]+"\s*:\s*(?:"[^"]*"|[\d.]+|true|false|null|\{[\s\S]*?\}|\[[\s\S]*?\]))\s*,?\s*"[^"]*$/m
+  )
   if (lastCompleteMatch) {
     repaired = lastCompleteMatch[1]
   }
@@ -910,11 +969,11 @@ export const extractHotelData = async (content, contentType = 'text', retryCount
 
   // Pre-process content to extract room information
   const preprocessed = preprocessRoomContent(content)
-  const roomHintsSection = preprocessed.roomHints
-    ? `\n${preprocessed.roomHints}\n`
-    : ''
+  const roomHintsSection = preprocessed.roomHints ? `\n${preprocessed.roomHints}\n` : ''
 
-  logger.info(`Preprocessed: ${preprocessed.roomNames?.length || 0} rooms found, ${preprocessed.totalImages || 0} images (${preprocessed.propertyImageCount || 0} property + ${preprocessed.roomImageCount || 0} room)`)
+  logger.info(
+    `Preprocessed: ${preprocessed.roomNames?.length || 0} rooms found, ${preprocessed.totalImages || 0} images (${preprocessed.propertyImageCount || 0} property + ${preprocessed.roomImageCount || 0} room)`
+  )
 
   const prompt = `Sen bir otel veri çıkarma uzmanısın. Aşağıdaki ${contentType === 'url' ? 'web sayfası içeriğinden' : contentType === 'pdf' ? 'PDF dökümanından' : 'metinden'} otel bilgilerini çıkar ve JSON formatında döndür.
 
@@ -1107,7 +1166,7 @@ Sadece JSON döndür:`
     // Use higher token limit for comprehensive extraction
     const responseText = await generateContent(prompt, {
       temperature: 0.1,
-      maxOutputTokens: 65536  // Maximum for Gemini
+      maxOutputTokens: 65536 // Maximum for Gemini
     })
 
     if (!responseText) {
@@ -1117,7 +1176,10 @@ Sadece JSON döndür:`
     logger.info(`Gemini raw response length: ${responseText.length} chars`)
 
     // Clean up response - remove markdown code blocks if present
-    let cleanedResponse = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    let cleanedResponse = responseText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
 
     // Try to extract JSON if there's extra text
     const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/)
@@ -1127,7 +1189,9 @@ Sadece JSON döndür:`
 
     // Check if response is truncated
     if (isJsonTruncated(cleanedResponse)) {
-      logger.warn(`Gemini response appears truncated (${cleanedResponse.length} chars), retry ${retryCount + 1}/${MAX_RETRIES}`)
+      logger.warn(
+        `Gemini response appears truncated (${cleanedResponse.length} chars), retry ${retryCount + 1}/${MAX_RETRIES}`
+      )
 
       if (retryCount < MAX_RETRIES) {
         // Wait a bit before retrying
@@ -1142,7 +1206,12 @@ Sadece JSON döndür:`
 
     try {
       const parsed = JSON.parse(cleanedResponse)
-      logger.info('Hotel data extraction completed - fields: ' + Object.keys(parsed).length + ', rooms: ' + (parsed.roomTemplates?.length || 0))
+      logger.info(
+        'Hotel data extraction completed - fields: ' +
+          Object.keys(parsed).length +
+          ', rooms: ' +
+          (parsed.roomTemplates?.length || 0)
+      )
       return {
         success: true,
         data: parsed
@@ -1167,7 +1236,10 @@ Sadece JSON döndür:`
     logger.error('Hotel data extraction error: ' + error.message)
 
     // Retry on network/API errors
-    if (retryCount < MAX_RETRIES && (error.message.includes('timeout') || error.message.includes('network'))) {
+    if (
+      retryCount < MAX_RETRIES &&
+      (error.message.includes('timeout') || error.message.includes('network'))
+    ) {
       logger.info(`Retrying due to error, attempt ${retryCount + 2}/${MAX_RETRIES + 1}`)
       await new Promise(resolve => setTimeout(resolve, 3000 * (retryCount + 1)))
       return extractHotelData(content, contentType, retryCount + 1)
@@ -1225,7 +1297,7 @@ export const extractHotelDataFromUrl = async (url, options = {}) => {
 
       const crawlResult = await firecrawl.smartFetch(url, {
         maxPages: 12,
-        onPageScraped: (pageInfo) => {
+        onPageScraped: pageInfo => {
           // Emit progress for each scraped page
           if (progress) {
             progress.updateStep('crawl', {
@@ -1510,20 +1582,22 @@ Sadece JSON döndür:`
           model: GEMINI_MODEL,
           config: {
             temperature: 0.1,
-            maxOutputTokens: 65536  // Maximum for comprehensive extraction
+            maxOutputTokens: 65536 // Maximum for comprehensive extraction
           },
-          contents: [{
-            role: 'user',
-            parts: [
-              {
-                fileData: {
-                  fileUri: url,
-                  mimeType: 'text/html'
-                }
-              },
-              { text: prompt }
-            ]
-          }]
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  fileData: {
+                    fileUri: url,
+                    mimeType: 'text/html'
+                  }
+                },
+                { text: prompt }
+              ]
+            }
+          ]
         })
 
         // Collect all chunks
@@ -1540,7 +1614,9 @@ Sadece JSON döndür:`
           }
         }
 
-        logger.info(`Gemini direct response - chunks: ${chunkCount}, length: ${fullText.length} chars`)
+        logger.info(
+          `Gemini direct response - chunks: ${chunkCount}, length: ${fullText.length} chars`
+        )
 
         if (progress) {
           progress.completeStep('crawl', { chunks: chunkCount, chars: fullText.length })
@@ -1554,7 +1630,10 @@ Sadece JSON döndür:`
         }
 
         // Clean up response
-        let cleanedResponse = fullText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+        let cleanedResponse = fullText
+          .replace(/```json\n?/g, '')
+          .replace(/```\n?/g, '')
+          .trim()
         const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/)
         if (jsonMatch) {
           cleanedResponse = jsonMatch[0]
@@ -1576,7 +1655,10 @@ Sadece JSON döndür:`
         }
 
         const parsed = JSON.parse(cleanedResponse)
-        logger.info('Hotel data extraction from URL completed (Gemini direct) - rooms: ' + (parsed.roomTemplates?.length || 0))
+        logger.info(
+          'Hotel data extraction from URL completed (Gemini direct) - rooms: ' +
+            (parsed.roomTemplates?.length || 0)
+        )
 
         if (progress) {
           progress.completeStep('extract', {
@@ -1643,13 +1725,13 @@ export const parseHotelContract = async (fileContent, mimeType, context = {}) =>
   }
 
   // Convert Buffer to base64 if needed
-  const base64Content = Buffer.isBuffer(fileContent)
-    ? fileContent.toString('base64')
-    : fileContent
+  const base64Content = Buffer.isBuffer(fileContent) ? fileContent.toString('base64') : fileContent
 
   // Build context string
-  const existingRoomsStr = context.roomTypes?.map(rt => `${rt.code}: ${rt.name}`).join(', ') || 'Yok'
-  const existingMealPlansStr = context.mealPlans?.map(mp => `${mp.code}: ${mp.name}`).join(', ') || 'Yok'
+  const existingRoomsStr =
+    context.roomTypes?.map(rt => `${rt.code}: ${rt.name}`).join(', ') || 'Yok'
+  const existingMealPlansStr =
+    context.mealPlans?.map(mp => `${mp.code}: ${mp.name}`).join(', ') || 'Yok'
   const currency = context.currency || 'EUR'
 
   const prompt = `Sen Türkiye'de bir seyahat acentesinde çalışan deneyimli bir KONTRAT ANALİSTİsin. Yıllardır otel kontratlarını okuyup sisteme giriyorsun. Türk turizm sektörünün tüm jargonlarını, kısaltmalarını ve yazılı olmayan kurallarını biliyorsun.
@@ -2088,7 +2170,9 @@ SADECE GEÇERLİ JSON DÖNDÜR - AÇIKLAMA YAZMA!
 ═══════════════════════════════════════════════════════════════`
 
   try {
-    logger.info(`Parsing hotel contract - mimeType: ${mimeType}, contentSize: ${base64Content.length} chars`)
+    logger.info(
+      `Parsing hotel contract - mimeType: ${mimeType}, contentSize: ${base64Content.length} chars`
+    )
 
     const response = await client.models.generateContentStream({
       model: GEMINI_MODEL,
@@ -2096,18 +2180,20 @@ SADECE GEÇERLİ JSON DÖNDÜR - AÇIKLAMA YAZMA!
         temperature: 0.1,
         maxOutputTokens: 65536
       },
-      contents: [{
-        role: 'user',
-        parts: [
-          {
-            inlineData: {
-              mimeType: mimeType,
-              data: base64Content
-            }
-          },
-          { text: prompt }
-        ]
-      }]
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              inlineData: {
+                mimeType: mimeType,
+                data: base64Content
+              }
+            },
+            { text: prompt }
+          ]
+        }
+      ]
     })
 
     // Collect all chunks
@@ -2120,14 +2206,19 @@ SADECE GEÇERLİ JSON DÖNDÜR - AÇIKLAMA YAZMA!
       }
     }
 
-    logger.info(`Contract parsing response - chunks: ${chunkCount}, length: ${fullText.length} chars`)
+    logger.info(
+      `Contract parsing response - chunks: ${chunkCount}, length: ${fullText.length} chars`
+    )
 
     if (!fullText) {
       throw new Error('No response received from AI')
     }
 
     // Clean up response
-    let cleanedResponse = fullText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    let cleanedResponse = fullText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim()
     const jsonMatch = cleanedResponse.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
       cleanedResponse = jsonMatch[0]
@@ -2148,7 +2239,7 @@ SADECE GEÇERLİ JSON DÖNDÜR - AÇIKLAMA YAZMA!
     const actualPrices = parsed.pricing?.length || 0
     const expectedPrices = periodCount * roomCount * mealPlanCount
 
-    logger.info(`Contract parsing completed:`)
+    logger.info('Contract parsing completed:')
     logger.info(`  - Periods: ${periodCount}`)
     logger.info(`  - Room types: ${roomCount}`)
     logger.info(`  - Meal plans: ${mealPlanCount}`)
@@ -2156,9 +2247,13 @@ SADECE GEÇERLİ JSON DÖNDÜR - AÇIKLAMA YAZMA!
 
     if (actualPrices < expectedPrices) {
       const missing = expectedPrices - actualPrices
-      logger.warn(`  - MISSING ${missing} price entries (${Math.round(missing/expectedPrices*100)}% incomplete)`)
+      logger.warn(
+        `  - MISSING ${missing} price entries (${Math.round((missing / expectedPrices) * 100)}% incomplete)`
+      )
       if (!parsed.warnings) parsed.warnings = []
-      parsed.warnings.push(`${missing} fiyat kaydı eksik olabilir (beklenen: ${expectedPrices}, bulunan: ${actualPrices})`)
+      parsed.warnings.push(
+        `${missing} fiyat kaydı eksik olabilir (beklenen: ${expectedPrices}, bulunan: ${actualPrices})`
+      )
     }
 
     return {

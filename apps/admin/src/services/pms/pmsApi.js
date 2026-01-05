@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { pmsLogger } from '@/utils/logger'
 
 /**
  * PMS API Client
@@ -57,7 +58,7 @@ pmsApiClient.interceptors.request.use(
         if (partnerStore.hasSelectedPartner && partnerStore.selectedPartner?._id) {
           config.headers['X-Partner-Id'] = partnerStore.selectedPartner._id
         }
-      } catch (e) {
+      } catch {
         // Partner store may not be available during initial load
       }
     }
@@ -65,7 +66,7 @@ pmsApiClient.interceptors.request.use(
     return config
   },
   error => {
-    console.error('[PMS API] Request interceptor error:', error)
+    pmsLogger.error('[PMS API] Request interceptor error:', error)
     return Promise.reject(error)
   }
 )
@@ -79,10 +80,12 @@ pmsApiClient.interceptors.response.use(
     // If 401 Unauthorized
     if (error.response?.status === 401) {
       // Skip for login endpoints
-      if (error.config?.url?.includes('/pms/auth/login') ||
-          error.config?.url?.includes('/pms/auth/select-hotel') ||
-          error.config?.url?.includes('/auth/login') ||
-          error.config?.url?.includes('/auth/refresh-token')) {
+      if (
+        error.config?.url?.includes('/pms/auth/login') ||
+        error.config?.url?.includes('/pms/auth/select-hotel') ||
+        error.config?.url?.includes('/auth/login') ||
+        error.config?.url?.includes('/auth/refresh-token')
+      ) {
         return Promise.reject(error)
       }
 
@@ -106,7 +109,7 @@ pmsApiClient.interceptors.response.use(
             return pmsApiClient(error.config)
           }
         } catch (refreshError) {
-          console.error('[PMS API] Token refresh failed:', refreshError)
+          pmsLogger.error('[PMS API] Token refresh failed:', refreshError)
           // Auth store will handle redirect to login
         }
       }

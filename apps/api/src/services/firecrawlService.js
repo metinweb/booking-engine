@@ -18,7 +18,8 @@ const getFirecrawlApiKey = async () => {
 
   try {
     // Try to load from database
-    const { default: PlatformSettings } = await import('../modules/platform-settings/platformSettings.model.js')
+    const { default: PlatformSettings } =
+      await import('../modules/platform-settings/platformSettings.model.js')
     const settings = await PlatformSettings.getSettings()
     const credentials = settings.getFirecrawlCredentials()
 
@@ -45,7 +46,7 @@ const getFirecrawlApiKey = async () => {
  * Extract image URLs from markdown content
  * Markdown images: ![alt](url)
  */
-const extractImagesFromMarkdown = (markdown) => {
+const extractImagesFromMarkdown = markdown => {
   if (!markdown) return []
   const images = []
 
@@ -66,7 +67,7 @@ const extractImagesFromMarkdown = (markdown) => {
  * Extract image URLs from HTML content
  * Looks for img src, background-image, data-src, srcset, and raw URL patterns
  */
-const extractImagesFromHtml = (html) => {
+const extractImagesFromHtml = html => {
   if (!html) return []
   const images = []
   let match
@@ -148,7 +149,9 @@ const filterImageUrls = (urls, baseUrl) => {
   let baseDomain = ''
   try {
     baseDomain = new URL(baseUrl).origin
-  } catch (e) {}
+  } catch {
+    // Invalid URL - baseDomain stays empty
+  }
 
   for (const url of urls) {
     // Skip if already seen
@@ -158,9 +161,18 @@ const filterImageUrls = (urls, baseUrl) => {
     if (url.includes('favicon') || url.includes('icon') || url.includes('logo')) continue
 
     // Skip social media / tracking images
-    if (url.includes('facebook') || url.includes('twitter') || url.includes('instagram') ||
-        url.includes('linkedin') || url.includes('youtube') || url.includes('pinterest') ||
-        url.includes('google') || url.includes('analytics') || url.includes('pixel')) continue
+    if (
+      url.includes('facebook') ||
+      url.includes('twitter') ||
+      url.includes('instagram') ||
+      url.includes('linkedin') ||
+      url.includes('youtube') ||
+      url.includes('pinterest') ||
+      url.includes('google') ||
+      url.includes('analytics') ||
+      url.includes('pixel')
+    )
+      continue
 
     // Skip base64 data URLs
     if (url.startsWith('data:')) continue
@@ -169,19 +181,20 @@ const filterImageUrls = (urls, baseUrl) => {
     if (/[-_](\d{1,2}x\d{1,2}|16|24|32|48|64)[-_.]/.test(url)) continue
 
     // Must be an image or image-like URL
-    const isImage = /\.(jpg|jpeg|png|gif|webp|avif|bmp)/i.test(url) ||
-                   url.includes('/image') ||
-                   url.includes('/photo') ||
-                   url.includes('/gallery') ||
-                   url.includes('/media') ||
-                   url.includes('/upload') ||
-                   url.includes('/room') ||
-                   url.includes('/oda') ||
-                   url.includes('cdn') ||
-                   url.includes('cloudinary') ||
-                   url.includes('imgix') ||
-                   url.includes('unsplash') ||
-                   url.includes('wp-content')
+    const isImage =
+      /\.(jpg|jpeg|png|gif|webp|avif|bmp)/i.test(url) ||
+      url.includes('/image') ||
+      url.includes('/photo') ||
+      url.includes('/gallery') ||
+      url.includes('/media') ||
+      url.includes('/upload') ||
+      url.includes('/room') ||
+      url.includes('/oda') ||
+      url.includes('cdn') ||
+      url.includes('cloudinary') ||
+      url.includes('imgix') ||
+      url.includes('unsplash') ||
+      url.includes('wp-content')
 
     if (!isImage) continue
 
@@ -229,7 +242,7 @@ export const isConfigured = async () => {
  * @param {string} url - URL to scrape
  * @returns {Promise<{success: boolean, content: string, metadata: object, images: array}>}
  */
-export const scrapePage = async (url) => {
+export const scrapePage = async url => {
   const client = await getFirecrawl()
   if (!client) {
     throw new Error('FIRECRAWL_API_KEY is not configured')
@@ -266,9 +279,7 @@ export const scrapePage = async (url) => {
 
     // 3. Extract from links array
     if (result.links && result.links.length > 0) {
-      const linkImages = result.links.filter(link =>
-        /\.(jpg|jpeg|png|gif|webp|avif)/i.test(link)
-      )
+      const linkImages = result.links.filter(link => /\.(jpg|jpeg|png|gif|webp|avif)/i.test(link))
       allImages.push(...linkImages)
     }
 
@@ -281,7 +292,9 @@ export const scrapePage = async (url) => {
       content += filteredImages.join('\n')
     }
 
-    logger.info(`Firecrawl scrape completed: ${content.length} chars, ${filteredImages.length} images extracted`)
+    logger.info(
+      `Firecrawl scrape completed: ${content.length} chars, ${filteredImages.length} images extracted`
+    )
 
     return {
       success: true,
@@ -305,22 +318,38 @@ const DOMAIN_CONFIGS = {
   // OTA (Online Travel Agency) sites - single page, no sub-pages
   ota: {
     domains: [
-      'etstur.com', 'www.etstur.com',
-      'tatilbudur.com', 'www.tatilbudur.com',
-      'jollytur.com', 'www.jollytur.com',
-      'setur.com.tr', 'www.setur.com.tr',
-      'tatilsepeti.com', 'www.tatilsepeti.com',
-      'odamax.com', 'www.odamax.com',
-      'obilet.com', 'www.obilet.com',
-      'enuygun.com', 'www.enuygun.com',
-      'otelz.com', 'www.otelz.com',
-      'touristica.com.tr', 'www.touristica.com.tr',
-      'booking.com', 'www.booking.com',
-      'hotels.com', 'www.hotels.com',
-      'expedia.com', 'www.expedia.com',
-      'agoda.com', 'www.agoda.com',
-      'tripadvisor.com', 'www.tripadvisor.com',
-      'trivago.com', 'www.trivago.com'
+      'etstur.com',
+      'www.etstur.com',
+      'tatilbudur.com',
+      'www.tatilbudur.com',
+      'jollytur.com',
+      'www.jollytur.com',
+      'setur.com.tr',
+      'www.setur.com.tr',
+      'tatilsepeti.com',
+      'www.tatilsepeti.com',
+      'odamax.com',
+      'www.odamax.com',
+      'obilet.com',
+      'www.obilet.com',
+      'enuygun.com',
+      'www.enuygun.com',
+      'otelz.com',
+      'www.otelz.com',
+      'touristica.com.tr',
+      'www.touristica.com.tr',
+      'booking.com',
+      'www.booking.com',
+      'hotels.com',
+      'www.hotels.com',
+      'expedia.com',
+      'www.expedia.com',
+      'agoda.com',
+      'www.agoda.com',
+      'tripadvisor.com',
+      'www.tripadvisor.com',
+      'trivago.com',
+      'www.trivago.com'
     ],
     maxPages: 1,
     subPages: [] // No sub-pages for OTA sites
@@ -328,12 +357,18 @@ const DOMAIN_CONFIGS = {
   // Hotel chain websites - may have some sub-pages
   chain: {
     domains: [
-      'hilton.com', 'www.hilton.com',
-      'marriott.com', 'www.marriott.com',
-      'ihg.com', 'www.ihg.com',
-      'accor.com', 'www.accor.com',
-      'wyndham.com', 'www.wyndham.com',
-      'hyatt.com', 'www.hyatt.com'
+      'hilton.com',
+      'www.hilton.com',
+      'marriott.com',
+      'www.marriott.com',
+      'ihg.com',
+      'www.ihg.com',
+      'accor.com',
+      'www.accor.com',
+      'wyndham.com',
+      'www.wyndham.com',
+      'hyatt.com',
+      'www.hyatt.com'
     ],
     maxPages: 3,
     subPages: ['/rooms', '/dining', '/amenities']
@@ -345,7 +380,7 @@ const DOMAIN_CONFIGS = {
  * @param {string} url - URL to check
  * @returns {object|null} - Domain config or null for default behavior
  */
-const getDomainConfig = (url) => {
+const getDomainConfig = url => {
   try {
     const hostname = new URL(url).hostname.toLowerCase()
 
@@ -370,16 +405,22 @@ const getDomainConfig = (url) => {
  * @param {string} baseUrl - Base URL of the hotel website
  * @returns {object} - { urls: string[], maxPages: number, siteType: string }
  */
-const buildHotelUrls = (baseUrl) => {
+const buildHotelUrls = baseUrl => {
   const urlObj = new URL(baseUrl)
   const base = `${urlObj.protocol}//${urlObj.host}`
-  const lang = urlObj.pathname.includes('/tr') ? '/tr' : (urlObj.pathname.includes('/en') ? '/en' : '')
+  const lang = urlObj.pathname.includes('/tr')
+    ? '/tr'
+    : urlObj.pathname.includes('/en')
+      ? '/en'
+      : ''
 
   // Check for domain-specific configuration
   const domainConfig = getDomainConfig(baseUrl)
 
   if (domainConfig) {
-    logger.info(`Detected ${domainConfig.type.toUpperCase()} site: ${urlObj.hostname} - limiting to ${domainConfig.maxPages} page(s)`)
+    logger.info(
+      `Detected ${domainConfig.type.toUpperCase()} site: ${urlObj.hostname} - limiting to ${domainConfig.maxPages} page(s)`
+    )
 
     const urls = [baseUrl] // Always include the original URL
 
@@ -399,22 +440,52 @@ const buildHotelUrls = (baseUrl) => {
   const paths = [
     '', // Homepage
     // Room pages (PRIORITY - for room images)
-    '/rooms', '/odalar', '/accommodation', '/konaklama',
-    '/rooms-suites', '/odalar-ve-suitler', '/room-types', '/oda-tipleri',
-    '/our-rooms', '/odalarimiz',
+    '/rooms',
+    '/odalar',
+    '/accommodation',
+    '/konaklama',
+    '/rooms-suites',
+    '/odalar-ve-suitler',
+    '/room-types',
+    '/oda-tipleri',
+    '/our-rooms',
+    '/odalarimiz',
     // About & Facilities
-    '/about', '/hakkimizda', '/kurumsal', '/about-us',
-    '/facilities', '/olanaklar', '/amenities', '/tesisler',
+    '/about',
+    '/hakkimizda',
+    '/kurumsal',
+    '/about-us',
+    '/facilities',
+    '/olanaklar',
+    '/amenities',
+    '/tesisler',
     // Spa & Wellness
-    '/spa', '/spa-wellness', '/wellness',
+    '/spa',
+    '/spa-wellness',
+    '/wellness',
     // Dining
-    '/restaurant', '/restoran', '/dining', '/restaurants', '/food-beverage',
+    '/restaurant',
+    '/restoran',
+    '/dining',
+    '/restaurants',
+    '/food-beverage',
     // Pool & Beach
-    '/pool', '/havuz', '/beach', '/plaj', '/pools',
+    '/pool',
+    '/havuz',
+    '/beach',
+    '/plaj',
+    '/pools',
     // Gallery (for images)
-    '/gallery', '/galeri', '/photos', '/fotograflar', '/media',
+    '/gallery',
+    '/galeri',
+    '/photos',
+    '/fotograflar',
+    '/media',
     // Contact & Location
-    '/contact', '/iletisim', '/location', '/konum'
+    '/contact',
+    '/iletisim',
+    '/location',
+    '/konum'
   ]
 
   // Build unique URLs
@@ -524,7 +595,9 @@ export const crawlWebsite = async (url, options = {}) => {
             result = await client.scrape(pageUrl, optionsWithActions)
           } catch (actionError) {
             // Actions failed (selector not found, etc.), retry without actions
-            logger.warn(`Actions failed for ${pageUrl}: ${actionError.message}. Retrying without actions.`)
+            logger.warn(
+              `Actions failed for ${pageUrl}: ${actionError.message}. Retrying without actions.`
+            )
             result = await client.scrape(pageUrl, baseOptions)
           }
         } else {
@@ -571,7 +644,9 @@ export const crawlWebsite = async (url, options = {}) => {
             imageCount: filteredPageImages.length
           })
           pagesScraped++
-          logger.info(`Scraped: ${pageUrl} (${result.markdown.length} chars, ${filteredPageImages.length} images)`)
+          logger.info(
+            `Scraped: ${pageUrl} (${result.markdown.length} chars, ${filteredPageImages.length} images)`
+          )
 
           // Call progress callback if provided
           if (onPageScraped) {
@@ -585,12 +660,12 @@ export const crawlWebsite = async (url, options = {}) => {
                 totalChars: successfulPages.reduce((sum, p) => sum + p.content.length, 0),
                 totalImages: allExtractedImages.length
               })
-            } catch (e) {
+            } catch {
               // Ignore callback errors
             }
           }
         }
-      } catch (pageError) {
+      } catch {
         // Silently skip failed pages (404s, etc.)
         continue
       }
@@ -604,9 +679,11 @@ export const crawlWebsite = async (url, options = {}) => {
     const uniqueImages = [...new Set(allExtractedImages)]
 
     // Combine all page contents
-    const combinedContent = successfulPages.map(page => {
-      return `\n\n=== PAGE: ${page.title} (${page.url}) ===\n\n${page.content}`
-    }).join('\n')
+    const combinedContent = successfulPages
+      .map(page => {
+        return `\n\n=== PAGE: ${page.title} (${page.url}) ===\n\n${page.content}`
+      })
+      .join('\n')
 
     // Add summary of all unique images at the end
     let finalContent = combinedContent
@@ -616,7 +693,9 @@ export const crawlWebsite = async (url, options = {}) => {
     }
 
     const totalImageCount = successfulPages.reduce((sum, p) => sum + (p.imageCount || 0), 0)
-    logger.info(`Firecrawl crawl completed: ${successfulPages.length} pages, ${uniqueImages.length} unique images (${totalImageCount} total)`)
+    logger.info(
+      `Firecrawl crawl completed: ${successfulPages.length} pages, ${uniqueImages.length} unique images (${totalImageCount} total)`
+    )
 
     return {
       success: true,
@@ -665,7 +744,6 @@ export const smartFetch = async (url, options = {}) => {
     // Fallback to single page scrape
     logger.info('Crawl returned minimal content, falling back to scrape')
     return await scrapePage(url)
-
   } catch (error) {
     logger.warn(`Firecrawl smartFetch failed, will fallback: ${error.message}`)
     // Return null to signal fallback should be used

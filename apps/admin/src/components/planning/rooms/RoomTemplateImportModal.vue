@@ -14,7 +14,7 @@
     <div v-else-if="error" class="text-center py-8">
       <span class="material-icons text-4xl text-red-500">error_outline</span>
       <p class="mt-2 text-gray-600 dark:text-slate-400">{{ error }}</p>
-      <button @click="fetchTemplates" class="mt-4 btn-secondary">
+      <button class="mt-4 btn-secondary" @click="fetchTemplates">
         {{ $t('common.tryAgain') }}
       </button>
     </div>
@@ -22,7 +22,9 @@
     <!-- No Templates -->
     <div v-else-if="templates.length === 0" class="text-center py-8">
       <span class="material-icons text-4xl text-gray-400">bedroom_parent</span>
-      <p class="mt-2 text-gray-600 dark:text-slate-400">{{ $t('planning.roomTemplates.noTemplates') }}</p>
+      <p class="mt-2 text-gray-600 dark:text-slate-400">
+        {{ $t('planning.roomTemplates.noTemplates') }}
+      </p>
     </div>
 
     <!-- Templates List -->
@@ -32,20 +34,26 @@
         <span class="material-icons text-indigo-600 dark:text-indigo-400">business</span>
         <div>
           <p class="font-medium text-indigo-800 dark:text-indigo-300">{{ baseHotelName }}</p>
-          <p class="text-sm text-indigo-600 dark:text-indigo-400">{{ $t('planning.roomTemplates.baseHotelTemplates') }}</p>
+          <p class="text-sm text-indigo-600 dark:text-indigo-400">
+            {{ $t('planning.roomTemplates.baseHotelTemplates') }}
+          </p>
         </div>
       </div>
 
       <!-- Select All -->
-      <div class="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-slate-700">
+      <div
+        class="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-slate-700"
+      >
         <label class="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             :checked="allSelected"
-            @change="toggleSelectAll"
             class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            @change="toggleSelectAll"
           />
-          <span class="text-sm text-gray-700 dark:text-slate-300">{{ $t('common.selectAll') }}</span>
+          <span class="text-sm text-gray-700 dark:text-slate-300">{{
+            $t('common.selectAll')
+          }}</span>
         </label>
         <span class="text-sm text-gray-500 dark:text-slate-400">
           {{ selectedTemplates.length }} / {{ templates.length }} {{ $t('common.selected') }}
@@ -60,20 +68,23 @@
           class="flex items-center gap-4 p-3 rounded-lg border cursor-pointer transition-colors"
           :class="{
             'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20': isSelected(template.code),
-            'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50': !isSelected(template.code),
+            'border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700/50':
+              !isSelected(template.code),
             'opacity-50 cursor-not-allowed': isAlreadyImported(template.code)
           }"
         >
           <input
+            v-model="selectedTemplates"
             type="checkbox"
             :value="template.code"
-            v-model="selectedTemplates"
             :disabled="isAlreadyImported(template.code)"
             class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
           />
 
           <!-- Room Image -->
-          <div class="w-20 h-14 flex-shrink-0 rounded overflow-hidden bg-gray-100 dark:bg-slate-600">
+          <div
+            class="w-20 h-14 flex-shrink-0 rounded overflow-hidden bg-gray-100 dark:bg-slate-600"
+          >
             <img
               v-if="getMainImage(template)"
               :src="getMainImage(template)"
@@ -88,8 +99,12 @@
           <!-- Room Info -->
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-indigo-600 dark:text-indigo-400 text-sm">{{ template.code }}</span>
-              <span class="font-medium text-gray-800 dark:text-white truncate">{{ getTemplateName(template) }}</span>
+              <span class="font-bold text-indigo-600 dark:text-indigo-400 text-sm">{{
+                template.code
+              }}</span>
+              <span class="font-medium text-gray-800 dark:text-white truncate">{{
+                getTemplateName(template)
+              }}</span>
               <span
                 v-if="isAlreadyImported(template.code)"
                 class="px-2 py-0.5 text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded"
@@ -116,7 +131,9 @@
       </div>
 
       <!-- Info Box -->
-      <div class="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg text-sm text-gray-600 dark:text-slate-400">
+      <div
+        class="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg text-sm text-gray-600 dark:text-slate-400"
+      >
         <div class="flex items-start gap-2">
           <span class="material-icons text-gray-400">info</span>
           <p>{{ $t('planning.roomTemplates.importInfo') }}</p>
@@ -126,13 +143,13 @@
 
     <template #footer>
       <div class="flex justify-end gap-3">
-        <button @click="$emit('close')" class="btn-secondary">
+        <button class="btn-secondary" @click="$emit('close')">
           {{ $t('common.cancel') }}
         </button>
         <button
-          @click="importTemplates"
           class="btn-primary flex items-center gap-2"
           :disabled="importing || selectedTemplates.length === 0"
+          @click="importTemplates"
         >
           <span v-if="importing" class="animate-spin material-icons text-lg">refresh</span>
           <span v-else class="material-icons text-lg">download</span>
@@ -181,12 +198,12 @@ const allSelected = computed(() => {
   return selectableCount > 0 && selectedTemplates.value.length === selectableCount
 })
 
-const getTemplateName = (template) => {
+const getTemplateName = template => {
   if (!template.name) return template.code
   return template.name[locale.value] || template.name.tr || template.name.en || template.code
 }
 
-const getMainImage = (template) => {
+const getMainImage = template => {
   if (!template.images?.length) return null
   const mainImage = template.images.find(img => img.isMain) || template.images[0]
   if (!mainImage?.url) return null
@@ -194,11 +211,11 @@ const getMainImage = (template) => {
   return `${apiBaseUrl}${mainImage.url}`
 }
 
-const isSelected = (code) => {
+const isSelected = code => {
   return selectedTemplates.value.includes(code)
 }
 
-const isAlreadyImported = (code) => {
+const isAlreadyImported = code => {
   return props.existingRoomTypes.some(rt => rt.code === code)
 }
 
@@ -220,7 +237,8 @@ const fetchTemplates = async () => {
     const response = await hotelService.getImportableRooms(props.hotelId)
     if (response.success) {
       templates.value = response.data.roomTemplates || []
-      baseHotelName.value = response.data.baseHotel?.name?.tr || response.data.baseHotel?.name?.en || ''
+      baseHotelName.value =
+        response.data.baseHotel?.name?.tr || response.data.baseHotel?.name?.en || ''
     } else {
       throw new Error(response.message || 'Failed to fetch templates')
     }
@@ -237,10 +255,17 @@ const importTemplates = async () => {
   importing.value = true
 
   try {
-    const response = await planningService.importRoomTypesFromBase(props.hotelId, selectedTemplates.value)
+    const response = await planningService.importRoomTypesFromBase(
+      props.hotelId,
+      selectedTemplates.value
+    )
 
     if (response.success) {
-      toast.success(t('planning.roomTemplates.importSuccess', { count: response.data?.imported || selectedTemplates.value.length }))
+      toast.success(
+        t('planning.roomTemplates.importSuccess', {
+          count: response.data?.imported || selectedTemplates.value.length
+        })
+      )
       emit('imported')
       emit('close')
     }

@@ -1,4 +1,5 @@
 import apiClient from './api'
+import { apiLogger } from '@/utils/logger'
 
 /**
  * Translate single text
@@ -16,7 +17,10 @@ const translateText = async (text, sourceLang, targetLang) => {
     })
     return response.data
   } catch (error) {
-    console.error('Translation Service: Failed to translate text', error.response?.data || error.message)
+    apiLogger.error(
+      'Translation Service: Failed to translate text',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -37,7 +41,10 @@ const translateFields = async (fields, sourceLang, targetLangs) => {
     })
     return response.data
   } catch (error) {
-    console.error('Translation Service: Failed to translate fields', error.response?.data || error.message)
+    apiLogger.error(
+      'Translation Service: Failed to translate fields',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -58,7 +65,10 @@ const batchTranslate = async (content, sourceLang, allLangs) => {
     })
     return response.data
   } catch (error) {
-    console.error('Translation Service: Failed to batch translate', error.response?.data || error.message)
+    apiLogger.error(
+      'Translation Service: Failed to batch translate',
+      error.response?.data || error.message
+    )
     throw error
   }
 }
@@ -81,7 +91,10 @@ const translateSeo = async (siteTitle, siteDescription, sourceLang, targetLangs)
     })
     return response.data
   } catch (error) {
-    console.error('Translation Service: Failed to translate SEO', error.response?.data || error.message)
+    apiLogger.error(
+      'Translation Service: Failed to translate SEO',
+      error.response?.data || error.message
+    )
     throw error
   }
 }

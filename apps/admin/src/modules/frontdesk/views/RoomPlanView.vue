@@ -1,35 +1,39 @@
 <template>
   <div class="h-full flex flex-col bg-gray-50 dark:bg-slate-900">
     <!-- Header -->
-    <div class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-3">
+    <div
+      class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-3"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h1 class="text-xl font-bold text-gray-900 dark:text-white">Oda Plani</h1>
-          <p class="text-sm text-gray-500 dark:text-slate-400">Timeline gorunumu ile oda doluluk yonetimi</p>
+          <p class="text-sm text-gray-500 dark:text-slate-400">
+            Timeline gorunumu ile oda doluluk yonetimi
+          </p>
         </div>
 
         <div class="flex items-center gap-4">
           <!-- Date Navigation -->
           <div class="flex items-center gap-2">
             <button
-              @click="navigateDays(-7)"
               class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               title="1 hafta geri"
+              @click="navigateDays(-7)"
             >
               <span class="material-icons text-gray-600 dark:text-gray-400">chevron_left</span>
             </button>
 
             <button
-              @click="goToToday"
               class="px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+              @click="goToToday"
             >
               Bugun
             </button>
 
             <button
-              @click="navigateDays(7)"
               class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               title="1 hafta ileri"
+              @click="navigateDays(7)"
             >
               <span class="material-icons text-gray-600 dark:text-gray-400">chevron_right</span>
             </button>
@@ -41,15 +45,19 @@
           </div>
 
           <!-- Zoom Controls -->
-          <div class="flex items-center border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden">
+          <div
+            class="flex items-center border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden"
+          >
             <button
               v-for="level in zoomLevels"
               :key="level.name"
-              @click="setZoomLevel(level)"
               class="px-3 py-1.5 text-sm font-medium transition-colors"
-              :class="currentZoom.name === level.name
-                ? 'bg-indigo-600 text-white'
-                : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'"
+              :class="
+                currentZoom.name === level.name
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
+              "
+              @click="setZoomLevel(level)"
             >
               {{ level.label }}
             </button>
@@ -57,19 +65,25 @@
 
           <!-- Refresh -->
           <button
-            @click="fetchData"
             :disabled="loading"
             class="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
             title="Yenile"
+            @click="fetchData"
           >
-            <span class="material-icons text-gray-600 dark:text-gray-400" :class="{ 'animate-spin': loading }">refresh</span>
+            <span
+              class="material-icons text-gray-600 dark:text-gray-400"
+              :class="{ 'animate-spin': loading }"
+              >refresh</span
+            >
           </button>
         </div>
       </div>
     </div>
 
     <!-- Statistics Bar -->
-    <div class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-2">
+    <div
+      class="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 px-4 py-2"
+    >
       <div class="flex items-center gap-6 text-sm">
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 rounded bg-green-500"></div>
@@ -77,7 +91,9 @@
         </div>
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 rounded bg-blue-400"></div>
-          <span class="text-gray-600 dark:text-gray-400">Rezervasyon: {{ statistics.pendingReservations }}</span>
+          <span class="text-gray-600 dark:text-gray-400"
+            >Rezervasyon: {{ statistics.pendingReservations }}</span
+          >
         </div>
         <div class="flex items-center gap-2">
           <div class="w-3 h-3 rounded bg-amber-500"></div>
@@ -96,21 +112,34 @@
     <!-- Timeline Container -->
     <div class="flex-1 overflow-hidden flex">
       <!-- Room Labels (Fixed Left Column) -->
-      <div class="w-48 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 z-10">
+      <div
+        class="w-48 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 z-10"
+      >
         <!-- Header spacer -->
-        <div class="h-16 border-b border-gray-200 dark:border-slate-700 flex items-center justify-center">
-          <span class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Odalar</span>
+        <div
+          class="h-16 border-b border-gray-200 dark:border-slate-700 flex items-center justify-center"
+        >
+          <span class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >Odalar</span
+          >
         </div>
 
         <!-- Room labels -->
-        <div class="overflow-y-auto" :style="{ height: 'calc(100% - 64px)' }" ref="roomLabelsRef">
-          <div v-for="group in roomTypeGroups" :key="group.roomTypeId" class="border-b border-gray-100 dark:border-slate-700">
+        <div ref="roomLabelsRef" class="overflow-y-auto" :style="{ height: 'calc(100% - 64px)' }">
+          <div
+            v-for="group in roomTypeGroups"
+            :key="group.roomTypeId"
+            class="border-b border-gray-100 dark:border-slate-700"
+          >
             <!-- Room Type header (collapsible) -->
             <div
-              @click="toggleGroup(group.roomTypeId)"
               class="px-3 py-2 bg-gray-50 dark:bg-slate-700/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2 sticky top-0 z-10"
+              @click="toggleGroup(group.roomTypeId)"
             >
-              <span class="material-icons text-gray-500 dark:text-slate-400 text-sm transition-transform" :class="{ '-rotate-90': collapsedGroups.has(group.roomTypeId) }">
+              <span
+                class="material-icons text-gray-500 dark:text-slate-400 text-sm transition-transform"
+                :class="{ '-rotate-90': collapsedGroups.has(group.roomTypeId) }"
+              >
                 expand_more
               </span>
               <span class="text-xs font-semibold text-gray-600 dark:text-slate-300 truncate flex-1">
@@ -131,7 +160,9 @@
                     class="w-4 h-4 rounded flex-shrink-0"
                     :class="getRoomStatusColor(room)"
                   ></span>
-                  <span class="font-medium text-gray-900 dark:text-white text-sm">{{ room.roomNumber }}</span>
+                  <span class="font-medium text-gray-900 dark:text-white text-sm">{{
+                    room.roomNumber
+                  }}</span>
                 </div>
               </div>
             </template>
@@ -140,9 +171,11 @@
       </div>
 
       <!-- Timeline Grid (Scrollable) -->
-      <div class="flex-1 overflow-auto" ref="timelineRef" @scroll="handleScroll">
+      <div ref="timelineRef" class="flex-1 overflow-auto" @scroll="handleScroll">
         <!-- Date Header -->
-        <div class="sticky top-0 bg-white dark:bg-slate-800 z-10 border-b border-gray-200 dark:border-slate-700">
+        <div
+          class="sticky top-0 bg-white dark:bg-slate-800 z-10 border-b border-gray-200 dark:border-slate-700"
+        >
           <!-- Month row -->
           <div class="h-6 flex border-b border-gray-100 dark:border-slate-700/50">
             <div
@@ -167,7 +200,14 @@
               }"
               :style="{ width: `${currentZoom.cellWidth}px` }"
             >
-              <span class="font-medium" :class="day.isToday ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-700 dark:text-gray-300'">
+              <span
+                class="font-medium"
+                :class="
+                  day.isToday
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-700 dark:text-gray-300'
+                "
+              >
                 {{ day.dayOfMonth }}
               </span>
               <span class="text-gray-400 dark:text-slate-500">{{ getDayName(day.dayOfWeek) }}</span>
@@ -192,10 +232,7 @@
                 }"
                 :style="{ width: `${currentZoom.cellWidth}px` }"
               >
-                <span
-                  class="text-xs font-medium"
-                  :class="getAvailabilityColor(group, day.date)"
-                >
+                <span class="text-xs font-medium" :class="getAvailabilityColor(group, day.date)">
                   {{ getAvailabilityText(group, day.date) }}
                 </span>
               </div>
@@ -208,8 +245,10 @@
                 :key="room._id"
                 class="h-10 relative border-b border-gray-100 dark:border-slate-700/50 transition-colors"
                 :class="{
-                  'bg-indigo-100/50 dark:bg-indigo-900/30 ring-2 ring-inset ring-indigo-400': dropTarget?.roomId === room._id,
-                  'bg-red-100/50 dark:bg-red-900/30': dropTarget?.roomId === room._id && !dropTarget?.isAvailable
+                  'bg-indigo-100/50 dark:bg-indigo-900/30 ring-2 ring-inset ring-indigo-400':
+                    dropTarget?.roomId === room._id,
+                  'bg-red-100/50 dark:bg-red-900/30':
+                    dropTarget?.roomId === room._id && !dropTarget?.isAvailable
                 }"
                 :style="{ width: `${dateHeaders.length * currentZoom.cellWidth}px` }"
                 @click="handleCellClick($event, room)"
@@ -253,7 +292,10 @@
                   </span>
 
                   <!-- VIP indicator dot -->
-                  <span v-if="stay.isVip" class="absolute top-0 right-1 w-2 h-2 bg-black rounded-full"></span>
+                  <span
+                    v-if="stay.isVip"
+                    class="absolute top-0 right-1 w-2 h-2 bg-black rounded-full"
+                  ></span>
                 </div>
               </div>
             </template>
@@ -274,9 +316,11 @@
           <div class="flex items-start justify-between mb-3">
             <div class="flex items-center gap-2">
               <span v-if="selectedStay.isVip" class="material-icons text-amber-500">star</span>
-              <h3 class="font-semibold text-gray-900 dark:text-white">{{ selectedStay.guestName }}</h3>
+              <h3 class="font-semibold text-gray-900 dark:text-white">
+                {{ selectedStay.guestName }}
+              </h3>
             </div>
-            <button @click="selectedStay = null" class="text-gray-400 hover:text-gray-500">
+            <button class="text-gray-400 hover:text-gray-500" @click="selectedStay = null">
               <span class="material-icons text-lg">close</span>
             </button>
           </div>
@@ -284,21 +328,31 @@
           <div class="space-y-2 text-sm">
             <div class="flex justify-between">
               <span class="text-gray-500 dark:text-slate-400">Numara</span>
-              <span class="font-medium text-gray-900 dark:text-white">{{ selectedStay.stayNumber || selectedStay.bookingNumber }}</span>
+              <span class="font-medium text-gray-900 dark:text-white">{{
+                selectedStay.stayNumber || selectedStay.bookingNumber
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500 dark:text-slate-400">Giris</span>
-              <span class="text-gray-900 dark:text-white">{{ formatDate(selectedStay.checkInDate, 'long') }}</span>
+              <span class="text-gray-900 dark:text-white">{{
+                formatDate(selectedStay.checkInDate, 'long')
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500 dark:text-slate-400">Cikis</span>
-              <span class="text-gray-900 dark:text-white">{{ formatDate(selectedStay.checkOutDate, 'long') }}</span>
+              <span class="text-gray-900 dark:text-white">{{
+                formatDate(selectedStay.checkOutDate, 'long')
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-gray-500 dark:text-slate-400">Durum</span>
               <span
                 class="px-2 py-0.5 rounded text-xs font-medium"
-                :class="selectedStay.type === 'reservation' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
+                :class="
+                  selectedStay.type === 'reservation'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-green-100 text-green-700'
+                "
               >
                 {{ selectedStay.type === 'reservation' ? 'Rezervasyon' : 'Aktif Konaklama' }}
               </span>
@@ -308,14 +362,14 @@
           <div class="mt-4 flex gap-2">
             <button
               v-if="selectedStay.type === 'stay'"
-              @click="navigateToStay(selectedStay)"
               class="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
+              @click="navigateToStay(selectedStay)"
             >
               Detaylara Git
             </button>
             <button
-              @click="selectedStay = null"
               class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              @click="selectedStay = null"
             >
               Kapat
             </button>
@@ -334,12 +388,16 @@
         <div class="fixed inset-0 bg-black/30" @click="cancelMove"></div>
         <div class="relative bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-md p-5">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+            <div
+              class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+            >
               <span class="material-icons text-indigo-600 dark:text-indigo-400">swap_horiz</span>
             </div>
             <div>
               <h3 class="font-semibold text-gray-900 dark:text-white">Konaklama Tasima</h3>
-              <p class="text-sm text-gray-500 dark:text-slate-400">{{ moveConfirmation.stay?.guestName }}</p>
+              <p class="text-sm text-gray-500 dark:text-slate-400">
+                {{ moveConfirmation.stay?.guestName }}
+              </p>
             </div>
           </div>
 
@@ -347,12 +405,16 @@
             <div class="flex items-center gap-3 text-sm">
               <div class="flex-1 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
                 <div class="text-gray-500 dark:text-slate-400 text-xs mb-1">Mevcut Oda</div>
-                <div class="font-medium text-gray-900 dark:text-white">{{ moveConfirmation.sourceRoom?.roomNumber }}</div>
+                <div class="font-medium text-gray-900 dark:text-white">
+                  {{ moveConfirmation.sourceRoom?.roomNumber }}
+                </div>
               </div>
               <span class="material-icons text-gray-400">arrow_forward</span>
               <div class="flex-1 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
                 <div class="text-indigo-600 dark:text-indigo-400 text-xs mb-1">Hedef Oda</div>
-                <div class="font-medium text-indigo-700 dark:text-indigo-300">{{ moveConfirmation.targetRoom?.roomNumber }}</div>
+                <div class="font-medium text-indigo-700 dark:text-indigo-300">
+                  {{ moveConfirmation.targetRoom?.roomNumber }}
+                </div>
               </div>
             </div>
 
@@ -360,21 +422,25 @@
               <div class="flex-1 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
                 <div class="text-gray-500 dark:text-slate-400 text-xs mb-1">Mevcut Tarih</div>
                 <div class="font-medium text-gray-900 dark:text-white">
-                  {{ formatDate(moveConfirmation.stay.checkInDate, 'short') }} - {{ formatDate(moveConfirmation.stay.checkOutDate, 'short') }}
+                  {{ formatDate(moveConfirmation.stay.checkInDate, 'short') }} -
+                  {{ formatDate(moveConfirmation.stay.checkOutDate, 'short') }}
                 </div>
               </div>
               <span class="material-icons text-gray-400">arrow_forward</span>
               <div class="flex-1 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
                 <div class="text-indigo-600 dark:text-indigo-400 text-xs mb-1">Yeni Tarih</div>
                 <div class="font-medium text-indigo-700 dark:text-indigo-300">
-                  {{ formatDate(moveConfirmation.newCheckIn, 'short') }} - {{ formatDate(moveConfirmation.newCheckOut, 'short') }}
+                  {{ formatDate(moveConfirmation.newCheckIn, 'short') }} -
+                  {{ formatDate(moveConfirmation.newCheckOut, 'short') }}
                 </div>
               </div>
             </div>
           </div>
 
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tasima Nedeni</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >Tasima Nedeni</label
+            >
             <input
               v-model="moveReason"
               type="text"
@@ -385,15 +451,15 @@
 
           <div class="flex gap-3">
             <button
-              @click="cancelMove"
               class="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              @click="cancelMove"
             >
               Iptal
             </button>
             <button
-              @click="confirmMove"
               :disabled="moveLoading"
               class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              @click="confirmMove"
             >
               <span v-if="moveLoading" class="material-icons animate-spin text-sm">refresh</span>
               {{ moveLoading ? 'Taşınıyor...' : 'Onayla' }}
@@ -404,7 +470,10 @@
     </div>
 
     <!-- Loading Overlay -->
-    <div v-if="loading && !roomTypeGroups.length" class="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80">
+    <div
+      v-if="loading && !roomTypeGroups.length"
+      class="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-slate-900/80"
+    >
       <div class="text-center">
         <span class="material-icons animate-spin text-4xl text-indigo-500">refresh</span>
         <p class="mt-2 text-gray-500 dark:text-slate-400">Yukleniyor...</p>
@@ -456,7 +525,7 @@ const timelineRef = ref(null)
 const roomLabelsRef = ref(null)
 
 // Helper to get string from multilang field
-const getLocalizedName = (field) => {
+const getLocalizedName = field => {
   if (!field) return ''
   if (typeof field === 'string') return field
   if (typeof field === 'object') {
@@ -491,7 +560,9 @@ const roomTypeGroups = computed(() => {
   // Sort groups by name and rooms by roomNumber
   const groups = Array.from(groupMap.values())
   groups.sort((a, b) => String(a.roomTypeName).localeCompare(String(b.roomTypeName)))
-  groups.forEach(g => g.rooms.sort((a, b) => String(a.roomNumber || '').localeCompare(String(b.roomNumber || ''))))
+  groups.forEach(g =>
+    g.rooms.sort((a, b) => String(a.roomNumber || '').localeCompare(String(b.roomNumber || '')))
+  )
 
   return groups
 })
@@ -540,7 +611,11 @@ const fetchData = async () => {
     })
 
     floors.value = response.data?.floors || []
-    statistics.value = response.data?.statistics || { totalRooms: 0, activeStays: 0, pendingReservations: 0 }
+    statistics.value = response.data?.statistics || {
+      totalRooms: 0,
+      activeStays: 0,
+      pendingReservations: 0
+    }
   } catch (error) {
     console.error('Failed to fetch room plan:', error)
     toast.error('Oda plani yuklenemedi')
@@ -549,7 +624,7 @@ const fetchData = async () => {
   }
 }
 
-const toggleGroup = (groupId) => {
+const toggleGroup = groupId => {
   if (collapsedGroups.value.has(groupId)) {
     collapsedGroups.value.delete(groupId)
   } else {
@@ -559,7 +634,7 @@ const toggleGroup = (groupId) => {
   collapsedGroups.value = new Set(collapsedGroups.value)
 }
 
-const navigateDays = (days) => {
+const navigateDays = days => {
   const newDate = new Date(viewStartDate.value)
   newDate.setDate(newDate.getDate() + days)
   viewStartDate.value = newDate
@@ -571,7 +646,7 @@ const goToToday = () => {
   viewStartDate.value = today
 }
 
-const setZoomLevel = (level) => {
+const setZoomLevel = level => {
   currentZoom.value = level
 }
 
@@ -582,7 +657,7 @@ const handleScroll = () => {
   }
 }
 
-const getBarColorClass = (item) => {
+const getBarColorClass = item => {
   // Status based colors matching reference
   if (item.type === 'reservation') {
     return 'bar-blue' // Blue for reservations
@@ -600,7 +675,7 @@ const getBarColorClass = (item) => {
 }
 
 // Get bar style with half-day positioning and parallelogram shape
-const getBarStyle = (stay) => {
+const getBarStyle = stay => {
   const checkIn = new Date(stay.checkInDate)
   const checkOut = new Date(stay.checkOutDate)
   const startDate = new Date(viewStartDate.value)
@@ -613,8 +688,8 @@ const getBarStyle = (stay) => {
   const cellWidth = currentZoom.value.cellWidth
 
   // Half-day positioning: start at 50% of check-in cell, end at 50% of check-out cell
-  const left = (checkInDays * cellWidth) + (cellWidth / 2)
-  const right = (checkOutDays * cellWidth) + (cellWidth / 2)
+  const left = checkInDays * cellWidth + cellWidth / 2
+  const right = checkOutDays * cellWidth + cellWidth / 2
   const width = right - left
 
   return {
@@ -623,7 +698,7 @@ const getBarStyle = (stay) => {
   }
 }
 
-const getRoomStatusColor = (room) => {
+const getRoomStatusColor = room => {
   // Room status colors matching reference image
   if (room.status === 'occupied') {
     return 'bg-red-500' // Red/orange for occupied
@@ -649,7 +724,7 @@ const getAvailability = (group, date) => {
   const total = group.rooms.length
 
   for (const room of group.rooms) {
-    for (const stay of (room.stays || [])) {
+    for (const stay of room.stays || []) {
       const checkIn = new Date(stay.checkInDate)
       const checkOut = new Date(stay.checkOutDate)
       checkIn.setHours(0, 0, 0, 0)
@@ -681,11 +756,11 @@ const getAvailabilityColor = (group, date) => {
   return 'text-green-600 dark:text-green-400' // Mostly available
 }
 
-const getMonthName = (month) => {
+const getMonthName = month => {
   return roomPlanService.getMonthName(month)
 }
 
-const getDayName = (dayOfWeek) => {
+const getDayName = dayOfWeek => {
   return roomPlanService.getDayName(dayOfWeek)
 }
 
@@ -693,11 +768,11 @@ const formatDate = (date, format = 'short') => {
   return roomPlanService.formatDate(date, format)
 }
 
-const showStayDetails = (stay) => {
+const showStayDetails = stay => {
   selectedStay.value = stay
 }
 
-const navigateToStay = (stay) => {
+const navigateToStay = stay => {
   // Navigate to front desk or reservation detail
   if (stay.type === 'stay') {
     router.push('/pms/front-desk')
@@ -711,7 +786,11 @@ const handleCellClick = (event, room) => {
   // Calculate clicked date from x position
   const rect = event.currentTarget.getBoundingClientRect()
   const x = event.clientX - rect.left + (timelineRef.value?.scrollLeft || 0)
-  const clickedDate = roomPlanService.pixelToDate(x, viewStartDate.value, currentZoom.value.cellWidth)
+  const clickedDate = roomPlanService.pixelToDate(
+    x,
+    viewStartDate.value,
+    currentZoom.value.cellWidth
+  )
 
   console.log('Clicked:', room.roomNumber, 'Date:', clickedDate)
   // TODO: Open new reservation modal with pre-filled room and date
@@ -792,14 +871,14 @@ const handleDragOver = async (event, room) => {
   }
 }
 
-const handleDragLeave = (event) => {
+const handleDragLeave = event => {
   // Only clear if leaving the room row entirely
   if (!event.currentTarget.contains(event.relatedTarget)) {
     dropTarget.value = null
   }
 }
 
-const handleDrop = async (event, room) => {
+const handleDrop = async event => {
   event.preventDefault()
 
   if (!draggingStay.value || !dropTarget.value) {
@@ -910,7 +989,7 @@ let unsubscribes = []
 const setupSocketListeners = () => {
   // Refresh when check-in happens
   unsubscribes.push(
-    onCheckIn((data) => {
+    onCheckIn(data => {
       console.log('[RoomPlan] Check-in event:', data)
       fetchData()
     })
@@ -918,7 +997,7 @@ const setupSocketListeners = () => {
 
   // Refresh when check-out happens
   unsubscribes.push(
-    onCheckOut((data) => {
+    onCheckOut(data => {
       console.log('[RoomPlan] Check-out event:', data)
       fetchData()
     })
@@ -926,7 +1005,7 @@ const setupSocketListeners = () => {
 
   // Refresh when room status changes
   unsubscribes.push(
-    onRoomStatusChange((data) => {
+    onRoomStatusChange(data => {
       console.log('[RoomPlan] Room status change:', data)
       // Update room status locally without full refresh
       updateRoomStatus(data)
@@ -935,7 +1014,7 @@ const setupSocketListeners = () => {
 
   // Refresh when reservation changes
   unsubscribes.push(
-    onReservation((data) => {
+    onReservation(data => {
       console.log('[RoomPlan] Reservation event:', data)
       fetchData()
     })
@@ -948,7 +1027,7 @@ const cleanupSocketListeners = () => {
 }
 
 // Update room status locally (optimistic update)
-const updateRoomStatus = (data) => {
+const updateRoomStatus = data => {
   if (!data.roomId) return
 
   for (const floor of floors.value) {
@@ -966,7 +1045,7 @@ watch([viewStartDate, currentZoom], () => {
   fetchData()
 })
 
-watch(hotelId, (newVal) => {
+watch(hotelId, newVal => {
   if (newVal) {
     goToToday()
     fetchData()

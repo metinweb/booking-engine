@@ -85,7 +85,8 @@
                 </span>
               </div>
               <p class="text-sm text-gray-500 dark:text-slate-400 truncate">
-                {{ booking.leadGuest?.firstName }} {{ booking.leadGuest?.lastName }} • {{ booking.hotel?.name }}
+                {{ booking.leadGuest?.firstName }} {{ booking.leadGuest?.lastName }} •
+                {{ booking.hotel?.name }}
               </p>
               <p class="text-xs text-gray-400 dark:text-slate-500">
                 {{ formatDate(booking.checkIn) }} - {{ formatDate(booking.checkOut) }}
@@ -95,10 +96,18 @@
               <p class="font-semibold text-gray-800 dark:text-white">
                 {{ formatPrice(booking.pricing?.grandTotal, booking.pricing?.currency) }}
               </p>
-              <p v-if="booking.source?.agencyName || booking.source?.agencyId" class="text-xs text-gray-500 dark:text-slate-400">{{ booking.source?.agencyName || booking.source?.agencyId?.name }}</p>
+              <p
+                v-if="booking.source?.agencyName || booking.source?.agencyId"
+                class="text-xs text-gray-500 dark:text-slate-400"
+              >
+                {{ booking.source?.agencyName || booking.source?.agencyId?.name }}
+              </p>
             </div>
           </div>
-          <p v-if="!recentBookings?.length" class="text-center text-gray-500 dark:text-slate-400 py-4">
+          <p
+            v-if="!recentBookings?.length"
+            class="text-center text-gray-500 dark:text-slate-400 py-4"
+          >
             {{ $t('dashboard.noRecentBookings') }}
           </p>
         </div>
@@ -119,14 +128,21 @@
               class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg"
             >
               <div class="flex items-center">
-                <span class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold mr-2">
+                <span
+                  class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-bold mr-2"
+                >
                   {{ index + 1 }}
                 </span>
                 <span class="text-gray-800 dark:text-white">{{ agency.name }}</span>
               </div>
-              <span class="text-green-600 dark:text-green-400 font-medium">₺{{ agency.revenue?.toLocaleString('tr-TR') }}</span>
+              <span class="text-green-600 dark:text-green-400 font-medium"
+                >₺{{ agency.revenue?.toLocaleString('tr-TR') }}</span
+              >
             </div>
-            <p v-if="!topAgencies?.length" class="text-center text-gray-500 dark:text-slate-400 py-2 text-sm">
+            <p
+              v-if="!topAgencies?.length"
+              class="text-center text-gray-500 dark:text-slate-400 py-2 text-sm"
+            >
               {{ $t('dashboard.noData') }}
             </p>
           </div>
@@ -145,14 +161,21 @@
               class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-slate-700/50 rounded-lg"
             >
               <div class="flex items-center">
-                <span class="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xs font-bold mr-2">
+                <span
+                  class="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 flex items-center justify-center text-xs font-bold mr-2"
+                >
                   {{ index + 1 }}
                 </span>
                 <span class="text-gray-800 dark:text-white">{{ hotel.name }}</span>
               </div>
-              <span class="text-green-600 dark:text-green-400 font-medium">₺{{ hotel.revenue?.toLocaleString('tr-TR') }}</span>
+              <span class="text-green-600 dark:text-green-400 font-medium"
+                >₺{{ hotel.revenue?.toLocaleString('tr-TR') }}</span
+              >
             </div>
-            <p v-if="!topHotels?.length" class="text-center text-gray-500 dark:text-slate-400 py-2 text-sm">
+            <p
+              v-if="!topHotels?.length"
+              class="text-center text-gray-500 dark:text-slate-400 py-2 text-sm"
+            >
               {{ $t('dashboard.noData') }}
             </p>
           </div>
@@ -173,7 +196,7 @@ defineProps({
   dailyTrend: { type: Array, default: () => [] }
 })
 
-const getStatusClass = (status) => {
+const getStatusClass = status => {
   const classes = {
     pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     confirmed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -183,7 +206,7 @@ const getStatusClass = (status) => {
   return classes[status] || classes.pending
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return ''
   return new Date(date).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' })
 }

@@ -16,18 +16,16 @@
       </li>
 
       <!-- Breadcrumb items -->
-      <li
-        v-for="(item, index) in items"
-        :key="index"
-        class="flex items-center"
-      >
+      <li v-for="(item, index) in items" :key="index" class="flex items-center">
         <!-- Separator -->
         <span
           class="mx-2 text-gray-400 dark:text-slate-500 select-none"
           :class="separatorSizeClasses"
         >
           <span v-if="separator === 'slash'">/</span>
-          <span v-else-if="separator === 'arrow'" class="material-icons" :class="iconSizeClasses">chevron_right</span>
+          <span v-else-if="separator === 'arrow'" class="material-icons" :class="iconSizeClasses"
+            >chevron_right</span
+          >
           <span v-else-if="separator === 'dot'">•</span>
           <span v-else>{{ separator }}</span>
         </span>
@@ -35,37 +33,31 @@
         <!-- Item -->
         <template v-if="index === items.length - 1">
           <!-- Last item (current page) -->
-          <span
-            class="font-medium"
-            :class="activeClasses"
-            aria-current="page"
-          >
-            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{ item.icon }}</span>
+          <span class="font-medium" :class="activeClasses" aria-current="page">
+            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{
+              item.icon
+            }}</span>
             {{ item.label }}
           </span>
         </template>
         <template v-else>
           <!-- Link items -->
-          <router-link
-            v-if="item.to"
-            :to="item.to"
-            class="transition-colors"
-            :class="linkClasses"
-          >
-            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{ item.icon }}</span>
+          <router-link v-if="item.to" :to="item.to" class="transition-colors" :class="linkClasses">
+            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{
+              item.icon
+            }}</span>
             {{ item.label }}
           </router-link>
-          <a
-            v-else-if="item.href"
-            :href="item.href"
-            class="transition-colors"
-            :class="linkClasses"
-          >
-            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{ item.icon }}</span>
+          <a v-else-if="item.href" :href="item.href" class="transition-colors" :class="linkClasses">
+            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{
+              item.icon
+            }}</span>
             {{ item.label }}
           </a>
           <span v-else class="text-gray-500 dark:text-slate-400">
-            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{ item.icon }}</span>
+            <span v-if="item.icon" class="material-icons mr-1" :class="iconSizeClasses">{{
+              item.icon
+            }}</span>
             {{ item.label }}
           </span>
         </template>
@@ -87,13 +79,13 @@ const props = defineProps({
   separator: {
     type: String,
     default: 'arrow',
-    validator: (v) => ['slash', 'arrow', 'dot'].includes(v) || typeof v === 'string'
+    validator: v => ['slash', 'arrow', 'dot'].includes(v) || typeof v === 'string'
   },
   // Size
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Show home icon at start
   showHome: {

@@ -12,16 +12,20 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="font-medium text-gray-900 dark:text-white">Otomatik Fatura Olustur</p>
-            <p class="text-sm text-gray-500 dark:text-slate-400">Check-out'ta otomatik fatura olusturulur</p>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              Check-out'ta otomatik fatura olusturulur
+            </p>
           </div>
           <label class="relative inline-flex items-center cursor-pointer">
             <input
-              type="checkbox"
               v-model="localSettings.autoGenerateInvoice"
-              @change="emitChange"
+              type="checkbox"
               class="sr-only peer"
+              @change="emitChange"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+            ></div>
           </label>
         </div>
 
@@ -31,11 +35,11 @@
               Fatura Prefix
             </label>
             <input
-              type="text"
               v-model="localSettings.invoicePrefix"
-              @input="emitChange"
+              type="text"
               placeholder="INV"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @input="emitChange"
             />
           </div>
           <div>
@@ -43,27 +47,29 @@
               Son Fatura No
             </label>
             <input
-              type="number"
               v-model.number="localSettings.lastInvoiceNumber"
-              @input="emitChange"
+              type="number"
               min="0"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+              @input="emitChange"
             />
           </div>
           <div class="flex items-end">
             <label class="flex items-center gap-2 cursor-pointer">
               <input
-                type="checkbox"
                 v-model="localSettings.invoiceYearSuffix"
-                @change="emitChange"
+                type="checkbox"
                 class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                @change="emitChange"
               />
               <span class="text-sm text-gray-700 dark:text-gray-300">Yil Suffix Ekle</span>
             </label>
           </div>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 rounded p-3 border border-gray-200 dark:border-slate-600">
+        <div
+          class="bg-white dark:bg-slate-800 rounded p-3 border border-gray-200 dark:border-slate-600"
+        >
           <p class="text-xs text-gray-500 dark:text-slate-400 mb-1">Ornek Fatura No:</p>
           <p class="font-mono text-gray-900 dark:text-white">{{ previewInvoiceNumber }}</p>
         </div>
@@ -79,10 +85,10 @@
             Sirket Adi
           </label>
           <input
-            type="text"
             v-model="localSettings.companyInfo.name"
-            @input="emitChange"
+            type="text"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
         </div>
         <div>
@@ -90,10 +96,10 @@
             Vergi Dairesi
           </label>
           <input
-            type="text"
             v-model="localSettings.companyInfo.taxOffice"
-            @input="emitChange"
+            type="text"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
         </div>
         <div>
@@ -101,10 +107,10 @@
             Vergi Numarasi
           </label>
           <input
-            type="text"
             v-model="localSettings.companyInfo.taxNumber"
-            @input="emitChange"
+            type="text"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
         </div>
         <div>
@@ -112,10 +118,10 @@
             Telefon
           </label>
           <input
-            type="text"
             v-model="localSettings.companyInfo.phone"
-            @input="emitChange"
+            type="text"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
         </div>
         <div>
@@ -123,10 +129,10 @@
             E-posta
           </label>
           <input
-            type="email"
             v-model="localSettings.companyInfo.email"
-            @input="emitChange"
+            type="email"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           />
         </div>
         <div class="md:col-span-2">
@@ -135,9 +141,9 @@
           </label>
           <textarea
             v-model="localSettings.companyInfo.address"
-            @input="emitChange"
             rows="2"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+            @input="emitChange"
           ></textarea>
         </div>
       </div>
@@ -148,10 +154,10 @@
       <h4 class="font-medium text-gray-900 dark:text-white mb-4">Fatura Alt Notu</h4>
       <textarea
         v-model="localSettings.invoiceNotes"
-        @input="emitChange"
         rows="3"
         placeholder="Faturanin alt kisminda gorunecek not..."
         class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+        @input="emitChange"
       ></textarea>
     </div>
   </div>
@@ -198,13 +204,17 @@ if (!localSettings.value.companyInfo) {
   }
 }
 
-watch(() => props.modelValue, (newVal) => {
-  localSettings.value = {
-    ...localSettings.value,
-    ...newVal,
-    companyInfo: { ...localSettings.value.companyInfo, ...(newVal?.companyInfo || {}) }
-  }
-}, { deep: true })
+watch(
+  () => props.modelValue,
+  newVal => {
+    localSettings.value = {
+      ...localSettings.value,
+      ...newVal,
+      companyInfo: { ...localSettings.value.companyInfo, ...(newVal?.companyInfo || {}) }
+    }
+  },
+  { deep: true }
+)
 
 const emitChange = () => {
   emit('update:modelValue', localSettings.value)

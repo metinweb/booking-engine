@@ -1,11 +1,7 @@
 <template>
   <Teleport to="body">
     <Transition name="drawer-backdrop">
-      <div
-        v-if="modelValue"
-        class="ui-drawer fixed inset-0 z-50"
-        @keydown.esc="handleEscape"
-      >
+      <div v-if="modelValue" class="ui-drawer fixed inset-0 z-50" @keydown.esc="handleEscape">
         <!-- Backdrop -->
         <div
           class="absolute inset-0 bg-black/50 dark:bg-black/70"
@@ -42,8 +38,7 @@
               <button
                 v-if="closable"
                 type="button"
-                class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300
-                       hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 @click="close"
               >
                 <span class="material-icons">close</span>
@@ -51,18 +46,14 @@
             </div>
 
             <!-- Body -->
-            <div
-              class="flex-1 overflow-y-auto px-6 py-4"
-              :class="bodyClasses"
-            >
+            <div class="flex-1 overflow-y-auto px-6 py-4" :class="bodyClasses">
               <slot></slot>
             </div>
 
             <!-- Footer -->
             <div
               v-if="$slots.footer"
-              class="flex items-center justify-end gap-3 px-6 py-4
-                     border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
+              class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
             >
               <slot name="footer"></slot>
             </div>
@@ -89,13 +80,13 @@ const props = defineProps({
   position: {
     type: String,
     default: 'right',
-    validator: (v) => ['left', 'right', 'top', 'bottom'].includes(v)
+    validator: v => ['left', 'right', 'top', 'bottom'].includes(v)
   },
   // Size
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg', 'xl', 'full'].includes(v)
+    validator: v => ['sm', 'md', 'lg', 'xl', 'full'].includes(v)
   },
   // Behavior
   closable: {
@@ -197,7 +188,7 @@ const originalOverflow = ref('')
 
 watch(
   () => props.modelValue,
-  (isOpen) => {
+  isOpen => {
     if (props.preventScroll) {
       if (isOpen) {
         originalOverflow.value = document.body.style.overflow

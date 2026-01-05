@@ -7,7 +7,7 @@ export const usePartnerStore = defineStore('partner', () => {
 
   const hasSelectedPartner = computed(() => !!selectedPartner.value)
 
-  const selectPartner = (partner) => {
+  const selectPartner = partner => {
     selectedPartner.value = partner
     localStorage.setItem('selectedPartner', JSON.stringify(partner))
   }

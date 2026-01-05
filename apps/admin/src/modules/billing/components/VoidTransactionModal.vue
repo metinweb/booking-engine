@@ -1,12 +1,9 @@
 <template>
-  <Modal
-    v-model="show"
-    title="Islem Iptal"
-    size="md"
-    @close="close"
-  >
+  <Modal v-model="show" title="Islem Iptal" size="md" @close="close">
     <div class="space-y-4">
-      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <div
+        class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+      >
         <div class="flex items-center gap-2 mb-2">
           <span class="material-icons text-red-600 dark:text-red-400">warning</span>
           <p class="font-medium text-red-800 dark:text-red-200">Dikkat!</p>
@@ -21,11 +18,15 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <p class="text-xs text-gray-500 dark:text-slate-400">Islem No</p>
-            <p class="font-mono font-medium text-gray-900 dark:text-white">{{ transaction?.transactionNumber }}</p>
+            <p class="font-mono font-medium text-gray-900 dark:text-white">
+              {{ transaction?.transactionNumber }}
+            </p>
           </div>
           <div>
             <p class="text-xs text-gray-500 dark:text-slate-400">Tutar</p>
-            <p class="font-bold text-gray-900 dark:text-white">{{ formatCurrency(transaction?.amount) }}</p>
+            <p class="font-bold text-gray-900 dark:text-white">
+              {{ formatCurrency(transaction?.amount) }}
+            </p>
           </div>
           <div class="col-span-2">
             <p class="text-xs text-gray-500 dark:text-slate-400">Aciklama</p>
@@ -48,19 +49,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Vazgec
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !reason"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>cancel</span>
+        <span v-else class="material-icons text-sm">cancel</span>
         Islemi Iptal Et
       </button>
     </template>
@@ -96,7 +97,7 @@ const reason = ref('')
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const submit = async () => {
@@ -120,9 +121,12 @@ const close = () => {
   reason.value = ''
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    reason.value = ''
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      reason.value = ''
+    }
   }
-})
+)
 </script>

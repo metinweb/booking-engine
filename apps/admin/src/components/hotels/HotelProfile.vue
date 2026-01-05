@@ -1,17 +1,21 @@
 <template>
   <div class="space-y-4">
     <div class="mb-6">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('hotels.profile.title') }}</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400">{{ $t('hotels.profile.pageDescription') }}</p>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+        {{ $t('hotels.profile.title') }}
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-slate-400">
+        {{ $t('hotels.profile.pageDescription') }}
+      </p>
     </div>
 
     <!-- Overview Section -->
     <ProfileSection
+      v-model:content="form.overview.content"
       :title="$t('hotels.profile.sections.overview')"
       icon="info"
       :features="[]"
       :selected-features="[]"
-      v-model:content="form.overview.content"
       :languages="languages"
       :default-open="true"
       :readonly="readonly"
@@ -76,44 +80,44 @@
 
     <!-- Facilities Section -->
     <ProfileSection
+      v-model:selected-features="form.facilities.features"
+      v-model:content="form.facilities.content"
       :title="$t('hotels.profile.sections.facilities')"
       icon="apartment"
       :features="facilitiesFeatures"
-      v-model:selected-features="form.facilities.features"
-      v-model:content="form.facilities.content"
       :languages="languages"
       :readonly="readonly"
     />
 
     <!-- Dining Section -->
     <ProfileSection
+      v-model:selected-features="form.dining.features"
+      v-model:content="form.dining.content"
       :title="$t('hotels.profile.sections.dining')"
       icon="restaurant"
       :features="diningFeatures"
-      v-model:selected-features="form.dining.features"
-      v-model:content="form.dining.content"
       :languages="languages"
       :readonly="readonly"
     />
 
     <!-- Sports & Entertainment Section -->
     <ProfileSection
+      v-model:selected-features="form.sportsEntertainment.features"
+      v-model:content="form.sportsEntertainment.content"
       :title="$t('hotels.profile.sections.sportsEntertainment')"
       icon="sports_tennis"
       :features="sportsFeatures"
-      v-model:selected-features="form.sportsEntertainment.features"
-      v-model:content="form.sportsEntertainment.content"
       :languages="languages"
       :readonly="readonly"
     />
 
     <!-- Spa & Wellness Section -->
     <ProfileSection
+      v-model:selected-features="form.spaWellness.features"
+      v-model:content="form.spaWellness.content"
       :title="$t('hotels.profile.sections.spaWellness')"
       icon="spa"
       :features="spaFeatures"
-      v-model:selected-features="form.spaWellness.features"
-      v-model:content="form.spaWellness.content"
       :languages="languages"
       :readonly="readonly"
     >
@@ -141,11 +145,11 @@
 
     <!-- Family & Kids Section -->
     <ProfileSection
+      v-model:selected-features="form.familyKids.features"
+      v-model:content="form.familyKids.content"
       :title="$t('hotels.profile.sections.familyKids')"
       icon="family_restroom"
       :features="familyFeatures"
-      v-model:selected-features="form.familyKids.features"
-      v-model:content="form.familyKids.content"
       :languages="languages"
       :readonly="readonly"
     >
@@ -175,7 +179,9 @@
                 placeholder="12"
                 :disabled="readonly"
               />
-              <span class="text-gray-500 dark:text-slate-400">{{ $t('hotels.profile.years') }}</span>
+              <span class="text-gray-500 dark:text-slate-400">{{
+                $t('hotels.profile.years')
+              }}</span>
             </div>
           </div>
         </div>
@@ -184,11 +190,11 @@
 
     <!-- Beach & Pool Section -->
     <ProfileSection
+      v-model:selected-features="form.beachPool.features"
+      v-model:content="form.beachPool.content"
       :title="$t('hotels.profile.sections.beachPool')"
       icon="beach_access"
       :features="beachPoolFeatures"
-      v-model:selected-features="form.beachPool.features"
-      v-model:content="form.beachPool.content"
       :languages="languages"
       :readonly="readonly"
     >
@@ -196,10 +202,14 @@
         <div class="space-y-4">
           <!-- Beach Details -->
           <div class="p-4 bg-gray-50 dark:bg-slate-700/30 rounded-lg">
-            <h5 class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">{{ $t('hotels.profile.beachDetails') }}</h5>
+            <h5 class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
+              {{ $t('hotels.profile.beachDetails') }}
+            </h5>
             <div class="grid grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('hotels.profile.beachDistance') }}</label>
+                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                  $t('hotels.profile.beachDistance')
+                }}</label>
                 <div class="flex items-center gap-2">
                   <input
                     v-model.number="form.beachPool.beachDetails.distance"
@@ -213,7 +223,9 @@
                 </div>
               </div>
               <div>
-                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('hotels.profile.beachType') }}</label>
+                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                  $t('hotels.profile.beachType')
+                }}</label>
                 <select
                   v-model="form.beachPool.beachDetails.type"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-slate-200"
@@ -227,7 +239,9 @@
                 </select>
               </div>
               <div>
-                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('hotels.profile.beachLength') }}</label>
+                <label class="block text-xs text-gray-500 dark:text-slate-400 mb-1">{{
+                  $t('hotels.profile.beachLength')
+                }}</label>
                 <div class="flex items-center gap-2">
                   <input
                     v-model.number="form.beachPool.beachDetails.length"
@@ -248,19 +262,19 @@
 
     <!-- Honeymoon Section -->
     <ProfileSection
+      v-model:selected-features="form.honeymoon.features"
+      v-model:content="form.honeymoon.content"
       :title="$t('hotels.profile.sections.honeymoon')"
       icon="favorite"
       :features="honeymoonFeatures"
-      v-model:selected-features="form.honeymoon.features"
-      v-model:content="form.honeymoon.content"
       :languages="languages"
       :readonly="readonly"
     >
       <template #fields>
         <div class="flex items-center gap-2">
           <input
-            type="checkbox"
             v-model="form.honeymoon.available"
+            type="checkbox"
             class="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
             :disabled="readonly"
           />
@@ -273,34 +287,36 @@
 
     <!-- Important Info Section -->
     <ProfileSection
+      v-model:content="form.importantInfo.content"
       :title="$t('hotels.profile.sections.importantInfo')"
       icon="warning"
       :features="[]"
       :selected-features="[]"
-      v-model:content="form.importantInfo.content"
       :languages="languages"
       :readonly="readonly"
     />
 
     <!-- Location Section -->
     <ProfileSection
+      v-model:content="form.location.content"
       :title="$t('hotels.profile.sections.location')"
       icon="location_on"
       :features="[]"
       :selected-features="[]"
-      v-model:content="form.location.content"
       :languages="languages"
       :readonly="readonly"
     >
       <template #fields>
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <h5 class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ $t('hotels.profile.distances') }}</h5>
+            <h5 class="text-sm font-medium text-gray-700 dark:text-slate-300">
+              {{ $t('hotels.profile.distances') }}
+            </h5>
             <button
               v-if="!readonly"
               type="button"
-              @click="addDistance"
               class="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 flex items-center gap-1"
+              @click="addDistance"
             >
               <span class="material-icons text-sm">add</span>
               {{ $t('common.add') }}
@@ -338,8 +354,8 @@
               <button
                 v-if="!readonly"
                 type="button"
-                @click="removeDistance(index)"
                 class="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+                @click="removeDistance(index)"
               >
                 <span class="material-icons text-sm">delete</span>
               </button>
@@ -355,7 +371,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, reactive } from 'vue'
+import { computed, watch, reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ProfileSection from './profile/ProfileSection.vue'
 
@@ -378,12 +394,35 @@ const { t } = useI18n()
 const currentYear = new Date().getFullYear()
 
 // Supported languages
-const languages = ['tr', 'en', 'de', 'ru', 'es', 'el', 'it', 'fr', 'ro', 'bg', 'pt', 'da', 'zh', 'ar', 'fa', 'he', 'sq', 'uk', 'pl', 'az']
+const languages = [
+  'tr',
+  'en',
+  'de',
+  'ru',
+  'es',
+  'el',
+  'it',
+  'fr',
+  'ro',
+  'bg',
+  'pt',
+  'da',
+  'zh',
+  'ar',
+  'fa',
+  'he',
+  'sq',
+  'uk',
+  'pl',
+  'az'
+]
 
 // Helper to create empty multilingual object
 const createMultiLangObject = () => {
   const obj = {}
-  languages.forEach(lang => { obj[lang] = '' })
+  languages.forEach(lang => {
+    obj[lang] = ''
+  })
   return obj
 }
 
@@ -583,82 +622,97 @@ const addDistance = () => {
   })
 }
 
-const removeDistance = (index) => {
+const removeDistance = index => {
   form.location.distances.splice(index, 1)
 }
 
 // Watch for hotel changes and populate form
-watch(() => props.hotel, (newHotel) => {
-  if (newHotel?.profile) {
-    const profile = newHotel.profile
+watch(
+  () => props.hotel,
+  newHotel => {
+    if (newHotel?.profile) {
+      const profile = newHotel.profile
 
-    // Overview
-    if (profile.overview) {
-      form.overview.content = { ...createMultiLangObject(), ...profile.overview.content }
-      form.overview.establishedYear = profile.overview.establishedYear || null
-      form.overview.renovationYear = profile.overview.renovationYear || null
-      form.overview.chainBrand = profile.overview.chainBrand || ''
-      form.overview.officialRating = profile.overview.officialRating || ''
-    }
+      // Overview
+      if (profile.overview) {
+        form.overview.content = { ...createMultiLangObject(), ...profile.overview.content }
+        form.overview.establishedYear = profile.overview.establishedYear || null
+        form.overview.renovationYear = profile.overview.renovationYear || null
+        form.overview.chainBrand = profile.overview.chainBrand || ''
+        form.overview.officialRating = profile.overview.officialRating || ''
+      }
 
-    // Facilities
-    if (profile.facilities) {
-      form.facilities.content = { ...createMultiLangObject(), ...profile.facilities.content }
-      form.facilities.features = profile.facilities.features || []
-    }
+      // Facilities
+      if (profile.facilities) {
+        form.facilities.content = { ...createMultiLangObject(), ...profile.facilities.content }
+        form.facilities.features = profile.facilities.features || []
+      }
 
-    // Dining
-    if (profile.dining) {
-      form.dining.content = { ...createMultiLangObject(), ...profile.dining.content }
-      form.dining.features = profile.dining.features || []
-    }
+      // Dining
+      if (profile.dining) {
+        form.dining.content = { ...createMultiLangObject(), ...profile.dining.content }
+        form.dining.features = profile.dining.features || []
+      }
 
-    // Sports & Entertainment
-    if (profile.sportsEntertainment) {
-      form.sportsEntertainment.content = { ...createMultiLangObject(), ...profile.sportsEntertainment.content }
-      form.sportsEntertainment.features = profile.sportsEntertainment.features || []
-    }
+      // Sports & Entertainment
+      if (profile.sportsEntertainment) {
+        form.sportsEntertainment.content = {
+          ...createMultiLangObject(),
+          ...profile.sportsEntertainment.content
+        }
+        form.sportsEntertainment.features = profile.sportsEntertainment.features || []
+      }
 
-    // Spa & Wellness
-    if (profile.spaWellness) {
-      form.spaWellness.content = { ...createMultiLangObject(), ...profile.spaWellness.content }
-      form.spaWellness.features = profile.spaWellness.features || []
-      form.spaWellness.spaDetails = { area: null, ...profile.spaWellness.spaDetails }
-    }
+      // Spa & Wellness
+      if (profile.spaWellness) {
+        form.spaWellness.content = { ...createMultiLangObject(), ...profile.spaWellness.content }
+        form.spaWellness.features = profile.spaWellness.features || []
+        form.spaWellness.spaDetails = { area: null, ...profile.spaWellness.spaDetails }
+      }
 
-    // Family & Kids
-    if (profile.familyKids) {
-      form.familyKids.content = { ...createMultiLangObject(), ...profile.familyKids.content }
-      form.familyKids.features = profile.familyKids.features || []
-      form.familyKids.kidsClubAges = { min: null, max: null, ...profile.familyKids.kidsClubAges }
-    }
+      // Family & Kids
+      if (profile.familyKids) {
+        form.familyKids.content = { ...createMultiLangObject(), ...profile.familyKids.content }
+        form.familyKids.features = profile.familyKids.features || []
+        form.familyKids.kidsClubAges = { min: null, max: null, ...profile.familyKids.kidsClubAges }
+      }
 
-    // Beach & Pool
-    if (profile.beachPool) {
-      form.beachPool.content = { ...createMultiLangObject(), ...profile.beachPool.content }
-      form.beachPool.features = profile.beachPool.features || []
-      form.beachPool.beachDetails = { distance: null, type: '', length: null, ...profile.beachPool.beachDetails }
-    }
+      // Beach & Pool
+      if (profile.beachPool) {
+        form.beachPool.content = { ...createMultiLangObject(), ...profile.beachPool.content }
+        form.beachPool.features = profile.beachPool.features || []
+        form.beachPool.beachDetails = {
+          distance: null,
+          type: '',
+          length: null,
+          ...profile.beachPool.beachDetails
+        }
+      }
 
-    // Honeymoon
-    if (profile.honeymoon) {
-      form.honeymoon.content = { ...createMultiLangObject(), ...profile.honeymoon.content }
-      form.honeymoon.features = profile.honeymoon.features || []
-      form.honeymoon.available = profile.honeymoon.available || false
-    }
+      // Honeymoon
+      if (profile.honeymoon) {
+        form.honeymoon.content = { ...createMultiLangObject(), ...profile.honeymoon.content }
+        form.honeymoon.features = profile.honeymoon.features || []
+        form.honeymoon.available = profile.honeymoon.available || false
+      }
 
-    // Important Info
-    if (profile.importantInfo) {
-      form.importantInfo.content = { ...createMultiLangObject(), ...profile.importantInfo.content }
-    }
+      // Important Info
+      if (profile.importantInfo) {
+        form.importantInfo.content = {
+          ...createMultiLangObject(),
+          ...profile.importantInfo.content
+        }
+      }
 
-    // Location
-    if (profile.location) {
-      form.location.content = { ...createMultiLangObject(), ...profile.location.content }
-      form.location.distances = profile.location.distances || []
+      // Location
+      if (profile.location) {
+        form.location.content = { ...createMultiLangObject(), ...profile.location.content }
+        form.location.distances = profile.location.distances || []
+      }
     }
-  }
-}, { immediate: true, deep: true })
+  },
+  { immediate: true, deep: true }
+)
 
 // Validate all fields
 const validateAll = () => true

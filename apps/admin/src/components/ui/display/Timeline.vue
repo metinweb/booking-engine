@@ -22,11 +22,7 @@
         >
           <span class="material-icons" :class="iconSizeClasses">{{ item.icon }}</span>
         </div>
-        <div
-          v-else
-          class="rounded-full"
-          :class="[dotClasses, getItemColorClasses(item)]"
-        ></div>
+        <div v-else class="rounded-full" :class="[dotClasses, getItemColorClasses(item)]"></div>
       </div>
 
       <!-- Content -->
@@ -41,19 +37,13 @@
               {{ item.subtitle }}
             </p>
           </div>
-          <time
-            v-if="item.time"
-            class="flex-shrink-0 text-sm text-gray-500 dark:text-slate-400"
-          >
+          <time v-if="item.time" class="flex-shrink-0 text-sm text-gray-500 dark:text-slate-400">
             {{ item.time }}
           </time>
         </div>
 
         <!-- Description -->
-        <p
-          v-if="item.description"
-          class="mt-2 text-sm text-gray-600 dark:text-gray-300"
-        >
+        <p v-if="item.description" class="mt-2 text-sm text-gray-600 dark:text-gray-300">
           {{ item.description }}
         </p>
 
@@ -67,8 +57,7 @@
           <span
             v-for="tag in item.tags"
             :key="tag"
-            class="px-2 py-0.5 text-xs font-medium rounded-full
-                   bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300"
+            class="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300"
           >
             {{ tag }}
           </span>
@@ -109,19 +98,19 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Default color
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'blue', 'green', 'red', 'amber', 'purple', 'gray'].includes(v)
+    validator: v => ['indigo', 'blue', 'green', 'red', 'amber', 'purple', 'gray'].includes(v)
   },
   // Variant
   variant: {
     type: String,
     default: 'default',
-    validator: (v) => ['default', 'alternate', 'compact'].includes(v)
+    validator: v => ['default', 'alternate', 'compact'].includes(v)
   }
 })
 
@@ -176,7 +165,7 @@ const iconSizeClasses = computed(() => {
 })
 
 // Get item color classes
-const getItemColorClasses = (item) => {
+const getItemColorClasses = item => {
   const itemColor = item.color || props.color
 
   const colors = {
@@ -192,12 +181,13 @@ const getItemColorClasses = (item) => {
 }
 
 // Get action classes
-const getActionClasses = (action) => {
+const getActionClasses = action => {
   const variant = action.variant || 'link'
 
   const variants = {
     link: 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300',
-    button: 'px-3 py-1 rounded bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600',
+    button:
+      'px-3 py-1 rounded bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600',
     danger: 'text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300'
   }
   return variants[variant]

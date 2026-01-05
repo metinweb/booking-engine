@@ -27,13 +27,27 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'gray',
-    validator: (v) => ['gray', 'green', 'red', 'yellow', 'blue', 'indigo', 'purple', 'pink', 'amber', 'orange', 'teal', 'cyan'].includes(v)
+    validator: v =>
+      [
+        'gray',
+        'green',
+        'red',
+        'yellow',
+        'blue',
+        'indigo',
+        'purple',
+        'pink',
+        'amber',
+        'orange',
+        'teal',
+        'cyan'
+      ].includes(v)
   },
   // Size
   size: {
     type: String,
     default: 'sm',
-    validator: (v) => ['xs', 'sm', 'md', 'lg'].includes(v)
+    validator: v => ['xs', 'sm', 'md', 'lg'].includes(v)
   },
   // Icon (material icon name)
   icon: {
@@ -100,10 +114,6 @@ const finalVariant = computed(() => {
   return statusInfo.value?.variant || props.variant
 })
 
-// Final label
-const finalLabel = computed(() => {
-  return props.label || statusInfo.value?.label || props.status
-})
 
 // Badge color classes
 const badgeClasses = computed(() => {

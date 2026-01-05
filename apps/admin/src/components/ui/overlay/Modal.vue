@@ -17,8 +17,7 @@
         <!-- Modal Content -->
         <div
           ref="modalRef"
-          class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl
-                 w-full overflow-hidden transform transition-all"
+          class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full overflow-hidden transform transition-all"
           :class="[sizeClasses, contentClasses]"
           role="dialog"
           :aria-modal="true"
@@ -42,8 +41,7 @@
             <button
               v-if="closable"
               type="button"
-              class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300
-                     hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               @click="close"
             >
               <span class="material-icons">close</span>
@@ -64,8 +62,7 @@
           <!-- Footer -->
           <div
             v-if="$slots.footer"
-            class="flex items-center justify-end gap-3 px-6 py-4
-                   border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
+            class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50"
           >
             <slot name="footer"></slot>
           </div>
@@ -76,7 +73,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onUnmounted, nextTick } from 'vue'
 
 const props = defineProps({
   modelValue: {
@@ -91,13 +88,13 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['xs', 'sm', 'md', 'lg', 'xl', 'full'].includes(v)
+    validator: v => ['xs', 'sm', 'md', 'lg', 'xl', 'full'].includes(v)
   },
   // Position
   position: {
     type: String,
     default: 'center',
-    validator: (v) => ['center', 'top'].includes(v)
+    validator: v => ['center', 'top'].includes(v)
   },
   // Behavior
   closable: {
@@ -173,7 +170,7 @@ const originalOverflow = ref('')
 
 watch(
   () => props.modelValue,
-  (isOpen) => {
+  isOpen => {
     if (props.preventScroll) {
       if (isOpen) {
         originalOverflow.value = document.body.style.overflow
@@ -212,7 +209,9 @@ defineExpose({ close })
 
 .modal-enter-active > div:last-child,
 .modal-leave-active > div:last-child {
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .modal-enter-from,

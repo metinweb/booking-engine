@@ -100,7 +100,8 @@ export const getSubscriptions = asyncHandler(async (req, res) => {
  */
 export const getVapidPublicKey = asyncHandler(async (req, res) => {
   try {
-    const { default: PlatformSettings } = await import('../platform-settings/platformSettings.model.js')
+    const { default: PlatformSettings } =
+      await import('../platform-settings/platformSettings.model.js')
     const settings = await PlatformSettings.getSettings()
 
     if (!settings.webPush?.enabled || !settings.webPush?.publicKey) {
@@ -138,7 +139,8 @@ export const getVapidPublicKey = asyncHandler(async (req, res) => {
 export const sendPushToUser = async (userId, payload) => {
   try {
     // Get VAPID credentials
-    const { default: PlatformSettings } = await import('../platform-settings/platformSettings.model.js')
+    const { default: PlatformSettings } =
+      await import('../platform-settings/platformSettings.model.js')
     const settings = await PlatformSettings.getSettings()
     const vapidKeys = settings.getVAPIDKeys()
 
@@ -172,10 +174,7 @@ export const sendPushToUser = async (userId, payload) => {
 
     for (const sub of subscriptions) {
       try {
-        await webpush.default.sendNotification(
-          sub.subscription,
-          JSON.stringify(payload)
-        )
+        await webpush.default.sendNotification(sub.subscription, JSON.stringify(payload))
 
         await sub.markSuccess()
         sent++

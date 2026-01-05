@@ -256,13 +256,7 @@ export const getAuditStats = asyncHandler(async (req, res) => {
  * Export audit logs (CSV format)
  */
 export const exportAuditLogs = asyncHandler(async (req, res) => {
-  const {
-    module,
-    action,
-    startDate,
-    endDate,
-    format = 'csv'
-  } = req.query
+  const { module, action, startDate, endDate, format = 'csv' } = req.query
 
   // Build filter
   const filter = {}
@@ -280,10 +274,7 @@ export const exportAuditLogs = asyncHandler(async (req, res) => {
   }
 
   // Limit export to 10000 records
-  const logs = await AuditLog.find(filter)
-    .sort({ timestamp: -1 })
-    .limit(10000)
-    .lean()
+  const logs = await AuditLog.find(filter).sort({ timestamp: -1 }).limit(10000).lean()
 
   if (format === 'csv') {
     // Generate CSV
@@ -305,28 +296,33 @@ export const exportAuditLogs = asyncHandler(async (req, res) => {
       'Duration (ms)'
     ].join(',')
 
-    const rows = logs.map(log => [
-      log.timestamp?.toISOString() || '',
-      log.module || '',
-      log.subModule || '',
-      log.action || '',
-      log.status || '',
-      log.actor?.email || '',
-      log.actor?.name || '',
-      log.actor?.role || '',
-      log.actor?.ip || '',
-      log.target?.collection || '',
-      log.target?.documentId || '',
-      `"${(log.target?.documentName || '').replace(/"/g, '""')}"`,
-      log.request?.path || '',
-      log.request?.statusCode || '',
-      log.request?.duration || ''
-    ].join(','))
+    const rows = logs.map(log =>
+      [
+        log.timestamp?.toISOString() || '',
+        log.module || '',
+        log.subModule || '',
+        log.action || '',
+        log.status || '',
+        log.actor?.email || '',
+        log.actor?.name || '',
+        log.actor?.role || '',
+        log.actor?.ip || '',
+        log.target?.collection || '',
+        log.target?.documentId || '',
+        `"${(log.target?.documentName || '').replace(/"/g, '""')}"`,
+        log.request?.path || '',
+        log.request?.statusCode || '',
+        log.request?.duration || ''
+      ].join(',')
+    )
 
     const csv = [headers, ...rows].join('\n')
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8')
-    res.setHeader('Content-Disposition', `attachment; filename="audit-logs-${new Date().toISOString().split('T')[0]}.csv"`)
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="audit-logs-${new Date().toISOString().split('T')[0]}.csv"`
+    )
     res.send('\ufeff' + csv) // BOM for Excel
   } else {
     // JSON format

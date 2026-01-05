@@ -2,13 +2,15 @@
   <div>
     <!-- Header with label and translate button -->
     <div class="flex items-center justify-between mb-2">
-      <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-slate-300">{{ label }}</label>
+      <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-slate-300">{{
+        label
+      }}</label>
       <button
         v-if="showTranslate && languages.length > 1"
         type="button"
-        @click="handleTranslate"
         :disabled="translating || !modelValue[selectedLang]"
         class="text-xs text-purple-600 hover:text-purple-700 dark:text-purple-400 flex items-center gap-1 disabled:opacity-50"
+        @click="handleTranslate"
       >
         <span v-if="translating" class="material-icons text-sm animate-spin">sync</span>
         <span v-else class="material-icons text-sm">translate</span>
@@ -18,12 +20,13 @@
 
     <!-- Language tabs -->
     <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden">
-      <div class="flex border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 overflow-x-auto">
+      <div
+        class="flex border-b border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/50 overflow-x-auto"
+      >
         <button
           v-for="lang in visibleLanguages"
           :key="lang"
           type="button"
-          @click="selectedLang = lang"
           :title="getLanguageName(lang)"
           class="relative px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors"
           :class="[
@@ -33,16 +36,19 @@
                 ? 'text-green-600 dark:text-green-400 font-semibold'
                 : 'text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200'
           ]"
+          @click="selectedLang = lang"
         >
-          <span v-if="modelValue[lang] && modelValue[lang].trim() && selectedLang !== lang"
-                class="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full"></span>
+          <span
+            v-if="modelValue[lang] && modelValue[lang].trim() && selectedLang !== lang"
+            class="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-green-500 rounded-full"
+          ></span>
           {{ lang.toUpperCase() }}
         </button>
         <button
           v-if="!showAllLanguages && languages.length > 5"
           type="button"
-          @click="showAllLanguages = true"
           class="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 dark:text-slate-500"
+          @click="showAllLanguages = true"
         >
           +{{ languages.length - 5 }}
         </button>
@@ -53,21 +59,21 @@
         <template v-if="type === 'textarea'">
           <textarea
             :value="modelValue[selectedLang] || ''"
-            @input="updateValue($event.target.value)"
             :rows="rows"
             :placeholder="placeholder || `${label} (${selectedLang.toUpperCase()})`"
             :maxlength="maxlength"
             class="form-input w-full"
+            @input="updateValue($event.target.value)"
           ></textarea>
         </template>
         <template v-else>
           <input
             :type="type"
             :value="modelValue[selectedLang] || ''"
-            @input="updateValue($event.target.value)"
             :placeholder="placeholder || `${label} (${selectedLang.toUpperCase()})`"
             :maxlength="maxlength"
             class="form-input w-full"
+            @input="updateValue($event.target.value)"
           />
         </template>
         <p v-if="maxlength" class="mt-1 text-xs text-gray-500 dark:text-slate-400 text-right">
@@ -182,7 +188,7 @@ const availableLanguages = [
   { code: 'az', name: 'Azərbaycanca', flag: '🇦🇿' }
 ]
 
-const getLanguageName = (code) => {
+const getLanguageName = code => {
   // Use translated language name from locale
   const translatedName = t(`common.languages.${code}`)
   // If translation exists and is different from the key, use it
@@ -193,18 +199,19 @@ const getLanguageName = (code) => {
   return availableLanguages.find(l => l.code === code)?.name || code.toUpperCase()
 }
 
-const getLanguageFlag = (code) => {
-  return availableLanguages.find(l => l.code === code)?.flag || ''
-}
 
 // Watch languages prop and reset selectedLang if needed
-watch(() => props.languages, (newLangs) => {
-  if (!newLangs.includes(selectedLang.value)) {
-    selectedLang.value = newLangs[0] || 'tr'
-  }
-}, { immediate: true })
+watch(
+  () => props.languages,
+  newLangs => {
+    if (!newLangs.includes(selectedLang.value)) {
+      selectedLang.value = newLangs[0] || 'tr'
+    }
+  },
+  { immediate: true }
+)
 
-const updateValue = (value) => {
+const updateValue = value => {
   const newValue = { ...props.modelValue }
   newValue[selectedLang.value] = value
   emit('update:modelValue', newValue)
@@ -221,7 +228,6 @@ const handleTranslate = async () => {
   translating.value = true
   try {
     // Get target languages (all except source)
-    const targetLangs = props.languages.filter(l => l !== selectedLang.value)
 
     const response = await translationService.batchTranslate(
       props.modelValue,

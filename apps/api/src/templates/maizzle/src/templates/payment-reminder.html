@@ -17,10 +17,10 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
 
   <!-- Heading -->
   <h1 class="m-0 mb-2 text-center text-2xl font-bold text-slate-800">
-    {{ TITLE }}
+    %% TITLE %%
   </h1>
   <p class="m-0 mb-6 text-center text-slate-600">
-    {{ SUBTITLE }}
+    %% SUBTITLE %%
   </p>
 
   <!-- Urgency Alert -->
@@ -28,7 +28,7 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
     <tr>
       <td class="p-4 text-center">
         <p class="m-0 text-warning-700 font-semibold">
-          ⏰ {{ URGENCY_MESSAGE }}
+          ⏰ %% URGENCY_MESSAGE %%
         </p>
       </td>
     </tr>
@@ -42,8 +42,8 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
         <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
             <td>
-              <p class="m-0 text-sm text-slate-500">{{ BOOKING_NUMBER_LABEL }}</p>
-              <p class="m-0 text-lg font-bold text-primary-600">{{ BOOKING_NUMBER }}</p>
+              <p class="m-0 text-sm text-slate-500">%% BOOKING_NUMBER_LABEL %%</p>
+              <p class="m-0 text-lg font-bold text-primary-600">%% BOOKING_NUMBER %%</p>
             </td>
           </tr>
         </table>
@@ -51,18 +51,18 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
         <div class="my-4 bg-slate-200" style="height: 1px;">&nbsp;</div>
 
         <!-- Hotel & Dates -->
-        <h3 class="m-0 mb-2 text-base font-bold text-slate-800">{{ HOTEL_NAME }}</h3>
-        <p class="m-0 mb-4 text-sm text-slate-600">{{ CHECKIN_DATE }} - {{ CHECKOUT_DATE }}</p>
+        <h3 class="m-0 mb-2 text-base font-bold text-slate-800">%% HOTEL_NAME %%</h3>
+        <p class="m-0 mb-4 text-sm text-slate-600">%% CHECKIN_DATE %% - %% CHECKOUT_DATE %%</p>
 
         <!-- Payment Details -->
         <table class="w-full text-sm" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
-            <td class="py-2 text-slate-600">{{ TOTAL_AMOUNT_LABEL }}</td>
-            <td class="py-2 font-semibold text-slate-800" align="right">{{ TOTAL_AMOUNT }}</td>
+            <td class="py-2 text-slate-600">%% TOTAL_AMOUNT_LABEL %%</td>
+            <td class="py-2 font-semibold text-slate-800" align="right">%% TOTAL_AMOUNT %%</td>
           </tr>
           <tr>
-            <td class="py-2 text-slate-600">{{ PAID_AMOUNT_LABEL }}</td>
-            <td class="py-2 font-semibold text-success-600" align="right">{{ PAID_AMOUNT }}</td>
+            <td class="py-2 text-slate-600">%% PAID_AMOUNT_LABEL %%</td>
+            <td class="py-2 font-semibold text-success-600" align="right">%% PAID_AMOUNT %%</td>
           </tr>
           <tr>
             <td colspan="2">
@@ -70,8 +70,8 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
             </td>
           </tr>
           <tr>
-            <td class="py-2 text-lg font-bold text-slate-800">{{ REMAINING_LABEL }}</td>
-            <td class="py-2 text-xl font-bold text-danger-600" align="right">{{ REMAINING_AMOUNT }}</td>
+            <td class="py-2 text-lg font-bold text-slate-800">%% REMAINING_LABEL %%</td>
+            <td class="py-2 text-xl font-bold text-danger-600" align="right">%% REMAINING_AMOUNT %%</td>
           </tr>
         </table>
       </td>
@@ -84,8 +84,8 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
       <td class="p-4">
         <table class="w-full" cellpadding="0" cellspacing="0" role="presentation">
           <tr>
-            <td class="text-sm text-danger-700">{{ DEADLINE_LABEL }}</td>
-            <td class="text-lg font-bold text-danger-700" align="right">{{ PAYMENT_DEADLINE }}</td>
+            <td class="text-sm text-danger-700">%% DEADLINE_LABEL %%</td>
+            <td class="text-lg font-bold text-danger-700" align="right">%% PAYMENT_DEADLINE %%</td>
           </tr>
         </table>
       </td>
@@ -99,8 +99,8 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
         <table cellpadding="0" cellspacing="0" role="presentation">
           <tr>
             <td class="rounded-lg bg-success-600" style="mso-padding-alt: 14px 40px;">
-              <a href="{{ PAYMENT_URL }}" class="block px-10 py-4 text-base font-bold text-white no-underline" style="mso-text-raise: 3px;">
-                {{ PAY_NOW_BUTTON }}
+              <a href="%% PAYMENT_URL %%" class="block px-10 py-4 text-base font-bold text-white no-underline" style="mso-text-raise: 3px;">
+                %% PAY_NOW_BUTTON %%
               </a>
             </td>
           </tr>
@@ -113,7 +113,7 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
   <table class="mt-6 w-full" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
       <td class="text-center">
-        <p class="m-0 text-sm text-slate-500">{{ PAYMENT_METHODS_TEXT }}</p>
+        <p class="m-0 text-sm text-slate-500">%% PAYMENT_METHODS_TEXT %%</p>
       </td>
     </tr>
   </table>
@@ -123,7 +123,7 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
     <tr>
       <td class="text-center">
         <p class="m-0 text-xs text-slate-400">
-          {{ CANCELLATION_WARNING }}
+          %% CANCELLATION_WARNING %%
         </p>
       </td>
     </tr>
@@ -131,7 +131,7 @@ previewText: "Rezervasyonunuz için ödeme bekleniyor"
 
   <!-- Help -->
   <p class="mt-8 text-center text-sm text-slate-500">
-    {{ HELP_TEXT }}<br>
-    <a href="mailto:{{ SUPPORT_EMAIL }}" class="text-primary-600">{{ SUPPORT_EMAIL }}</a>
+    %% HELP_TEXT %%<br>
+    <a href="mailto:%% SUPPORT_EMAIL %%" class="text-primary-600">%% SUPPORT_EMAIL %%</a>
   </p>
 </x-main>

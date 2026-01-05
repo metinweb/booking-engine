@@ -59,7 +59,9 @@ export const getRoomsWithOccupancy = asyncHandler(async (req, res) => {
       }
     ]
   })
-    .select('stayNumber room checkInDate checkOutDate actualCheckIn status paymentStatus guests isVip vipLevel')
+    .select(
+      'stayNumber room checkInDate checkOutDate actualCheckIn status paymentStatus guests isVip vipLevel'
+    )
     .lean()
 
   // Get pending reservations (not yet checked in) that overlap with date range
@@ -101,7 +103,7 @@ export const getRoomsWithOccupancy = asyncHandler(async (req, res) => {
 
   // Add reservations (bookings that haven't checked in yet)
   for (const booking of reservations) {
-    for (const roomBooking of (booking.rooms || [])) {
+    for (const roomBooking of booking.rooms || []) {
       const roomId = roomBooking.room?.toString()
       if (!roomId) continue
 

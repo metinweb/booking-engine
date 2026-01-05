@@ -4,12 +4,12 @@
     <div class="flex justify-end">
       <button
         v-if="hasChanges"
-        @click="saveAllSettings"
         :disabled="saving"
         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+        @click="saveAllSettings"
       >
         <span v-if="saving" class="material-icons animate-spin text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>save</span>
+        <span v-else class="material-icons text-sm">save</span>
         Kaydet
       </button>
     </div>
@@ -20,18 +20,23 @@
     </div>
 
     <!-- Settings Tabs -->
-    <div v-else class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div
+      v-else
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+    >
       <!-- Tab Navigation -->
       <div class="border-b border-gray-200 dark:border-slate-700 overflow-x-auto">
         <div class="flex min-w-max">
           <button
             v-for="tab in tabs"
             :key="tab.id"
-            @click="activeTab = tab.id"
             class="px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
-            :class="activeTab === tab.id
-              ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300'"
+            :class="
+              activeTab === tab.id
+                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300'
+            "
+            @click="activeTab = tab.id"
           >
             <span class="material-icons text-sm mr-1 align-middle">{{ tab.icon }}</span>
             {{ tab.label }}
@@ -58,9 +63,7 @@
         />
 
         <!-- Agency Settings -->
-        <AgencySettings
-          v-else-if="activeTab === 'agencies'"
-        />
+        <AgencySettings v-else-if="activeTab === 'agencies'" />
 
         <!-- Tax Settings -->
         <TaxSettings
@@ -112,16 +115,10 @@
         />
 
         <!-- KBS Settings -->
-        <KBSSettings
-          v-else-if="activeTab === 'kbs'"
-          v-model="settings.kbs"
-          @change="markChanged"
-        />
+        <KBSSettings v-else-if="activeTab === 'kbs'" v-model="settings.kbs" @change="markChanged" />
 
         <!-- Exchange Settings -->
-        <ExchangeSettings
-          v-else-if="activeTab === 'exchange'"
-        />
+        <ExchangeSettings v-else-if="activeTab === 'exchange'" />
       </div>
     </div>
 
@@ -138,14 +135,14 @@
         </p>
         <div class="flex justify-end gap-3">
           <button
-            @click="showResetModal = false"
             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+            @click="showResetModal = false"
           >
             Iptal
           </button>
           <button
-            @click="confirmReset"
             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            @click="confirmReset"
           >
             Sifirla
           </button>
@@ -156,7 +153,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import * as settingsService from '@/services/pms/settingsService'
 
@@ -284,7 +281,7 @@ const saveAllSettings = async () => {
   }
 }
 
-const openResetModal = (section) => {
+const openResetModal = section => {
   resetSection.value = section
   showResetModal.value = true
 }

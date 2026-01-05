@@ -17,9 +17,7 @@
     <!-- Overflow count -->
     <span
       v-if="overflowCount > 0"
-      class="relative inline-flex items-center justify-center font-medium
-             bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-gray-300
-             ring-2 ring-white dark:ring-slate-800"
+      class="relative inline-flex items-center justify-center font-medium bg-gray-200 dark:bg-slate-600 text-gray-600 dark:text-gray-300 ring-2 ring-white dark:ring-slate-800"
       :class="[sizeClasses, 'rounded-full']"
     >
       <span :class="textSizeClasses">+{{ overflowCount }}</span>
@@ -44,7 +42,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
+    validator: v => ['xs', 'sm', 'md', 'lg', 'xl'].includes(v)
   }
 })
 
@@ -82,7 +80,7 @@ const textSizeClasses = computed(() => {
 })
 
 // Get color based on index
-const getColor = (index) => {
+const getColor = index => {
   const colors = ['indigo', 'blue', 'green', 'amber', 'purple', 'pink', 'red']
   return colors[index % colors.length]
 }

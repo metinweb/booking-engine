@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 flex items-center justify-center p-4">
+  <div
+    class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 flex items-center justify-center p-4"
+  >
     <div class="w-full max-w-md">
       <!-- Logo & Title -->
       <div class="text-center mb-8">
@@ -8,7 +10,10 @@
           <img :src="partnerInfo.logo" alt="Logo" class="h-16 mx-auto" />
         </div>
         <!-- Default Icon -->
-        <div v-else class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/30">
+        <div
+          v-else
+          class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-500/30"
+        >
           <span class="material-icons text-white text-3xl">hotel</span>
         </div>
         <h1 class="text-3xl font-bold text-white mb-2">
@@ -18,29 +23,39 @@
       </div>
 
       <!-- Loading Partner Info -->
-      <div v-if="loadingPartner" class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+      <div
+        v-if="loadingPartner"
+        class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center"
+      >
+        <div
+          class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"
+        ></div>
         <p class="text-gray-600 dark:text-slate-400">Partner bilgileri yukleniyor...</p>
       </div>
 
       <!-- Login Card -->
       <div v-else class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
         <!-- Error Message -->
-        <div v-if="error" class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div
+          v-if="error"
+          class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+        >
           <div class="flex items-center gap-2 text-red-600 dark:text-red-400">
             <span class="material-icons text-lg">error</span>
             <span class="text-sm">{{ error }}</span>
           </div>
         </div>
 
-        <form @submit.prevent="handleLogin" class="space-y-5">
+        <form class="space-y-5" @submit.prevent="handleLogin">
           <!-- Partner Code (only show if not auto-detected from domain) -->
           <div v-if="!isCustomDomain">
             <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
               Partner Kodu
             </label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">
+              <span
+                class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg"
+              >
                 business
               </span>
               <input
@@ -59,7 +74,9 @@
               Kullanici Adi
             </label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">
+              <span
+                class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg"
+              >
                 person
               </span>
               <input
@@ -78,7 +95,9 @@
               Sifre
             </label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">
+              <span
+                class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg"
+              >
                 lock
               </span>
               <input
@@ -90,8 +109,8 @@
               />
               <button
                 type="button"
-                @click="showPassword = !showPassword"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 transition-colors"
+                @click="showPassword = !showPassword"
               >
                 <span class="material-icons text-lg">
                   {{ showPassword ? 'visibility_off' : 'visibility' }}
@@ -119,8 +138,19 @@
             class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <svg v-if="loading" class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             <span>{{ loading ? 'Giris Yapiliyor...' : 'Giris Yap' }}</span>
           </button>
@@ -190,7 +220,7 @@ onMounted(async () => {
       if (response.success && response.data) {
         partnerInfo.value = response.data
       }
-    } catch (err) {
+    } catch {
       // Domain not found - show regular login with partner code
       console.log('No partner found for domain:', hostname)
     } finally {
@@ -227,7 +257,8 @@ const handleLogin = async () => {
     }
   } catch (err) {
     console.error('Login error:', err)
-    error.value = err.response?.data?.message || 'Giris basarisiz. Lutfen bilgilerinizi kontrol edin.'
+    error.value =
+      err.response?.data?.message || 'Giris basarisiz. Lutfen bilgilerinizi kontrol edin.'
   } finally {
     loading.value = false
   }

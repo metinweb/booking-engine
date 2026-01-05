@@ -7,7 +7,7 @@ import logger from '../../core/logger.js'
 import sslService from '../../services/sslService.js'
 
 // Get partner ID from request (partner user or platform admin viewing as partner)
-const getPartnerId = (req) => {
+const getPartnerId = req => {
   if (req.user.accountType === 'partner') {
     return req.user.accountId
   }
@@ -139,8 +139,14 @@ export const updateGeneral = asyncHandler(async (req, res) => {
   const settings = await SiteSettings.getOrCreateForPartner(partnerId)
 
   const allowedFields = [
-    'logo', 'favicon', 'activeLanguages', 'defaultLanguage',
-    'maintenanceMode', 'maintenanceMessage', 'siteTitle', 'siteDescription'
+    'logo',
+    'favicon',
+    'activeLanguages',
+    'defaultLanguage',
+    'maintenanceMode',
+    'maintenanceMessage',
+    'siteTitle',
+    'siteDescription'
   ]
 
   allowedFields.forEach(field => {
@@ -237,7 +243,8 @@ export const updateTracking = asyncHandler(async (req, res) => {
 
   const settings = await SiteSettings.getOrCreateForPartner(partnerId)
 
-  const { googleAnalytics, googleTagManager, facebookPixel, microsoftClarity, customScripts } = req.body
+  const { googleAnalytics, googleTagManager, facebookPixel, microsoftClarity, customScripts } =
+    req.body
 
   if (!settings.tracking) {
     settings.tracking = {}
@@ -247,13 +254,19 @@ export const updateTracking = asyncHandler(async (req, res) => {
     settings.tracking.googleAnalytics = { ...settings.tracking.googleAnalytics, ...googleAnalytics }
   }
   if (googleTagManager !== undefined) {
-    settings.tracking.googleTagManager = { ...settings.tracking.googleTagManager, ...googleTagManager }
+    settings.tracking.googleTagManager = {
+      ...settings.tracking.googleTagManager,
+      ...googleTagManager
+    }
   }
   if (facebookPixel !== undefined) {
     settings.tracking.facebookPixel = { ...settings.tracking.facebookPixel, ...facebookPixel }
   }
   if (microsoftClarity !== undefined) {
-    settings.tracking.microsoftClarity = { ...settings.tracking.microsoftClarity, ...microsoftClarity }
+    settings.tracking.microsoftClarity = {
+      ...settings.tracking.microsoftClarity,
+      ...microsoftClarity
+    }
   }
   if (customScripts !== undefined) {
     settings.tracking.customScripts = { ...settings.tracking.customScripts, ...customScripts }
@@ -308,9 +321,7 @@ export const updateSliderItem = asyncHandler(async (req, res) => {
 
   const settings = await SiteSettings.getOrCreateForPartner(partnerId)
 
-  const sliderIndex = settings.homepage.slider.findIndex(
-    s => s._id.toString() === sliderId
-  )
+  const sliderIndex = settings.homepage.slider.findIndex(s => s._id.toString() === sliderId)
 
   if (sliderIndex === -1) {
     throw new NotFoundError('SLIDER_NOT_FOUND')
@@ -343,9 +354,7 @@ export const deleteSliderItem = asyncHandler(async (req, res) => {
 
   const settings = await SiteSettings.getOrCreateForPartner(partnerId)
 
-  const sliderIndex = settings.homepage.slider.findIndex(
-    s => s._id.toString() === sliderId
-  )
+  const sliderIndex = settings.homepage.slider.findIndex(s => s._id.toString() === sliderId)
 
   if (sliderIndex === -1) {
     throw new NotFoundError('SLIDER_NOT_FOUND')

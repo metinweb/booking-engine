@@ -32,16 +32,10 @@
 
           <!-- Content -->
           <div class="px-6 py-4 text-center">
-            <h3
-              :id="titleId"
-              class="text-lg font-semibold text-gray-900 dark:text-white"
-            >
+            <h3 :id="titleId" class="text-lg font-semibold text-gray-900 dark:text-white">
               {{ title }}
             </h3>
-            <p
-              :id="messageId"
-              class="mt-2 text-sm text-gray-600 dark:text-gray-400"
-            >
+            <p :id="messageId" class="mt-2 text-sm text-gray-600 dark:text-gray-400">
               <slot>{{ message }}</slot>
             </p>
           </div>
@@ -52,10 +46,7 @@
               v-if="showCancel"
               ref="cancelButtonRef"
               type="button"
-              class="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors
-                     text-gray-700 bg-gray-100 hover:bg-gray-200
-                     dark:text-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600
-                     focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              class="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors text-gray-700 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               @click="cancel"
             >
               {{ cancelText }}
@@ -63,16 +54,31 @@
             <button
               ref="confirmButtonRef"
               type="button"
-              class="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors
-                     focus:outline-none focus:ring-2 focus:ring-offset-2"
+              class="flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
               :class="confirmButtonClass"
               :disabled="loading"
               @click="confirm"
             >
               <span v-if="loading" class="inline-flex items-center gap-2">
-                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  class="animate-spin h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 {{ loadingText || confirmText }}
               </span>
@@ -104,7 +110,7 @@ const props = defineProps({
   type: {
     type: String,
     default: 'warning',
-    validator: (v) => ['warning', 'danger', 'info', 'success'].includes(v)
+    validator: v => ['warning', 'danger', 'info', 'success'].includes(v)
   },
   icon: {
     type: String,
@@ -215,16 +221,19 @@ const cancel = () => {
 }
 
 // Focus management
-watch(() => props.modelValue, async (isOpen) => {
-  if (isOpen) {
-    await nextTick()
-    if (props.focusConfirm && confirmButtonRef.value) {
-      confirmButtonRef.value.focus()
-    } else if (cancelButtonRef.value) {
-      cancelButtonRef.value.focus()
+watch(
+  () => props.modelValue,
+  async isOpen => {
+    if (isOpen) {
+      await nextTick()
+      if (props.focusConfirm && confirmButtonRef.value) {
+        confirmButtonRef.value.focus()
+      } else if (cancelButtonRef.value) {
+        cancelButtonRef.value.focus()
+      }
     }
   }
-})
+)
 </script>
 
 <style scoped>
@@ -235,7 +244,9 @@ watch(() => props.modelValue, async (isOpen) => {
 
 .modal-enter-active > div:last-child,
 .modal-leave-active > div:last-child {
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .modal-enter-from,

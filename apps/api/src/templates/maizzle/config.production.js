@@ -1,11 +1,19 @@
 /** @type {import('@maizzle/framework').Config} */
-export default {
+module.exports = {
   build: {
     templates: {
+      source: 'src/templates',
       destination: {
         path: '../emails'
       }
     }
+  },
+
+  // Use different delimiters for Maizzle processing (build-time)
+  // Runtime variables use %% VARIABLE %% syntax
+  expressions: {
+    delimiters: ['{{', '}}'],
+    unescapeDelimiters: ['{{{', '}}}']
   },
 
   inlineCSS: true,

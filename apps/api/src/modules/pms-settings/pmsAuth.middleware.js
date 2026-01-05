@@ -69,7 +69,7 @@ export const pmsProtect = async (req, res, next) => {
  * Check if user has specific permission for current hotel
  * @param {string|string[]} permissions - Required permission(s)
  */
-export const pmsRequirePermission = (permissions) => {
+export const pmsRequirePermission = permissions => {
   return (req, res, next) => {
     const user = req.pmsUser
     const hotelId = req.pmsHotelId
@@ -104,7 +104,7 @@ export const pmsRequirePermission = (permissions) => {
  * Check if user has specific role for current hotel
  * @param {string|string[]} roles - Required role(s)
  */
-export const pmsRequireRole = (roles) => {
+export const pmsRequireRole = roles => {
   return (req, res, next) => {
     const user = req.pmsUser
     const hotelId = req.pmsHotelId
@@ -156,7 +156,7 @@ export const pmsOptionalAuth = async (req, res, next) => {
     }
 
     next()
-  } catch (error) {
+  } catch {
     // Ignore errors for optional auth
     next()
   }

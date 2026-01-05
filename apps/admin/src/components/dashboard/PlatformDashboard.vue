@@ -74,7 +74,9 @@
               <p class="text-sm text-gray-500 dark:text-slate-400">{{ booking.hotel?.name }}</p>
             </div>
             <div class="text-right">
-              <p class="font-semibold text-gray-800 dark:text-white">{{ formatPrice(booking.pricing?.grandTotal, booking.pricing?.currency) }}</p>
+              <p class="font-semibold text-gray-800 dark:text-white">
+                {{ formatPrice(booking.pricing?.grandTotal, booking.pricing?.currency) }}
+              </p>
               <span
                 :class="[
                   'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
@@ -85,7 +87,10 @@
               </span>
             </div>
           </div>
-          <p v-if="!recentBookings?.length" class="text-center text-gray-500 dark:text-slate-400 py-4">
+          <p
+            v-if="!recentBookings?.length"
+            class="text-center text-gray-500 dark:text-slate-400 py-4"
+          >
             {{ $t('dashboard.noRecentBookings') }}
           </p>
         </div>
@@ -107,20 +112,27 @@
               <span
                 :class="[
                   'w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3',
-                  index === 0 ? 'bg-yellow-100 text-yellow-700' :
-                  index === 1 ? 'bg-gray-200 text-gray-700' :
-                  index === 2 ? 'bg-orange-100 text-orange-700' :
-                  'bg-gray-100 text-gray-600'
+                  index === 0
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : index === 1
+                      ? 'bg-gray-200 text-gray-700'
+                      : index === 2
+                        ? 'bg-orange-100 text-orange-700'
+                        : 'bg-gray-100 text-gray-600'
                 ]"
               >
                 {{ index + 1 }}
               </span>
               <div>
                 <p class="font-medium text-gray-800 dark:text-white">{{ partner.name }}</p>
-                <p class="text-sm text-gray-500 dark:text-slate-400">{{ partner.count }} {{ $t('dashboard.bookings') }}</p>
+                <p class="text-sm text-gray-500 dark:text-slate-400">
+                  {{ partner.count }} {{ $t('dashboard.bookings') }}
+                </p>
               </div>
             </div>
-            <p class="font-semibold text-green-600 dark:text-green-400">₺{{ partner.revenue?.toLocaleString('tr-TR') }}</p>
+            <p class="font-semibold text-green-600 dark:text-green-400">
+              ₺{{ partner.revenue?.toLocaleString('tr-TR') }}
+            </p>
           </div>
           <p v-if="!topPartners?.length" class="text-center text-gray-500 dark:text-slate-400 py-4">
             {{ $t('dashboard.noData') }}
@@ -141,7 +153,7 @@ defineProps({
   monthlyTrend: { type: Array, default: () => [] }
 })
 
-const getStatusClass = (status) => {
+const getStatusClass = status => {
   const classes = {
     pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
     confirmed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',

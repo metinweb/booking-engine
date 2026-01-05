@@ -13,12 +13,14 @@
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
           <input
-            type="checkbox"
             v-model="form.useOwnSES"
+            type="checkbox"
             class="sr-only peer"
             @change="handleToggleChange"
           />
-          <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-purple-600"></div>
+          <div
+            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-500 peer-checked:bg-purple-600"
+          ></div>
         </label>
       </div>
     </div>
@@ -27,7 +29,9 @@
     <transition name="fade">
       <div v-if="form.useOwnSES" class="space-y-6">
         <!-- AWS Credentials Card -->
-        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+        <div
+          class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
+        >
           <div class="p-4 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
               <span class="material-icons text-orange-500 mr-2">cloud</span>
@@ -58,8 +62,8 @@
                 {{ $t('emailSetup.accessKeyId') }}
               </label>
               <input
-                type="text"
                 v-model="form.aws.accessKeyId"
+                type="text"
                 :placeholder="$t('emailSetup.accessKeyIdPlaceholder')"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
               />
@@ -72,17 +76,19 @@
               </label>
               <div class="relative">
                 <input
-                  :type="showSecretKey ? 'text' : 'password'"
                   v-model="form.aws.secretAccessKey"
+                  :type="showSecretKey ? 'text' : 'password'"
                   :placeholder="$t('emailSetup.secretAccessKeyPlaceholder')"
                   class="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                 />
                 <button
                   type="button"
-                  @click="showSecretKey = !showSecretKey"
                   class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
+                  @click="showSecretKey = !showSecretKey"
                 >
-                  <span class="material-icons text-xl">{{ showSecretKey ? 'visibility_off' : 'visibility' }}</span>
+                  <span class="material-icons text-xl">{{
+                    showSecretKey ? 'visibility_off' : 'visibility'
+                  }}</span>
                 </button>
               </div>
             </div>
@@ -90,7 +96,9 @@
         </div>
 
         <!-- Domain Verification Card -->
-        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+        <div
+          class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
+        >
           <div class="p-4 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
               <span class="material-icons text-blue-500 mr-2">verified</span>
@@ -105,19 +113,21 @@
                   {{ $t('emailSetup.domain') }}
                 </label>
                 <input
-                  type="text"
                   v-model="form.domain"
+                  type="text"
                   :placeholder="$t('emailSetup.domainPlaceholder')"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
                 />
               </div>
               <div class="flex items-end">
                 <button
-                  @click="verifyDomain"
                   :disabled="!form.domain || verifyingDomain"
                   class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                  @click="verifyDomain"
                 >
-                  <span v-if="verifyingDomain" class="material-icons animate-spin mr-2">refresh</span>
+                  <span v-if="verifyingDomain" class="material-icons animate-spin mr-2"
+                    >refresh</span
+                  >
                   {{ $t('emailSetup.verifyDomain') }}
                 </button>
               </div>
@@ -131,9 +141,12 @@
                 </span>
                 <span
                   :class="{
-                    'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400': form.domainVerification.status === 'pending',
-                    'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400': form.domainVerification.status === 'verified',
-                    'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400': form.domainVerification.status === 'failed'
+                    'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400':
+                      form.domainVerification.status === 'pending',
+                    'text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400':
+                      form.domainVerification.status === 'verified',
+                    'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400':
+                      form.domainVerification.status === 'failed'
                   }"
                   class="px-2 py-1 rounded-full text-xs font-medium"
                 >
@@ -142,7 +155,10 @@
               </div>
 
               <!-- DKIM Records -->
-              <div v-if="form.domainVerification.dkimTokens?.length" class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4">
+              <div
+                v-if="form.domainVerification.dkimTokens?.length"
+                class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4"
+              >
                 <p class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
                   {{ $t('emailSetup.dkimRecords') }}
                 </p>
@@ -150,9 +166,15 @@
                   <table class="w-full text-sm">
                     <thead>
                       <tr class="text-left border-b border-gray-200 dark:border-slate-600">
-                        <th class="pb-2 text-gray-600 dark:text-slate-400">{{ $t('emailSetup.recordType') }}</th>
-                        <th class="pb-2 text-gray-600 dark:text-slate-400">{{ $t('emailSetup.recordName') }}</th>
-                        <th class="pb-2 text-gray-600 dark:text-slate-400">{{ $t('emailSetup.recordValue') }}</th>
+                        <th class="pb-2 text-gray-600 dark:text-slate-400">
+                          {{ $t('emailSetup.recordType') }}
+                        </th>
+                        <th class="pb-2 text-gray-600 dark:text-slate-400">
+                          {{ $t('emailSetup.recordName') }}
+                        </th>
+                        <th class="pb-2 text-gray-600 dark:text-slate-400">
+                          {{ $t('emailSetup.recordValue') }}
+                        </th>
                         <th class="pb-2 text-gray-600 dark:text-slate-400 w-10"></th>
                       </tr>
                     </thead>
@@ -171,9 +193,9 @@
                         </td>
                         <td class="py-2">
                           <button
-                            @click="copyToClipboard(`${token}.dkim.amazonses.com`)"
                             class="p-1 text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
                             :title="$t('common.copy')"
+                            @click="copyToClipboard(`${token}.dkim.amazonses.com`)"
                           >
                             <span class="material-icons text-lg">content_copy</span>
                           </button>
@@ -184,11 +206,13 @@
                 </div>
 
                 <button
-                  @click="checkDomainStatus"
                   :disabled="checkingStatus"
                   class="mt-4 px-4 py-2 bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-white rounded-lg hover:bg-gray-300 dark:hover:bg-slate-500 flex items-center"
+                  @click="checkDomainStatus"
                 >
-                  <span v-if="checkingStatus" class="material-icons animate-spin mr-2">refresh</span>
+                  <span v-if="checkingStatus" class="material-icons animate-spin mr-2"
+                    >refresh</span
+                  >
                   <span v-else class="material-icons mr-2">sync</span>
                   {{ $t('emailSetup.checkStatus') }}
                 </button>
@@ -198,7 +222,9 @@
         </div>
 
         <!-- Sender Settings Card -->
-        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+        <div
+          class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
+        >
           <div class="p-4 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
               <span class="material-icons text-green-500 mr-2">mail_outline</span>
@@ -212,8 +238,8 @@
                 {{ $t('emailSetup.fromEmail') }}
               </label>
               <input
-                type="email"
                 v-model="form.aws.fromEmail"
+                type="email"
                 :placeholder="$t('emailSetup.fromEmailPlaceholder')"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
               />
@@ -225,8 +251,8 @@
                 {{ $t('emailSetup.fromName') }}
               </label>
               <input
-                type="text"
                 v-model="form.aws.fromName"
+                type="text"
                 :placeholder="$t('emailSetup.fromNamePlaceholder')"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
               />
@@ -235,7 +261,9 @@
         </div>
 
         <!-- Test Email Section -->
-        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg">
+        <div
+          class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg"
+        >
           <div class="p-4 border-b border-gray-200 dark:border-slate-700">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
               <span class="material-icons text-purple-500 mr-2">send</span>
@@ -245,15 +273,15 @@
           <div class="p-6">
             <div class="flex space-x-2">
               <input
-                type="email"
                 v-model="testEmail"
+                type="email"
                 :placeholder="$t('emailSetup.testEmailPlaceholder')"
                 class="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
               />
               <button
-                @click="sendTestEmail"
                 :disabled="!testEmail || sendingTest"
                 class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                @click="sendTestEmail"
               >
                 <span v-if="sendingTest" class="material-icons animate-spin mr-2">refresh</span>
                 <span v-else class="material-icons mr-2">send</span>
@@ -269,7 +297,10 @@
     </transition>
 
     <!-- Platform Default Info -->
-    <div v-if="!form.useOwnSES" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+    <div
+      v-if="!form.useOwnSES"
+      class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6"
+    >
       <div class="flex items-start">
         <span class="material-icons text-blue-500 mr-3">info</span>
         <div>
@@ -286,9 +317,9 @@
     <!-- Save Button -->
     <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-slate-700">
       <button
-        @click="saveSettings"
         :disabled="saving"
         class="px-6 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium"
+        @click="saveSettings"
       >
         <span v-if="saving" class="material-icons animate-spin mr-2">refresh</span>
         <span v-else class="material-icons mr-2">save</span>
@@ -333,7 +364,7 @@ const form = reactive({
 
 // Get partner context
 const { currentPartnerId } = usePartnerContext({
-  onPartnerChange: (partner) => {
+  onPartnerChange: partner => {
     if (partner) {
       loadSettings()
     }
@@ -456,11 +487,11 @@ const saveSettings = async () => {
   }
 }
 
-const copyToClipboard = async (text) => {
+const copyToClipboard = async text => {
   try {
     await navigator.clipboard.writeText(text)
     toast.success(t('common.copied'))
-  } catch (error) {
+  } catch {
     toast.error(t('common.copyError'))
   }
 }

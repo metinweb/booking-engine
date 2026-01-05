@@ -2,8 +2,12 @@
   <div class="space-y-6">
     <!-- Hierarchical Location Selection - TOP -->
     <div>
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('locations.hierarchicalLocation') }}</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('locations.hierarchicalLocationHelp') }}</p>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+        {{ $t('locations.hierarchicalLocation') }}
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+        {{ $t('locations.hierarchicalLocationHelp') }}
+      </p>
 
       <CascadingLocationSelect
         v-model:country-code="location.countryCode"
@@ -16,8 +20,12 @@
 
     <!-- Address & Map Section -->
     <div class="pt-6 border-t border-gray-200 dark:border-slate-700">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('hotels.address.title') }}</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.address.mapHelp') }}</p>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+        {{ $t('hotels.address.title') }}
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+        {{ $t('hotels.address.mapHelp') }}
+      </p>
 
       <!-- Address Search -->
       <div class="mb-6">
@@ -36,9 +44,9 @@
           />
           <button
             type="button"
-            @click="searchAddress"
             class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-purple-600 text-white rounded text-sm hover:bg-purple-700 transition-colors"
             :disabled="searching || readonly"
+            @click="searchAddress"
           >
             <span v-if="searching" class="material-icons text-sm animate-spin">sync</span>
             <span v-else>{{ $t('common.search') }}</span>
@@ -48,7 +56,7 @@
 
       <!-- Interactive Map Container -->
       <div class="mb-6 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden">
-        <div class="h-96 relative" ref="mapContainer">
+        <div ref="mapContainer" class="h-96 relative">
           <div id="hotel-map" class="w-full h-full z-0"></div>
 
           <!-- Map overlay instructions (hidden in readonly mode) -->
@@ -58,22 +66,28 @@
           >
             <div class="bg-white dark:bg-slate-800 rounded-lg px-4 py-3 shadow-lg text-center">
               <span class="material-icons text-3xl text-purple-600 mb-2">touch_app</span>
-              <p class="text-sm text-gray-700 dark:text-slate-300">{{ $t('hotels.address.clickToSelect') }}</p>
+              <p class="text-sm text-gray-700 dark:text-slate-300">
+                {{ $t('hotels.address.clickToSelect') }}
+              </p>
             </div>
           </div>
         </div>
 
         <!-- Map Actions -->
-        <div class="bg-white dark:bg-slate-800 p-3 flex items-center justify-between border-t border-gray-200 dark:border-slate-700">
+        <div
+          class="bg-white dark:bg-slate-800 p-3 flex items-center justify-between border-t border-gray-200 dark:border-slate-700"
+        >
           <div class="flex items-center gap-4">
             <!-- Current Location Button -->
             <button
               type="button"
-              @click="getCurrentLocation"
               class="flex items-center gap-1 text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="gettingLocation || readonly"
+              @click="getCurrentLocation"
             >
-              <span class="material-icons text-lg" :class="{ 'animate-pulse': gettingLocation }">my_location</span>
+              <span class="material-icons text-lg" :class="{ 'animate-pulse': gettingLocation }"
+                >my_location</span
+              >
               {{ $t('hotels.address.currentLocation') }}
             </button>
 
@@ -81,14 +95,17 @@
             <button
               v-if="form.coordinates.lat && form.coordinates.lng"
               type="button"
-              @click="centerOnMarker"
               class="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              @click="centerOnMarker"
             >
               <span class="material-icons text-lg">center_focus_strong</span>
               {{ $t('hotels.address.centerMap') }}
             </button>
           </div>
-          <div v-if="form.coordinates.lat && form.coordinates.lng" class="text-sm text-gray-500 dark:text-slate-400 font-mono">
+          <div
+            v-if="form.coordinates.lat && form.coordinates.lng"
+            class="text-sm text-gray-500 dark:text-slate-400 font-mono"
+          >
             {{ form.coordinates.lat.toFixed(6) }}, {{ form.coordinates.lng.toFixed(6) }}
           </div>
         </div>
@@ -114,8 +131,12 @@
 
     <!-- Manual Coordinates -->
     <div class="pt-6 border-t border-gray-200 dark:border-slate-700">
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">{{ $t('hotels.address.coordinates') }}</h3>
-      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">{{ $t('hotels.address.coordinatesHelp') }}</p>
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+        {{ $t('hotels.address.coordinates') }}
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-slate-400 mb-4">
+        {{ $t('hotels.address.coordinatesHelp') }}
+      </p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Latitude -->
@@ -174,12 +195,11 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
 import L from 'leaflet'
@@ -218,7 +238,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['validation-change'])
+defineEmits(['validation-change'])
 
 const searchQuery = ref('')
 const searching = ref(false)
@@ -253,7 +273,7 @@ const location = ref({
 const selectedCityName = ref('')
 
 // Handle city selection - focus map on city coordinates
-const handleCitySelected = (city) => {
+const handleCitySelected = city => {
   // Store city name for address field
   selectedCityName.value = city?.name || ''
 
@@ -266,7 +286,7 @@ const handleCitySelected = (city) => {
 }
 
 // Get country name from code
-const getCountryName = (countryCode) => {
+const getCountryName = countryCode => {
   if (!countryCode) return ''
   const country = COUNTRIES.find(c => c.code === countryCode)
   if (!country) return ''
@@ -309,9 +329,10 @@ const createMarkerIcon = () => {
 const initMap = () => {
   if (map) return
 
-  const center = form.value.coordinates.lat && form.value.coordinates.lng
-    ? [form.value.coordinates.lat, form.value.coordinates.lng]
-    : defaultCenter
+  const center =
+    form.value.coordinates.lat && form.value.coordinates.lng
+      ? [form.value.coordinates.lat, form.value.coordinates.lng]
+      : defaultCenter
 
   map = L.map('hotel-map', {
     center: center,
@@ -321,7 +342,8 @@ const initMap = () => {
 
   // Add OpenStreetMap tiles
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 19
   }).addTo(map)
 
@@ -331,7 +353,7 @@ const initMap = () => {
   }
 
   // Click event to place marker (disabled in readonly mode)
-  map.on('click', (e) => {
+  map.on('click', e => {
     if (props.readonly) return
     const { lat, lng } = e.latlng
     setLocation(lat, lng, true)
@@ -349,7 +371,7 @@ const addMarker = (lat, lng) => {
     }).addTo(map)
 
     // Marker drag event (disabled in readonly mode)
-    marker.on('dragend', (e) => {
+    marker.on('dragend', e => {
       if (props.readonly) return
       const { lat, lng } = e.target.getLatLng()
       setLocation(lat, lng, true)
@@ -416,45 +438,49 @@ const centerOnMarker = () => {
 }
 
 // Watch for hotel changes and update form
-watch(() => props.hotel, (newHotel) => {
-  if (!newHotel) return
+watch(
+  () => props.hotel,
+  newHotel => {
+    if (!newHotel) return
 
-  // Update address form
-  if (newHotel.address) {
-    form.value = {
-      street: newHotel.address.street || '',
-      coordinates: {
-        lat: newHotel.address.coordinates?.lat || null,
-        lng: newHotel.address.coordinates?.lng || null
-      },
-      formattedAddress: newHotel.address.formattedAddress || ''
-    }
-
-    // Update map if it exists
-    nextTick(() => {
-      if (map && form.value.coordinates.lat && form.value.coordinates.lng) {
-        addMarker(form.value.coordinates.lat, form.value.coordinates.lng)
-        map.setView([form.value.coordinates.lat, form.value.coordinates.lng], 16)
+    // Update address form
+    if (newHotel.address) {
+      form.value = {
+        street: newHotel.address.street || '',
+        coordinates: {
+          lat: newHotel.address.coordinates?.lat || null,
+          lng: newHotel.address.coordinates?.lng || null
+        },
+        formattedAddress: newHotel.address.formattedAddress || ''
       }
-    })
-  }
 
-  // Update hierarchical location (separate from address check)
-  if (newHotel.location) {
-    location.value = {
-      countryCode: newHotel.location.countryCode || '',
-      cityId: newHotel.location.city?._id || newHotel.location.city || '',
-      regionIds: (newHotel.location.tourismRegions || []).map(r => r?._id || r)
+      // Update map if it exists
+      nextTick(() => {
+        if (map && form.value.coordinates.lat && form.value.coordinates.lng) {
+          addMarker(form.value.coordinates.lat, form.value.coordinates.lng)
+          map.setView([form.value.coordinates.lat, form.value.coordinates.lng], 16)
+        }
+      })
     }
 
-    // Set city name from location or address
-    if (newHotel.location.city?.name) {
-      selectedCityName.value = newHotel.location.city.name
-    } else if (newHotel.address?.city) {
-      selectedCityName.value = newHotel.address.city
+    // Update hierarchical location (separate from address check)
+    if (newHotel.location) {
+      location.value = {
+        countryCode: newHotel.location.countryCode || '',
+        cityId: newHotel.location.city?._id || newHotel.location.city || '',
+        regionIds: (newHotel.location.tourismRegions || []).map(r => r?._id || r)
+      }
+
+      // Set city name from location or address
+      if (newHotel.location.city?.name) {
+        selectedCityName.value = newHotel.location.city.name
+      } else if (newHotel.address?.city) {
+        selectedCityName.value = newHotel.address.city
+      }
     }
-  }
-}, { immediate: true, deep: true })
+  },
+  { immediate: true, deep: true }
+)
 
 // Search address using Nominatim (OpenStreetMap)
 const searchAddress = async () => {
@@ -516,7 +542,7 @@ const getCurrentLocation = () => {
   gettingLocation.value = true
 
   navigator.geolocation.getCurrentPosition(
-    async (position) => {
+    async position => {
       const lat = position.coords.latitude
       const lng = position.coords.longitude
 
@@ -529,7 +555,7 @@ const getCurrentLocation = () => {
       gettingLocation.value = false
       toast.success(t('hotels.address.currentLocation'))
     },
-    (error) => {
+    error => {
       gettingLocation.value = false
       console.error('Geolocation error:', error)
       toast.error('Could not get your location')

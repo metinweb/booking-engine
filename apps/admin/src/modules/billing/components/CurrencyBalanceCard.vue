@@ -7,7 +7,9 @@
     <div class="flex items-center justify-between mb-3">
       <div class="flex items-center gap-2">
         <span class="text-2xl font-bold" :class="currencyColor">{{ currency }}</span>
-        <span v-if="currencySymbol" class="text-sm text-gray-500 dark:text-slate-400">{{ currencySymbol }}</span>
+        <span v-if="currencySymbol" class="text-sm text-gray-500 dark:text-slate-400">{{
+          currencySymbol
+        }}</span>
       </div>
       <span
         v-if="exchangeRate && currency !== 'TRY'"
@@ -21,21 +23,27 @@
     <div class="grid grid-cols-3 gap-3 mb-3">
       <!-- Cash -->
       <div class="text-center">
-        <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('pms.currency.cash') }}</div>
+        <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+          {{ $t('pms.currency.cash') }}
+        </div>
         <div class="text-lg font-semibold text-green-600 dark:text-green-400">
           {{ formatCurrency(balances.cash, currency) }}
         </div>
       </div>
       <!-- Card -->
       <div class="text-center">
-        <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('pms.currency.card') }}</div>
+        <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+          {{ $t('pms.currency.card') }}
+        </div>
         <div class="text-lg font-semibold text-blue-600 dark:text-blue-400">
           {{ formatCurrency(balances.card, currency) }}
         </div>
       </div>
       <!-- Other -->
       <div class="text-center">
-        <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">{{ $t('pms.currency.other') }}</div>
+        <div class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+          {{ $t('pms.currency.other') }}
+        </div>
         <div class="text-lg font-semibold text-purple-600 dark:text-purple-400">
           {{ formatCurrency(balances.other, currency) }}
         </div>
@@ -45,14 +53,21 @@
     <!-- Total -->
     <div class="border-t border-gray-200 dark:border-slate-700 pt-3">
       <div class="flex items-center justify-between">
-        <span class="text-sm text-gray-600 dark:text-slate-400">{{ $t('pms.currency.total') }}</span>
+        <span class="text-sm text-gray-600 dark:text-slate-400">{{
+          $t('pms.currency.total')
+        }}</span>
         <span class="text-xl font-bold" :class="totalColor">
           {{ formatCurrency(total, currency) }}
         </span>
       </div>
       <!-- TRY Equivalent -->
-      <div v-if="showTryEquivalent && currency !== 'TRY' && tryEquivalent" class="flex items-center justify-between mt-1">
-        <span class="text-xs text-gray-400 dark:text-slate-500">{{ $t('pms.currency.equivalentInTRY') }}</span>
+      <div
+        v-if="showTryEquivalent && currency !== 'TRY' && tryEquivalent"
+        class="flex items-center justify-between mt-1"
+      >
+        <span class="text-xs text-gray-400 dark:text-slate-500">{{
+          $t('pms.currency.equivalentInTRY')
+        }}</span>
         <span class="text-sm text-gray-500 dark:text-slate-400">
           {{ formatCurrency(tryEquivalent, 'TRY') }}
         </span>
@@ -60,7 +75,10 @@
     </div>
 
     <!-- Transaction Count (optional) -->
-    <div v-if="transactionCount !== undefined" class="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700">
+    <div
+      v-if="transactionCount !== undefined"
+      class="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700"
+    >
       <div class="flex items-center justify-between text-sm">
         <span class="text-gray-500 dark:text-slate-400">{{ $t('pms.currency.transactions') }}</span>
         <span class="font-medium text-gray-700 dark:text-slate-300">{{ transactionCount }}</span>
@@ -71,9 +89,6 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
 
 const props = defineProps({
   currency: {
@@ -132,7 +147,9 @@ const currencyColors = {
   CNY: 'text-pink-600 dark:text-pink-400'
 }
 
-const currencyColor = computed(() => currencyColors[props.currency] || 'text-gray-700 dark:text-gray-300')
+const currencyColor = computed(
+  () => currencyColors[props.currency] || 'text-gray-700 dark:text-gray-300'
+)
 
 // Calculate total
 const total = computed(() => {
@@ -167,7 +184,7 @@ const formatCurrency = (amount, currency) => {
 }
 
 // Format number
-const formatNumber = (num) => {
+const formatNumber = num => {
   return new Intl.NumberFormat('tr-TR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 4

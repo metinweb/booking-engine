@@ -1,9 +1,6 @@
 import mongoose from 'mongoose'
 import crypto from 'crypto'
-import Partner from '../modules/partner/partner.model.js'
-import Agency from '../modules/agency/agency.model.js'
 import User from '../modules/user/user.model.js'
-import Hotel from '../modules/hotel/hotel.model.js'
 import logger from './logger.js'
 
 /**

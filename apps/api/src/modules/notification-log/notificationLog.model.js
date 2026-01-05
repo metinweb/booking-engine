@@ -1,129 +1,131 @@
 import mongoose from 'mongoose'
 
-const notificationLogSchema = new mongoose.Schema({
-  // Notification type
-  type: {
-    type: String,
-    required: true,
-    enum: [
-      'booking_confirmation',
-      'booking_cancelled',
-      'booking_modified',
-      'payment_reminder',
-      'payment_received',
-      'checkin_reminder',
-      'welcome',
-      'password_reset',
-      '2fa_setup',
-      'partner_approved',
-      'agency_created',
-      'custom'
-    ],
-    index: true
-  },
-
-  // Recipient
-  recipient: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    index: true
-  },
-
-  recipientEmail: {
-    type: String,
-    lowercase: true
-  },
-
-  recipientPhone: {
-    type: String
-  },
-
-  // Partner (for multi-tenant filtering)
-  partner: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Partner',
-    index: true
-  },
-
-  // Related entity
-  relatedTo: {
-    model: {
+const notificationLogSchema = new mongoose.Schema(
+  {
+    // Notification type
+    type: {
       type: String,
-      enum: ['Booking', 'User', 'Partner', 'Agency', null]
+      required: true,
+      enum: [
+        'booking_confirmation',
+        'booking_cancelled',
+        'booking_modified',
+        'payment_reminder',
+        'payment_received',
+        'checkin_reminder',
+        'welcome',
+        'password_reset',
+        '2fa_setup',
+        'partner_approved',
+        'agency_created',
+        'custom'
+      ],
+      index: true
     },
-    id: {
-      type: mongoose.Schema.Types.ObjectId
-    }
-  },
 
-  // Channels and their results
-  channels: {
-    email: {
-      attempted: { type: Boolean, default: false },
-      success: { type: Boolean },
-      messageId: { type: String },
-      error: { type: String },
-      sentAt: { type: Date },
-      source: { type: String, enum: ['platform-db', 'partner', 'env'] }
-    },
-    sms: {
-      attempted: { type: Boolean, default: false },
-      success: { type: Boolean },
-      messageId: { type: String },
-      error: { type: String },
-      sentAt: { type: Date }
-    },
-    push: {
-      attempted: { type: Boolean, default: false },
-      success: { type: Boolean },
-      sent: { type: Number, default: 0 },
-      failed: { type: Number, default: 0 },
-      sentAt: { type: Date }
-    }
-  },
-
-  // Subject/Title for email/push
-  subject: {
-    type: String
-  },
-
-  // Template data (for debugging/replay)
-  templateData: {
-    type: mongoose.Schema.Types.Mixed
-  },
-
-  // Overall status
-  status: {
-    type: String,
-    enum: ['pending', 'partial', 'success', 'failed'],
-    default: 'pending',
-    index: true
-  },
-
-  // Retry information
-  retryCount: {
-    type: Number,
-    default: 0
-  },
-
-  lastRetryAt: {
-    type: Date
-  },
-
-  // IP and user agent for audit
-  requestMeta: {
-    ip: String,
-    userAgent: String,
-    triggeredBy: {
+    // Recipient
+    recipient: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  }
+      ref: 'User',
+      index: true
+    },
 
-}, {
-  timestamps: true,
-  collection: 'notification_logs'
-})
+    recipientEmail: {
+      type: String,
+      lowercase: true
+    },
+
+    recipientPhone: {
+      type: String
+    },
+
+    // Partner (for multi-tenant filtering)
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Partner',
+      index: true
+    },
+
+    // Related entity
+    relatedTo: {
+      model: {
+        type: String,
+        enum: ['Booking', 'User', 'Partner', 'Agency', null]
+      },
+      id: {
+        type: mongoose.Schema.Types.ObjectId
+      }
+    },
+
+    // Channels and their results
+    channels: {
+      email: {
+        attempted: { type: Boolean, default: false },
+        success: { type: Boolean },
+        messageId: { type: String },
+        error: { type: String },
+        sentAt: { type: Date },
+        source: { type: String, enum: ['platform-db', 'partner', 'env'] }
+      },
+      sms: {
+        attempted: { type: Boolean, default: false },
+        success: { type: Boolean },
+        messageId: { type: String },
+        error: { type: String },
+        sentAt: { type: Date }
+      },
+      push: {
+        attempted: { type: Boolean, default: false },
+        success: { type: Boolean },
+        sent: { type: Number, default: 0 },
+        failed: { type: Number, default: 0 },
+        sentAt: { type: Date }
+      }
+    },
+
+    // Subject/Title for email/push
+    subject: {
+      type: String
+    },
+
+    // Template data (for debugging/replay)
+    templateData: {
+      type: mongoose.Schema.Types.Mixed
+    },
+
+    // Overall status
+    status: {
+      type: String,
+      enum: ['pending', 'partial', 'success', 'failed'],
+      default: 'pending',
+      index: true
+    },
+
+    // Retry information
+    retryCount: {
+      type: Number,
+      default: 0
+    },
+
+    lastRetryAt: {
+      type: Date
+    },
+
+    // IP and user agent for audit
+    requestMeta: {
+      ip: String,
+      userAgent: String,
+      triggeredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    }
+  },
+  {
+    timestamps: true,
+    collection: 'notification_logs'
+  }
+)
 
 // Indexes for common queries
 notificationLogSchema.index({ createdAt: -1 })
@@ -132,7 +134,7 @@ notificationLogSchema.index({ recipient: 1, createdAt: -1 })
 notificationLogSchema.index({ status: 1, createdAt: -1 })
 
 // Calculate overall status before save
-notificationLogSchema.pre('save', function(next) {
+notificationLogSchema.pre('save', function (next) {
   const channels = this.channels
 
   const attempted = []
@@ -165,15 +167,8 @@ notificationLogSchema.pre('save', function(next) {
 })
 
 // Static method to find by partner with pagination
-notificationLogSchema.statics.findByPartner = function(partnerId, options = {}) {
-  const {
-    page = 1,
-    limit = 20,
-    type,
-    status,
-    startDate,
-    endDate
-  } = options
+notificationLogSchema.statics.findByPartner = function (partnerId, options = {}) {
+  const { page = 1, limit = 20, type, status, startDate, endDate } = options
 
   const query = { partner: partnerId }
 
@@ -193,7 +188,7 @@ notificationLogSchema.statics.findByPartner = function(partnerId, options = {}) 
 }
 
 // Static method to get stats
-notificationLogSchema.statics.getStats = async function(partnerId, period = 'week') {
+notificationLogSchema.statics.getStats = async function (partnerId, period = 'week') {
   const now = new Date()
   let startDate
 

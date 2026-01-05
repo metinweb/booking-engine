@@ -1,24 +1,32 @@
 <template>
   <div class="flex h-full">
     <!-- Sidebar Navigation -->
-    <aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 overflow-y-auto">
+    <aside
+      class="w-64 flex-shrink-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 overflow-y-auto"
+    >
       <div class="p-4 border-b border-gray-200 dark:border-slate-700">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white">UI Framework</h1>
-        <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">{{ componentCount }} Components</p>
+        <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
+          {{ componentCount }} Components
+        </p>
       </div>
 
       <nav class="p-4">
         <div v-for="group in componentGroups" :key="group.key" class="mb-4">
-          <h3 class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+          <h3
+            class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2"
+          >
             {{ group.label }}
           </h3>
           <ul class="space-y-1">
             <li v-for="item in group.items" :key="item.key">
               <button
                 class="w-full text-left px-3 py-2 text-sm rounded-lg transition-colors"
-                :class="activeSection === item.key
-                  ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'"
+                :class="
+                  activeSection === item.key
+                    ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700'
+                "
                 @click="activeSection = item.key"
               >
                 {{ item.label }}
@@ -88,7 +96,9 @@
       <!-- Form Inputs Section -->
       <section v-if="activeSection === 'form-inputs'" class="space-y-8">
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Form Input Components</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Form Input Components
+          </h2>
           <p class="text-gray-600 dark:text-gray-400">Form giriş elemanları</p>
         </div>
 
@@ -112,24 +122,16 @@
             <Checkbox v-model="checkboxValue" value="option1" label="Option 1" />
             <Checkbox v-model="checkboxValue" value="option2" label="Option 2" />
             <Checkbox v-model="checkboxValue" value="option3" label="Option 3" disabled />
-            <Checkbox :modelValue="true" label="Indeterminate" indeterminate />
+            <Checkbox :model-value="true" label="Indeterminate" indeterminate />
           </div>
           <p class="mt-3 text-sm text-gray-500">Selected: {{ checkboxValue }}</p>
         </ComponentCard>
 
         <!-- RadioGroup -->
         <ComponentCard title="RadioGroup" description="Single selection">
-          <RadioGroup
-            v-model="radioValue"
-            :options="radioOptions"
-            label="Select an option"
-          />
+          <RadioGroup v-model="radioValue" :options="radioOptions" label="Select an option" />
           <div class="mt-4">
-            <RadioGroup
-              v-model="radioValue"
-              :options="radioOptions"
-              inline
-            />
+            <RadioGroup v-model="radioValue" :options="radioOptions" inline />
           </div>
         </ComponentCard>
 
@@ -180,7 +182,7 @@
           <div class="space-y-4">
             <Rating v-model="ratingValue" show-value />
             <Rating v-model="ratingValue" :max="10" color="red" icon="favorite" />
-            <Rating :modelValue="3.5" allow-half readonly />
+            <Rating :model-value="3.5" allow-half readonly />
           </div>
         </ComponentCard>
 
@@ -196,8 +198,8 @@
         <ComponentCard title="FormField" description="Form input with built-in validation rules">
           <div class="space-y-4">
             <FormField
-              v-model="formFieldEmail"
               ref="emailFieldRef"
+              v-model="formFieldEmail"
               name="email"
               label="E-posta"
               type="email"
@@ -209,8 +211,8 @@
               ]"
             />
             <FormField
-              v-model="formFieldPhone"
               ref="phoneFieldRef"
+              v-model="formFieldPhone"
               name="phone"
               label="Telefon"
               placeholder="+90 5XX XXX XX XX"
@@ -221,8 +223,8 @@
               ]"
             />
             <FormField
-              v-model="formFieldPassword"
               ref="passwordFieldRef"
+              v-model="formFieldPassword"
               name="password"
               label="Şifre"
               type="password"
@@ -233,23 +235,19 @@
               ]"
             />
             <FormField
-              v-model="formFieldUrl"
               ref="urlFieldRef"
+              v-model="formFieldUrl"
               name="website"
               label="Website"
               placeholder="https://example.com"
               icon="language"
-              :rules="[
-                { url: true, message: 'Geçerli bir URL giriniz' }
-              ]"
+              :rules="[{ url: true, message: 'Geçerli bir URL giriniz' }]"
             />
             <div class="flex gap-2 pt-2">
-              <BaseButton @click="validateAllFields" variant="primary" size="sm">
+              <BaseButton variant="primary" size="sm" @click="validateAllFields">
                 Validate All
               </BaseButton>
-              <BaseButton @click="resetAllFields" variant="secondary" size="sm">
-                Reset
-              </BaseButton>
+              <BaseButton variant="secondary" size="sm" @click="resetAllFields"> Reset </BaseButton>
             </div>
           </div>
         </ComponentCard>
@@ -268,7 +266,10 @@
         </ComponentCard>
 
         <!-- DateRangePicker -->
-        <ComponentCard title="DateRangePicker" description="Tarih aralığı seçici - preset butonları ile">
+        <ComponentCard
+          title="DateRangePicker"
+          description="Tarih aralığı seçici - preset butonları ile"
+        >
           <div class="space-y-4">
             <DateRangePicker
               v-model="dateRangeValue"
@@ -284,15 +285,14 @@
 
         <!-- DateRangePicker Without Presets -->
         <ComponentCard title="DateRangePicker (No Presets)" description="Preset butonları olmadan">
-          <DateRangePicker
-            v-model="dateRangeValue2"
-            label="Tarih Aralığı"
-            :show-presets="false"
-          />
+          <DateRangePicker v-model="dateRangeValue2" label="Tarih Aralığı" :show-presets="false" />
         </ComponentCard>
 
         <!-- DateRangePicker with Min Date -->
-        <ComponentCard title="DateRangePicker (Min Date)" description="Minimum tarih kısıtlaması ile">
+        <ComponentCard
+          title="DateRangePicker (Min Date)"
+          description="Minimum tarih kısıtlaması ile"
+        >
           <DateRangePicker
             v-model="dateRangeValue3"
             label="Gelecek Tarihler"
@@ -303,12 +303,12 @@
         </ComponentCard>
 
         <!-- BookingDateRangePicker -->
-        <ComponentCard title="BookingDateRangePicker" description="Booking akışı için özelleştirilmiş tarih seçici">
+        <ComponentCard
+          title="BookingDateRangePicker"
+          description="Booking akışı için özelleştirilmiş tarih seçici"
+        >
           <div class="space-y-4">
-            <BookingDateRangePicker
-              v-model="bookingDateRange"
-              :min-date="today"
-            />
+            <BookingDateRangePicker v-model="bookingDateRange" :min-date="today" />
             <p v-if="bookingDateRange.start" class="text-sm text-gray-500 dark:text-slate-400">
               Check-in: {{ bookingDateRange.start }} | Check-out: {{ bookingDateRange.end }}
             </p>
@@ -420,7 +420,9 @@
       <!-- Navigation Section -->
       <section v-if="activeSection === 'navigation'" class="space-y-8">
         <div class="mb-8">
-          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Navigation Components</h2>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Navigation Components
+          </h2>
           <p class="text-gray-600 dark:text-gray-400">Navigasyon bileşenleri</p>
         </div>
 
@@ -428,15 +430,9 @@
         <ComponentCard title="Tabs" description="Tab navigation">
           <Tabs v-model="activeTab" :tabs="tabItems" />
           <div class="mt-4 p-4 bg-gray-100 dark:bg-slate-700 rounded-lg">
-            <TabPanel :active-tab="activeTab" tab-key="tab1">
-              Content for Tab 1
-            </TabPanel>
-            <TabPanel :active-tab="activeTab" tab-key="tab2">
-              Content for Tab 2
-            </TabPanel>
-            <TabPanel :active-tab="activeTab" tab-key="tab3">
-              Content for Tab 3
-            </TabPanel>
+            <TabPanel :active-tab="activeTab" tab-key="tab1"> Content for Tab 1 </TabPanel>
+            <TabPanel :active-tab="activeTab" tab-key="tab2"> Content for Tab 2 </TabPanel>
+            <TabPanel :active-tab="activeTab" tab-key="tab3"> Content for Tab 3 </TabPanel>
           </div>
           <div class="mt-6">
             <Tabs v-model="activeTab" :tabs="tabItems" variant="pills" />
@@ -517,8 +513,8 @@
         <!-- Progress -->
         <ComponentCard title="Progress" description="Progress bars">
           <div class="space-y-4">
-            <Progress :modelValue="progressValue" label="Upload Progress" show-value />
-            <Progress :modelValue="75" color="green" striped animated />
+            <Progress :model-value="progressValue" label="Upload Progress" show-value />
+            <Progress :model-value="75" color="green" striped animated />
             <Progress indeterminate color="blue" />
           </div>
         </ComponentCard>
@@ -553,7 +549,8 @@
           </div>
           <Modal v-model="showModal" title="Modal Title" size="md">
             <p class="text-gray-600 dark:text-gray-300">
-              This is the modal content. You can put any content here including forms, tables, or other components.
+              This is the modal content. You can put any content here including forms, tables, or
+              other components.
             </p>
             <template #footer>
               <BaseButton variant="ghost" @click="showModal = false">Cancel</BaseButton>
@@ -578,7 +575,11 @@
           <div class="flex gap-3">
             <BaseButton @click="showDrawerRight = true">Right Drawer</BaseButton>
             <BaseButton variant="outline" @click="showDrawerLeft = true">Left Drawer</BaseButton>
-            <BaseButton variant="outline" @click="showDrawerBottom = true">Bottom Drawer</BaseButton>
+            <BaseButton variant="outline" @click="showDrawerBottom = true"
+              >
+Bottom Drawer
+</BaseButton
+            >
           </div>
           <Drawer v-model="showDrawerRight" title="Right Drawer" position="right">
             <p class="text-gray-600 dark:text-gray-300">
@@ -595,9 +596,7 @@
             </p>
           </Drawer>
           <Drawer v-model="showDrawerBottom" title="Bottom Drawer" position="bottom" size="md">
-            <p class="text-gray-600 dark:text-gray-300">
-              This drawer slides in from the bottom.
-            </p>
+            <p class="text-gray-600 dark:text-gray-300">This drawer slides in from the bottom.</p>
           </Drawer>
         </ComponentCard>
       </section>
@@ -611,12 +610,7 @@
 
         <!-- DataTable -->
         <ComponentCard title="DataTable" description="Advanced data table">
-          <DataTable
-            :columns="tableColumns"
-            :data="tableData"
-            :loading="tableLoading"
-            selectable
-          />
+          <DataTable :columns="tableColumns" :data="tableData" :loading="tableLoading" selectable />
         </ComponentCard>
       </section>
 
@@ -677,7 +671,10 @@
         </ComponentCard>
 
         <!-- GuestCountSelector - Age Mode -->
-        <ComponentCard title="GuestCountSelector (Age Mode)" description="Misafir sayısı seçici - Çocuk yaşı girişi">
+        <ComponentCard
+          title="GuestCountSelector (Age Mode)"
+          description="Misafir sayısı seçici - Çocuk yaşı girişi"
+        >
           <GuestCountSelector
             v-model:adults="guestAdults"
             v-model:children="guestChildren"
@@ -686,7 +683,10 @@
         </ComponentCard>
 
         <!-- GuestCountSelector - Birth Date Mode -->
-        <ComponentCard title="GuestCountSelector (Birth Date Mode)" description="Misafir sayısı seçici - Çocuk doğum tarihi girişi">
+        <ComponentCard
+          title="GuestCountSelector (Birth Date Mode)"
+          description="Misafir sayısı seçici - Çocuk doğum tarihi girişi"
+        >
           <GuestCountSelector
             v-model:adults="guestAdultsBD"
             v-model:children="guestChildrenBD"
@@ -703,7 +703,10 @@
         </ComponentCard>
 
         <!-- CascadingLocationSelect -->
-        <ComponentCard title="CascadingLocationSelect" description="Kademeli konum seçici (Ülke/Şehir)">
+        <ComponentCard
+          title="CascadingLocationSelect"
+          description="Kademeli konum seçici (Ülke/Şehir)"
+        >
           <CascadingLocationSelect
             v-model:country-code="locationCountry"
             v-model:city-code="locationCity"
@@ -734,11 +737,7 @@
 
         <!-- RichTextEditor -->
         <ComponentCard title="RichTextEditor" description="Zengin metin editörü (çoklu dil)">
-          <RichTextEditor
-            v-model="richTextValue"
-            label="İçerik"
-            :languages="['tr', 'en']"
-          />
+          <RichTextEditor v-model="richTextValue" label="İçerik" :languages="['tr', 'en']" />
         </ComponentCard>
       </section>
     </main>
@@ -818,9 +817,7 @@ const componentGroups = [
   {
     key: 'buttons',
     label: 'Buttons',
-    items: [
-      { key: 'buttons', label: 'Buttons & Actions' }
-    ]
+    items: [{ key: 'buttons', label: 'Buttons & Actions' }]
   },
   {
     key: 'form',
@@ -833,44 +830,32 @@ const componentGroups = [
   {
     key: 'display',
     label: 'Display',
-    items: [
-      { key: 'display', label: 'Display Elements' }
-    ]
+    items: [{ key: 'display', label: 'Display Elements' }]
   },
   {
     key: 'navigation',
     label: 'Navigation',
-    items: [
-      { key: 'navigation', label: 'Navigation' }
-    ]
+    items: [{ key: 'navigation', label: 'Navigation' }]
   },
   {
     key: 'feedback',
     label: 'Feedback',
-    items: [
-      { key: 'feedback', label: 'Feedback' }
-    ]
+    items: [{ key: 'feedback', label: 'Feedback' }]
   },
   {
     key: 'overlays',
     label: 'Overlays',
-    items: [
-      { key: 'overlays', label: 'Modals & Drawers' }
-    ]
+    items: [{ key: 'overlays', label: 'Modals & Drawers' }]
   },
   {
     key: 'data',
     label: 'Data',
-    items: [
-      { key: 'data', label: 'Data Display' }
-    ]
+    items: [{ key: 'data', label: 'Data Display' }]
   },
   {
     key: 'common',
     label: 'Common',
-    items: [
-      { key: 'common', label: 'Common Components' }
-    ]
+    items: [{ key: 'common', label: 'Common Components' }]
   }
 ]
 
@@ -1054,7 +1039,7 @@ const tableData = [
 ]
 
 // Handlers
-const handleAction = (item) => {
+const handleAction = item => {
   console.log('Action:', item)
 }
 

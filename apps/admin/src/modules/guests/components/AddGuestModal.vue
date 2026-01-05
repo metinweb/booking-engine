@@ -16,7 +16,9 @@
               v-model="form.title"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
             >
-              <option v-for="t in titleOptions" :key="t.value" :value="t.value">{{ t.label }}</option>
+              <option v-for="t in titleOptions" :key="t.value" :value="t.value">
+                {{ t.label }}
+              </option>
             </select>
           </div>
           <div>
@@ -53,7 +55,9 @@
               v-model="form.gender"
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
             >
-              <option v-for="g in genderOptions" :key="g.value" :value="g.value">{{ g.label }}</option>
+              <option v-for="g in genderOptions" :key="g.value" :value="g.value">
+                {{ g.label }}
+              </option>
             </select>
           </div>
           <div>
@@ -90,7 +94,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Gecerlilik Tarihi</label>
+            <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1"
+              >Gecerlilik Tarihi</label
+            >
             <input
               v-model="form.idExpiry"
               type="date"
@@ -104,11 +110,7 @@
       <div>
         <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Iletisim Bilgileri</h4>
         <div class="grid grid-cols-2 gap-4">
-          <PhoneInput
-            v-model="form.phone"
-            label="Telefon"
-            country="TR"
-          />
+          <PhoneInput v-model="form.phone" label="Telefon" country="TR" />
           <div>
             <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">E-posta</label>
             <input
@@ -117,16 +119,8 @@
               class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
             />
           </div>
-          <PhoneInput
-            v-model="form.whatsapp"
-            label="WhatsApp"
-            country="TR"
-          />
-          <PhoneInput
-            v-model="form.alternatePhone"
-            label="Alternatif Telefon"
-            country="TR"
-          />
+          <PhoneInput v-model="form.whatsapp" label="WhatsApp" country="TR" />
+          <PhoneInput v-model="form.alternatePhone" label="Alternatif Telefon" country="TR" />
         </div>
       </div>
 
@@ -163,7 +157,9 @@
 
       <!-- Company Info (Optional) -->
       <div>
-        <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Sirket Bilgileri (Opsiyonel)</h4>
+        <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+          Sirket Bilgileri (Opsiyonel)
+        </h4>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm text-gray-500 dark:text-slate-400 mb-1">Sirket Adi</label>
@@ -187,19 +183,19 @@
 
     <template #footer>
       <button
-        @click="close"
         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
         :disabled="loading"
+        @click="close"
       >
         Iptal
       </button>
       <button
-        @click="submit"
         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
         :disabled="loading || !isValid"
+        @click="submit"
       >
         <span v-if="loading" class="animate-spin material-icons text-sm">refresh</span>
-        <span class="material-icons text-sm" v-else>{{ isEditMode ? 'save' : 'person_add' }}</span>
+        <span v-else class="material-icons text-sm">{{ isEditMode ? 'save' : 'person_add' }}</span>
         {{ isEditMode ? 'Kaydet' : 'Misafir Olustur' }}
       </button>
     </template>
@@ -241,7 +237,7 @@ const idTypes = ID_TYPES
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: val => emit('update:modelValue', val)
 })
 
 const defaultForm = () => ({
@@ -294,7 +290,10 @@ const submit = async () => {
     }
     close()
   } catch (error) {
-    toast.error(error.response?.data?.message || (isEditMode.value ? 'Misafir guncellenemedi' : 'Misafir olusturulamadi'))
+    toast.error(
+      error.response?.data?.message ||
+        (isEditMode.value ? 'Misafir guncellenemedi' : 'Misafir olusturulamadi')
+    )
   } finally {
     loading.value = false
   }
@@ -306,46 +305,49 @@ const close = () => {
 }
 
 // Helper to format date for input
-const formatDateForInput = (date) => {
+const formatDateForInput = date => {
   if (!date) return ''
   const d = new Date(date)
   return d.toISOString().split('T')[0]
 }
 
-watch(() => props.modelValue, (val) => {
-  if (val) {
-    if (props.guest) {
-      // Edit mode - populate form with guest data
-      form.value = {
-        title: props.guest.title || 'mr',
-        firstName: props.guest.firstName || '',
-        lastName: props.guest.lastName || '',
-        gender: props.guest.gender || 'prefer_not_to_say',
-        dateOfBirth: formatDateForInput(props.guest.dateOfBirth),
-        nationality: props.guest.nationality || 'TR',
-        idType: props.guest.idType || 'tc_kimlik',
-        idNumber: props.guest.idNumber || '',
-        idExpiry: formatDateForInput(props.guest.idExpiry),
-        phone: props.guest.phone || '',
-        email: props.guest.email || '',
-        whatsapp: props.guest.whatsapp || '',
-        alternatePhone: props.guest.alternatePhone || '',
-        address: {
-          street: props.guest.address?.street || '',
-          city: props.guest.address?.city || '',
-          state: props.guest.address?.state || '',
-          postalCode: props.guest.address?.postalCode || '',
-          country: props.guest.address?.country || ''
-        },
-        company: {
-          name: props.guest.company?.name || '',
-          position: props.guest.company?.position || '',
-          taxNumber: props.guest.company?.taxNumber || ''
+watch(
+  () => props.modelValue,
+  val => {
+    if (val) {
+      if (props.guest) {
+        // Edit mode - populate form with guest data
+        form.value = {
+          title: props.guest.title || 'mr',
+          firstName: props.guest.firstName || '',
+          lastName: props.guest.lastName || '',
+          gender: props.guest.gender || 'prefer_not_to_say',
+          dateOfBirth: formatDateForInput(props.guest.dateOfBirth),
+          nationality: props.guest.nationality || 'TR',
+          idType: props.guest.idType || 'tc_kimlik',
+          idNumber: props.guest.idNumber || '',
+          idExpiry: formatDateForInput(props.guest.idExpiry),
+          phone: props.guest.phone || '',
+          email: props.guest.email || '',
+          whatsapp: props.guest.whatsapp || '',
+          alternatePhone: props.guest.alternatePhone || '',
+          address: {
+            street: props.guest.address?.street || '',
+            city: props.guest.address?.city || '',
+            state: props.guest.address?.state || '',
+            postalCode: props.guest.address?.postalCode || '',
+            country: props.guest.address?.country || ''
+          },
+          company: {
+            name: props.guest.company?.name || '',
+            position: props.guest.company?.position || '',
+            taxNumber: props.guest.company?.taxNumber || ''
+          }
         }
+      } else {
+        form.value = defaultForm()
       }
-    } else {
-      form.value = defaultForm()
     }
   }
-})
+)
 </script>

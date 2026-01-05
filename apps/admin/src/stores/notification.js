@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useToast } from 'vue-toastification'
 import notificationService from '@/services/notificationService'
+import { storeLogger } from '@/utils/logger'
 
 export const useNotificationStore = defineStore('notification', () => {
   // State
@@ -39,7 +40,7 @@ export const useNotificationStore = defineStore('notification', () => {
         pagination.value = response.pagination
       }
     } catch (error) {
-      console.error('Failed to fetch notifications:', error)
+      storeLogger.error('Failed to fetch notifications:', error)
     } finally {
       isLoading.value = false
     }
@@ -55,7 +56,7 @@ export const useNotificationStore = defineStore('notification', () => {
         unreadCount.value = response.data.count
       }
     } catch (error) {
-      console.error('Failed to fetch unread count:', error)
+      storeLogger.error('Failed to fetch unread count:', error)
     }
   }
 
@@ -74,7 +75,7 @@ export const useNotificationStore = defineStore('notification', () => {
         unreadCount.value = Math.max(0, unreadCount.value - 1)
       }
     } catch (error) {
-      console.error('Failed to mark notification as read:', error)
+      storeLogger.error('Failed to mark notification as read:', error)
     }
   }
 
@@ -92,7 +93,7 @@ export const useNotificationStore = defineStore('notification', () => {
       })
       unreadCount.value = 0
     } catch (error) {
-      console.error('Failed to mark all as read:', error)
+      storeLogger.error('Failed to mark all as read:', error)
     }
   }
 
@@ -113,7 +114,7 @@ export const useNotificationStore = defineStore('notification', () => {
         notifications.value.splice(index, 1)
       }
     } catch (error) {
-      console.error('Failed to delete notification:', error)
+      storeLogger.error('Failed to delete notification:', error)
     }
   }
 

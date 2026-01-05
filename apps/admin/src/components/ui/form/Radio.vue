@@ -27,11 +27,7 @@
       <!-- Inner dot -->
       <span
         class="rounded-full transition-transform duration-150"
-        :class="[
-          dotSizeClasses,
-          activeDotClasses,
-          isChecked ? 'scale-100' : 'scale-0'
-        ]"
+        :class="[dotSizeClasses, activeDotClasses, isChecked ? 'scale-100' : 'scale-0']"
       ></span>
     </span>
 
@@ -84,13 +80,13 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   // Color
   color: {
     type: String,
     default: 'indigo',
-    validator: (v) => ['indigo', 'green', 'blue', 'red', 'amber', 'purple'].includes(v)
+    validator: v => ['indigo', 'green', 'blue', 'red', 'amber', 'purple'].includes(v)
   }
 })
 

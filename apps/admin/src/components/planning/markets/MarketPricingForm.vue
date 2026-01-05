@@ -1,22 +1,32 @@
 <template>
   <div>
     <!-- Info Box -->
-    <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 mb-6 border border-indigo-200 dark:border-indigo-800">
+    <div
+      class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 mb-6 border border-indigo-200 dark:border-indigo-800"
+    >
       <div class="flex items-start gap-3">
         <span class="material-icons text-indigo-500 text-xl">info</span>
         <div>
-          <h4 class="font-medium text-indigo-800 dark:text-indigo-300 mb-1">{{ $t('planning.markets.pricingOverrideInfo') }}</h4>
-          <p class="text-sm text-indigo-700 dark:text-indigo-400">{{ $t('planning.markets.pricingOverrideDescription') }}</p>
+          <h4 class="font-medium text-indigo-800 dark:text-indigo-300 mb-1">
+            {{ $t('planning.markets.pricingOverrideInfo') }}
+          </h4>
+          <p class="text-sm text-indigo-700 dark:text-indigo-400">
+            {{ $t('planning.markets.pricingOverrideDescription') }}
+          </p>
         </div>
       </div>
     </div>
 
     <!-- No Rooms Warning -->
     <div v-if="pricingRoomTypes.length === 0" class="text-center py-12">
-      <div class="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+      <div
+        class="w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4"
+      >
         <span class="material-icons text-3xl text-gray-400 dark:text-slate-500">hotel</span>
       </div>
-      <h5 class="font-medium text-gray-600 dark:text-slate-400 mb-2">{{ $t('planning.markets.noRooms') }}</h5>
+      <h5 class="font-medium text-gray-600 dark:text-slate-400 mb-2">
+        {{ $t('planning.markets.noRooms') }}
+      </h5>
       <p class="text-sm text-gray-500 dark:text-slate-500 max-w-md mx-auto">
         {{ $t('planning.markets.noRoomsHint') }}
       </p>
@@ -30,11 +40,13 @@
           v-for="rt in pricingRoomTypes"
           :key="rt._id"
           type="button"
-          @click="selectedPricingRoom = rt._id"
           class="px-4 py-2 text-sm font-medium whitespace-nowrap transition-all border-b-2 -mb-px rounded-t-lg"
-          :class="selectedPricingRoom === rt._id
-            ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
-            : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 hover:border-gray-300'"
+          :class="
+            selectedPricingRoom === rt._id
+              ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20'
+              : 'border-transparent text-gray-500 dark:text-slate-400 hover:text-gray-700 hover:border-gray-300'
+          "
+          @click="selectedPricingRoom = rt._id"
         >
           <div class="flex flex-col items-center">
             <div class="flex items-center gap-1">
@@ -47,7 +59,11 @@
             <!-- Pricing type badge -->
             <span
               class="text-[10px] font-mono opacity-60"
-              :class="rt.pricingType === 'per_person' ? 'text-purple-600 dark:text-purple-400' : 'text-gray-500 dark:text-slate-400'"
+              :class="
+                rt.pricingType === 'per_person'
+                  ? 'text-purple-600 dark:text-purple-400'
+                  : 'text-gray-500 dark:text-slate-400'
+              "
             >
               {{ rt.pricingType === 'per_person' ? 'obp' : 'ünite' }}
             </span>
@@ -59,38 +75,55 @@
       <div v-if="selectedPricingRoom && currentSelectedRoom" class="space-y-4">
         <!-- Room Info -->
         <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
-          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm">
+          <div
+            class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm"
+          >
             {{ currentSelectedRoom.code }}
           </div>
           <div class="flex-1">
-            <div class="font-medium text-gray-800 dark:text-white text-sm">{{ currentSelectedRoom.name?.[locale] || currentSelectedRoom.name?.tr }}</div>
+            <div class="font-medium text-gray-800 dark:text-white text-sm">
+              {{ currentSelectedRoom.name?.[locale] || currentSelectedRoom.name?.tr }}
+            </div>
             <div class="text-xs text-gray-500 dark:text-slate-400">
-              {{ currentSelectedRoom.pricingType === 'per_person' ? 'Kişi Bazlı (OBP)' : 'Ünite Bazlı' }}
+              {{
+                currentSelectedRoom.pricingType === 'per_person'
+                  ? 'Kişi Bazlı (OBP)'
+                  : 'Ünite Bazlı'
+              }}
               <template v-if="currentSelectedRoom.useMultipliers"> + Çarpan Sistemi</template>
-              | Max: {{ currentSelectedRoom.occupancy?.maxAdults || 2 }} Yetişkin, {{ currentSelectedRoom.occupancy?.maxChildren || 0 }} Çocuk
+              | Max: {{ currentSelectedRoom.occupancy?.maxAdults || 2 }} Yetişkin,
+              {{ currentSelectedRoom.occupancy?.maxChildren || 0 }} Çocuk
             </div>
           </div>
         </div>
 
         <!-- 1. Pricing Type Override -->
-        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+        <div
+          class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800"
+        >
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
                 <span class="material-icons text-white">payments</span>
               </div>
               <div>
-                <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.markets.pricingTypeOverride') }}</h4>
-                <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.markets.pricingTypeOverrideHint') }}</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white">
+                  {{ $t('planning.markets.pricingTypeOverride') }}
+                </h4>
+                <p class="text-xs text-gray-500 dark:text-slate-400">
+                  {{ $t('planning.markets.pricingTypeOverrideHint') }}
+                </p>
               </div>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
-                type="checkbox"
                 v-model="currentRoomOverride.usePricingTypeOverride"
+                type="checkbox"
                 class="sr-only peer"
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              <div
+                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+              ></div>
             </label>
           </div>
 
@@ -98,31 +131,43 @@
           <div v-if="currentRoomOverride.usePricingTypeOverride" class="grid grid-cols-2 gap-3">
             <button
               type="button"
-              @click="currentRoomOverride.pricingType = 'unit'"
               class="p-4 rounded-xl border-2 transition-all text-left"
-              :class="currentRoomOverride.pricingType === 'unit'
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+              :class="
+                currentRoomOverride.pricingType === 'unit'
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+              "
+              @click="currentRoomOverride.pricingType = 'unit'"
             >
               <div class="flex items-center gap-2 mb-1">
                 <span class="material-icons text-blue-500">home</span>
-                <span class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.pricing.unitBased') }}</span>
+                <span class="font-semibold text-gray-900 dark:text-white">{{
+                  $t('planning.pricing.unitBased')
+                }}</span>
               </div>
-              <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.unitBasedHint') }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">
+                {{ $t('planning.pricing.unitBasedHint') }}
+              </p>
             </button>
             <button
               type="button"
-              @click="currentRoomOverride.pricingType = 'per_person'"
               class="p-4 rounded-xl border-2 transition-all text-left"
-              :class="currentRoomOverride.pricingType === 'per_person'
-                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'"
+              :class="
+                currentRoomOverride.pricingType === 'per_person'
+                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                  : 'border-gray-200 dark:border-slate-600 hover:border-gray-300'
+              "
+              @click="currentRoomOverride.pricingType = 'per_person'"
             >
               <div class="flex items-center gap-2 mb-1">
                 <span class="material-icons text-purple-500">person</span>
-                <span class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.pricing.perPerson') }}</span>
+                <span class="font-semibold text-gray-900 dark:text-white">{{
+                  $t('planning.pricing.perPerson')
+                }}</span>
               </div>
-              <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.pricing.perPersonHint') }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400">
+                {{ $t('planning.pricing.perPersonHint') }}
+              </p>
             </button>
           </div>
 
@@ -131,8 +176,19 @@
             <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2">
               <span class="material-icons text-sm text-blue-500">info</span>
               {{ $t('planning.markets.usingRoomPricingType') }}:
-              <span class="font-semibold" :class="currentSelectedRoom.pricingType === 'per_person' ? 'text-purple-600' : 'text-blue-600'">
-                {{ currentSelectedRoom.pricingType === 'per_person' ? $t('planning.pricing.perPerson') : $t('planning.pricing.unitBased') }}
+              <span
+                class="font-semibold"
+                :class="
+                  currentSelectedRoom.pricingType === 'per_person'
+                    ? 'text-purple-600'
+                    : 'text-blue-600'
+                "
+              >
+                {{
+                  currentSelectedRoom.pricingType === 'per_person'
+                    ? $t('planning.pricing.perPerson')
+                    : $t('planning.pricing.unitBased')
+                }}
               </span>
             </p>
           </div>
@@ -149,25 +205,45 @@
                 <span class="material-icons text-white">calculate</span>
               </div>
               <div>
-                <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('planning.pricing.multiplierOverride') }}</h4>
-                <p class="text-xs text-gray-500 dark:text-slate-400">{{ $t('planning.markets.overrideRoomMultipliers') }}</p>
+                <h4 class="font-semibold text-gray-900 dark:text-white">
+                  {{ $t('planning.pricing.multiplierOverride') }}
+                </h4>
+                <p class="text-xs text-gray-500 dark:text-slate-400">
+                  {{ $t('planning.markets.overrideRoomMultipliers') }}
+                </p>
               </div>
             </div>
             <label class="relative inline-flex items-center cursor-pointer">
               <input
-                type="checkbox"
                 v-model="currentRoomOverride.useMultiplierOverride"
+                type="checkbox"
                 class="sr-only peer"
               />
-              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
-              <span class="ms-2 text-sm font-medium" :class="currentRoomOverride.useMultiplierOverride ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500 dark:text-slate-400'">
-                {{ currentRoomOverride.useMultiplierOverride ? $t('common.active') : $t('common.inactive') }}
+              <div
+                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
+              ></div>
+              <span
+                class="ms-2 text-sm font-medium"
+                :class="
+                  currentRoomOverride.useMultiplierOverride
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-gray-500 dark:text-slate-400'
+                "
+              >
+                {{
+                  currentRoomOverride.useMultiplierOverride
+                    ? $t('common.active')
+                    : $t('common.inactive')
+                }}
               </span>
             </label>
           </div>
 
           <!-- Info when disabled -->
-          <div v-if="!currentRoomOverride.useMultiplierOverride" class="mt-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg">
+          <div
+            v-if="!currentRoomOverride.useMultiplierOverride"
+            class="mt-3 p-3 bg-white/50 dark:bg-slate-800/50 rounded-lg"
+          >
             <p class="text-sm text-gray-600 dark:text-slate-400 flex items-center gap-2">
               <span class="material-icons text-sm text-blue-500">info</span>
               {{ $t('planning.pricing.usingRoomMultipliers') }}
@@ -176,7 +252,9 @@
         </div>
 
         <!-- Multiplier Template (when override enabled) -->
-        <div v-if="currentRoomOverride.useMultiplierOverride && effectivePricingType === 'per_person'">
+        <div
+          v-if="currentRoomOverride.useMultiplierOverride && effectivePricingType === 'per_person'"
+        >
           <MultiplierTemplate
             v-model="currentRoomOverride.multiplierOverride"
             :occupancy="currentSelectedRoom.occupancy"
@@ -201,7 +279,7 @@ const props = defineProps({
   saving: { type: Boolean, default: false }
 })
 
-const { t, locale } = useI18n()
+const { locale } = useI18n()
 const selectedPricingRoom = ref('')
 
 // Room types for pricing tab - considers market's active room types
@@ -209,7 +287,7 @@ const pricingRoomTypes = computed(() => {
   const activeRoomTypes = props.market?.activeRoomTypes || []
   // If market has specific active room types, use those
   if (activeRoomTypes.length > 0) {
-    const activeIds = activeRoomTypes.map(id => typeof id === 'object' ? id._id : id)
+    const activeIds = activeRoomTypes.map(id => (typeof id === 'object' ? id._id : id))
     return props.roomTypes.filter(rt => activeIds.includes(rt._id))
   }
   // Otherwise use all room types
@@ -224,27 +302,39 @@ const currentSelectedRoom = computed(() => {
 // Pricing overrides storage
 const pricingOverrides = reactive({})
 
+// Default room override values
+const defaultRoomOverride = {
+  usePricingTypeOverride: false,
+  pricingType: 'unit',
+  useMultiplierOverride: false,
+  multiplierOverride: null
+}
+
+// Initialize pricing override for a room
+const initializePricingOverride = roomId => {
+  if (!roomId || pricingOverrides[roomId]) return
+  const room = pricingRoomTypes.value.find(rt => rt._id === roomId)
+  pricingOverrides[roomId] = {
+    usePricingTypeOverride: false,
+    pricingType: room?.pricingType || 'unit',
+    useMultiplierOverride: false,
+    multiplierOverride: room?.multiplierTemplate
+      ? JSON.parse(JSON.stringify(room.multiplierTemplate))
+      : null
+  }
+}
+
+// Initialize override when room selection changes
+watch(selectedPricingRoom, roomId => {
+  initializePricingOverride(roomId)
+})
+
 // Current room override data
 const currentRoomOverride = computed(() => {
   if (!selectedPricingRoom.value) {
-    return {
-      usePricingTypeOverride: false,
-      pricingType: 'unit',
-      useMultiplierOverride: false,
-      multiplierOverride: null
-    }
+    return defaultRoomOverride
   }
-  if (!pricingOverrides[selectedPricingRoom.value]) {
-    // Initialize with room's settings
-    const room = currentSelectedRoom.value
-    pricingOverrides[selectedPricingRoom.value] = {
-      usePricingTypeOverride: false,
-      pricingType: room?.pricingType || 'unit',
-      useMultiplierOverride: false,
-      multiplierOverride: room?.multiplierTemplate ? JSON.parse(JSON.stringify(room.multiplierTemplate)) : null
-    }
-  }
-  return pricingOverrides[selectedPricingRoom.value]
+  return pricingOverrides[selectedPricingRoom.value] || defaultRoomOverride
 })
 
 // Effective pricing type (considering override)
@@ -257,7 +347,7 @@ const effectivePricingType = computed(() => {
 })
 
 // Check if specific room has override
-const hasRoomOverride = (roomId) => {
+const hasRoomOverride = roomId => {
   const override = pricingOverrides[roomId]
   return override?.usePricingTypeOverride || override?.useMultiplierOverride || false
 }
@@ -266,7 +356,8 @@ const hasRoomOverride = (roomId) => {
 const loadOverrides = () => {
   if (props.market?.pricingOverrides?.length) {
     props.market.pricingOverrides.forEach(override => {
-      const roomId = typeof override.roomType === 'object' ? override.roomType._id : override.roomType
+      const roomId =
+        typeof override.roomType === 'object' ? override.roomType._id : override.roomType
       pricingOverrides[roomId] = {
         usePricingTypeOverride: override.usePricingTypeOverride || false,
         pricingType: override.pricingType || 'unit',
@@ -278,16 +369,24 @@ const loadOverrides = () => {
 }
 
 // Select first room when room types become available
-watch(pricingRoomTypes, (newRoomTypes) => {
-  if (newRoomTypes.length > 0 && !selectedPricingRoom.value) {
-    selectedPricingRoom.value = newRoomTypes[0]._id
-  }
-}, { immediate: true })
+watch(
+  pricingRoomTypes,
+  newRoomTypes => {
+    if (newRoomTypes.length > 0 && !selectedPricingRoom.value) {
+      selectedPricingRoom.value = newRoomTypes[0]._id
+    }
+  },
+  { immediate: true }
+)
 
 // Reload overrides when market changes
-watch(() => props.market, () => {
-  loadOverrides()
-}, { deep: true })
+watch(
+  () => props.market,
+  () => {
+    loadOverrides()
+  },
+  { deep: true }
+)
 
 // Public method to get form data
 const getFormData = () => {

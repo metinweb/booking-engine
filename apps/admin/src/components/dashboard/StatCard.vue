@@ -21,7 +21,9 @@
           trend >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
         ]"
       >
-        <span class="material-icons text-sm mr-1">{{ trend >= 0 ? 'trending_up' : 'trending_down' }}</span>
+        <span class="material-icons text-sm mr-1">{{
+          trend >= 0 ? 'trending_up' : 'trending_down'
+        }}</span>
         {{ Math.abs(trend) }}%
       </span>
       <span class="text-sm text-gray-500 dark:text-slate-400 ml-2">{{ trendLabel }}</span>

@@ -20,13 +20,13 @@
 -->
 <template>
   <div class="pms-provider-wrapper">
-    <slot />
+    <slot></slot>
   </div>
 </template>
 
 <script setup>
 import { provide, onMounted, onUnmounted, watch } from 'vue'
-import { usePmsContext, PMS_CONTEXT_KEY, PMS_CONTEXT_MODE } from '@/composables/usePmsContext'
+import { usePmsContext, PMS_CONTEXT_KEY } from '@/composables/usePmsContext'
 import { usePMSSocket } from '@/composables/usePMSSocket'
 import { disconnectSocket, useSocket } from '@/composables/useSocket'
 import { useHotelStore } from '@/stores/hotel'
@@ -66,17 +66,20 @@ const initPMSNotifications = async () => {
       return
     }
 
-    console.log('[PmsProvider] Authenticating socket for notifications:', { userId, userName: pmsUser.name })
+    console.log('[PmsProvider] Authenticating socket for notifications:', {
+      userId,
+      userName: pmsUser.name
+    })
     authenticate(userId, 'PMSUser')
 
     // Listen for new notifications
-    onSocketEvent('notification:new', (data) => {
+    onSocketEvent('notification:new', data => {
       console.log('[PmsProvider] Received notification:new event:', data)
       notificationStore.handleNewNotification(data.notification)
     })
 
     // Listen for notification count updates
-    onSocketEvent('notification:count', (data) => {
+    onSocketEvent('notification:count', data => {
       notificationStore.handleCountUpdate(data.count)
     })
 
@@ -105,10 +108,15 @@ const syncHotelStore = () => {
         // PMS returns {id, name, role, permissions} but hotelStore expects {_id, name}
         const mappedHotel = {
           ...hotel,
-          _id: hotel._id || hotel.id  // Ensure _id is set
+          _id: hotel._id || hotel.id // Ensure _id is set
         }
         hotelStore.setHotel(mappedHotel)
-        console.log('[PmsProvider] Synced hotelStore with PMS hotel:', mappedHotel?.name, 'ID:', mappedHotel?._id)
+        console.log(
+          '[PmsProvider] Synced hotelStore with PMS hotel:',
+          mappedHotel?.name,
+          'ID:',
+          mappedHotel?._id
+        )
       }
     } catch (e) {
       console.error('[PmsProvider] Failed to parse PMS hotel:', e)
@@ -144,24 +152,30 @@ onMounted(async () => {
 })
 
 // Watch for hotel changes
-watch(() => pmsContext.hotelId.value, (newHotelId, oldHotelId) => {
-  if (newHotelId && newHotelId !== oldHotelId) {
-    console.log('[PmsProvider] Hotel changed:', oldHotelId, '->', newHotelId)
-    joinHotelRoom(newHotelId)
-    // Keep hotelStore in sync
-    syncHotelStore()
+watch(
+  () => pmsContext.hotelId.value,
+  (newHotelId, oldHotelId) => {
+    if (newHotelId && newHotelId !== oldHotelId) {
+      console.log('[PmsProvider] Hotel changed:', oldHotelId, '->', newHotelId)
+      joinHotelRoom(newHotelId)
+      // Keep hotelStore in sync
+      syncHotelStore()
+    }
   }
-})
+)
 
 // Watch for logout
-watch(() => pmsContext.isAuthenticated.value, (isAuth) => {
-  if (!isAuth) {
-    console.log('[PmsProvider] User logged out, cleaning up socket and notifications')
-    notificationStore.clearNotifications()
-    cleanupPMSSocket()
-    disconnectSocket()
+watch(
+  () => pmsContext.isAuthenticated.value,
+  isAuth => {
+    if (!isAuth) {
+      console.log('[PmsProvider] User logged out, cleaning up socket and notifications')
+      notificationStore.clearNotifications()
+      cleanupPMSSocket()
+      disconnectSocket()
+    }
   }
-})
+)
 
 // Cleanup on unmount
 onUnmounted(() => {

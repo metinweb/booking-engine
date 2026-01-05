@@ -30,7 +30,8 @@ export const getPartnerByDomain = asyncHandler(async (req, res) => {
   }
 
   // Clean domain (remove protocol, www, trailing slashes)
-  const cleanDomain = domain.toLowerCase()
+  const cleanDomain = domain
+    .toLowerCase()
     .replace(/^https?:\/\//, '')
     .replace(/^www\./, '')
     .replace(/\/$/, '')
@@ -74,7 +75,8 @@ export const login = asyncHandler(async (req, res) => {
 
   // Try domain first (highest priority for custom domains)
   if (!resolvedPartnerId && domain) {
-    const cleanDomain = domain.toLowerCase()
+    const cleanDomain = domain
+      .toLowerCase()
       .replace(/^https?:\/\//, '')
       .replace(/^www\./, '')
       .replace(/\/$/, '')
@@ -113,7 +115,9 @@ export const login = asyncHandler(async (req, res) => {
     partner: resolvedPartnerId,
     username: username.toLowerCase(),
     isActive: true
-  }).select('+password').populate('assignedHotels.hotel', 'name status')
+  })
+    .select('+password')
+    .populate('assignedHotels.hotel', 'name status')
 
   if (!user) {
     throw new UnauthorizedError('INVALID_CREDENTIALS')
@@ -221,8 +225,10 @@ export const selectHotel = asyncHandler(async (req, res) => {
   }
 
   // Get user
-  const user = await PmsUser.findById(decoded.pmsUserId)
-    .populate('assignedHotels.hotel', 'name status')
+  const user = await PmsUser.findById(decoded.pmsUserId).populate(
+    'assignedHotels.hotel',
+    'name status'
+  )
 
   if (!user || !user.isActive) {
     throw new UnauthorizedError('USER_NOT_FOUND')
@@ -339,12 +345,14 @@ export const me = asyncHandler(async (req, res) => {
         language: user.language,
         lastLogin: user.lastLogin
       },
-      currentHotel: currentHotelAssignment ? {
-        id: currentHotelAssignment.hotel._id,
-        name: currentHotelAssignment.hotel.name,
-        role: currentHotelAssignment.role,
-        permissions: currentHotelAssignment.permissions
-      } : null,
+      currentHotel: currentHotelAssignment
+        ? {
+            id: currentHotelAssignment.hotel._id,
+            name: currentHotelAssignment.hotel.name,
+            role: currentHotelAssignment.role,
+            permissions: currentHotelAssignment.permissions
+          }
+        : null,
       assignedHotels: user.assignedHotels
         .filter(h => h.hotel && h.hotel.status === 'active')
         .map(h => ({

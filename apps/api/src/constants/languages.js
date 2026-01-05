@@ -8,8 +8,26 @@ export const ADMIN_LANGUAGES = ['tr', 'en']
 
 // B2C languages (20 languages for Hotel, RoomType, MealPlan, etc.)
 export const B2C_LANGUAGES = [
-	'tr', 'en', 'ru', 'el', 'de', 'es', 'it', 'fr', 'ro', 'bg',
-	'pt', 'da', 'zh', 'ar', 'fa', 'he', 'sq', 'uk', 'pl', 'az'
+  'tr',
+  'en',
+  'ru',
+  'el',
+  'de',
+  'es',
+  'it',
+  'fr',
+  'ro',
+  'bg',
+  'pt',
+  'da',
+  'zh',
+  'ar',
+  'fa',
+  'he',
+  'sq',
+  'uk',
+  'pl',
+  'az'
 ]
 
 // Backward compatibility alias
@@ -21,12 +39,12 @@ export const SUPPORTED_LANGUAGES = B2C_LANGUAGES
  * @param {boolean} required - Whether at least one language is required
  * @returns {Object} Mongoose schema definition for multi-language field
  */
-export const multiLangString = (languages = B2C_LANGUAGES, required = false) => {
-	const schema = {}
-	languages.forEach(lang => {
-		schema[lang] = { type: String, trim: true, default: '' }
-	})
-	return schema
+export const multiLangString = (languages = B2C_LANGUAGES, _required = false) => {
+  const schema = {}
+  languages.forEach(lang => {
+    schema[lang] = { type: String, trim: true, default: '' }
+  })
+  return schema
 }
 
 /**

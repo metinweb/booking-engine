@@ -9,7 +9,7 @@ export function useDate() {
   const { locale } = useI18n()
 
   // Get locale string for date formatting
-  const dateLocale = computed(() => locale.value === 'tr' ? 'tr-TR' : 'en-US')
+  const dateLocale = computed(() => (locale.value === 'tr' ? 'tr-TR' : 'en-US'))
 
   /**
    * Format date to display string (e.g., "25 Ara 2025" or "Dec 25, 2025")
@@ -31,7 +31,7 @@ export function useDate() {
   /**
    * Format date to short display (e.g., "25.12.25" or "12/25/25")
    */
-  const formatShortDate = (dateStr) => {
+  const formatShortDate = dateStr => {
     if (!dateStr) return '-'
     const date = new Date(dateStr)
     if (isNaN(date.getTime())) return '-'
@@ -46,7 +46,7 @@ export function useDate() {
   /**
    * Format date to ISO format (YYYY-MM-DD)
    */
-  const formatISODate = (date) => {
+  const formatISODate = date => {
     if (!date) return ''
     const d = date instanceof Date ? date : new Date(date)
     if (isNaN(d.getTime())) return ''
@@ -60,7 +60,7 @@ export function useDate() {
   /**
    * Format date from ISO to Turkish format (DD.MM.YYYY)
    */
-  const formatTurkishDate = (dateStr) => {
+  const formatTurkishDate = dateStr => {
     if (!dateStr) return ''
     const [year, month, day] = dateStr.split('-')
     return `${day}.${month}.${year}`
@@ -103,7 +103,7 @@ export function useDate() {
   /**
    * Check if date is today
    */
-  const isToday = (dateStr) => {
+  const isToday = dateStr => {
     if (!dateStr) return false
     const date = new Date(dateStr)
     const today = new Date()
@@ -113,7 +113,7 @@ export function useDate() {
   /**
    * Check if date is in the past
    */
-  const isPast = (dateStr) => {
+  const isPast = dateStr => {
     if (!dateStr) return false
     const date = new Date(dateStr)
     const today = new Date()
@@ -124,7 +124,7 @@ export function useDate() {
   /**
    * Check if date is in the future
    */
-  const isFuture = (dateStr) => {
+  const isFuture = dateStr => {
     if (!dateStr) return false
     const date = new Date(dateStr)
     const today = new Date()
@@ -152,7 +152,7 @@ export function useDate() {
   /**
    * Parse date string to Date object
    */
-  const parseDate = (dateStr) => {
+  const parseDate = dateStr => {
     if (!dateStr) return null
     const date = new Date(dateStr)
     return isNaN(date.getTime()) ? null : date

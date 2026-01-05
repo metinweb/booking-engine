@@ -1,12 +1,17 @@
 <template>
   <div class="space-y-6">
     <!-- No Partner Selected Warning (only for platform admin) -->
-    <div v-if="!canAccess" class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+    <div
+      v-if="!canAccess"
+      class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4"
+    >
       <div class="flex items-center gap-3">
         <span class="material-icons text-amber-600 dark:text-amber-400">warning</span>
         <div>
           <p class="font-medium text-amber-800 dark:text-amber-200">Partner Secimi Gerekli</p>
-          <p class="text-sm text-amber-600 dark:text-amber-400">PMS kullanicilarini yonetmek icin lutfen ust menuden bir partner secin.</p>
+          <p class="text-sm text-amber-600 dark:text-amber-400">
+            PMS kullanicilarini yonetmek icin lutfen ust menuden bir partner secin.
+          </p>
         </div>
       </div>
     </div>
@@ -14,9 +19,9 @@
     <!-- Action Button -->
     <div v-if="canAccess" class="flex justify-end">
       <button
-        @click="showAddModal = true"
         :disabled="hotels.length === 0"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        @click="showAddModal = true"
       >
         <span class="material-icons text-lg">person_add</span>
         Yeni Kullanici
@@ -24,21 +29,30 @@
     </div>
 
     <!-- No Hotels Warning -->
-    <div v-if="canAccess && hotels.length === 0 && !loading" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
+    <div
+      v-if="canAccess && hotels.length === 0 && !loading"
+      class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4"
+    >
       <div class="flex items-center gap-3">
         <span class="material-icons text-blue-600 dark:text-blue-400">info</span>
         <div>
           <p class="font-medium text-blue-800 dark:text-blue-200">Otel Bulunamadi</p>
-          <p class="text-sm text-blue-600 dark:text-blue-400">Bu partner'a ait otel yok. Once bir otel ekleyin.</p>
+          <p class="text-sm text-blue-600 dark:text-blue-400">
+            Bu partner'a ait otel yok. Once bir otel ekleyin.
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Statistics Cards -->
     <div v-if="canAccess" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center"
+          >
             <span class="material-icons text-blue-600 dark:text-blue-400">badge</span>
           </div>
           <div>
@@ -47,9 +61,13 @@
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+          >
             <span class="material-icons text-green-600 dark:text-green-400">check_circle</span>
           </div>
           <div>
@@ -58,9 +76,13 @@
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+          >
             <span class="material-icons text-red-600 dark:text-red-400">cancel</span>
           </div>
           <div>
@@ -69,10 +91,16 @@
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <span class="material-icons text-purple-600 dark:text-purple-400">admin_panel_settings</span>
+          <div
+            class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center"
+          >
+            <span class="material-icons text-purple-600 dark:text-purple-400"
+              >admin_panel_settings</span
+            >
           </div>
           <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.admins }}</p>
@@ -83,12 +111,17 @@
     </div>
 
     <!-- Filters -->
-    <div v-if="canAccess" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+    <div
+      v-if="canAccess"
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+    >
       <div class="flex flex-wrap gap-4">
         <!-- Search -->
         <div class="flex-1 min-w-[200px]">
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400">search</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400"
+              >search</span
+            >
             <input
               v-model="filters.search"
               type="text"
@@ -102,19 +135,21 @@
         <div class="w-44">
           <select
             v-model="filters.department"
-            @change="fetchUsers"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            @change="fetchUsers"
           >
             <option value="">Tum Departmanlar</option>
-            <option v-for="dept in departments" :key="dept.value" :value="dept.value">{{ dept.label }}</option>
+            <option v-for="dept in departments" :key="dept.value" :value="dept.value">
+              {{ dept.label }}
+            </option>
           </select>
         </div>
         <!-- Status Filter -->
         <div class="w-32">
           <select
             v-model="filters.isActive"
-            @change="fetchUsers"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            @change="fetchUsers"
           >
             <option value="">Tum Durum</option>
             <option value="true">Aktif</option>
@@ -125,17 +160,19 @@
         <div class="w-48">
           <select
             v-model="filters.hotelId"
-            @change="fetchUsers"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            @change="fetchUsers"
           >
             <option value="">Tum Oteller</option>
-            <option v-for="hotel in hotels" :key="hotel._id" :value="hotel._id">{{ hotel.name }}</option>
+            <option v-for="hotel in hotels" :key="hotel._id" :value="hotel._id">
+              {{ hotel.name }}
+            </option>
           </select>
         </div>
         <!-- Reset -->
         <button
-          @click="resetFilters"
           class="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+          @click="resetFilters"
         >
           <span class="material-icons">refresh</span>
         </button>
@@ -143,7 +180,10 @@
     </div>
 
     <!-- Users Table -->
-    <div v-if="canAccess" class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div
+      v-if="canAccess"
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+    >
       <div v-if="loading" class="p-8 text-center">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
         <p class="mt-2 text-gray-500 dark:text-slate-400">Yukleniyor...</p>
@@ -157,41 +197,88 @@
       <table v-else class="w-full">
         <thead class="bg-gray-50 dark:bg-slate-700/50">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Kullanici</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Departman</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Atanan Oteller</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Son Giris</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Durum</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Islemler</th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Kullanici
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Departman
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Atanan Oteller
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Son Giris
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Durum
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Islemler
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
-          <tr v-for="user in users" :key="user._id" class="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+          <tr
+            v-for="user in users"
+            :key="user._id"
+            class="hover:bg-gray-50 dark:hover:bg-slate-700/50"
+          >
             <!-- User Info -->
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                  <span class="text-indigo-600 dark:text-indigo-400 font-medium">{{ getUserInitials(user) }}</span>
+                <div
+                  class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+                >
+                  <span class="text-indigo-600 dark:text-indigo-400 font-medium">{{
+                    getUserInitials(user)
+                  }}</span>
                 </div>
                 <div>
-                  <p class="font-medium text-gray-900 dark:text-white">{{ user.firstName }} {{ user.lastName }}</p>
+                  <p class="font-medium text-gray-900 dark:text-white">
+                    {{ user.firstName }} {{ user.lastName }}
+                  </p>
                   <p class="text-sm text-gray-500 dark:text-slate-400">@{{ user.username }}</p>
                 </div>
               </div>
             </td>
             <!-- Department -->
             <td class="px-4 py-3">
-              <span class="px-2 py-1 text-xs rounded-full" :class="getDepartmentClass(user.department)">
+              <span
+                class="px-2 py-1 text-xs rounded-full"
+                :class="getDepartmentClass(user.department)"
+              >
                 {{ getDepartmentLabel(user.department) }}
               </span>
-              <p v-if="user.position" class="text-xs text-gray-500 dark:text-slate-400 mt-1">{{ user.position }}</p>
+              <p v-if="user.position" class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                {{ user.position }}
+              </p>
             </td>
             <!-- Assigned Hotels -->
             <td class="px-4 py-3">
               <div v-if="user.assignedHotels?.length > 0" class="space-y-1">
-                <div v-for="(assignment, i) in user.assignedHotels.slice(0, 2)" :key="i" class="flex items-center gap-2">
-                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ assignment.hotel?.name || 'Otel' }}</span>
-                  <span class="px-1.5 py-0.5 text-xs rounded bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-300">
+                <div
+                  v-for="(assignment, i) in user.assignedHotels.slice(0, 2)"
+                  :key="i"
+                  class="flex items-center gap-2"
+                >
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{
+                    assignment.hotel?.name || 'Otel'
+                  }}</span>
+                  <span
+                    class="px-1.5 py-0.5 text-xs rounded bg-gray-100 dark:bg-slate-600 text-gray-600 dark:text-gray-300"
+                  >
                     {{ getRoleLabel(assignment.role) }}
                   </span>
                 </div>
@@ -212,7 +299,11 @@
             <td class="px-4 py-3">
               <span
                 class="px-2 py-1 text-xs rounded-full"
-                :class="user.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'"
+                :class="
+                  user.isActive
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                "
               >
                 {{ user.isActive ? 'Aktif' : 'Pasif' }}
               </span>
@@ -221,38 +312,44 @@
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-1">
                 <button
-                  @click="openEditModal(user)"
                   class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg"
                   title="Duzenle"
+                  @click="openEditModal(user)"
                 >
                   <span class="material-icons text-lg">edit</span>
                 </button>
                 <button
-                  @click="openAssignHotelModal(user)"
                   class="p-1.5 text-gray-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg"
                   title="Otel Ata"
+                  @click="openAssignHotelModal(user)"
                 >
                   <span class="material-icons text-lg">add_business</span>
                 </button>
                 <button
-                  @click="openResetPasswordModal(user)"
                   class="p-1.5 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-lg"
                   title="Sifre Sifirla"
+                  @click="openResetPasswordModal(user)"
                 >
                   <span class="material-icons text-lg">lock_reset</span>
                 </button>
                 <button
-                  @click="toggleUserStatus(user)"
                   class="p-1.5 rounded-lg"
-                  :class="user.isActive ? 'text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30' : 'text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30'"
+                  :class="
+                    user.isActive
+                      ? 'text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30'
+                      : 'text-gray-500 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30'
+                  "
                   :title="user.isActive ? 'Pasif Yap' : 'Aktif Yap'"
+                  @click="toggleUserStatus(user)"
                 >
-                  <span class="material-icons text-lg">{{ user.isActive ? 'block' : 'check_circle' }}</span>
+                  <span class="material-icons text-lg">{{
+                    user.isActive ? 'block' : 'check_circle'
+                  }}</span>
                 </button>
                 <button
-                  @click="confirmDelete(user)"
                   class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                   title="Sil"
+                  @click="confirmDelete(user)"
                 >
                   <span class="material-icons text-lg">delete</span>
                 </button>
@@ -300,21 +397,22 @@
     <!-- Delete Confirmation Modal -->
     <Modal v-model="showDeleteModal" title="Kullaniciyi Sil" size="sm">
       <p class="text-gray-600 dark:text-gray-400">
-        <strong>{{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</strong> kullanicisini silmek istediginize emin misiniz?
+        <strong>{{ selectedUser?.firstName }} {{ selectedUser?.lastName }}</strong> kullanicisini
+        silmek istediginize emin misiniz?
       </p>
       <p class="text-sm text-red-500 mt-2">Bu islem geri alinamaz.</p>
       <template #footer>
         <div class="flex justify-end gap-3">
           <button
-            @click="showDeleteModal = false"
             class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+            @click="showDeleteModal = false"
           >
             Iptal
           </button>
           <button
-            @click="deleteUser"
             :disabled="deleting"
             class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
+            @click="deleteUser"
           >
             {{ deleting ? 'Siliniyor...' : 'Sil' }}
           </button>
@@ -325,7 +423,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import pmsAdminUserService from '@/services/pms/pmsAdminUserService'
 import hotelService from '@/services/hotelService'
@@ -343,8 +441,8 @@ const toast = useToast()
 const pmsContext = usePmsContextInjection()
 
 // Partner context - for platform admin
-const { hasPartner, currentPartnerId, isViewingAsPartner } = usePartnerContext({
-  onPartnerChange: (partner) => {
+const { hasPartner, currentPartnerId } = usePartnerContext({
+  onPartnerChange: partner => {
     if (partner) {
       fetchHotels()
       fetchUsers()
@@ -447,9 +545,7 @@ const stats = computed(() => {
   const total = users.value.length
   const active = users.value.filter(u => u.isActive).length
   const inactive = total - active
-  const admins = users.value.filter(u =>
-    u.assignedHotels?.some(h => h.role === 'pms_admin')
-  ).length
+  const admins = users.value.filter(u => u.assignedHotels?.some(h => h.role === 'pms_admin')).length
   return { total, active, inactive, admins }
 })
 
@@ -487,10 +583,11 @@ const fetchUsers = async () => {
     // Client-side search filter
     if (filters.value.search) {
       const search = filters.value.search.toLowerCase()
-      data = data.filter(u =>
-        u.firstName?.toLowerCase().includes(search) ||
-        u.lastName?.toLowerCase().includes(search) ||
-        u.username?.toLowerCase().includes(search)
+      data = data.filter(
+        u =>
+          u.firstName?.toLowerCase().includes(search) ||
+          u.lastName?.toLowerCase().includes(search) ||
+          u.username?.toLowerCase().includes(search)
       )
     }
 
@@ -510,17 +607,17 @@ const resetFilters = () => {
 }
 
 // Get user initials
-const getUserInitials = (user) => {
+const getUserInitials = user => {
   return `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase()
 }
 
 // Get department label
-const getDepartmentLabel = (dept) => {
+const getDepartmentLabel = dept => {
   return departments.find(d => d.value === dept)?.label || dept
 }
 
 // Get department class
-const getDepartmentClass = (dept) => {
+const getDepartmentClass = dept => {
   const classes = {
     front_office: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     housekeeping: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -533,12 +630,12 @@ const getDepartmentClass = (dept) => {
 }
 
 // Get role label
-const getRoleLabel = (role) => {
+const getRoleLabel = role => {
   return roles.find(r => r.value === role)?.label || role
 }
 
 // Format date
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleString('tr-TR', {
     day: '2-digit',
@@ -550,25 +647,25 @@ const formatDate = (date) => {
 }
 
 // Open edit modal
-const openEditModal = (user) => {
+const openEditModal = user => {
   selectedUser.value = user
   showEditModal.value = true
 }
 
 // Open assign hotel modal
-const openAssignHotelModal = (user) => {
+const openAssignHotelModal = user => {
   selectedUser.value = user
   showAssignHotelModal.value = true
 }
 
 // Open reset password modal
-const openResetPasswordModal = (user) => {
+const openResetPasswordModal = user => {
   selectedUser.value = user
   showResetPasswordModal.value = true
 }
 
 // Toggle user status
-const toggleUserStatus = async (user) => {
+const toggleUserStatus = async user => {
   try {
     await pmsAdminUserService.update(user._id, { isActive: !user.isActive })
     toast.success(user.isActive ? 'Kullanici pasif yapildi' : 'Kullanici aktif yapildi')
@@ -580,7 +677,7 @@ const toggleUserStatus = async (user) => {
 }
 
 // Confirm delete
-const confirmDelete = (user) => {
+const confirmDelete = user => {
   selectedUser.value = user
   showDeleteModal.value = true
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="relative" ref="containerRef">
+  <div ref="containerRef" class="relative">
     <!-- Label -->
     <label
       v-if="label"
@@ -12,31 +12,38 @@
 
     <!-- Select Button -->
     <button
-      type="button"
-      ref="buttonRef"
       :id="inputId"
-      @click="toggleDropdown"
-      @keydown="handleKeydown"
+      ref="buttonRef"
+      type="button"
       class="w-full flex items-center justify-between px-3 py-2 border rounded-lg bg-white dark:bg-slate-700 text-left transition-colors"
       :class="[
         error
           ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
           : 'border-gray-300 dark:border-slate-600 focus:ring-indigo-500',
-        disabled ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-slate-800' : 'cursor-pointer hover:border-gray-400 dark:hover:border-slate-500'
+        disabled
+          ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-slate-800'
+          : 'cursor-pointer hover:border-gray-400 dark:hover:border-slate-500'
       ]"
       :disabled="disabled"
       :aria-expanded="isOpen"
       :aria-haspopup="true"
       :aria-labelledby="label ? inputId : undefined"
       :aria-describedby="error ? `${inputId}-error` : undefined"
+      @click="toggleDropdown"
+      @keydown="handleKeydown"
     >
       <span
         class="flex-1 truncate"
-        :class="selectedLabel ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-slate-500'"
+        :class="
+          selectedLabel ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-slate-500'
+        "
       >
         {{ selectedLabel || placeholder }}
       </span>
-      <span class="material-icons text-gray-400 dark:text-slate-500 ml-2 transition-transform" :class="{ 'rotate-180': isOpen }">
+      <span
+        class="material-icons text-gray-400 dark:text-slate-500 ml-2 transition-transform"
+        :class="{ 'rotate-180': isOpen }"
+      >
         expand_more
       </span>
     </button>
@@ -83,8 +90,6 @@
             v-for="(option, index) in filteredOptions"
             :key="getOptionValue(option)"
             type="button"
-            @click="selectOption(option)"
-            @mouseenter="highlightedIndex = index"
             class="w-full px-4 py-2 text-left text-sm transition-colors flex items-center justify-between"
             :class="[
               index === highlightedIndex
@@ -94,9 +99,13 @@
             ]"
             role="option"
             :aria-selected="isSelected(option)"
+            @click="selectOption(option)"
+            @mouseenter="highlightedIndex = index"
           >
             <span class="truncate">{{ getOptionLabel(option) }}</span>
-            <span v-if="isSelected(option)" class="material-icons text-indigo-500 text-lg ml-2">check</span>
+            <span v-if="isSelected(option)" class="material-icons text-indigo-500 text-lg ml-2"
+              >check</span
+            >
           </button>
         </div>
       </div>
@@ -215,21 +224,21 @@ const selectedLabel = computed(() => {
 })
 
 // Methods
-const getOptionValue = (option) => {
+const getOptionValue = option => {
   if (typeof option === 'object' && option !== null) {
     return option[props.valueKey]
   }
   return option
 }
 
-const getOptionLabel = (option) => {
+const getOptionLabel = option => {
   if (typeof option === 'object' && option !== null) {
     return option[props.labelKey]
   }
   return String(option)
 }
 
-const isSelected = (option) => {
+const isSelected = option => {
   const optionValue = getOptionValue(option)
   const currentValue = props.returnObject ? getOptionValue(props.modelValue) : props.modelValue
   return optionValue === currentValue
@@ -255,14 +264,14 @@ const closeDropdown = () => {
   buttonRef.value?.focus()
 }
 
-const selectOption = (option) => {
+const selectOption = option => {
   const value = props.returnObject ? option : getOptionValue(option)
   emit('update:modelValue', value)
   emit('change', value)
   closeDropdown()
 }
 
-const handleKeydown = (event) => {
+const handleKeydown = event => {
   if (props.disabled) return
 
   switch (event.key) {
@@ -280,7 +289,10 @@ const handleKeydown = (event) => {
       if (!isOpen.value) {
         toggleDropdown()
       } else {
-        highlightedIndex.value = Math.min(highlightedIndex.value + 1, filteredOptions.value.length - 1)
+        highlightedIndex.value = Math.min(
+          highlightedIndex.value + 1,
+          filteredOptions.value.length - 1
+        )
       }
       break
     case 'ArrowUp':
@@ -303,7 +315,7 @@ const handleKeydown = (event) => {
   }
 }
 
-const handleSearchKeydown = (event) => {
+const handleSearchKeydown = event => {
   switch (event.key) {
     case 'Enter':
       event.preventDefault()
@@ -313,7 +325,10 @@ const handleSearchKeydown = (event) => {
       break
     case 'ArrowDown':
       event.preventDefault()
-      highlightedIndex.value = Math.min(highlightedIndex.value + 1, filteredOptions.value.length - 1)
+      highlightedIndex.value = Math.min(
+        highlightedIndex.value + 1,
+        filteredOptions.value.length - 1
+      )
       break
     case 'ArrowUp':
       event.preventDefault()
@@ -327,7 +342,7 @@ const handleSearchKeydown = (event) => {
 }
 
 // Click outside handler
-const handleClickOutside = (event) => {
+const handleClickOutside = event => {
   if (containerRef.value && !containerRef.value.contains(event.target)) {
     closeDropdown()
   }

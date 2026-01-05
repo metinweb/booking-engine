@@ -12,34 +12,29 @@
 
     <!-- Toggle Button -->
     <button
+      :id="inputId"
       type="button"
       role="switch"
-      :id="inputId"
       :aria-checked="modelValue"
       :aria-label="label"
       :disabled="disabled"
-      @click="toggle"
-      @keydown.space.prevent="toggle"
-      @keydown.enter.prevent="toggle"
       class="relative inline-flex shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
       :class="[
         sizeClasses.button,
-        modelValue
-          ? activeColor
-          : 'bg-gray-300 dark:bg-slate-600',
+        modelValue ? activeColor : 'bg-gray-300 dark:bg-slate-600',
         disabled
           ? 'opacity-50 cursor-not-allowed'
           : 'focus:ring-indigo-500 dark:focus:ring-offset-slate-900'
       ]"
+      @click="toggle"
+      @keydown.space.prevent="toggle"
+      @keydown.enter.prevent="toggle"
     >
       <span class="sr-only">{{ label }}</span>
       <span
         class="pointer-events-none inline-block rounded-full bg-white shadow transform ring-0 transition duration-200 ease-in-out"
-        :class="[
-          sizeClasses.dot,
-          modelValue ? sizeClasses.dotTranslate : 'translate-x-0'
-        ]"
-      />
+        :class="[sizeClasses.dot, modelValue ? sizeClasses.dotTranslate : 'translate-x-0']"
+      ></span>
     </button>
 
     <!-- Label (Right) -->
@@ -78,7 +73,7 @@ const props = defineProps({
   labelPosition: {
     type: String,
     default: 'right', // 'left' | 'right'
-    validator: (v) => ['left', 'right'].includes(v)
+    validator: v => ['left', 'right'].includes(v)
   },
   description: {
     type: String,
@@ -91,7 +86,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md', // 'sm' | 'md' | 'lg'
-    validator: (v) => ['sm', 'md', 'lg'].includes(v)
+    validator: v => ['sm', 'md', 'lg'].includes(v)
   },
   color: {
     type: String,

@@ -21,7 +21,7 @@
       />
 
       <!-- Page Content -->
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ Component, route }">
         <Transition
           enter-active-class="transition ease-out duration-200"
           enter-from-class="opacity-0 transform translate-y-4"
@@ -31,7 +31,7 @@
           leave-to-class="opacity-0 transform -translate-y-4"
           mode="out-in"
         >
-          <component :is="Component" />
+          <component :is="Component" :key="route.path" />
         </Transition>
       </router-view>
     </div>

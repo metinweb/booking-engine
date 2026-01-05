@@ -13,9 +13,7 @@ const files = fs.readdirSync(localesDir)
 files.forEach(file => {
   if (file.endsWith('.json')) {
     const lang = file.replace('.json', '')
-    locales[lang] = JSON.parse(
-      fs.readFileSync(path.join(localesDir, file), 'utf-8')
-    )
+    locales[lang] = JSON.parse(fs.readFileSync(path.join(localesDir, file), 'utf-8'))
   }
 })
 
@@ -30,15 +28,14 @@ export const t = (key, lang = 'tr') => {
 // i18n Middleware
 export const i18nMiddleware = (req, res, next) => {
   // Get language from header, query or default to 'tr'
-  const lang = req.headers['accept-language']?.split(',')[0]?.split('-')[0] ||
-    req.query.lang ||
-    'tr'
+  const lang =
+    req.headers['accept-language']?.split(',')[0]?.split('-')[0] || req.query.lang || 'tr'
 
   // Validate and set language
   req.lang = supportedLanguages.includes(lang) ? lang : 'tr'
 
   // Add translate helper to request
-  req.t = (key) => t(key, req.lang)
+  req.t = key => t(key, req.lang)
 
   next()
 }

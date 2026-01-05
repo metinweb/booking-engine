@@ -11,10 +11,10 @@
       <div
         v-if="modelValue"
         class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-        @click.self="handleOverlayClick"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="titleId"
+        @click.self="handleOverlayClick"
       >
         <Transition
           enter-active-class="transition ease-out duration-200"
@@ -33,33 +33,40 @@
             @keydown="handleTabKey"
           >
             <!-- Header -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
-              <h3
-                :id="titleId"
-                class="text-lg font-semibold text-gray-900 dark:text-white"
-              >
+            <div
+              class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700"
+            >
+              <h3 :id="titleId" class="text-lg font-semibold text-gray-900 dark:text-white">
                 {{ title }}
               </h3>
               <button
                 ref="closeButtonRef"
-                @click="close"
                 class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 aria-label="Kapat"
+                @click="close"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
 
             <!-- Body -->
             <div class="p-4 max-h-[calc(100vh-200px)] overflow-y-auto" :class="contentClass">
-              <slot />
+              <slot></slot>
             </div>
 
             <!-- Footer -->
-            <div v-if="$slots.footer" class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-slate-700">
-              <slot name="footer" />
+            <div
+              v-if="$slots.footer"
+              class="flex items-center justify-end gap-2 p-4 border-t border-gray-200 dark:border-slate-700"
+            >
+              <slot name="footer"></slot>
             </div>
           </div>
         </Transition>
@@ -83,7 +90,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg', 'xl'].includes(value)
+    validator: value => ['sm', 'md', 'lg', 'xl'].includes(value)
   },
   closeOnOverlay: {
     type: Boolean,
@@ -163,8 +170,8 @@ const focusFirstElement = () => {
   const focusable = getFocusableElements()
 
   // Try to find an input or textarea first
-  const inputElement = focusable.find(el =>
-    el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'
+  const inputElement = focusable.find(
+    el => el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'
   )
 
   if (inputElement) {
@@ -175,7 +182,7 @@ const focusFirstElement = () => {
 }
 
 // Handle tab key for focus trap
-const handleTabKey = (event) => {
+const handleTabKey = event => {
   if (!props.trapFocus || event.key !== 'Tab') return
 
   const focusable = getFocusableElements()
@@ -209,40 +216,44 @@ const onAfterEnter = () => {
 }
 
 // ESC key handler
-const handleKeydown = (e) => {
+const handleKeydown = e => {
   if (e.key === 'Escape' && props.closeOnEsc) {
     close()
   }
 }
 
 // Watch modelValue to manage focus and event listeners
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    // Store currently focused element
-    if (props.restoreFocus) {
-      previouslyFocusedElement.value = document.activeElement
+watch(
+  () => props.modelValue,
+  isOpen => {
+    if (isOpen) {
+      // Store currently focused element
+      if (props.restoreFocus) {
+        previouslyFocusedElement.value = document.activeElement
+      }
+
+      // Add keydown listener
+      document.addEventListener('keydown', handleKeydown)
+
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden'
+    } else {
+      // Remove keydown listener
+      document.removeEventListener('keydown', handleKeydown)
+
+      // Restore body scroll
+      document.body.style.overflow = ''
+
+      // Restore focus to previously focused element
+      if (props.restoreFocus && previouslyFocusedElement.value) {
+        nextTick(() => {
+          previouslyFocusedElement.value?.focus()
+        })
+      }
     }
-
-    // Add keydown listener
-    document.addEventListener('keydown', handleKeydown)
-
-    // Prevent body scroll
-    document.body.style.overflow = 'hidden'
-  } else {
-    // Remove keydown listener
-    document.removeEventListener('keydown', handleKeydown)
-
-    // Restore body scroll
-    document.body.style.overflow = ''
-
-    // Restore focus to previously focused element
-    if (props.restoreFocus && previouslyFocusedElement.value) {
-      nextTick(() => {
-        previouslyFocusedElement.value?.focus()
-      })
-    }
-  }
-}, { immediate: true })
+  },
+  { immediate: true }
+)
 
 // Cleanup on unmount
 onUnmounted(() => {

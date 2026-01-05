@@ -3,24 +3,32 @@ import * as stayService from './stay.service.js'
 import * as reportsService from './reports.service.js'
 import roomPlanRoutes from './roomPlan.routes.js'
 import {
-    pmsDualAuth,
-    pmsDualRequirePartnerOrAdmin,
-    pmsSetPartnerFromHotel
+  pmsDualAuth,
+  pmsDualRequirePartnerOrAdmin,
+  pmsSetPartnerFromHotel
 } from '../pms-settings/pmsAuth.middleware.js'
 
 const router = express.Router()
 
-const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel];
+const hotelMiddleware = [pmsDualAuth, pmsDualRequirePartnerOrAdmin, pmsSetPartnerFromHotel]
 
 // ===========================================
 // FRONT DESK ROUTES (Alias for compatibility)
 // ===========================================
 
 // Today's arrivals (alias for reports)
-router.get('/hotels/:hotelId/front-desk/arrivals', hotelMiddleware, reportsService.getArrivalsReport)
+router.get(
+  '/hotels/:hotelId/front-desk/arrivals',
+  hotelMiddleware,
+  reportsService.getArrivalsReport
+)
 
 // Today's departures (alias for reports)
-router.get('/hotels/:hotelId/front-desk/departures', hotelMiddleware, reportsService.getDeparturesReport)
+router.get(
+  '/hotels/:hotelId/front-desk/departures',
+  hotelMiddleware,
+  reportsService.getDeparturesReport
+)
 
 // In-house guests (alias for reports)
 router.get('/hotels/:hotelId/front-desk/in-house', hotelMiddleware, reportsService.getInHouseReport)
@@ -57,7 +65,11 @@ router.post('/hotels/:hotelId/stays/walk-in', hotelMiddleware, stayService.walkI
 router.post('/hotels/:hotelId/stays/check-in', hotelMiddleware, stayService.checkInFromBooking)
 
 // Check-in from pending stay (PMS reservation or auto-created from booking)
-router.patch('/hotels/:hotelId/stays/:stayId/check-in', hotelMiddleware, stayService.checkInFromStay)
+router.patch(
+  '/hotels/:hotelId/stays/:stayId/check-in',
+  hotelMiddleware,
+  stayService.checkInFromStay
+)
 
 // Check-out
 router.post('/hotels/:hotelId/stays/:stayId/check-out', hotelMiddleware, stayService.checkOut)
@@ -86,11 +98,19 @@ router.get('/hotels/:hotelId/reports/dashboard', hotelMiddleware, reportsService
 
 // Occupancy reports
 router.get('/hotels/:hotelId/reports/occupancy', hotelMiddleware, reportsService.getOccupancyReport)
-router.get('/hotels/:hotelId/reports/occupancy/room-types', hotelMiddleware, reportsService.getRoomTypeOccupancy)
+router.get(
+  '/hotels/:hotelId/reports/occupancy/room-types',
+  hotelMiddleware,
+  reportsService.getRoomTypeOccupancy
+)
 
 // Arrival/Departure reports
 router.get('/hotels/:hotelId/reports/arrivals', hotelMiddleware, reportsService.getArrivalsReport)
-router.get('/hotels/:hotelId/reports/departures', hotelMiddleware, reportsService.getDeparturesReport)
+router.get(
+  '/hotels/:hotelId/reports/departures',
+  hotelMiddleware,
+  reportsService.getDeparturesReport
+)
 router.get('/hotels/:hotelId/reports/in-house', hotelMiddleware, reportsService.getInHouseReport)
 
 // Financial reports
@@ -98,11 +118,23 @@ router.get('/hotels/:hotelId/reports/revenue', hotelMiddleware, reportsService.g
 router.get('/hotels/:hotelId/reports/shifts', hotelMiddleware, reportsService.getShiftReport)
 
 // Housekeeping report
-router.get('/hotels/:hotelId/reports/housekeeping', hotelMiddleware, reportsService.getHousekeepingReport)
+router.get(
+  '/hotels/:hotelId/reports/housekeeping',
+  hotelMiddleware,
+  reportsService.getHousekeepingReport
+)
 
 // Guest reports
-router.get('/hotels/:hotelId/reports/guests/nationality', hotelMiddleware, reportsService.getGuestNationalityReport)
-router.get('/hotels/:hotelId/reports/guests/vip', hotelMiddleware, reportsService.getVipGuestsReport)
+router.get(
+  '/hotels/:hotelId/reports/guests/nationality',
+  hotelMiddleware,
+  reportsService.getGuestNationalityReport
+)
+router.get(
+  '/hotels/:hotelId/reports/guests/vip',
+  hotelMiddleware,
+  reportsService.getVipGuestsReport
+)
 
 // ===========================================
 // ROOM PLAN ROUTES

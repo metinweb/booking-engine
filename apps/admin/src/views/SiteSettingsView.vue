@@ -7,11 +7,13 @@
           <button
             v-for="tab in tabs"
             :key="tab.id"
-            @click="activeTab = tab.id"
             class="px-6 py-4 text-sm font-medium transition-colors border-b-2"
-            :class="activeTab === tab.id
-              ? 'border-purple-600 text-purple-600 dark:text-purple-400'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-slate-400 dark:hover:text-slate-300'"
+            :class="
+              activeTab === tab.id
+                ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-slate-400 dark:hover:text-slate-300'
+            "
+            @click="activeTab = tab.id"
           >
             <span class="flex items-center">
               <span class="material-icons text-lg mr-2">{{ tab.icon }}</span>
@@ -33,49 +35,37 @@
         <div v-show="activeTab === 'setup'">
           <SetupTab
             :settings="settings?.setup"
+            :saving="saving"
             @save="handleSetupSave"
             @request-ssl="handleSslRequest"
-            :saving="saving"
           />
         </div>
 
         <!-- General Tab -->
         <div v-show="activeTab === 'general'">
-          <GeneralTab
-            :settings="settings?.general"
-            @save="handleGeneralSave"
-            :saving="saving"
-          />
+          <GeneralTab :settings="settings?.general" :saving="saving" @save="handleGeneralSave" />
         </div>
 
         <!-- Homepage Tab -->
         <div v-show="activeTab === 'homepage'">
           <HomepageTab
             :settings="settings?.homepage"
+            :saving="saving"
             @save="handleHomepageSave"
             @add-slider="handleAddSlider"
             @update-slider="handleUpdateSlider"
             @delete-slider="handleDeleteSlider"
-            :saving="saving"
           />
         </div>
 
         <!-- Contact Tab -->
         <div v-show="activeTab === 'contact'">
-          <ContactTab
-            :settings="settings?.contact"
-            @save="handleContactSave"
-            :saving="saving"
-          />
+          <ContactTab :settings="settings?.contact" :saving="saving" @save="handleContactSave" />
         </div>
 
         <!-- Tracking Tab -->
         <div v-show="activeTab === 'tracking'">
-          <TrackingTab
-            :settings="settings?.tracking"
-            @save="handleTrackingSave"
-            :saving="saving"
-          />
+          <TrackingTab :settings="settings?.tracking" :saving="saving" @save="handleTrackingSave" />
         </div>
       </div>
     </div>
@@ -125,8 +115,8 @@ const fetchSettings = async () => {
 }
 
 // React to partner changes - reload settings when partner is switched
-const { currentPartner, hasPartner } = usePartnerContext({
-  onPartnerChange: (partner) => {
+usePartnerContext({
+  onPartnerChange: partner => {
     if (partner) {
       fetchSettings()
     }
@@ -135,7 +125,7 @@ const { currentPartner, hasPartner } = usePartnerContext({
 })
 
 // Setup handlers
-const handleSetupSave = async (data) => {
+const handleSetupSave = async data => {
   saving.value = true
   try {
     const response = await siteSettingsService.updateSetup(data)
@@ -173,7 +163,7 @@ const handleSslRequest = async ({ type, formData }) => {
 }
 
 // General handlers
-const handleGeneralSave = async (data) => {
+const handleGeneralSave = async data => {
   saving.value = true
   try {
     const response = await siteSettingsService.updateGeneral(data)
@@ -189,7 +179,7 @@ const handleGeneralSave = async (data) => {
 }
 
 // Homepage handlers
-const handleHomepageSave = async (data) => {
+const handleHomepageSave = async data => {
   saving.value = true
   try {
     const response = await siteSettingsService.updateHomepage(data)
@@ -204,7 +194,7 @@ const handleHomepageSave = async (data) => {
   }
 }
 
-const handleAddSlider = async (data) => {
+const handleAddSlider = async data => {
   saving.value = true
   try {
     const response = await siteSettingsService.addSliderItem(data)
@@ -234,7 +224,7 @@ const handleUpdateSlider = async ({ sliderId, data }) => {
   }
 }
 
-const handleDeleteSlider = async (sliderId) => {
+const handleDeleteSlider = async sliderId => {
   saving.value = true
   try {
     const response = await siteSettingsService.deleteSliderItem(sliderId)
@@ -250,7 +240,7 @@ const handleDeleteSlider = async (sliderId) => {
 }
 
 // Contact handlers
-const handleContactSave = async (data) => {
+const handleContactSave = async data => {
   saving.value = true
   try {
     const response = await siteSettingsService.updateContact(data)
@@ -266,7 +256,7 @@ const handleContactSave = async (data) => {
 }
 
 // Tracking handlers
-const handleTrackingSave = async (data) => {
+const handleTrackingSave = async data => {
   saving.value = true
   try {
     const response = await siteSettingsService.updateTracking(data)
@@ -280,5 +270,4 @@ const handleTrackingSave = async (data) => {
     saving.value = false
   }
 }
-
 </script>

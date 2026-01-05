@@ -1,4 +1,4 @@
-import { ref, computed, watch, reactive } from 'vue'
+import { computed, reactive } from 'vue'
 import { useDebounce } from './useDebounce'
 
 /**
@@ -70,7 +70,7 @@ export function useFilters(initialFilters = {}, options = {}) {
   }
 
   // Tek filtreyi temizle
-  const clearFilter = (key) => {
+  const clearFilter = key => {
     if (key in defaultFilters) {
       setFilter(key, defaultFilters[key])
     } else {
@@ -121,7 +121,7 @@ export function useFilters(initialFilters = {}, options = {}) {
   })
 
   // URL query string'den yükle
-  const fromQueryString = (queryString) => {
+  const fromQueryString = queryString => {
     const params = new URLSearchParams(queryString)
     for (const key of Object.keys(filters)) {
       if (params.has(key)) {
@@ -137,7 +137,7 @@ export function useFilters(initialFilters = {}, options = {}) {
   }
 
   // Filtre preset'i uygula
-  const applyPreset = (preset) => {
+  const applyPreset = preset => {
     for (const [key, value] of Object.entries(preset)) {
       if (key in filters) {
         filters[key] = value

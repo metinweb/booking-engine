@@ -2,7 +2,9 @@
   <div class="p-6">
     <!-- Header -->
     <div class="flex items-center gap-3 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+      <div
+        class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"
+      >
         <span class="material-icons text-2xl text-emerald-600 dark:text-emerald-400">payments</span>
       </div>
       <div>
@@ -34,15 +36,21 @@
           <p class="text-sm text-gray-500 dark:text-slate-400">Dolu Oda</p>
         </div>
         <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center">
-          <p class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ formatCurrency(summary.roomCharges) }}</p>
+          <p class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">
+            {{ formatCurrency(summary.roomCharges) }}
+          </p>
           <p class="text-sm text-gray-500 dark:text-slate-400">Oda Ucreti</p>
         </div>
         <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
-          <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(summary.extras) }}</p>
+          <p class="text-3xl font-bold text-blue-600 dark:text-blue-400">
+            {{ formatCurrency(summary.extras) }}
+          </p>
           <p class="text-sm text-gray-500 dark:text-slate-400">Ekstralar</p>
         </div>
         <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 text-center">
-          <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">{{ formatCurrency(summary.total) }}</p>
+          <p class="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+            {{ formatCurrency(summary.total) }}
+          </p>
           <p class="text-sm text-gray-500 dark:text-slate-400">Toplam</p>
         </div>
       </div>
@@ -62,8 +70,8 @@
               Minibar, hasar veya diger ekstra ucretler icin onay bekleniyor
             </p>
             <button
-              @click="showExtrasModal = true"
               class="mt-2 text-sm font-medium text-amber-700 dark:text-amber-300 hover:underline"
+              @click="showExtrasModal = true"
             >
               Ekstralari Incele
             </button>
@@ -72,27 +80,41 @@
       </div>
 
       <!-- Charges Table -->
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+      >
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead class="bg-gray-50 dark:bg-slate-700/50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   Oda
                 </th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   Misafir
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   Oda Ucreti
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   Ekstralar
                 </th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   Toplam
                 </th>
-                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
+                <th
+                  class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider"
+                >
                   Durum
                 </th>
               </tr>
@@ -105,14 +127,18 @@
                 :class="{ 'bg-amber-50/50 dark:bg-amber-900/10': charge.hasPendingExtras }"
               >
                 <td class="px-4 py-3">
-                  <span class="font-medium text-gray-900 dark:text-white">{{ charge.roomNumber }}</span>
+                  <span class="font-medium text-gray-900 dark:text-white">{{
+                    charge.roomNumber
+                  }}</span>
                 </td>
                 <td class="px-4 py-3">
                   <p class="text-gray-900 dark:text-white">{{ charge.guestName }}</p>
                   <p class="text-xs text-gray-500 dark:text-slate-400">{{ charge.roomType }}</p>
                 </td>
                 <td class="px-4 py-3 text-right">
-                  <span class="text-gray-900 dark:text-white">{{ formatCurrency(charge.roomRate) }}</span>
+                  <span class="text-gray-900 dark:text-white">{{
+                    formatCurrency(charge.roomRate)
+                  }}</span>
                 </td>
                 <td class="px-4 py-3 text-right">
                   <span v-if="charge.extras > 0" class="text-blue-600 dark:text-blue-400">
@@ -162,9 +188,9 @@
       <!-- Post All Button -->
       <div v-if="charges.length > 0 && !allPosted" class="mt-4 flex justify-center">
         <button
-          @click="postAllCharges"
           :disabled="posting || pendingExtras.length > 0"
           class="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-medium rounded-xl transition-colors"
+          @click="postAllCharges"
         >
           <span v-if="posting" class="material-icons animate-spin">refresh</span>
           <span v-else class="material-icons">bolt</span>
@@ -180,24 +206,22 @@
           <template v-if="charges.length > 0">
             {{ postedCount }} / {{ charges.length }} oda ucreti yansitildi
           </template>
-          <template v-else>
-            Islem yapilacak ucret yok
-          </template>
+          <template v-else> Islem yapilacak ucret yok </template>
         </p>
 
         <div class="flex items-center gap-3">
           <button
-            @click="emit('back')"
             class="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            @click="emit('back')"
           >
             <span class="material-icons">arrow_back</span>
             Geri
           </button>
 
           <button
-            @click="handleContinue"
             :disabled="loading || completing || (charges.length > 0 && !allPosted)"
             class="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-medium rounded-lg transition-colors"
+            @click="handleContinue"
           >
             <span v-if="completing" class="material-icons animate-spin">refresh</span>
             {{ completing ? 'Kaydediliyor...' : 'Devam Et' }}
@@ -222,12 +246,18 @@
           class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
           @click.self="showExtrasModal = false"
         >
-          <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-hidden">
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Onay Bekleyen Ekstralar</h3>
+          <div
+            class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] overflow-hidden"
+          >
+            <div
+              class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700"
+            >
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Onay Bekleyen Ekstralar
+              </h3>
               <button
-                @click="showExtrasModal = false"
                 class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg"
+                @click="showExtrasModal = false"
               >
                 <span class="material-icons">close</span>
               </button>
@@ -246,17 +276,19 @@
                     {{ formatCurrency(extra.amount) }}
                   </span>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">{{ extra.description }}</p>
+                <p class="text-sm text-gray-500 dark:text-slate-400 mb-3">
+                  {{ extra.description }}
+                </p>
                 <div class="flex items-center gap-2">
                   <button
-                    @click="approveExtra(extra)"
                     class="flex-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    @click="approveExtra(extra)"
                   >
                     Onayla
                   </button>
                   <button
-                    @click="rejectExtra(extra)"
                     class="flex-1 px-3 py-1.5 bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition-colors"
+                    @click="rejectExtra(extra)"
                   >
                     Reddet
                   </button>
@@ -317,17 +349,19 @@ const allPosted = computed(() => {
 })
 
 const pendingExtras = computed(() => {
-  return charges.value.filter(c => c.hasPendingExtras).map(c => ({
-    stayId: c.stayId,
-    roomNumber: c.roomNumber,
-    guestName: c.guestName,
-    description: c.pendingExtraDescription || 'Ekstra ucret',
-    amount: c.pendingExtraAmount || 0
-  }))
+  return charges.value
+    .filter(c => c.hasPendingExtras)
+    .map(c => ({
+      stayId: c.stayId,
+      roomNumber: c.roomNumber,
+      guestName: c.guestName,
+      description: c.pendingExtraDescription || 'Ekstra ucret',
+      amount: c.pendingExtraAmount || 0
+    }))
 })
 
 // Methods
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return nightAuditService.formatCurrency(amount)
 }
 
@@ -406,7 +440,7 @@ const postAllCharges = async () => {
   }
 }
 
-const approveExtra = (extra) => {
+const approveExtra = extra => {
   // Find and update the charge
   const charge = charges.value.find(c => c.stayId === extra.stayId)
   if (charge) {
@@ -419,7 +453,7 @@ const approveExtra = (extra) => {
   toast.success('Ekstra onaylandi')
 }
 
-const rejectExtra = (extra) => {
+const rejectExtra = extra => {
   // Find and update the charge
   const charge = charges.value.find(c => c.stayId === extra.stayId)
   if (charge) {

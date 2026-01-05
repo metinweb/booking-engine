@@ -258,7 +258,10 @@ export const getAgencyUsers = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -280,10 +283,7 @@ export const getAgencyUsers = asyncHandler(async (req, res) => {
   // Pagination
   const skip = (page - 1) * limit
   const total = await User.countDocuments(filter)
-  const users = await User.find(filter)
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(parseInt(limit))
+  const users = await User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit))
 
   res.json({
     success: true,
@@ -311,7 +311,10 @@ export const createAgencyUser = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -344,7 +347,10 @@ export const updateAgencyUser = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -384,7 +390,10 @@ export const deleteAgencyUser = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -416,7 +425,10 @@ export const approveAgency = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -449,7 +461,10 @@ export const uploadDocument = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -459,7 +474,10 @@ export const uploadDocument = asyncHandler(async (req, res) => {
 
   const { documentType } = req.body
 
-  if (!documentType || !['license', 'tax_certificate', 'contract', 'other'].includes(documentType)) {
+  if (
+    !documentType ||
+    !['license', 'tax_certificate', 'contract', 'other'].includes(documentType)
+  ) {
     throw new BadRequestError('INVALID_DOCUMENT_TYPE')
   }
 
@@ -489,7 +507,10 @@ export const deleteDocument = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -520,7 +541,10 @@ export const serveDocument = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 
@@ -544,7 +568,10 @@ export const suspendAgency = asyncHandler(async (req, res) => {
   }
 
   // Check ownership for partner users
-  if (req.user.accountType === 'partner' && agency.partner.toString() !== req.user.accountId.toString()) {
+  if (
+    req.user.accountType === 'partner' &&
+    agency.partner.toString() !== req.user.accountId.toString()
+  ) {
     throw new NotFoundError('AGENCY_NOT_FOUND')
   }
 

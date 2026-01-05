@@ -31,11 +31,36 @@ export const REPORT_CATEGORIES = [
     icon: 'analytics',
     color: 'blue',
     reports: [
-      { type: REPORT_TYPES.OCCUPANCY, label: 'Doluluk Raporu', icon: 'hotel', description: 'Gunluk doluluk oranlari ve oda durumlari' },
-      { type: REPORT_TYPES.ARRIVALS, label: 'Giris Raporu', icon: 'login', description: 'Bugunku ve gelecek girisler' },
-      { type: REPORT_TYPES.DEPARTURES, label: 'Cikis Raporu', icon: 'logout', description: 'Bugunku ve gelecek cikislar' },
-      { type: REPORT_TYPES.IN_HOUSE, label: 'Konaklayan Misafirler', icon: 'people', description: 'Su an otelde bulunan misafirler' },
-      { type: REPORT_TYPES.HOUSEKEEPING, label: 'Housekeeping Raporu', icon: 'cleaning_services', description: 'Oda temizlik durumlari' }
+      {
+        type: REPORT_TYPES.OCCUPANCY,
+        label: 'Doluluk Raporu',
+        icon: 'hotel',
+        description: 'Gunluk doluluk oranlari ve oda durumlari'
+      },
+      {
+        type: REPORT_TYPES.ARRIVALS,
+        label: 'Giris Raporu',
+        icon: 'login',
+        description: 'Bugunku ve gelecek girisler'
+      },
+      {
+        type: REPORT_TYPES.DEPARTURES,
+        label: 'Cikis Raporu',
+        icon: 'logout',
+        description: 'Bugunku ve gelecek cikislar'
+      },
+      {
+        type: REPORT_TYPES.IN_HOUSE,
+        label: 'Konaklayan Misafirler',
+        icon: 'people',
+        description: 'Su an otelde bulunan misafirler'
+      },
+      {
+        type: REPORT_TYPES.HOUSEKEEPING,
+        label: 'Housekeeping Raporu',
+        icon: 'cleaning_services',
+        description: 'Oda temizlik durumlari'
+      }
     ]
   },
   {
@@ -44,8 +69,18 @@ export const REPORT_CATEGORIES = [
     icon: 'payments',
     color: 'green',
     reports: [
-      { type: REPORT_TYPES.REVENUE, label: 'Gelir Raporu', icon: 'trending_up', description: 'Gelir ve odeme analizleri' },
-      { type: REPORT_TYPES.SHIFTS, label: 'Vardiya Raporu', icon: 'schedule', description: 'Kasa vardiya raporlari' }
+      {
+        type: REPORT_TYPES.REVENUE,
+        label: 'Gelir Raporu',
+        icon: 'trending_up',
+        description: 'Gelir ve odeme analizleri'
+      },
+      {
+        type: REPORT_TYPES.SHIFTS,
+        label: 'Vardiya Raporu',
+        icon: 'schedule',
+        description: 'Kasa vardiya raporlari'
+      }
     ]
   },
   {
@@ -54,8 +89,18 @@ export const REPORT_CATEGORIES = [
     icon: 'person',
     color: 'purple',
     reports: [
-      { type: REPORT_TYPES.NATIONALITY, label: 'Ulke Bazli Rapor', icon: 'public', description: 'Misafirlerin ulkelere gore dagilimi' },
-      { type: REPORT_TYPES.VIP_GUESTS, label: 'VIP Misafirler', icon: 'workspace_premium', description: 'VIP misafir listesi ve istatistikleri' }
+      {
+        type: REPORT_TYPES.NATIONALITY,
+        label: 'Ulke Bazli Rapor',
+        icon: 'public',
+        description: 'Misafirlerin ulkelere gore dagilimi'
+      },
+      {
+        type: REPORT_TYPES.VIP_GUESTS,
+        label: 'VIP Misafirler',
+        icon: 'workspace_premium',
+        description: 'VIP misafir listesi ve istatistikleri'
+      }
     ]
   }
 ]
@@ -67,7 +112,7 @@ export const REPORT_CATEGORIES = [
 /**
  * Get dashboard summary report
  */
-export const getDashboardReport = async (hotelId) => {
+export const getDashboardReport = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/dashboard`)
   return response.data
 }
@@ -89,7 +134,9 @@ export const getOccupancyReport = async (hotelId, params = {}) => {
  */
 export const getRoomTypeOccupancy = async (hotelId, date = null) => {
   const params = date ? { date } : {}
-  const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/occupancy/room-types`, { params })
+  const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/occupancy/room-types`, {
+    params
+  })
   return response.data
 }
 
@@ -116,7 +163,7 @@ export const getDeparturesReport = async (hotelId, params = {}) => {
 /**
  * Get in-house guests report
  */
-export const getInHouseReport = async (hotelId) => {
+export const getInHouseReport = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/in-house`)
   return response.data
 }
@@ -148,7 +195,7 @@ export const getShiftReport = async (hotelId, params = {}) => {
 /**
  * Get housekeeping report
  */
-export const getHousekeepingReport = async (hotelId) => {
+export const getHousekeepingReport = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/housekeeping`)
   return response.data
 }
@@ -161,14 +208,16 @@ export const getHousekeepingReport = async (hotelId) => {
  * Get nationality report
  */
 export const getNationalityReport = async (hotelId, params = {}) => {
-  const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/guests/nationality`, { params })
+  const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/guests/nationality`, {
+    params
+  })
   return response.data
 }
 
 /**
  * Get VIP guests report
  */
-export const getVipGuestsReport = async (hotelId) => {
+export const getVipGuestsReport = async hotelId => {
   const response = await pmsApiClient.get(`/pms/hotels/${hotelId}/reports/guests/vip`)
   return response.data
 }
@@ -190,14 +239,14 @@ export const formatCurrency = (amount, currency = 'TRY') => {
 /**
  * Format percentage
  */
-export const formatPercentage = (value) => {
+export const formatPercentage = value => {
   return `%${parseFloat(value || 0).toFixed(1)}`
 }
 
 /**
  * Format date
  */
-export const formatDate = (date) => {
+export const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -209,7 +258,7 @@ export const formatDate = (date) => {
 /**
  * Get date range for common periods
  */
-export const getDateRange = (period) => {
+export const getDateRange = period => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 

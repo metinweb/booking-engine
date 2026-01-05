@@ -3,8 +3,8 @@
     <!-- Action Button -->
     <div class="flex justify-end">
       <button
-        @click="showAddModal = true"
         class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+        @click="showAddModal = true"
       >
         <span class="material-icons text-lg">person_add</span>
         Yeni Misafir
@@ -13,9 +13,13 @@
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center"
+          >
             <span class="material-icons text-blue-600 dark:text-blue-400">people</span>
           </div>
           <div>
@@ -24,10 +28,16 @@
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <span class="material-icons text-purple-600 dark:text-purple-400">workspace_premium</span>
+          <div
+            class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center"
+          >
+            <span class="material-icons text-purple-600 dark:text-purple-400"
+              >workspace_premium</span
+            >
           </div>
           <div>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.vipGuests }}</p>
@@ -35,9 +45,13 @@
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+          >
             <span class="material-icons text-green-600 dark:text-green-400">schedule</span>
           </div>
           <div>
@@ -46,23 +60,41 @@
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+      >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
+          >
             <span class="material-icons text-red-600 dark:text-red-400">block</span>
           </div>
           <div>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.blacklistedGuests }}</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+              {{ stats.blacklistedGuests }}
+            </p>
             <p class="text-xs text-gray-500 dark:text-slate-400">Kara Liste</p>
           </div>
         </div>
       </div>
-      <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 col-span-2 md:col-span-1">
-        <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">En Cok Harcayan</h4>
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 col-span-2 md:col-span-1"
+      >
+        <h4 class="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase mb-2">
+          En Cok Harcayan
+        </h4>
         <div v-if="stats.topSpenders?.length > 0" class="space-y-1">
-          <div v-for="(guest, i) in stats.topSpenders.slice(0, 3)" :key="i" class="flex justify-between text-sm">
-            <span class="text-gray-700 dark:text-gray-300 truncate">{{ guest.firstName }} {{ guest.lastName }}</span>
-            <span class="text-gray-900 dark:text-white font-medium">{{ formatCurrency(guest.statistics?.totalSpent) }}</span>
+          <div
+            v-for="(guest, i) in stats.topSpenders.slice(0, 3)"
+            :key="i"
+            class="flex justify-between text-sm"
+          >
+            <span class="text-gray-700 dark:text-gray-300 truncate"
+              >{{ guest.firstName }} {{ guest.lastName }}</span
+            >
+            <span class="text-gray-900 dark:text-white font-medium">{{
+              formatCurrency(guest.statistics?.totalSpent)
+            }}</span>
           </div>
         </div>
         <p v-else class="text-sm text-gray-400">-</p>
@@ -70,12 +102,16 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4"
+    >
       <div class="flex flex-wrap gap-4">
         <!-- Search -->
         <div class="flex-1 min-w-[200px]">
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400">search</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400"
+              >search</span
+            >
             <input
               v-model="filters.search"
               type="text"
@@ -89,8 +125,8 @@
         <div class="w-36">
           <select
             v-model="filters.vipLevel"
-            @change="fetchGuests"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            @change="fetchGuests"
           >
             <option value="all">Tum VIP</option>
             <option value="none">Standart</option>
@@ -103,8 +139,8 @@
         <div class="w-36">
           <select
             v-model="filters.isBlacklisted"
-            @change="fetchGuests"
             class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+            @change="fetchGuests"
           >
             <option value="">Tum Misafirler</option>
             <option value="false">Normal</option>
@@ -113,8 +149,8 @@
         </div>
         <!-- Reset -->
         <button
-          @click="resetFilters"
           class="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg"
+          @click="resetFilters"
         >
           <span class="material-icons">refresh</span>
         </button>
@@ -122,7 +158,9 @@
     </div>
 
     <!-- Guests Table -->
-    <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+    <div
+      class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+    >
       <div v-if="loading" class="p-8 text-center">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
         <p class="mt-2 text-gray-500 dark:text-slate-400">Yukleniyor...</p>
@@ -136,13 +174,41 @@
       <table v-else class="w-full">
         <thead class="bg-gray-50 dark:bg-slate-700/50">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Misafir</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Iletisim</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Kimlik</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">VIP</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Istatistik</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Son Konaklama</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase">Islemler</th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Misafir
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Iletisim
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Kimlik
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              VIP
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Istatistik
+            </th>
+            <th
+              class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Son Konaklama
+            </th>
+            <th
+              class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
+            >
+              Islemler
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
@@ -182,7 +248,9 @@
             <td class="px-4 py-3">
               <div>
                 <p class="text-sm text-gray-900 dark:text-white">{{ guest.idNumber || '-' }}</p>
-                <p class="text-xs text-gray-500 dark:text-slate-400">{{ getIdTypeLabel(guest.idType) }}</p>
+                <p class="text-xs text-gray-500 dark:text-slate-400">
+                  {{ getIdTypeLabel(guest.idType) }}
+                </p>
               </div>
             </td>
             <td class="px-4 py-3">
@@ -195,21 +263,27 @@
             </td>
             <td class="px-4 py-3">
               <div>
-                <p class="text-sm text-gray-900 dark:text-white">{{ guest.statistics?.totalStays || 0 }} konaklama</p>
-                <p class="text-xs text-gray-500 dark:text-slate-400">{{ formatCurrency(guest.statistics?.totalSpent) }}</p>
+                <p class="text-sm text-gray-900 dark:text-white">
+                  {{ guest.statistics?.totalStays || 0 }} konaklama
+                </p>
+                <p class="text-xs text-gray-500 dark:text-slate-400">
+                  {{ formatCurrency(guest.statistics?.totalSpent) }}
+                </p>
               </div>
             </td>
             <td class="px-4 py-3">
               <p class="text-sm text-gray-900 dark:text-white">
-                {{ guest.statistics?.lastStayDate ? formatDate(guest.statistics.lastStayDate) : '-' }}
+                {{
+                  guest.statistics?.lastStayDate ? formatDate(guest.statistics.lastStayDate) : '-'
+                }}
               </p>
             </td>
             <td class="px-4 py-3 text-right">
               <div class="flex items-center justify-end gap-1">
                 <button
-                  @click.stop="openDetail(guest)"
                   class="p-1.5 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded"
                   title="Detay"
+                  @click.stop="openDetail(guest)"
                 >
                   <span class="material-icons text-lg">visibility</span>
                 </button>
@@ -220,15 +294,18 @@
       </table>
 
       <!-- Pagination -->
-      <div v-if="pagination.totalPages > 1" class="px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+      <div
+        v-if="pagination.totalPages > 1"
+        class="px-4 py-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between"
+      >
         <p class="text-sm text-gray-500 dark:text-slate-400">
           Toplam {{ pagination.total }} misafir
         </p>
         <div class="flex items-center gap-2">
           <button
-            @click="changePage(pagination.page - 1)"
             :disabled="pagination.page === 1"
             class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-slate-700"
+            @click="changePage(pagination.page - 1)"
           >
             <span class="material-icons text-sm">chevron_left</span>
           </button>
@@ -236,9 +313,9 @@
             {{ pagination.page }} / {{ pagination.totalPages }}
           </span>
           <button
-            @click="changePage(pagination.page + 1)"
             :disabled="pagination.page === pagination.totalPages"
             class="px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-lg disabled:opacity-50 hover:bg-gray-50 dark:hover:bg-slate-700"
+            @click="changePage(pagination.page + 1)"
           >
             <span class="material-icons text-sm">chevron_right</span>
           </button>
@@ -247,15 +324,11 @@
     </div>
 
     <!-- Modals -->
-    <AddGuestModal
-      v-model="showAddModal"
-      :hotelId="hotelId"
-      @created="onGuestCreated"
-    />
+    <AddGuestModal v-model="showAddModal" :hotel-id="hotelId" @created="onGuestCreated" />
 
     <GuestDetailModal
       v-model="showDetailModal"
-      :hotelId="hotelId"
+      :hotel-id="hotelId"
       :guest="selectedGuest"
       @updated="onGuestUpdated"
     />
@@ -344,12 +417,12 @@ const fetchStats = async () => {
   }
 }
 
-const openDetail = (guest) => {
+const openDetail = guest => {
   selectedGuest.value = guest
   showDetailModal.value = true
 }
 
-const changePage = (page) => {
+const changePage = page => {
   pagination.value.page = page
   fetchGuests()
 }
@@ -374,27 +447,27 @@ const onGuestUpdated = () => {
   fetchStats()
 }
 
-const getInitials = (guest) => {
+const getInitials = guest => {
   const first = guest.firstName?.charAt(0) || ''
   const last = guest.lastName?.charAt(0) || ''
   return (first + last).toUpperCase()
 }
 
-const getVipLabel = (level) => {
+const getVipLabel = level => {
   return VIP_LEVEL_INFO[level]?.label || 'Standart'
 }
 
-const getVipClasses = (level) => {
+const getVipClasses = level => {
   const info = VIP_LEVEL_INFO[level]
   if (!info) return 'bg-gray-100 text-gray-600'
   return `${info.bgColor} ${info.textColor}`
 }
 
-const getIdTypeLabel = (type) => {
+const getIdTypeLabel = type => {
   return ID_TYPES.find(t => t.value === type)?.label || type || '-'
 }
 
-const formatDate = (date) => {
+const formatDate = date => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('tr-TR', {
     day: '2-digit',
@@ -403,19 +476,22 @@ const formatDate = (date) => {
   })
 }
 
-const formatCurrency = (amount) => {
+const formatCurrency = amount => {
   return new Intl.NumberFormat('tr-TR', {
     style: 'currency',
     currency: 'TRY'
   }).format(amount || 0)
 }
 
-watch(() => hotelId.value, () => {
-  if (hotelId.value) {
-    fetchGuests()
-    fetchStats()
+watch(
+  () => hotelId.value,
+  () => {
+    if (hotelId.value) {
+      fetchGuests()
+      fetchStats()
+    }
   }
-})
+)
 
 onMounted(() => {
   if (hotelId.value) {

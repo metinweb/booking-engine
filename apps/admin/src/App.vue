@@ -50,13 +50,13 @@ const initNotifications = async () => {
   authenticate(userId, 'User')
 
   // Listen for new notifications
-  on('notification:new', (data) => {
+  on('notification:new', data => {
     console.log('[App] Received notification:new event:', data)
     notificationStore.handleNewNotification(data.notification)
   })
 
   // Listen for notification count updates
-  on('notification:count', (data) => {
+  on('notification:count', data => {
     notificationStore.handleCountUpdate(data.count)
   })
 
@@ -68,16 +68,19 @@ onMounted(async () => {
   const { authStore, notificationStore } = await getStores()
 
   // Watch for auth changes (regular users only, PMS handled by PmsProvider)
-  watch(() => authStore.isAuthenticated, (isAuth) => {
-    if (isAuth) {
-      initNotifications()
-    } else {
-      // Clear notifications on logout (only if no PMS session)
-      if (!localStorage.getItem('pmsToken')) {
-        notificationStore.clearNotifications()
+  watch(
+    () => authStore.isAuthenticated,
+    isAuth => {
+      if (isAuth) {
+        initNotifications()
+      } else {
+        // Clear notifications on logout (only if no PMS session)
+        if (!localStorage.getItem('pmsToken')) {
+          notificationStore.clearNotifications()
+        }
       }
     }
-  })
+  )
 
   // Check if user is already authenticated on app load
   await authStore.checkAuth()
@@ -92,7 +95,9 @@ onMounted(async () => {
 
 <style>
 /* Remove default margins and ensure full height */
-html, body, #app {
+html,
+body,
+#app {
   height: 100%;
   margin: 0;
   padding: 0;

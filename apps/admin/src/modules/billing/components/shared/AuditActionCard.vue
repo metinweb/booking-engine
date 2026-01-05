@@ -7,8 +7,12 @@
       <div class="flex items-start justify-between gap-4">
         <!-- Avatar & Info -->
         <div class="flex items-start gap-3 min-w-0">
-          <div class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center flex-shrink-0">
-            <span v-if="avatarIcon" class="material-icons text-gray-600 dark:text-gray-400">{{ avatarIcon }}</span>
+          <div
+            class="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center flex-shrink-0"
+          >
+            <span v-if="avatarIcon" class="material-icons text-gray-600 dark:text-gray-400">{{
+              avatarIcon
+            }}</span>
             <span v-else class="text-lg font-medium text-gray-600 dark:text-gray-400">
               {{ initials }}
             </span>
@@ -24,10 +28,7 @@
 
         <!-- Status Badge -->
         <div v-if="status" class="flex-shrink-0">
-          <span
-            class="px-2 py-1 text-xs font-medium rounded-full"
-            :class="statusBadgeClass"
-          >
+          <span class="px-2 py-1 text-xs font-medium rounded-full" :class="statusBadgeClass">
             {{ status }}
           </span>
         </div>
@@ -37,15 +38,21 @@
       <slot name="info"></slot>
 
       <!-- Actions -->
-      <div v-if="$slots.actions && !selectedAction" class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+      <div
+        v-if="$slots.actions && !selectedAction"
+        class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-slate-700"
+      >
         <slot name="actions"></slot>
       </div>
 
       <!-- Undo Button -->
-      <div v-if="selectedAction" class="flex items-center justify-end mt-4 pt-4 border-t border-gray-100 dark:border-slate-700">
+      <div
+        v-if="selectedAction"
+        class="flex items-center justify-end mt-4 pt-4 border-t border-gray-100 dark:border-slate-700"
+      >
         <button
-          @click="$emit('undo')"
           class="flex items-center gap-1 px-3 py-1 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+          @click="$emit('undo')"
         >
           <span class="material-icons text-lg">undo</span>
           Geri Al
@@ -85,7 +92,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: 'default',
-    validator: (value) => ['default', 'danger', 'warning', 'success', 'muted'].includes(value)
+    validator: value => ['default', 'danger', 'warning', 'success', 'muted'].includes(value)
   }
 })
 
