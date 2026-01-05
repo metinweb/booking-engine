@@ -18,17 +18,27 @@
       </div>
 
       <!-- Login Form -->
-      <form @submit.prevent="handleLogin" class="space-y-6">
+      <form class="space-y-6" @submit.prevent="handleLogin">
         <div>
           <label for="email" class="form-label">{{ $t('auth.email') }}</label>
           <div class="relative">
-            <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+            <svg
+              class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+              />
             </svg>
             <input
-              type="email"
               id="email"
               v-model="email"
+              type="email"
               class="form-input pl-10"
               placeholder="example@company.com"
               required
@@ -42,15 +52,33 @@
         </div>
 
         <div>
-          <label for="password" class="form-label">{{ $t('auth.password') }}</label>
+          <div class="flex items-center justify-between">
+            <label for="password" class="form-label">{{ $t('auth.password') }}</label>
+            <RouterLink
+              to="/forgot-password"
+              class="text-sm text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
+            >
+              {{ $t('auth.forgotPassword') }}
+            </RouterLink>
+          </div>
           <div class="relative">
-            <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <svg
+              class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
             </svg>
             <input
-              type="password"
               id="password"
               v-model="password"
+              type="password"
               class="form-input pl-10"
               placeholder="••••••••"
               required
@@ -62,23 +90,43 @@
           </div>
         </div>
 
-
         <button
           type="submit"
           class="w-full btn-primary flex items-center justify-center"
           :disabled="loading"
         >
           <span v-if="loading" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             {{ $t('auth.signingIn') }}
           </span>
           <span v-else class="flex items-center">
             {{ $t('auth.login') }}
             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
+              />
             </svg>
           </span>
         </button>
@@ -88,7 +136,10 @@
       <div class="mt-6 text-center">
         <p class="text-sm text-gray-600 dark:text-slate-400">
           {{ $t('auth.dontHaveAccount') }}
-          <RouterLink to="/register" class="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
+          <RouterLink
+            to="/register"
+            class="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+          >
             {{ $t('auth.registerHere') }}
           </RouterLink>
         </p>
@@ -112,17 +163,27 @@
         </div>
       </div>
 
-      <form @submit.prevent="handle2FAVerification" class="space-y-6">
+      <form class="space-y-6" @submit.prevent="handle2FAVerification">
         <div>
           <label for="twoFactorCode" class="form-label">{{ $t('auth.verificationCode') }}</label>
           <div class="relative">
-            <svg class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            <svg
+              class="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
             </svg>
             <input
-              type="text"
               id="twoFactorCode"
               v-model="twoFactorCode"
+              type="text"
               class="form-input pl-10 text-center text-2xl tracking-widest"
               placeholder="000000"
               maxlength="6"
@@ -141,9 +202,25 @@
           :disabled="loading || twoFactorCode.length !== 6"
         >
           <span v-if="loading" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            <svg
+              class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             {{ $t('auth.verifying') }}
           </span>
@@ -152,11 +229,16 @@
 
         <button
           type="button"
-          @click="backToLogin"
           class="w-full text-sm text-gray-600 hover:text-gray-800 flex items-center justify-center"
+          @click="backToLogin"
         >
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
           </svg>
           {{ $t('auth.backToLogin') }}
         </button>
@@ -176,7 +258,6 @@ const authStore = useAuthStore()
 // Form state
 const email = ref('')
 const password = ref('')
-const rememberMe = ref(false)
 const loading = ref(false)
 const errorMessage = ref(null)
 const show2FAForm = ref(false)
@@ -190,8 +271,7 @@ const handleLogin = async () => {
   try {
     const result = await authStore.login({
       email: email.value,
-      password: password.value,
-      accountType: 'platform' // Admin panel is for platform admins only
+      password: password.value
     })
 
     if (result && result.requires2FA) {
@@ -209,7 +289,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login failed:', error)
-    
+
     // Display error message
     if (error.response?.data?.error) {
       errorMessage.value = error.response.data.error
@@ -242,7 +322,7 @@ const handle2FAVerification = async () => {
     }
   } catch (error) {
     console.error('2FA verification failed:', error)
-    
+
     // Display error message
     if (error.response?.data?.error) {
       errorMessage.value = error.response.data.error
@@ -251,7 +331,7 @@ const handle2FAVerification = async () => {
     } else {
       errorMessage.value = 'Verification failed. Please check the code and try again.'
     }
-    
+
     // Clear the code
     twoFactorCode.value = ''
   } finally {
@@ -260,7 +340,7 @@ const handle2FAVerification = async () => {
 }
 
 // Handle code input - only allow numbers
-const handleCodeInput = (event) => {
+const handleCodeInput = event => {
   const value = event.target.value.replace(/[^0-9]/g, '')
   twoFactorCode.value = value
 }

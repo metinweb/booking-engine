@@ -4,14 +4,22 @@
     :class="uiStore.sidebarExpanded ? 'w-56' : 'w-20'"
   >
     <!-- Logo / Module Icon Section -->
-    <div class="flex items-center px-4 mb-6" :class="uiStore.sidebarExpanded ? 'justify-between' : 'justify-center'">
+    <div
+      class="flex items-center px-4 mb-6"
+      :class="uiStore.sidebarExpanded ? 'justify-between' : 'justify-center'"
+    >
       <!-- Dynamic Module Icon -->
-      <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+      <div
+        class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center flex-shrink-0"
+      >
         <span class="material-icons text-white">{{ currentModuleIcon }}</span>
       </div>
 
       <!-- App Name (only when expanded) -->
-      <span v-if="uiStore.sidebarExpanded" class="text-lg font-semibold text-gray-800 dark:text-white ml-3 truncate">
+      <span
+        v-if="uiStore.sidebarExpanded"
+        class="text-lg font-semibold text-gray-800 dark:text-white ml-3 truncate"
+      >
         Booking
       </span>
     </div>
@@ -35,8 +43,11 @@
           :class="[
             uiStore.sidebarExpanded ? 'px-3 py-2.5' : 'p-3 justify-center',
             {
-              'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30': isActive(item.to),
-              'text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30': !isActive(item.to)
+              'text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30': isActive(
+                item.to
+              ),
+              'text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30':
+                !isActive(item.to)
             }
           ]"
           :title="!uiStore.sidebarExpanded ? item.label : ''"
@@ -61,15 +72,20 @@
     </nav>
 
     <!-- Bottom Navigation -->
-    <div class="flex flex-col space-y-1 mt-auto pt-4 px-3 border-t border-gray-200 dark:border-slate-700">
+    <div
+      class="flex flex-col space-y-1 mt-auto pt-4 px-3 border-t border-gray-200 dark:border-slate-700"
+    >
       <!-- Toggle Sidebar Button -->
       <button
-        @click="uiStore.toggleSidebarExpanded"
         class="flex items-center rounded-lg transition-colors duration-200 cursor-pointer text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30"
         :class="uiStore.sidebarExpanded ? 'px-3 py-2.5' : 'p-3 justify-center'"
         :title="uiStore.sidebarExpanded ? $t('nav.collapseSidebar') : $t('nav.expandSidebar')"
+        @click="uiStore.toggleSidebarExpanded"
       >
-        <span class="material-icons flex-shrink-0 transition-transform" :class="{ 'rotate-180': uiStore.sidebarExpanded }">
+        <span
+          class="material-icons flex-shrink-0 transition-transform"
+          :class="{ 'rotate-180': uiStore.sidebarExpanded }"
+        >
           chevron_right
         </span>
         <span v-if="uiStore.sidebarExpanded" class="ml-3 text-sm font-medium truncate">
@@ -81,10 +97,10 @@
       <button
         v-for="item in bottomNavItems"
         :key="item.name"
-        @click="handleBottomNav(item)"
         class="flex items-center rounded-lg transition-colors duration-200 cursor-pointer text-gray-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 group relative"
         :class="uiStore.sidebarExpanded ? 'px-3 py-2.5' : 'p-3 justify-center'"
         :title="!uiStore.sidebarExpanded ? item.label : ''"
+        @click="handleBottomNav(item)"
       >
         <span class="material-icons flex-shrink-0">{{ item.icon }}</span>
 
@@ -124,7 +140,7 @@ const { t } = useI18n()
 const emit = defineEmits(['navigate'])
 
 // Check if a route is active
-const isActive = (path) => {
+const isActive = path => {
   return route.path === path || route.path.startsWith(path + '/')
 }
 
@@ -159,42 +175,100 @@ const currentModuleIcon = computed(() => {
 })
 
 // Handle bottom nav button click
-const handleBottomNav = (item) => {
+const handleBottomNav = item => {
   item.action()
   emit('navigate')
 }
 
+// Check if user has permission for a module
+const hasPermission = module => {
+  // Platform admins and admin role users have all permissions
+  if (authStore.isPlatformAdmin || authStore.user?.role === 'admin') {
+    return true
+  }
+
+  // Check user's permissions array
+  const permissions = authStore.user?.permissions || []
+  const permission = permissions.find(p => p.module === module)
+  return permission?.actions?.view === true
+}
+
 // Main section - always visible
 const mainSection = computed(() => {
-  const items = [
-    { name: 'dashboard', to: '/dashboard', icon: 'dashboard', label: t('nav.dashboard') }
-  ]
+  const items = []
+
+  // Dashboard is always visible if user has permission
+  if (hasPermission('dashboard')) {
+    items.push({ name: 'dashboard', to: '/dashboard', icon: 'dashboard', label: t('nav.dashboard') })
+  }
 
   // Determine effective view mode:
   // - Platform admin with no partner selected -> Admin view
   // - Platform admin with partner selected -> Partner view (as if logged in as that partner)
   // - Partner user -> Partner view
   const isAdminView = authStore.isPlatformAdmin && !partnerStore.hasSelectedPartner
-  const isPartnerView = authStore.accountType === 'partner' || (authStore.isPlatformAdmin && partnerStore.hasSelectedPartner)
+  const isPartnerView =
+    authStore.accountType === 'partner' ||
+    (authStore.isPlatformAdmin && partnerStore.hasSelectedPartner)
 
   // Admin-only menu items (visible only when in admin view)
   if (isAdminView) {
     items.push({ name: 'partners', to: '/partners', icon: 'business', label: t('nav.partners') })
-    items.push({ name: 'region-management', to: '/admin/regions', icon: 'map', label: t('nav.regionManagement') })
-    items.push({ name: 'hotel-base', to: '/admin/hotel-base', icon: 'domain', label: t('nav.hotelBase') })
-    items.push({ name: 'audit-logs', to: '/admin/audit-logs', icon: 'history', label: t('nav.auditLogs') })
-    items.push({ name: 'platform-settings', to: '/admin/platform-settings', icon: 'settings', label: t('nav.platformSettings') })
+    items.push({
+      name: 'region-management',
+      to: '/admin/regions',
+      icon: 'map',
+      label: t('nav.regionManagement')
+    })
+    items.push({
+      name: 'hotel-base',
+      to: '/admin/hotel-base',
+      icon: 'domain',
+      label: t('nav.hotelBase')
+    })
+    items.push({
+      name: 'audit-logs',
+      to: '/admin/audit-logs',
+      icon: 'history',
+      label: t('nav.auditLogs')
+    })
+    items.push({
+      name: 'platform-settings',
+      to: '/admin/platform-settings',
+      icon: 'settings',
+      label: t('nav.platformSettings')
+    })
   }
 
-  // Partner menu items (visible when in partner view)
+  // Partner menu items (visible when in partner view, filtered by permissions)
   if (isPartnerView) {
-    items.push({ name: 'agencies', to: '/agencies', icon: 'groups', label: t('nav.agencies') })
-    items.push({ name: 'site-management', to: '/site-management/settings', icon: 'language', label: t('nav.siteManagement') })
-    items.push({ name: 'hotels', to: '/hotels', icon: 'hotel', label: t('nav.hotels') })
-    items.push({ name: 'planning', to: '/planning', icon: 'event_note', label: t('nav.planning') })
-    items.push({ name: 'bookings', to: '/bookings', icon: 'book_online', label: t('nav.bookings') })
-    items.push({ name: 'pms', to: '/pms', icon: 'apartment', label: 'PMS' })
-    items.push({ name: 'developers', to: '/developers', icon: 'code', label: t('nav.developers') })
+    if (hasPermission('agencies')) {
+      items.push({ name: 'agencies', to: '/agencies', icon: 'groups', label: t('nav.agencies') })
+    }
+    if (hasPermission('settings')) {
+      items.push({ name: 'users', to: '/users', icon: 'people', label: t('nav.users') })
+      items.push({
+        name: 'site-management',
+        to: '/site-management/settings',
+        icon: 'language',
+        label: t('nav.siteManagement')
+      })
+    }
+    if (hasPermission('hotels')) {
+      items.push({ name: 'hotels', to: '/hotels', icon: 'hotel', label: t('nav.hotels') })
+    }
+    if (hasPermission('planning')) {
+      items.push({ name: 'planning', to: '/planning', icon: 'event_note', label: t('nav.planning') })
+    }
+    if (hasPermission('booking')) {
+      items.push({ name: 'bookings', to: '/bookings', icon: 'book_online', label: t('nav.bookings') })
+    }
+    if (hasPermission('pms')) {
+      items.push({ name: 'pms', to: '/pms', icon: 'apartment', label: 'PMS' })
+    }
+    if (hasPermission('settings')) {
+      items.push({ name: 'developers', to: '/developers', icon: 'code', label: t('nav.developers') })
+    }
   }
 
   return items

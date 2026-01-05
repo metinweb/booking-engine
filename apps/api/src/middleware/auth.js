@@ -104,12 +104,55 @@ export const protect = async (req, res, next) => {
   }
 }
 
-// Require admin role
+// Require admin role OR user with permissions
+// - Platform admins: always allowed
+// - Partner/Agency admins (role: 'admin'): always allowed
+// - Partner/Agency users (role: 'user') with permissions: allowed
+// Specific module/action permission checks should be done in service layer
 export const requireAdmin = (req, res, next) => {
-  if (!req.user.isAdmin()) {
-    throw new UnauthorizedError('FORBIDDEN')
+  // Platform admins always have full access
+  if (req.user.accountType === 'platform') {
+    return next()
   }
-  next()
+
+  // Admin role has full access
+  if (req.user.isAdmin && req.user.isAdmin()) {
+    return next()
+  }
+
+  // Users with permissions can access (specific checks done in services)
+  const permissions = req.user.permissions || []
+  if (permissions.length > 0) {
+    return next()
+  }
+
+  throw new UnauthorizedError('FORBIDDEN')
+}
+
+// Require specific module permission
+// Usage: requirePermission('hotels', 'view') or requirePermission('hotels') for any action
+export const requirePermission = (module, action = 'view') => {
+  return (req, res, next) => {
+    // Platform admins always have full access
+    if (req.user.accountType === 'platform') {
+      return next()
+    }
+
+    // Admin role has full access
+    if (req.user.isAdmin && req.user.isAdmin()) {
+      return next()
+    }
+
+    // Check specific module permission
+    const permissions = req.user.permissions || []
+    const modulePermission = permissions.find(p => p.module === module)
+
+    if (modulePermission && modulePermission.actions && modulePermission.actions[action]) {
+      return next()
+    }
+
+    throw new UnauthorizedError('PERMISSION_DENIED')
+  }
 }
 
 // Require specific account type
@@ -130,12 +173,12 @@ export const requirePlatformAdmin = (req, res, next) => {
   next()
 }
 
-// Require partner admin or platform admin
+// Require partner user or platform admin
 export const requirePartnerOrAdmin = (req, res, next) => {
   const isPlatformAdmin = req.user.accountType === 'platform'
-  const isPartnerAdmin = req.user.accountType === 'partner' && req.user.isAdmin()
+  const isPartnerUser = req.user.accountType === 'partner'
 
-  if (!isPlatformAdmin && !isPartnerAdmin) {
+  if (!isPlatformAdmin && !isPartnerUser) {
     throw new UnauthorizedError('FORBIDDEN')
   }
 

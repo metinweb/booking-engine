@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 import config from '../../config/index.js'
 import User from '../user/user.model.js'
 import Partner from '../partner/partner.model.js'
@@ -6,6 +7,13 @@ import Agency from '../agency/agency.model.js'
 import { UnauthorizedError, BadRequestError } from '../../core/errors.js'
 import { asyncHandler } from '../../helpers/asyncHandler.js'
 import { verify2FAToken } from '../../helpers/twoFactor.js'
+import { sendPasswordResetEmail } from '../../helpers/mail.js'
+import {
+  checkLoginLockout,
+  recordFailedLogin,
+  clearFailedLogins
+} from '../../middleware/rateLimiter.js'
+import logger from '../../core/logger.js'
 
 // Generate JWT tokens
 export const generateTokens = (user, account) => {
@@ -20,116 +28,84 @@ export const generateTokens = (user, account) => {
     expiresIn: config.jwt.accessExpire
   })
 
-  const refreshToken = jwt.sign(
-    { userId: user._id },
-    config.jwt.secret,
-    { expiresIn: config.jwt.refreshExpire }
-  )
+  const refreshToken = jwt.sign({ userId: user._id }, config.jwt.secret, {
+    expiresIn: config.jwt.refreshExpire
+  })
 
   return { accessToken, refreshToken }
 }
 
 // Login
 export const login = asyncHandler(async (req, res) => {
-  const { email, password, accountType, twoFactorToken } = req.body
+  const { email, password, twoFactorToken } = req.body
 
   // Validation
   if (!email || !password) {
     throw new BadRequestError('REQUIRED_EMAIL_PASSWORD')
   }
 
-  if (!accountType) {
-    throw new BadRequestError('REQUIRED_ACCOUNT_TYPE')
-  }
-
-  // Platform admin login
-  if (accountType === 'platform') {
-    const user = await User.findOne({
-      email: email.toLowerCase(),
-      accountType: 'platform'
-    }).select('+password +twoFactorSecret')
-
-    if (!user || !await user.comparePassword(password)) {
-      throw new UnauthorizedError('INVALID_CREDENTIALS')
-    }
-
-    if (!user.isActive()) {
-      throw new UnauthorizedError('ACCOUNT_INACTIVE')
-    }
-
-    // Check 2FA if enabled
-    if (user.twoFactorEnabled) {
-      if (!twoFactorToken) {
-        return res.json({
-          success: false,
-          requiresTwoFactor: true,
-          message: req.t('REQUIRED_2FA_TOKEN')
-        })
-      }
-
-      const isValid = verify2FAToken(twoFactorToken, user.twoFactorSecret)
-      if (!isValid) {
-        throw new UnauthorizedError('INVALID_2FA_TOKEN')
-      }
-    }
-
-    // Update last login
-    await user.updateLastLogin()
-
-    // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user, { _id: user.accountId })
-
-    return res.json({
-      success: true,
-      message: req.t('LOGIN_SUCCESS'),
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          accountType: user.accountType
-        },
-        accessToken,
-        refreshToken,
-        forcePasswordChange: user.forcePasswordChange || false
-      }
+  // Check if account is locked out due to too many failed attempts
+  const lockoutStatus = checkLoginLockout(email)
+  if (lockoutStatus.isLocked) {
+    logger.warn(`Login attempt for locked account: ${email}`)
+    return res.status(429).json({
+      success: false,
+      error: 'ACCOUNT_LOCKED',
+      message: req.t
+        ? req.t('ACCOUNT_LOCKED_TRY_LATER', { minutes: lockoutStatus.lockoutMinutes })
+        : `Account temporarily locked. Try again in ${lockoutStatus.lockoutMinutes} minutes.`,
+      lockoutMinutes: lockoutStatus.lockoutMinutes
     })
   }
 
-  // Partner/Agency login
-  // accountId gerekli (partner veya agency ID'si)
-  const { accountId } = req.body
-
-  if (!accountId) {
-    throw new BadRequestError('REQUIRED_ACCOUNT_ID')
-  }
-
-  // User bul
+  // Find user by email only - auto-detect accountType
   const user = await User.findOne({
-    email: email.toLowerCase(),
-    accountId,
-    accountType
+    email: email.toLowerCase()
   }).select('+password +twoFactorSecret')
 
-  if (!user || !await user.comparePassword(password)) {
-    throw new UnauthorizedError('INVALID_CREDENTIALS')
+  if (!user || !(await user.comparePassword(password))) {
+    // Record failed attempt
+    const failedResult = recordFailedLogin(email)
+    logger.warn(`Failed login attempt for ${email}. Remaining attempts: ${failedResult.remainingAttempts}`)
+
+    if (failedResult.isLocked) {
+      return res.status(429).json({
+        success: false,
+        error: 'ACCOUNT_LOCKED',
+        message: req.t
+          ? req.t('ACCOUNT_LOCKED_TRY_LATER', { minutes: failedResult.lockoutMinutes })
+          : `Too many failed attempts. Account locked for ${failedResult.lockoutMinutes} minutes.`,
+        lockoutMinutes: failedResult.lockoutMinutes
+      })
+    }
+
+    return res.status(401).json({
+      success: false,
+      error: 'INVALID_CREDENTIALS',
+      message: req.t ? req.t('INVALID_CREDENTIALS') : 'Invalid email or password',
+      remainingAttempts: failedResult.remainingAttempts
+    })
   }
 
   if (!user.isActive()) {
     throw new UnauthorizedError('ACCOUNT_INACTIVE')
   }
 
-  // Account kontrolü
-  let account
-  if (accountType === 'partner') {
-    account = await Partner.findById(accountId)
-  } else if (accountType === 'agency') {
-    account = await Agency.findById(accountId).populate('partner')
-  }
+  // Get accountType from user record
+  const accountType = user.accountType
 
-  if (!account || !account.isActive()) {
-    throw new UnauthorizedError('ACCOUNT_INACTIVE')
+  // For partner/agency users, verify the account is active
+  let account = { _id: user.accountId }
+  if (accountType === 'partner') {
+    account = await Partner.findById(user.accountId)
+    if (!account || !account.isActive()) {
+      throw new UnauthorizedError('ACCOUNT_INACTIVE')
+    }
+  } else if (accountType === 'agency') {
+    account = await Agency.findById(user.accountId).populate('partner')
+    if (!account || !account.isActive()) {
+      throw new UnauthorizedError('ACCOUNT_INACTIVE')
+    }
   }
 
   // Check 2FA if enabled
@@ -148,11 +124,16 @@ export const login = asyncHandler(async (req, res) => {
     }
   }
 
+  // Clear failed login attempts on successful login
+  clearFailedLogins(email)
+
   // Update last login
   await user.updateLastLogin()
 
   // Generate tokens
   const { accessToken, refreshToken } = generateTokens(user, account)
+
+  logger.info(`Successful ${accountType} login for ${email}`)
 
   res.json({
     success: true,
@@ -164,7 +145,8 @@ export const login = asyncHandler(async (req, res) => {
         email: user.email,
         role: user.role,
         accountType: user.accountType,
-        accountId: user.accountId
+        accountId: user.accountId,
+        permissions: user.permissions || []
       },
       account: {
         id: account._id,
@@ -211,7 +193,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
       success: true,
       data: { accessToken }
     })
-  } catch (error) {
+  } catch {
     throw new UnauthorizedError('INVALID_TOKEN')
   }
 })
@@ -227,7 +209,7 @@ export const logout = asyncHandler(async (req, res) => {
   })
 })
 
-// Get current user
+// Get current user - returns user info with permissions
 export const me = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)
 
@@ -249,16 +231,20 @@ export const me = asyncHandler(async (req, res) => {
         phone: user.phone,
         role: user.role,
         accountType: user.accountType,
+        accountId: user.accountId,
+        permissions: user.permissions || [],
         language: user.language,
         isOnline: user.isOnline,
         lastLogin: user.lastLogin,
         notificationPreferences: user.notificationPreferences
       },
-      account: account ? {
-        id: account._id,
-        name: user.accountType === 'partner' ? account.companyName : account.name,
-        type: user.accountType
-      } : null
+      account: account
+        ? {
+            id: account._id,
+            name: user.accountType === 'partner' ? account.companyName : account.name,
+            type: user.accountType
+          }
+        : null
     }
   })
 })
@@ -385,5 +371,113 @@ export const register = asyncHandler(async (req, res) => {
         status: partner.status
       }
     }
+  })
+})
+
+// Forgot Password - Request password reset
+export const forgotPassword = asyncHandler(async (req, res) => {
+  const { email, accountType } = req.body
+
+  if (!email) {
+    throw new BadRequestError('REQUIRED_EMAIL')
+  }
+
+  // Build query based on account type
+  const query = { email: email.toLowerCase() }
+  if (accountType) {
+    query.accountType = accountType
+  }
+
+  // Find user by email
+  const user = await User.findOne(query).select('+passwordResetToken +passwordResetExpires')
+
+  // Always return success to prevent email enumeration
+  if (!user) {
+    logger.info(`Password reset requested for non-existent email: ${email}`)
+    return res.json({
+      success: true,
+      message: req.t ? req.t('PASSWORD_RESET_EMAIL_SENT') : 'If the email exists, a password reset link has been sent.'
+    })
+  }
+
+  // Check if user is active
+  if (!user.isActive()) {
+    logger.warn(`Password reset requested for inactive account: ${email}`)
+    return res.json({
+      success: true,
+      message: req.t ? req.t('PASSWORD_RESET_EMAIL_SENT') : 'If the email exists, a password reset link has been sent.'
+    })
+  }
+
+  // Generate reset token
+  const resetToken = user.generatePasswordResetToken()
+  await user.save({ validateBeforeSave: false })
+
+  // Build reset URL (frontend URL)
+  const frontendUrl = config.frontendUrl || 'http://localhost:5173'
+  const resetUrl = `${frontendUrl}/reset-password/${resetToken}`
+
+  try {
+    // Send password reset email
+    await sendPasswordResetEmail({
+      to: user.email,
+      name: user.name,
+      resetUrl,
+      partnerId: user.accountType === 'partner' ? user.accountId : null
+    })
+
+    logger.info(`Password reset email sent to: ${email}`)
+
+    res.json({
+      success: true,
+      message: req.t ? req.t('PASSWORD_RESET_EMAIL_SENT') : 'Password reset email has been sent.'
+    })
+  } catch (error) {
+    // Clear reset token if email fails
+    user.clearPasswordResetToken()
+    await user.save({ validateBeforeSave: false })
+
+    logger.error(`Failed to send password reset email to ${email}:`, error)
+    throw new BadRequestError('EMAIL_SEND_FAILED')
+  }
+})
+
+// Reset Password - Set new password using token
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { token, password } = req.body
+
+  if (!token || !password) {
+    throw new BadRequestError('REQUIRED_TOKEN_AND_PASSWORD')
+  }
+
+  // Validate password length
+  if (password.length < 12) {
+    throw new BadRequestError('PASSWORD_TOO_SHORT')
+  }
+
+  // Hash the token to compare with stored hash
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
+
+  // Find user with valid token
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() }
+  }).select('+passwordResetToken +passwordResetExpires')
+
+  if (!user) {
+    throw new BadRequestError('INVALID_OR_EXPIRED_TOKEN')
+  }
+
+  // Update password
+  user.password = password
+  user.forcePasswordChange = false
+  user.clearPasswordResetToken()
+  await user.save()
+
+  logger.info(`Password reset successfully for: ${user.email}`)
+
+  res.json({
+    success: true,
+    message: req.t ? req.t('PASSWORD_RESET_SUCCESS') : 'Password has been reset successfully. You can now login with your new password.'
   })
 })
