@@ -437,14 +437,17 @@
                         <span class="material-icons text-orange-500 text-lg">shield</span>
                         {{ $t('users.actions.reset2FA') }}
                       </button>
-                      <hr class="my-1 border-gray-200 dark:border-slate-700" />
-                      <button
-                        class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                        @click="handleDelete(user)"
-                      >
-                        <span class="material-icons text-lg">delete</span>
-                        {{ $t('common.delete') }}
-                      </button>
+                      <!-- Cannot delete yourself -->
+                      <template v-if="user._id !== authStore.user?.id">
+                        <hr class="my-1 border-gray-200 dark:border-slate-700" />
+                        <button
+                          class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
+                          @click="handleDelete(user)"
+                        >
+                          <span class="material-icons text-lg">delete</span>
+                          {{ $t('common.delete') }}
+                        </button>
+                      </template>
                     </div>
                   </div>
                 </div>
