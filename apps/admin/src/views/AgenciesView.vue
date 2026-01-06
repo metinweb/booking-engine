@@ -66,7 +66,7 @@
               {{ $t('agencies.totalCredit') }}
             </p>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
-              {{ formatCurrency(stats.totalCredit) }}
+              {{ formatCurrency(stats.totalCredit, 'TRY', locale) }}
             </p>
           </div>
           <div
@@ -292,12 +292,13 @@
               <span class="font-medium text-gray-900 dark:text-white">{{
                 formatCurrency(
                   getAvailableCredit(row.creditLimit),
-                  row.creditLimit.currency
+                  row.creditLimit.currency,
+                  locale
                 )
               }}</span>
               <span class="text-gray-400 dark:text-slate-500">
                 /
-                {{ formatCurrency(row.creditLimit.amount, row.creditLimit.currency) }}</span
+                {{ formatCurrency(row.creditLimit.amount, row.creditLimit.currency, locale) }}</span
               >
             </div>
           </div>
@@ -311,7 +312,7 @@
           <div class="flex items-center gap-1">
             <span class="material-icons text-sm text-green-500">percent</span>
             <span class="font-medium text-gray-900 dark:text-white"
-              >{{ row.commission?.default || 10 }}%</span
+              >{{ row.commission?.default || DEFAULT_COMMISSION_RATES.hotel }}%</span
             >
           </div>
         </template>
@@ -713,9 +714,9 @@
                   </FormField>
                   <FormField :label="$t('agencies.currency')">
                     <select v-model="form.creditLimit.currency" class="form-input">
-                      <option value="TRY">TRY - Türk Lirası</option>
-                      <option value="USD">USD - Dolar</option>
-                      <option value="EUR">EUR - Euro</option>
+                      <option v-for="currency in CURRENCIES" :key="currency" :value="currency">
+                        {{ currency }}
+                      </option>
                     </select>
                   </FormField>
                 </div>
@@ -1059,10 +1060,16 @@ import { useI18n } from 'vue-i18n'
 import { usePartnerContext } from '@/composables/usePartnerContext'
 import { getCountryName } from '@/data/countries'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { useStatusHelpers } from '@/composables/useStatusHelpers'
+import { formatCurrency, formatPhone, getInitials } from '@/utils/formatters'
+import { CREDIT_LOW_THRESHOLD, DEFAULT_COMMISSION_RATES, CURRENCIES, PAYMENT_METHODS } from '@/constants'
 
 const { t, locale } = useI18n()
 const toast = useToast()
 const router = useRouter()
+
+// Status helpers from centralized composable
+const { getStatusClass, getStatusDotClass, getStatusLabel, getCreditBarClass, getCreditPercentage, getAvailableCredit, getCreditFilterLabel } = useStatusHelpers()
 
 // Async action composables
 const { isLoading: loading, execute: executeFetch } = useAsyncAction({ showSuccessToast: false })
@@ -1133,7 +1140,7 @@ const filteredAgencies = computed(() => {
       result = result.filter(a => {
         if (!a.creditLimit?.enabled) return false
         const available = a.creditLimit.amount - (a.creditLimit.used || 0)
-        return available < a.creditLimit.amount * 0.2
+        return available < a.creditLimit.amount * CREDIT_LOW_THRESHOLD
       })
     }
   }
@@ -1178,7 +1185,7 @@ const getDefaultForm = () => ({
   taxNumber: '',
   status: 'active',
   address: { street: '', city: '', country: '', postalCode: '' },
-  commission: { mode: 'net', hotel: 10, tour: 10, transfer: 10 },
+  commission: { mode: 'net', hotel: DEFAULT_COMMISSION_RATES.hotel, tour: DEFAULT_COMMISSION_RATES.tour, transfer: DEFAULT_COMMISSION_RATES.transfer },
   creditLimit: { enabled: false, amount: 0, currency: 'TRY', used: 0 },
   salesRestrictions: { allowedCountries: [], allowedHotels: [], blockedHotels: [] },
   paymentSettings: {
@@ -1204,79 +1211,7 @@ const validateForm = () => {
 }
 
 // Helper functions
-const getInitials = name => {
-  if (!name) return '?'
-  return name
-    .split(' ')
-    .map(w => w[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
-}
-
 const getCountryLabel = code => getCountryName(code, locale.value)
-
-const getStatusLabel = status => {
-  const labels = {
-    active: t('common.active'),
-    inactive: t('common.inactive'),
-    pending: t('common.pending'),
-    suspended: t('agencies.suspended')
-  }
-  return labels[status] || status
-}
-
-const getCreditFilterLabel = filter => {
-  const labels = {
-    enabled: t('agencies.creditEnabled'),
-    disabled: t('agencies.creditDisabled'),
-    low: t('agencies.lowCredit')
-  }
-  return labels[filter] || filter
-}
-
-const getStatusClass = status => {
-  const classes = {
-    active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400',
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-    suspended: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-  }
-  return classes[status] || classes.inactive
-}
-
-const getStatusDotClass = status => {
-  const classes = {
-    active: 'bg-green-500',
-    inactive: 'bg-gray-500',
-    pending: 'bg-yellow-500',
-    suspended: 'bg-red-500'
-  }
-  return classes[status] || 'bg-gray-500'
-}
-
-const getCreditBarClass = creditLimit => {
-  const percentage = getCreditPercentage(creditLimit)
-  if (percentage < 20) return 'bg-red-500'
-  if (percentage < 50) return 'bg-yellow-500'
-  return 'bg-green-500'
-}
-
-const getCreditPercentage = creditLimit => {
-  if (!creditLimit?.amount) return 0
-  const available = creditLimit.amount - (creditLimit.used || 0)
-  return Math.round((available / creditLimit.amount) * 100)
-}
-
-const getAvailableCredit = creditLimit => creditLimit.amount - (creditLimit.used || 0)
-
-const formatCurrency = (amount, currency = 'TRY') => {
-  return new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0
-  }).format(amount)
-}
 
 // Filter functions
 const debouncedSearch = () => {
@@ -1378,9 +1313,9 @@ const openEditModal = agency => {
     },
     commission: {
       mode: agency.commission?.mode || 'net',
-      hotel: agency.commission?.hotel ?? 10,
-      tour: agency.commission?.tour ?? 10,
-      transfer: agency.commission?.transfer ?? 10
+      hotel: agency.commission?.hotel ?? DEFAULT_COMMISSION_RATES.hotel,
+      tour: agency.commission?.tour ?? DEFAULT_COMMISSION_RATES.tour,
+      transfer: agency.commission?.transfer ?? DEFAULT_COMMISSION_RATES.transfer
     },
     creditLimit: {
       enabled: agency.creditLimit?.enabled || false,

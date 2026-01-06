@@ -177,7 +177,7 @@
                     class="w-1.5 h-1.5 rounded-full mr-1"
                     :class="getStatusDotClass(row.status)"
                   ></span>
-                  {{ getStatusLabel(row.status) }}
+                  {{ getBookingStatusLabel(row.status) }}
                 </span>
                 <!-- Expiry warning for drafts -->
                 <span
@@ -544,6 +544,10 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { usePartnerContext } from '@/composables/usePartnerContext'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { useStatusHelpers } from '@/composables/useStatusHelpers'
+import { useDateFiltering } from '@/composables/useDateFiltering'
+import { formatPrice, formatDateTime, formatDaysUntil, getCountryFlag } from '@/utils/formatters'
+import { DEFAULT_PAGE_SIZE, BOOKING_STATUSES } from '@/constants'
 import bookingService from '@/services/bookingService'
 import ModuleNavigation from '@/components/common/ModuleNavigation.vue'
 import Modal from '@/components/common/Modal.vue'
@@ -554,6 +558,9 @@ import PaymentStatusBadge from '@/components/booking/payment/PaymentStatusBadge.
 
 const { locale, t } = useI18n()
 const router = useRouter()
+
+// Status helpers
+const { getStatusClass, getStatusDotClass, getBookingStatusLabel } = useStatusHelpers()
 
 // Navigation items
 const navItems = computed(() => [
@@ -596,7 +603,7 @@ const stats = ref({})
 const currentPage = ref(1)
 const totalPages = ref(1)
 const totalItems = ref(0)
-const perPage = 15
+const perPage = DEFAULT_PAGE_SIZE
 const openMenuId = ref(null)
 const showDeleteModal = ref(false)
 const selectedBooking = ref(null)
@@ -944,93 +951,6 @@ const formatDate = date => {
     month: 'short',
     year: 'numeric'
   })
-}
-
-// Format date with time
-const formatDateTime = date => {
-  if (!date) return '-'
-  const d = new Date(date)
-  return d.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-// Format price
-const formatPrice = (amount, currency = 'TRY') => {
-  if (!amount && amount !== 0) return '-'
-  const formatter = new Intl.NumberFormat(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  })
-  return formatter.format(amount)
-}
-
-// Format days until
-const formatDaysUntil = date => {
-  if (!date) return '-'
-  const now = new Date()
-  const target = new Date(date)
-  const days = Math.ceil((target - now) / (1000 * 60 * 60 * 24))
-  if (days <= 0) return t('booking.expired')
-  return `${days} ${t('booking.days')}`
-}
-
-// Get status class
-const getStatusClass = status => {
-  const classes = {
-    draft: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-    pending: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
-    confirmed: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
-    completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-    cancelled: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
-    expired: 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300',
-    no_show: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
-  }
-  return classes[status] || classes.pending
-}
-
-// Get status dot class
-const getStatusDotClass = status => {
-  const classes = {
-    draft: 'bg-purple-500',
-    pending: 'bg-yellow-500',
-    confirmed: 'bg-green-500',
-    completed: 'bg-blue-500',
-    cancelled: 'bg-red-500',
-    expired: 'bg-gray-500',
-    no_show: 'bg-orange-500'
-  }
-  return classes[status] || classes.pending
-}
-
-// Get status label
-const getStatusLabel = status => {
-  const labels = {
-    draft: t('booking.status.draft'),
-    pending: t('booking.status.pending'),
-    confirmed: t('booking.status.confirmed'),
-    completed: t('booking.status.completed'),
-    cancelled: t('booking.status.cancelled'),
-    expired: t('booking.status.expired'),
-    no_show: t('booking.status.noShow')
-  }
-  return labels[status] || status
-}
-
-// Convert ISO country code to flag emoji
-const getCountryFlag = countryCode => {
-  if (!countryCode || countryCode.length !== 2) return ''
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0))
-  return String.fromCodePoint(...codePoints)
 }
 
 // Country names map
