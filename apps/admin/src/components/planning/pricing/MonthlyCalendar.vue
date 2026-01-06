@@ -1,124 +1,22 @@
 <template>
   <div class="monthly-calendar">
-    <!-- Month Navigation Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button
-          class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-          @click="previousMonth"
-        >
-          <span class="material-icons text-lg sm:text-2xl">chevron_left</span>
-        </button>
-        <h3
-          class="text-base sm:text-xl font-bold text-gray-800 dark:text-white min-w-[140px] sm:min-w-[200px] text-center"
-        >
-          {{ monthYearLabel }}
-        </h3>
-        <button
-          class="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-          @click="nextMonth"
-        >
-          <span class="material-icons text-lg sm:text-2xl">chevron_right</span>
-        </button>
-        <button
-          class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
-          @click="goToToday"
-        >
-          {{ $t('planning.pricing.today') }}
-        </button>
-
-        <!-- Current Month Seasons -->
-        <template v-if="currentSeasons.length > 0">
-          <span class="hidden sm:block w-px h-5 bg-gray-300 dark:bg-slate-600 mx-1"></span>
-          <div class="hidden sm:flex items-center gap-1">
-            <span
-              v-for="season in currentSeasons"
-              :key="season._id"
-              class="px-2 py-0.5 text-xs font-medium text-white rounded-full"
-              :style="{ backgroundColor: season.color || '#6366f1' }"
-              :title="getSeasonName(season)"
-            >
-              {{ season.code }}
-            </span>
-          </div>
-        </template>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-1">
-        <!-- Copy/Paste Buttons -->
-        <button
-          v-if="selectedCells.length > 0"
-          class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 transition-colors flex items-center gap-1 whitespace-nowrap"
-          :title="'Ctrl+C'"
-          @click="copyWeek"
-        >
-          <span class="material-icons text-sm">content_copy</span>
-          <span class="hidden sm:inline">{{ $t('planning.pricing.copyWeek') }}</span>
-        </button>
-        <button
-          v-if="copiedWeek"
-          class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-200 transition-colors flex items-center gap-1 whitespace-nowrap"
-          :title="'Ctrl+V'"
-          @click="pasteWeek"
-        >
-          <span class="material-icons text-sm">content_paste</span>
-          <span class="hidden sm:inline">{{ $t('planning.pricing.pasteWeek') }}</span>
-        </button>
-
-        <div
-          v-if="selectedCells.length > 0 || copiedWeek"
-          class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-slate-600 mx-0.5 sm:mx-1"
-        ></div>
-
-        <button
-          v-if="selectedCells.length > 0"
-          class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
-          @click="clearSelection"
-        >
-          <span class="material-icons text-sm align-middle mr-0.5 sm:mr-1">close</span>
-          <span class="hidden sm:inline">{{ $t('planning.pricing.clearSelection') }}</span> ({{
-            selectedCells.length
-          }})
-        </button>
-        <button
-          v-if="selectedCells.length > 0"
-          class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1 whitespace-nowrap"
-          @click="bulkEdit"
-        >
-          <span class="material-icons text-sm">edit</span>
-          <span class="hidden sm:inline">{{ $t('planning.pricing.bulkEdit') }}</span>
-        </button>
-
-        <div class="w-px h-5 sm:h-6 bg-gray-300 dark:bg-slate-600 mx-0.5 sm:mx-1"></div>
-
-        <!-- Inline Edit Mode Toggle -->
-        <button
-          class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg transition-colors flex items-center gap-1 whitespace-nowrap"
-          :class="
-            inlineEditMode
-              ? 'bg-green-600 text-white hover:bg-green-700'
-              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200'
-          "
-          @click="toggleInlineEditMode"
-        >
-          <span class="material-icons text-sm">{{ inlineEditMode ? 'save' : 'edit_note' }}</span>
-          <span class="hidden sm:inline">{{
-            inlineEditMode
-              ? $t('planning.pricing.saveInlineEdit')
-              : $t('planning.pricing.inlineEditMode')
-          }}</span>
-        </button>
-        <button
-          v-if="inlineEditMode"
-          class="px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1 whitespace-nowrap"
-          @click="cancelInlineEdit"
-        >
-          <span class="material-icons text-sm">close</span>
-          <span class="hidden sm:inline">{{ $t('common.cancel') }}</span>
-        </button>
-      </div>
-    </div>
+    <!-- Calendar Header - Month Navigation & Quick Actions -->
+    <CalendarHeader
+      :month-year-label="monthYearLabel"
+      :current-seasons="currentSeasons"
+      :selected-count="selectedCells.length"
+      :copied-week="copiedWeek"
+      :inline-edit-mode="inlineEditMode"
+      @previous-month="previousMonth"
+      @next-month="nextMonth"
+      @go-to-today="goToToday"
+      @copy-week="copyWeek"
+      @paste-week="pasteWeek"
+      @clear-selection="clearSelection"
+      @bulk-edit="bulkEdit"
+      @toggle-inline-edit="toggleInlineEditMode"
+      @cancel-inline-edit="cancelInlineEdit"
+    />
 
     <!-- Inline Edit Mode Banner -->
     <div
@@ -206,161 +104,19 @@
     </div>
 
     <!-- Compact Allotment Status Bar -->
-    <div
-      v-if="
-        allotmentStats.totalCells > 0 &&
-        (allotmentStats.critical > 0 || allotmentStats.low > 0 || allotmentStats.stopSale > 0)
-      "
-      class="mb-3 flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-700/50 rounded-lg border border-gray-200 dark:border-slate-600"
-    >
-      <div class="flex items-center gap-4 text-xs">
-        <!-- Critical -->
-        <span
-          v-if="allotmentStats.critical > 0"
-          class="flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full cursor-pointer hover:bg-red-200 transition-colors"
-          @click="highlightAllotmentLevel('critical')"
-        >
-          <span class="material-icons text-sm">error</span>
-          <span class="font-bold">{{ allotmentStats.critical }}</span>
-          <span class="hidden sm:inline">stok yok</span>
-        </span>
-        <!-- Low -->
-        <span
-          v-if="allotmentStats.low > 0"
-          class="flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full cursor-pointer hover:bg-amber-200 transition-colors"
-          @click="highlightAllotmentLevel('low')"
-        >
-          <span class="material-icons text-sm">warning</span>
-          <span class="font-bold">{{ allotmentStats.low }}</span>
-          <span class="hidden sm:inline">düşük</span>
-        </span>
-        <!-- Stop Sale -->
-        <span
-          v-if="allotmentStats.stopSale > 0"
-          class="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full cursor-pointer hover:bg-purple-200 transition-colors"
-          @click="highlightAllotmentLevel('stopSale')"
-        >
-          <span class="material-icons text-sm">block</span>
-          <span class="font-bold">{{ allotmentStats.stopSale }}</span>
-          <span class="hidden sm:inline">stop</span>
-        </span>
-        <!-- Normal -->
-        <span class="flex items-center gap-1 text-green-600 dark:text-green-400">
-          <span class="material-icons text-sm">check_circle</span>
-          <span class="font-bold">{{ allotmentStats.normal }}</span>
-          <span class="hidden sm:inline">normal</span>
-        </span>
-      </div>
-      <!-- Details Link -->
-      <button
-        class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 hover:underline flex items-center gap-1"
-        @click="showAllotmentModal = true"
-      >
-        <span class="material-icons text-sm">info</span>
-        Detaylar
-      </button>
-    </div>
+    <CalendarAllotmentBar
+      :stats="allotmentStats"
+      @highlight-level="highlightAllotmentLevel"
+      @show-details="showAllotmentModal = true"
+    />
 
     <!-- Allotment Details Modal -->
-    <Teleport to="body">
-      <Transition name="fade">
-        <div
-          v-if="showAllotmentModal"
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-          @click.self="showAllotmentModal = false"
-        >
-          <div
-            class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
-          >
-            <!-- Modal Header -->
-            <div
-              class="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between"
-            >
-              <div class="flex items-center gap-3">
-                <span class="material-icons">monitoring</span>
-                <h3 class="text-lg font-bold">Kontenjan Durumu</h3>
-              </div>
-              <button
-                class="p-1 hover:bg-white/20 rounded-lg transition-colors"
-                @click="showAllotmentModal = false"
-              >
-                <span class="material-icons">close</span>
-              </button>
-            </div>
-            <!-- Modal Content -->
-            <div class="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
-              <!-- Summary Cards -->
-              <div class="grid grid-cols-4 gap-3 mb-6">
-                <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl text-center">
-                  <div class="text-2xl font-bold text-red-600">{{ allotmentStats.critical }}</div>
-                  <div class="text-xs text-red-500">Stok Yok (0)</div>
-                </div>
-                <div class="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl text-center">
-                  <div class="text-2xl font-bold text-amber-600">{{ allotmentStats.low }}</div>
-                  <div class="text-xs text-amber-500">Düşük (1-3)</div>
-                </div>
-                <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl text-center">
-                  <div class="text-2xl font-bold text-green-600">{{ allotmentStats.normal }}</div>
-                  <div class="text-xs text-green-500">Normal (4+)</div>
-                </div>
-                <div class="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl text-center">
-                  <div class="text-2xl font-bold text-purple-600">
-                    {{ allotmentStats.stopSale }}
-                  </div>
-                  <div class="text-xs text-purple-500">Stop Sale</div>
-                </div>
-              </div>
-
-              <!-- Details List -->
-              <div v-if="allotmentDetails.length > 0" class="space-y-2">
-                <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                  Oda Bazlı Detay
-                </h4>
-                <div
-                  v-for="detail in allotmentDetails"
-                  :key="detail.key"
-                  class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
-                >
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-purple-600">{{ detail.roomCode }}</span>
-                    <span
-                      class="px-2 py-0.5 rounded text-xs font-medium"
-                      :class="getMealPlanBadgeClass(detail.mealPlanCode)"
-                    >
-                      {{ detail.mealPlanCode }}
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span
-                      v-if="detail.critical > 0"
-                      class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full"
-                    >
-                      {{ detail.critical }} stok yok
-                    </span>
-                    <span
-                      v-if="detail.low > 0"
-                      class="text-xs px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full"
-                    >
-                      {{ detail.low }} düşük
-                    </span>
-                    <span
-                      v-if="detail.stopSale > 0"
-                      class="text-xs px-2 py-0.5 bg-purple-100 text-purple-600 rounded-full"
-                    >
-                      {{ detail.stopSale }} stop
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="text-center py-8 text-gray-500">
-                <span class="material-icons text-4xl text-green-500 mb-2">check_circle</span>
-                <p>Tüm odalar normal stokta</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+    <CalendarAllotmentModal
+      :visible="showAllotmentModal"
+      :stats="allotmentStats"
+      :details="allotmentDetails"
+      @close="showAllotmentModal = false"
+    />
 
     <!-- Loading State -->
     <div v-if="loading" class="py-12 text-center">
@@ -369,222 +125,36 @@
     </div>
 
     <!-- Calendar Grid -->
-    <div
+    <CalendarGrid
       v-else
-      class="calendar-grid-wrapper overflow-auto rounded-xl border border-gray-200 dark:border-slate-600 shadow-sm"
-    >
-      <table class="calendar-table w-full" :style="{ minWidth: `${100 + daysInMonth * 44}px` }">
-        <!-- Days Header -->
-        <thead>
-          <!-- Day Numbers -->
-          <tr class="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
-            <th
-              class="sticky left-0 z-30 bg-gray-50 dark:bg-slate-800 px-2 sm:px-3 py-2 text-left min-w-[120px] sm:min-w-[180px] border-r border-gray-200 dark:border-slate-700"
-            >
-              <span
-                class="text-[10px] sm:text-xs font-medium text-gray-500 dark:text-slate-400 uppercase"
-              >
-                {{ $t('planning.pricing.roomType') }}
-              </span>
-            </th>
-            <th
-              v-for="day in calendarDays"
-              :key="day.date"
-              class="px-0.5 sm:px-1 py-1.5 sm:py-2 text-center min-w-[36px] sm:min-w-[48px] border-r border-gray-100 dark:border-slate-700 last:border-r-0 cursor-pointer hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
-              :class="{
-                'bg-blue-50 dark:bg-blue-900/20': day.isToday,
-                'bg-amber-50/50 dark:bg-amber-900/10': day.isWeekend && !day.isToday,
-                'bg-purple-100 dark:bg-purple-900/30': isDateColumnSelected(day.date)
-              }"
-              :title="$t('planning.pricing.clickToSelectDate')"
-              @click="selectDateColumn(day.date, $event)"
-            >
-              <div
-                class="text-[10px] sm:text-xs font-medium"
-                :class="
-                  day.isToday
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : day.isWeekend
-                      ? 'text-amber-600 dark:text-amber-400'
-                      : 'text-gray-500 dark:text-slate-400'
-                "
-              >
-                {{ day.weekday }}
-              </div>
-              <div
-                class="text-xs sm:text-sm font-bold mt-0.5"
-                :class="
-                  day.isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-800 dark:text-white'
-                "
-              >
-                {{ day.dayNumber }}
-              </div>
-            </th>
-          </tr>
-        </thead>
-
-        <!-- Room Type Rows -->
-        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
-          <template v-for="roomType in roomTypes" :key="roomType._id">
-            <!-- Main Room Row (with meal plan if only one) -->
-            <tr
-              v-for="(mealPlan, mpIndex) in filteredMealPlans"
-              :key="`${roomType._id}-${mealPlan._id}`"
-            >
-              <!-- Room Type / Meal Plan Label -->
-              <td
-                class="sticky left-0 z-20 bg-white dark:bg-slate-800 px-2 sm:px-3 py-1.5 sm:py-2 border-r border-gray-200 dark:border-slate-700 cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
-                :class="{
-                  'border-t border-gray-200 dark:border-slate-700': mpIndex === 0,
-                  'bg-purple-50 dark:bg-purple-900/20': isRoomMealPlanSelected(
-                    roomType._id,
-                    mealPlan._id
-                  )
-                }"
-                :title="$t('planning.pricing.clickToSelectRow')"
-                @click="selectRoomRow(roomType._id, mealPlan._id, $event)"
-              >
-                <div
-                  v-if="mpIndex === 0"
-                  class="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[160px]"
-                >
-                  <span class="text-purple-600 dark:text-purple-400">{{ roomType.code }}</span>
-                  <span class="text-gray-400 mx-0.5">·</span>
-                  {{ getRoomTypeName(roomType) }}
-                  <span
-                    v-if="roomType.status === 'inactive'"
-                    class="ml-1 px-1 py-0.5 text-[9px] font-medium rounded bg-gray-200 dark:bg-slate-600 text-gray-500 dark:text-slate-400"
-                  >
-                    {{ $t('common.status.inactive') }}
-                  </span>
-                </div>
-                <div class="flex items-center gap-1 sm:gap-2 mt-0.5">
-                  <span
-                    class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded text-[10px] sm:text-xs font-medium"
-                    :class="getMealPlanColor(mealPlan.code)"
-                  >
-                    {{ mealPlan.code }}
-                  </span>
-                  <span
-                    class="text-[10px] sm:text-xs text-gray-400 dark:text-slate-500 hidden sm:inline truncate max-w-[80px]"
-                  >
-                    {{ getMealPlanName(mealPlan) }}
-                  </span>
-                </div>
-              </td>
-
-              <!-- Day Cells -->
-              <td
-                v-for="day in calendarDays"
-                :key="`${roomType._id}-${mealPlan._id}-${day.date}`"
-                class="relative border-r border-gray-100 dark:border-slate-700 last:border-r-0 p-0"
-                :class="{
-                  'bg-blue-50/30 dark:bg-blue-900/10': day.isToday,
-                  'bg-amber-50/30 dark:bg-amber-900/5': day.isWeekend && !day.isToday
-                }"
-              >
-                <RateCell
-                  :rate="getRateForCell(roomType._id, mealPlan._id, day.date)"
-                  :date="day.date"
-                  :room-type-id="roomType._id"
-                  :meal-plan-id="mealPlan._id"
-                  :room-type="roomType"
-                  :currency="currency"
-                  :is-selected="isCellSelected(roomType._id, mealPlan._id, day.date)"
-                  :is-past="day.isPast"
-                  :inline-edit-mode="inlineEditMode"
-                  :inline-edit-value="getInlineEditPrice(roomType._id, mealPlan._id, day.date)"
-                  :is-base-cell="isBaseCellFn(roomType._id, mealPlan._id)"
-                  :is-calculated="isCalculatedCell(roomType._id, mealPlan._id)"
-                  :allow-edit-calculated="inlineAllowEditCalculated"
-                  @click="handleCellClick($event, roomType._id, mealPlan._id, day.date)"
-                  @dblclick="handleCellDblClick(roomType._id, mealPlan._id, day.date)"
-                  @contextmenu="handleCellContextMenu($event, roomType._id, mealPlan._id, day.date)"
-                  @inline-change="handleInlineChange(roomType._id, mealPlan._id, day.date, $event)"
-                  @inline-up="navigateCell(roomType._id, mealPlan._id, day.date, 'up')"
-                  @inline-down="navigateCell(roomType._id, mealPlan._id, day.date, 'down')"
-                />
-              </td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-    </div>
+      :room-types="roomTypes"
+      :filtered-meal-plans="filteredMealPlans"
+      :calendar-days="calendarDays"
+      :days-in-month="daysInMonth"
+      :currency="currency"
+      :selected-cells="selectedCells"
+      :inline-edit-mode="inlineEditMode"
+      :inline-edit-prices="inlineEditPrices"
+      :allow-edit-calculated="inlineAllowEditCalculated"
+      :has-base-room="hasBaseRoom"
+      :base-room-id="baseRoom?._id"
+      :base-meal-plan-id="baseMealPlan?._id"
+      :inline-relative-pricing="inlineRelativePricing"
+      :get-rate-for-cell="getRateForCell"
+      @select-date-column="selectDateColumn"
+      @select-room-row="selectRoomRow"
+      @cell-click="handleCellClick"
+      @cell-dblclick="handleCellDblClick"
+      @cell-contextmenu="handleCellContextMenu"
+      @inline-change="handleInlineChange"
+      @navigate-cell="navigateCell"
+    />
 
     <!-- Legend & Keyboard Shortcuts -->
-    <div
-      class="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 sm:gap-4"
-    >
-      <!-- Legend -->
-      <div
-        class="flex flex-wrap items-center gap-3 sm:gap-6 text-[10px] sm:text-xs text-gray-600 dark:text-slate-400"
-      >
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <div class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full bg-green-500"></div>
-          <span>{{ $t('planning.pricing.available') }}</span>
-        </div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <div class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full bg-red-500"></div>
-          <span>{{ $t('planning.pricing.stopSale') }}</span>
-        </div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <div class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full bg-pink-500"></div>
-          <span>{{ $t('planning.pricing.singleStop') }}</span>
-        </div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <div class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full bg-amber-500"></div>
-          <span>{{ $t('planning.pricing.lowAllotment') }}</span>
-        </div>
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <div class="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded bg-gray-200 dark:bg-slate-600"></div>
-          <span>{{ $t('planning.pricing.noRate') }}</span>
-        </div>
-      </div>
-
-      <!-- Keyboard Shortcuts (hidden on mobile) -->
-      <div class="hidden sm:flex items-center gap-4 text-xs text-gray-500 dark:text-slate-500">
-        <div class="flex items-center gap-1">
-          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono"
-            >Shift</kbd
-          >
-          <span>+ Click: Range</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono"
-            >Ctrl</kbd
-          >
-          <span>+ C/V: Copy/Paste</span>
-        </div>
-        <div class="flex items-center gap-1">
-          <kbd class="px-1.5 py-0.5 bg-gray-100 dark:bg-slate-700 rounded text-[10px] font-mono"
-            >Delete</kbd
-          >
-          <span>: Stop Sale</span>
-        </div>
-      </div>
-    </div>
+    <CalendarLegend />
 
     <!-- Clipboard Indicator -->
-    <Transition name="fade">
-      <div
-        v-if="copiedWeek"
-        class="fixed bottom-6 right-6 z-40 flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-xl shadow-lg"
-      >
-        <span class="material-icons text-lg">content_paste</span>
-        <div>
-          <div class="font-medium text-sm">{{ $t('planning.pricing.weekCopied') }}</div>
-          <div class="text-xs opacity-80">
-            {{ copiedWeek.duration }} {{ locale === 'tr' ? 'gün' : 'days' }}
-          </div>
-        </div>
-        <button
-          class="ml-2 p-1 hover:bg-blue-500 rounded transition-colors"
-          @click="copiedWeek = null"
-        >
-          <span class="material-icons text-sm">close</span>
-        </button>
-      </div>
-    </Transition>
+    <CalendarClipboardIndicator :copied-week="copiedWeek" @clear="copiedWeek = null" />
 
     <!-- Inline Edit Popover -->
     <QuickEditPopover
@@ -603,56 +173,15 @@
     />
 
     <!-- Context Menu for Inline Edit -->
-    <Teleport to="body">
-      <Transition name="fade">
-        <div
-          v-if="showContextMenu && contextMenuCell"
-          ref="contextMenuRef"
-          class="fixed z-[9999] bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 p-3 min-w-[200px]"
-          :style="{ top: `${contextMenuPosition.y}px`, left: `${contextMenuPosition.x}px` }"
-        >
-          <div class="flex flex-col gap-2">
-            <!-- Header -->
-            <div
-              class="text-xs text-gray-500 dark:text-slate-400 border-b border-gray-100 dark:border-slate-700 pb-2"
-            >
-              {{ $t('planning.pricing.copyValue') }}:
-              <span class="font-bold text-green-600">{{ contextMenuCell?.value }}</span>
-            </div>
-
-            <!-- Input and Button -->
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-600 dark:text-slate-400 whitespace-nowrap">{{
-                $t('planning.pricing.copyToNextDays')
-              }}</span>
-              <input
-                v-model.number="copyDaysCount"
-                type="number"
-                min="1"
-                max="31"
-                class="w-14 text-center text-sm font-bold border-2 border-purple-300 dark:border-purple-700 rounded-lg py-1 bg-white dark:bg-slate-800"
-                @keyup.enter="copyToRightDays"
-              />
-              <button
-                class="px-3 py-1.5 text-sm bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-1"
-                @click="copyToRightDays"
-              >
-                <span class="material-icons text-sm">content_copy</span>
-                {{ $t('common.copy') }}
-              </button>
-            </div>
-
-            <!-- Cancel -->
-            <button
-              class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-slate-300 mt-1"
-              @click="closeContextMenu"
-            >
-              {{ $t('common.cancel') }}
-            </button>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
+    <CalendarContextMenu
+      ref="contextMenuRef"
+      :visible="showContextMenu"
+      :position="contextMenuPosition"
+      :cell="contextMenuCell"
+      :copy-days-count="copyDaysCount"
+      @close="closeContextMenu"
+      @copy-to-days="copyToRightDays"
+    />
   </div>
 </template>
 
@@ -660,8 +189,21 @@
 import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
-import RateCell from './RateCell.vue'
+
+// Sub-components
+import CalendarHeader from './CalendarHeader.vue'
+import CalendarAllotmentBar from './CalendarAllotmentBar.vue'
+import CalendarAllotmentModal from './CalendarAllotmentModal.vue'
+import CalendarGrid from './CalendarGrid.vue'
+import CalendarLegend from './CalendarLegend.vue'
+import CalendarClipboardIndicator from './CalendarClipboardIndicator.vue'
+import CalendarContextMenu from './CalendarContextMenu.vue'
 import QuickEditPopover from './QuickEditPopover.vue'
+
+// Composable
+import { useCalendarLogic } from './composables/useCalendarLogic'
+
+// Service
 import planningService from '@/services/planningService'
 
 const props = defineProps({
@@ -670,11 +212,11 @@ const props = defineProps({
   mealPlans: { type: Array, default: () => [] },
   market: { type: Object, default: null },
   rates: { type: Array, default: () => [] },
-  overrides: { type: Array, default: () => [] }, // RateOverride records (daily exceptions)
+  overrides: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
-  initialMonth: { type: Object, default: null }, // { year, month }
-  currentSeasons: { type: Array, default: () => [] }, // Seasons in current month
-  childAgeGroups: { type: Array, default: () => [] } // For formatting combination keys
+  initialMonth: { type: Object, default: null },
+  currentSeasons: { type: Array, default: () => [] },
+  childAgeGroups: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['update', 'bulk-edit', 'refresh', 'selection-change'])
@@ -682,248 +224,60 @@ const emit = defineEmits(['update', 'bulk-edit', 'refresh', 'selection-change'])
 const { t, locale } = useI18n()
 const toast = useToast()
 
-// Current month/year - use initialMonth prop if provided
-const getInitialDate = () => {
-  if (props.initialMonth?.year && props.initialMonth?.month) {
-    return new Date(props.initialMonth.year, props.initialMonth.month - 1, 1)
-  }
-  return new Date()
-}
-const currentDate = ref(getInitialDate())
+// Use the calendar logic composable
+const {
+  // State
+  currentDate,
+  selectedCells,
+  copiedWeek,
+  inlineEditMode,
+  inlineEditPrices,
+  inlineRelativePricing,
+  inlineAllowEditCalculated,
+  showAllotmentModal,
+  highlightedAllotmentLevel,
 
-// Selection state
-const selectedCells = ref([])
+  // Computed
+  currency,
+  filteredMealPlans,
+  baseRoom,
+  baseMealPlan,
+  hasBaseRoom,
+  monthYearLabel,
+  daysInMonth,
+  calendarDays,
+  getSelectionDateRange,
+  allotmentStats,
+  allotmentDetails,
 
-// Copy/Paste state
-const copiedWeek = ref(null)
+  // Methods
+  formatDateToString,
+  formatDateKey,
+  parseDateString,
+  getRateForCell,
+  isBaseCellFn,
+  isCalculatedCell,
+  previousMonth,
+  nextMonth,
+  goToToday,
+  clearSelection,
+  selectRange,
+  highlightAllotmentLevel,
+  copyWeek,
+  pasteWeek,
+  quickAction,
+  toggleInlineEditMode,
+  getInlineEditPrice,
+  setInlineEditPrice,
+  handleInlineChange,
+  cancelInlineEdit
+} = useCalendarLogic(props, emit)
 
-// Inline edit mode
-const inlineEditMode = ref(false)
-const inlineEditPrices = reactive({}) // { `${roomTypeId}-${mealPlanId}-${date}`: price }
-const inlineRelativePricing = ref(true) // Use relative pricing in inline edit mode
-const inlineAllowEditCalculated = ref(false) // Allow editing calculated cells
+// ============================================
+// Additional State for Components Not in Composable
+// ============================================
 
-// Allotment monitoring
-const showAllotmentModal = ref(false)
-const highlightedAllotmentLevel = ref(null)
-
-// Allotment stats computed
-const allotmentStats = computed(() => {
-  const stats = { critical: 0, low: 0, normal: 0, stopSale: 0, totalCells: 0 }
-
-  for (const rt of props.roomTypes) {
-    for (const mp of filteredMealPlans.value) {
-      for (let day = 1; day <= daysInMonth.value; day++) {
-        const date = formatDateKey(
-          currentDate.value.getFullYear(),
-          currentDate.value.getMonth() + 1,
-          day
-        )
-        const rateInfo = getRateForCell(rt._id, mp._id, date)
-
-        if (rateInfo) {
-          stats.totalCells++
-
-          if (rateInfo.stopSale) {
-            stats.stopSale++
-          } else if (rateInfo.allotment === 0) {
-            stats.critical++
-          } else if (rateInfo.allotment <= 3) {
-            stats.low++
-          } else {
-            stats.normal++
-          }
-        }
-      }
-    }
-  }
-
-  return stats
-})
-
-// Allotment details per room/meal plan
-const allotmentDetails = computed(() => {
-  const details = []
-
-  for (const rt of props.roomTypes) {
-    for (const mp of filteredMealPlans.value) {
-      const detail = {
-        key: `${rt._id}-${mp._id}`,
-        roomCode: rt.code,
-        mealPlanCode: mp.code,
-        critical: 0,
-        low: 0,
-        stopSale: 0
-      }
-
-      for (let day = 1; day <= daysInMonth.value; day++) {
-        const date = formatDateKey(
-          currentDate.value.getFullYear(),
-          currentDate.value.getMonth() + 1,
-          day
-        )
-        const rateInfo = getRateForCell(rt._id, mp._id, date)
-
-        if (rateInfo) {
-          if (rateInfo.stopSale) {
-            detail.stopSale++
-          } else if (rateInfo.allotment === 0) {
-            detail.critical++
-          } else if (rateInfo.allotment <= 3) {
-            detail.low++
-          }
-        }
-      }
-
-      // Only include if there are issues
-      if (detail.critical > 0 || detail.low > 0 || detail.stopSale > 0) {
-        details.push(detail)
-      }
-    }
-  }
-
-  return details.sort((a, b) => b.critical + b.low + b.stopSale - (a.critical + a.low + a.stopSale))
-})
-
-const highlightAllotmentLevel = level => {
-  highlightedAllotmentLevel.value = highlightedAllotmentLevel.value === level ? null : level
-  // Auto-select cells with this allotment level
-  if (highlightedAllotmentLevel.value) {
-    const cells = []
-    for (const rt of props.roomTypes) {
-      for (const mp of filteredMealPlans.value) {
-        for (let day = 1; day <= daysInMonth.value; day++) {
-          const date = formatDateKey(
-            currentDate.value.getFullYear(),
-            currentDate.value.getMonth() + 1,
-            day
-          )
-          const rateInfo = getRateForCell(rt._id, mp._id, date)
-
-          if (rateInfo) {
-            let matches = false
-            if (level === 'critical' && !rateInfo.stopSale && rateInfo.allotment === 0)
-              matches = true
-            if (
-              level === 'low' &&
-              !rateInfo.stopSale &&
-              rateInfo.allotment > 0 &&
-              rateInfo.allotment <= 3
-            )
-              matches = true
-            if (level === 'stopSale' && rateInfo.stopSale) matches = true
-
-            if (matches) {
-              cells.push({ roomTypeId: rt._id, mealPlanId: mp._id, date })
-            }
-          }
-        }
-      }
-    }
-    selectedCells.value = cells
-    emit('selection-change', cells)
-    if (cells.length > 0) {
-      toast.info(t('planning.pricing.cellsSelected', { count: cells.length }))
-    }
-  } else {
-    selectedCells.value = []
-    emit('selection-change', [])
-  }
-}
-
-const getMealPlanBadgeClass = code => {
-  const colors = {
-    RO: 'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium',
-    BB: 'px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs font-medium',
-    HB: 'px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded text-xs font-medium',
-    FB: 'px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium',
-    AI: 'px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs font-medium',
-    UAI: 'px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded text-xs font-medium'
-  }
-  return (
-    colors[code] ||
-    'px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs font-medium'
-  )
-}
-
-// Base room/meal plan for relative pricing (only if explicitly set)
-const baseRoom = computed(() => props.roomTypes.find(rt => rt.isBaseRoom) || null)
-const baseMealPlan = computed(() => {
-  const found = props.mealPlans.find(mp => mp.isBaseMealPlan)
-  if (found) return found
-  // Fallback to first meal plan only if base room exists
-  return baseRoom.value ? props.mealPlans[0] : null
-})
-const hasBaseRoom = computed(() => props.roomTypes.some(rt => rt.isBaseRoom === true))
-
-// Current editing room type (for QuickEditPopover)
-const editingRoomType = computed(() => {
-  if (!editingCell.value) return null
-  return props.roomTypes.find(rt => rt._id === editingCell.value.roomTypeId) || null
-})
-
-// Check if a cell is the base cell
-const isBaseCellFn = (roomTypeId, mealPlanId) => {
-  if (!hasBaseRoom.value || !inlineRelativePricing.value) return false
-  return baseRoom.value._id === roomTypeId && baseMealPlan.value?._id === mealPlanId
-}
-
-// Check if a cell is calculated (not base, when relative pricing is active)
-const isCalculatedCell = (roomTypeId, mealPlanId) => {
-  if (!hasBaseRoom.value || !inlineRelativePricing.value) return false
-  return !isBaseCellFn(roomTypeId, mealPlanId)
-}
-
-// Navigate between cells with arrow keys
-const navigateCell = (currentRoomId, currentMealPlanId, currentDate, direction) => {
-  const meals = filteredMealPlans.value
-  const rooms = props.roomTypes
-
-  // Get current indices
-  const roomIndex = rooms.findIndex(r => r._id === currentRoomId)
-  const mealIndex = meals.findIndex(m => m._id === currentMealPlanId)
-
-  if (roomIndex === -1 || mealIndex === -1) return
-
-  let newRoomIndex = roomIndex
-  let newMealIndex = mealIndex
-
-  if (direction === 'up') {
-    // Move to previous meal plan row, or previous room's last meal plan
-    if (mealIndex > 0) {
-      newMealIndex = mealIndex - 1
-    } else if (roomIndex > 0) {
-      newRoomIndex = roomIndex - 1
-      newMealIndex = meals.length - 1
-    } else {
-      return // Already at top
-    }
-  } else if (direction === 'down') {
-    // Move to next meal plan row, or next room's first meal plan
-    if (mealIndex < meals.length - 1) {
-      newMealIndex = mealIndex + 1
-    } else if (roomIndex < rooms.length - 1) {
-      newRoomIndex = roomIndex + 1
-      newMealIndex = 0
-    } else {
-      return // Already at bottom
-    }
-  }
-
-  const newRoomId = rooms[newRoomIndex]._id
-  const newMealPlanId = meals[newMealIndex]._id
-
-  // Find the target cell using data attribute and focus its input
-  nextTick(() => {
-    const selector = `[data-cell="${newRoomId}-${newMealPlanId}-${currentDate}"] input`
-    const input = document.querySelector(selector)
-    if (input) {
-      input.focus()
-    }
-  })
-}
-
-// Inline edit state
+// Inline edit popover state
 const editingCell = ref(null)
 const quickEditPopoverRef = ref(null)
 const popoverStyle = ref({})
@@ -940,42 +294,21 @@ const inlineForm = reactive({
   extraInfant: '',
   childOrderPricing: [],
   singleSupplement: '',
-  // OBP fields
   pricingType: 'unit',
   occupancyPricing: {}
 })
 
-// Context menu state for inline edit
+// Context menu state
 const showContextMenu = ref(false)
 const contextMenuPosition = ref({ x: 0, y: 0 })
-const contextMenuCell = ref(null) // { roomTypeId, mealPlanId, date }
+const contextMenuCell = ref(null)
 const copyDaysCount = ref(7)
 const contextMenuRef = ref(null)
-const popoverCopyDays = ref(7) // For quick edit popover copy
 
-// Helper: Format date to YYYY-MM-DD without timezone issues
-const formatDateToString = date => {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+// ============================================
+// Additional Computed
+// ============================================
 
-// Helper: Format year, month, day to YYYY-MM-DD key
-const formatDateKey = (year, month, day) => {
-  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-}
-
-// Helper: Parse YYYY-MM-DD string to local Date without timezone issues
-const parseDateString = dateStr => {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  return new Date(year, month - 1, day)
-}
-
-// Computed
-const currency = computed(() => props.market?.currency || 'EUR')
-
-// Label for editing cell (e.g., "FAM,HD 02.07")
 const editingCellLabel = computed(() => {
   if (!editingCell.value) return ''
   const { roomTypeId, mealPlanId, date } = editingCell.value
@@ -985,181 +318,30 @@ const editingCellLabel = computed(() => {
   return `${room?.code || ''},${meal?.code || ''} ${day}.${month}`
 })
 
-const filteredMealPlans = computed(() => {
-  return props.mealPlans.filter(mp => mp.status === 'active')
+const editingRoomType = computed(() => {
+  if (!editingCell.value) return null
+  return props.roomTypes.find(rt => rt._id === editingCell.value.roomTypeId) || null
 })
 
-const monthYearLabel = computed(() => {
-  const months =
-    locale.value === 'tr'
-      ? [
-          'Ocak',
-          'Şubat',
-          'Mart',
-          'Nisan',
-          'Mayıs',
-          'Haziran',
-          'Temmuz',
-          'Ağustos',
-          'Eylül',
-          'Ekim',
-          'Kasım',
-          'Aralık'
-        ]
-      : [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December'
-        ]
-
-  return `${months[currentDate.value.getMonth()]} ${currentDate.value.getFullYear()}`
-})
-
-const daysInMonth = computed(() => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
-  return new Date(year, month + 1, 0).getDate()
-})
-
-const calendarDays = computed(() => {
-  const year = currentDate.value.getFullYear()
-  const month = currentDate.value.getMonth()
-  const days = []
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const weekdaysShort =
-    locale.value === 'tr'
-      ? ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt']
-      : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
-  for (let i = 1; i <= daysInMonth.value; i++) {
-    const date = new Date(year, month, i)
-    const dayOfWeek = date.getDay()
-
-    days.push({
-      date: formatDateToString(date),
-      dayNumber: i,
-      weekday: weekdaysShort[dayOfWeek],
-      isWeekend: dayOfWeek === 0 || dayOfWeek === 6,
-      isToday: date.getTime() === today.getTime(),
-      isPast: date < today
-    })
-  }
-
-  return days
-})
-
-const getSelectionDateRange = computed(() => {
-  if (selectedCells.value.length === 0) return ''
-
-  const dates = selectedCells.value.map(c => c.date).sort()
-  const first = dates[0]
-  const last = dates[dates.length - 1]
-
-  // Parse date without timezone issues (YYYY-MM-DD format)
-  const formatDateStr = dateStr => {
-    const [year, month, day] = dateStr.split('-').map(Number)
-    const date = new Date(year, month - 1, day) // month is 0-indexed
-    return date.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US')
-  }
-
-  if (first === last) {
-    return formatDateStr(first)
-  }
-
-  return `${formatDateStr(first)} - ${formatDateStr(last)}`
-})
-
+// ============================================
 // Methods
-const previousMonth = () => {
-  const newDate = new Date(currentDate.value)
-  newDate.setMonth(newDate.getMonth() - 1)
-  currentDate.value = newDate
-  emit('refresh', { year: newDate.getFullYear(), month: newDate.getMonth() + 1 })
-}
+// ============================================
 
-const nextMonth = () => {
-  const newDate = new Date(currentDate.value)
-  newDate.setMonth(newDate.getMonth() + 1)
-  currentDate.value = newDate
-  emit('refresh', { year: newDate.getFullYear(), month: newDate.getMonth() + 1 })
-}
-
-const goToToday = () => {
-  currentDate.value = new Date()
-  emit('refresh', {
-    year: currentDate.value.getFullYear(),
-    month: currentDate.value.getMonth() + 1
-  })
-}
-
-const getRoomTypeName = roomType => {
-  return roomType.name?.[locale.value] || roomType.name?.tr || roomType.name?.en || roomType.code
-}
-
-const getMealPlanName = mealPlan => {
-  return mealPlan.name?.[locale.value] || mealPlan.name?.tr || mealPlan.name?.en || ''
-}
-
-const getSeasonName = season => {
-  return season.name?.[locale.value] || season.name?.tr || season.name?.en || season.code
-}
-
-const getMealPlanColor = code => {
-  const colors = {
-    RO: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-    BB: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-    HB: 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300',
-    FB: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
-    AI: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
-    UAI: 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+const bulkEdit = () => {
+  if (selectedCells.value.length > 0) {
+    emit('bulk-edit', selectedCells.value)
   }
-  return colors[code] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
 }
 
-const getRateForCell = (roomTypeId, mealPlanId, dateStr) => {
-  // Daily rate model - find the rate that matches this exact date
-  return (
-    props.rates.find(rate => {
-      const rtId = rate.roomType?._id || rate.roomType
-      const mpId = rate.mealPlan?._id || rate.mealPlan
-
-      if (rtId !== roomTypeId || mpId !== mealPlanId) return false
-
-      // Compare date string directly (YYYY-MM-DD format)
-      const rateDateStr = rate.date?.substring?.(0, 10) || ''
-      return rateDateStr === dateStr
-    }) || null
-  )
-}
-
-const isCellSelected = (roomTypeId, mealPlanId, date) => {
-  return selectedCells.value.some(
-    c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId && c.date === date
-  )
-}
-
+// Cell click handlers
 const handleCellClick = (event, roomTypeId, mealPlanId, date) => {
-  // Get rate ID if exists
   const rate = getRateForCell(roomTypeId, mealPlanId, date)
   const cellKey = { roomTypeId, mealPlanId, date, rateId: rate?._id || null }
 
   if (event.shiftKey && selectedCells.value.length > 0) {
-    // Range select
     const lastSelected = selectedCells.value[selectedCells.value.length - 1]
     selectRange(lastSelected, cellKey)
   } else if (event.ctrlKey || event.metaKey) {
-    // Toggle single cell
     const idx = selectedCells.value.findIndex(
       c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId && c.date === date
     )
@@ -1169,7 +351,6 @@ const handleCellClick = (event, roomTypeId, mealPlanId, date) => {
       selectedCells.value.push(cellKey)
     }
   } else {
-    // Single select
     selectedCells.value = [cellKey]
   }
 }
@@ -1179,18 +360,14 @@ const handleCellDblClick = (roomTypeId, mealPlanId, date) => {
   openInlineEdit(roomTypeId, mealPlanId, date, rate)
 }
 
-// Handle right-click context menu in inline edit mode
 const handleCellContextMenu = (event, roomTypeId, mealPlanId, date) => {
-  // Only show context menu in inline edit mode
   if (!inlineEditMode.value) return
 
   event.preventDefault()
 
-  // Get the current value from inline edit prices
   const key = `${roomTypeId}-${mealPlanId}-${date}`
   const currentValue = inlineEditPrices[key]
 
-  // Only show if there's a value to copy
   if (currentValue === '' || currentValue === null || currentValue === undefined) return
 
   contextMenuCell.value = { roomTypeId, mealPlanId, date, value: currentValue }
@@ -1198,27 +375,23 @@ const handleCellContextMenu = (event, roomTypeId, mealPlanId, date) => {
   showContextMenu.value = true
 }
 
-// Close context menu
 const closeContextMenu = () => {
   showContextMenu.value = false
   contextMenuCell.value = null
 }
 
-// Copy value to next X days
-const copyToRightDays = () => {
-  if (!contextMenuCell.value || !copyDaysCount.value) return
+const copyToRightDays = count => {
+  if (!contextMenuCell.value || !count) return
 
   const { roomTypeId, mealPlanId, date, value } = contextMenuCell.value
   const startDate = parseDateString(date)
-  const count = Math.min(copyDaysCount.value, 31) // Max 31 days
+  const dayCount = Math.min(count, 31)
 
-  // Copy to the next X days (starting from the day after current date)
-  for (let i = 1; i <= count; i++) {
+  for (let i = 1; i <= dayCount; i++) {
     const targetDate = new Date(startDate)
     targetDate.setDate(targetDate.getDate() + i)
     const targetDateStr = formatDateToString(targetDate)
 
-    // Only copy if it's within the current month
     const targetMonth = targetDate.getMonth()
     const currentMonth = currentDate.value.getMonth()
     if (targetMonth !== currentMonth) continue
@@ -1226,7 +399,6 @@ const copyToRightDays = () => {
     const targetKey = `${roomTypeId}-${mealPlanId}-${targetDateStr}`
     inlineEditPrices[targetKey] = value
 
-    // If relative pricing is active and this is the base cell, calculate for other cells
     if (inlineRelativePricing.value && hasBaseRoom.value && isBaseCellFn(roomTypeId, mealPlanId)) {
       const basePrice = parseFloat(value) || 0
       if (basePrice > 0) {
@@ -1248,48 +420,11 @@ const copyToRightDays = () => {
     }
   }
 
-  toast.success(t('planning.pricing.copiedToDays', { count }))
+  toast.success(t('planning.pricing.copiedToDays', { count: dayCount }))
   closeContextMenu()
 }
 
-const selectRange = (start, end) => {
-  const startDate = parseDateString(start.date)
-  const endDate = parseDateString(end.date)
-  const minDate = startDate < endDate ? startDate : endDate
-  const maxDate = startDate > endDate ? startDate : endDate
-
-  const newSelection = []
-
-  // Select all cells between start and end for same room/meal combo
-  if (start.roomTypeId === end.roomTypeId && start.mealPlanId === end.mealPlanId) {
-    const current = new Date(minDate)
-    while (current <= maxDate) {
-      const dateStr = formatDateToString(current)
-      const rate = getRateForCell(start.roomTypeId, start.mealPlanId, dateStr)
-      newSelection.push({
-        roomTypeId: start.roomTypeId,
-        mealPlanId: start.mealPlanId,
-        date: dateStr,
-        rateId: rate?._id || null
-      })
-      current.setDate(current.getDate() + 1)
-    }
-  }
-
-  selectedCells.value = newSelection
-}
-
-const clearSelection = () => {
-  selectedCells.value = []
-}
-
-const bulkEdit = () => {
-  if (selectedCells.value.length > 0) {
-    emit('bulk-edit', selectedCells.value)
-  }
-}
-
-// Select all cells in a date column (all rooms and meal plans for that date)
+// Select date column
 const selectDateColumn = (date, event) => {
   const newCells = []
 
@@ -1306,7 +441,6 @@ const selectDateColumn = (date, event) => {
   }
 
   if (event.shiftKey && selectedCells.value.length > 0) {
-    // Range select dates
     const existingDates = [...new Set(selectedCells.value.map(c => c.date))].sort()
     const lastDate = existingDates[existingDates.length - 1]
     const startDateObj = parseDateString(lastDate < date ? lastDate : date)
@@ -1331,7 +465,6 @@ const selectDateColumn = (date, event) => {
     }
     selectedCells.value = rangeCells
   } else if (event.ctrlKey || event.metaKey) {
-    // Toggle date column
     const dateSelected = selectedCells.value.some(c => c.date === date)
     if (dateSelected) {
       selectedCells.value = selectedCells.value.filter(c => c.date !== date)
@@ -1343,14 +476,7 @@ const selectDateColumn = (date, event) => {
   }
 }
 
-// Check if a date column is fully selected
-const isDateColumnSelected = date => {
-  const totalCells = props.roomTypes.length * filteredMealPlans.value.length
-  const selectedCount = selectedCells.value.filter(c => c.date === date).length
-  return selectedCount === totalCells && totalCells > 0
-}
-
-// Select all cells in a room row (all dates for that room/meal plan)
+// Select room row
 const selectRoomRow = (roomTypeId, mealPlanId, event) => {
   const newCells = calendarDays.value.map(day => {
     const rate = getRateForCell(roomTypeId, mealPlanId, day.date)
@@ -1363,7 +489,6 @@ const selectRoomRow = (roomTypeId, mealPlanId, event) => {
   })
 
   if (event.ctrlKey || event.metaKey) {
-    // Toggle row
     const rowSelected = selectedCells.value.some(
       c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId
     )
@@ -1379,316 +504,52 @@ const selectRoomRow = (roomTypeId, mealPlanId, event) => {
   }
 }
 
-// Check if a room/meal plan row is fully selected
-const isRoomMealPlanSelected = (roomTypeId, mealPlanId) => {
-  const totalCells = calendarDays.value.length
-  const selectedCount = selectedCells.value.filter(
-    c => c.roomTypeId === roomTypeId && c.mealPlanId === mealPlanId
-  ).length
-  return selectedCount === totalCells && totalCells > 0
-}
+// Navigate between cells
+const navigateCell = (currentRoomId, currentMealPlanId, currentDate, direction) => {
+  const meals = filteredMealPlans.value
+  const rooms = props.roomTypes
 
-// Inline edit mode functions
-const toggleInlineEditMode = () => {
-  if (inlineEditMode.value) {
-    // Exiting edit mode - save changes
-    saveInlineEditPrices()
-  } else {
-    // Entering edit mode - populate prices from existing rates
-    populateInlineEditPrices()
-  }
-  inlineEditMode.value = !inlineEditMode.value
-}
+  const roomIndex = rooms.findIndex(r => r._id === currentRoomId)
+  const mealIndex = meals.findIndex(m => m._id === currentMealPlanId)
 
-const populateInlineEditPrices = () => {
-  // Clear existing
-  Object.keys(inlineEditPrices).forEach(key => delete inlineEditPrices[key])
+  if (roomIndex === -1 || mealIndex === -1) return
 
-  // Populate from rates
-  for (const roomType of props.roomTypes) {
-    for (const mealPlan of filteredMealPlans.value) {
-      for (const day of calendarDays.value) {
-        const rate = getRateForCell(roomType._id, mealPlan._id, day.date)
-        const key = `${roomType._id}-${mealPlan._id}-${day.date}`
-        inlineEditPrices[key] = rate?.pricePerNight || ''
-      }
-    }
-  }
-}
+  let newRoomIndex = roomIndex
+  let newMealIndex = mealIndex
 
-const getInlineEditPrice = (roomTypeId, mealPlanId, date) => {
-  const key = `${roomTypeId}-${mealPlanId}-${date}`
-  return inlineEditPrices[key]
-}
-
-const setInlineEditPrice = (roomTypeId, mealPlanId, date, value) => {
-  const key = `${roomTypeId}-${mealPlanId}-${date}`
-  inlineEditPrices[key] = value
-}
-
-// Handle inline change with relative pricing calculation
-const handleInlineChange = (roomTypeId, mealPlanId, date, value) => {
-  setInlineEditPrice(roomTypeId, mealPlanId, date, value)
-
-  // If this is the base cell and relative pricing is enabled, calculate others
-  if (inlineRelativePricing.value && hasBaseRoom.value && isBaseCellFn(roomTypeId, mealPlanId)) {
-    const basePrice = parseFloat(value) || 0
-    if (basePrice <= 0) return
-
-    // Calculate for all other room/meal plan combinations for this date
-    props.roomTypes.forEach(room => {
-      props.mealPlans.forEach(meal => {
-        // Skip base cell
-        if (isBaseCellFn(room._id, meal._id)) return
-
-        const roomAdj = room.priceAdjustment || 0
-        const mealAdj = meal.priceAdjustment || 0
-
-        // Apply adjustments: first room, then meal plan
-        const afterRoom = basePrice * (1 + roomAdj / 100)
-        const afterMeal = afterRoom * (1 + mealAdj / 100)
-        const calculatedPrice = Math.round(afterMeal * 100) / 100
-
-        const key = `${room._id}-${meal._id}-${date}`
-        inlineEditPrices[key] = calculatedPrice
-      })
-    })
-  }
-}
-
-const saveInlineEditPrices = async () => {
-  const updates = []
-
-  for (const [key, price] of Object.entries(inlineEditPrices)) {
-    if (price === '' || price === null || price === undefined) continue
-
-    // Key format: roomTypeId-mealPlanId-YYYY-MM-DD
-    // MongoDB ObjectIds are 24 character hex strings (no hyphens)
-    // So we can safely split: first 24 chars = roomTypeId, next 24 chars (after hyphen) = mealPlanId, rest = date
-    const parts = key.split('-')
-    const rtId = parts[0] // 24 char ObjectId
-    const mpId = parts[1] // 24 char ObjectId
-    const dateStr = parts.slice(2).join('-') // YYYY-MM-DD
-
-    const existingRate = getRateForCell(rtId, mpId, dateStr)
-    const numPrice = Number(price)
-
-    if (isNaN(numPrice) || numPrice < 0) continue
-
-    if (existingRate) {
-      // Only update if price changed
-      if (existingRate.pricePerNight !== numPrice) {
-        updates.push({
-          type: 'update',
-          rateId: existingRate._id,
-          data: { pricePerNight: numPrice }
-        })
-      }
-    } else if (numPrice > 0) {
-      // Create new rate
-      updates.push({
-        type: 'create',
-        data: {
-          roomType: rtId,
-          mealPlan: mpId,
-          market: props.market?._id,
-          startDate: dateStr,
-          endDate: dateStr,
-          pricePerNight: numPrice,
-          currency: currency.value
-        }
-      })
-    }
-  }
-
-  if (updates.length === 0) {
-    return
-  }
-
-  try {
-    for (const update of updates) {
-      if (update.type === 'update') {
-        await planningService.quickUpdateRate(props.hotelId, update.rateId, update.data)
-      } else {
-        await planningService.createRate(props.hotelId, update.data)
-      }
-    }
-    toast.success(t('planning.pricing.inlineEditSaved', { count: updates.length }))
-    emit('refresh')
-  } catch {
-    toast.error(t('common.operationFailed'))
-  }
-}
-
-const cancelInlineEdit = () => {
-  inlineEditMode.value = false
-  Object.keys(inlineEditPrices).forEach(key => delete inlineEditPrices[key])
-}
-
-const quickAction = async (field, value) => {
-  if (selectedCells.value.length === 0) return
-
-  try {
-    // Group by rate to minimize API calls
-    for (const cell of selectedCells.value) {
-      const rate = getRateForCell(cell.roomTypeId, cell.mealPlanId, cell.date)
-      if (rate) {
-        await planningService.quickUpdateRate(props.hotelId, rate._id, { [field]: value })
-      }
-    }
-
-    toast.success(t('planning.pricing.quickUpdateSuccess'))
-    emit('refresh')
-    clearSelection()
-  } catch {
-    toast.error(t('common.operationFailed'))
-  }
-}
-
-// Copy/Paste Week Functions
-const copyWeek = () => {
-  if (selectedCells.value.length === 0) {
-    toast.warning(t('planning.pricing.selectCellsToCopy'))
-    return
-  }
-
-  // Get unique dates and sort them
-  const dates = [...new Set(selectedCells.value.map(c => c.date))].sort()
-
-  // Get unique room type / meal plan combinations
-  const combinations = []
-  const seen = new Set()
-
-  for (const cell of selectedCells.value) {
-    const key = `${cell.roomTypeId}-${cell.mealPlanId}`
-    if (!seen.has(key)) {
-      seen.add(key)
-      combinations.push({ roomTypeId: cell.roomTypeId, mealPlanId: cell.mealPlanId })
-    }
-  }
-
-  // Collect rate data for the selected cells
-  const rateData = []
-  for (const combo of combinations) {
-    for (const date of dates) {
-      const rate = getRateForCell(combo.roomTypeId, combo.mealPlanId, date)
-      if (rate) {
-        rateData.push({
-          dayOffset: dates.indexOf(date),
-          roomTypeId: combo.roomTypeId,
-          mealPlanId: combo.mealPlanId,
-          pricePerNight: rate.pricePerNight,
-          allotment: rate.allotment,
-          minStay: rate.minStay,
-          stopSale: rate.stopSale,
-          singleStop: rate.singleStop,
-          closedToArrival: rate.closedToArrival,
-          closedToDeparture: rate.closedToDeparture
-        })
-      }
-    }
-  }
-
-  copiedWeek.value = {
-    startDate: dates[0],
-    endDate: dates[dates.length - 1],
-    duration: dates.length,
-    combinations,
-    rateData
-  }
-
-  toast.success(t('planning.pricing.weekCopied'))
-}
-
-const pasteWeek = async () => {
-  if (!copiedWeek.value) {
-    toast.warning(t('planning.pricing.noWeekToPaste'))
-    return
-  }
-
-  if (selectedCells.value.length === 0) {
-    toast.warning(t('planning.pricing.selectTargetCell'))
-    return
-  }
-
-  // Get the first selected cell as the starting point
-  const targetCells = [...selectedCells.value].sort((a, b) => a.date.localeCompare(b.date))
-  const targetStartDate = parseDateString(targetCells[0].date)
-
-  try {
-    for (const rateInfo of copiedWeek.value.rateData) {
-      // Calculate target date based on day offset
-      const targetDate = new Date(targetStartDate)
-      targetDate.setDate(targetDate.getDate() + rateInfo.dayOffset)
-      const targetDateStr = formatDateToString(targetDate)
-
-      // Find if there's an existing rate for this cell
-      const existingRate = getRateForCell(rateInfo.roomTypeId, rateInfo.mealPlanId, targetDateStr)
-
-      const rateData = {
-        pricePerNight: rateInfo.pricePerNight,
-        allotment: rateInfo.allotment,
-        minStay: rateInfo.minStay,
-        stopSale: rateInfo.stopSale,
-        singleStop: rateInfo.singleStop,
-        closedToArrival: rateInfo.closedToArrival,
-        closedToDeparture: rateInfo.closedToDeparture
-      }
-
-      if (existingRate?._id) {
-        await planningService.quickUpdateRate(props.hotelId, existingRate._id, rateData)
-      } else {
-        await planningService.createRate(props.hotelId, {
-          ...rateData,
-          roomType: rateInfo.roomTypeId,
-          mealPlan: rateInfo.mealPlanId,
-          market: props.market?._id,
-          startDate: targetDateStr,
-          endDate: targetDateStr,
-          currency: currency.value
-        })
-      }
-    }
-
-    toast.success(t('planning.pricing.weekPasted'))
-    emit('refresh')
-    clearSelection()
-  } catch (error) {
-    console.error('Paste week error:', error)
-    toast.error(t('common.operationFailed'))
-  }
-}
-
-// Keyboard shortcuts
-const handleKeyDown = e => {
-  // Ctrl+C or Cmd+C - Copy
-  if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !editingCell.value) {
-    e.preventDefault()
-    copyWeek()
-  }
-
-  // Ctrl+V or Cmd+V - Paste
-  if ((e.ctrlKey || e.metaKey) && e.key === 'v' && !editingCell.value) {
-    e.preventDefault()
-    pasteWeek()
-  }
-
-  // Escape - Clear selection or close inline edit
-  if (e.key === 'Escape') {
-    if (editingCell.value) {
-      closeInlineEdit()
+  if (direction === 'up') {
+    if (mealIndex > 0) {
+      newMealIndex = mealIndex - 1
+    } else if (roomIndex > 0) {
+      newRoomIndex = roomIndex - 1
+      newMealIndex = meals.length - 1
     } else {
-      clearSelection()
+      return
+    }
+  } else if (direction === 'down') {
+    if (mealIndex < meals.length - 1) {
+      newMealIndex = mealIndex + 1
+    } else if (roomIndex < rooms.length - 1) {
+      newRoomIndex = roomIndex + 1
+      newMealIndex = 0
+    } else {
+      return
     }
   }
 
-  // Delete - Quick stop sale
-  if (e.key === 'Delete' && selectedCells.value.length > 0 && !editingCell.value) {
-    e.preventDefault()
-    quickAction('stopSale', true)
-  }
+  const newRoomId = rooms[newRoomIndex]._id
+  const newMealPlanId = meals[newMealIndex]._id
+
+  nextTick(() => {
+    const selector = `[data-cell="${newRoomId}-${newMealPlanId}-${currentDate}"] input`
+    const input = document.querySelector(selector)
+    if (input) {
+      input.focus()
+    }
+  })
 }
 
+// Inline edit popover
 const openInlineEdit = async (roomTypeId, mealPlanId, date, rate) => {
   editingCell.value = { roomTypeId, mealPlanId, date, rate }
 
@@ -1709,13 +570,11 @@ const openInlineEdit = async (roomTypeId, mealPlanId, date, rate) => {
   inlineForm.extraInfant = rate?.extraInfant ?? ''
   inlineForm.singleSupplement = rate?.singleSupplement ?? ''
 
-  // OBP occupancy pricing - initialize for maxAdults
   inlineForm.occupancyPricing = {}
   for (let i = 1; i <= maxAdults; i++) {
     inlineForm.occupancyPricing[i] = rate?.occupancyPricing?.[i] ?? ''
   }
 
-  // Pre-populate child pricing array
   inlineForm.childOrderPricing = Array(maxChildren)
     .fill('')
     .map((_, i) => {
@@ -1723,33 +582,26 @@ const openInlineEdit = async (roomTypeId, mealPlanId, date, rate) => {
       return typeof existing === 'number' ? existing : ''
     })
 
-  // Position popover near the click - smart positioning to avoid going off-screen
   await nextTick()
   const cellEl = document.querySelector(`[data-cell="${roomTypeId}-${mealPlanId}-${date}"]`)
   if (cellEl) {
     const rect = cellEl.getBoundingClientRect()
-    const popoverHeight = 480 // Approximate height of the popover
-    const popoverWidth = 300 // Width of the popover
-    const margin = 8 // Margin from cell and viewport edges
+    const popoverHeight = 480
+    const popoverWidth = 300
+    const margin = 8
 
-    // Calculate available space above and below the cell
     const spaceBelow = window.innerHeight - rect.bottom - margin
     const spaceAbove = rect.top - margin
 
-    // Decide whether to show above or below
     let top
     if (spaceBelow >= popoverHeight) {
-      // Enough space below - show below the cell
       top = rect.bottom + margin
     } else if (spaceAbove >= popoverHeight) {
-      // Not enough space below but enough above - show above the cell
       top = rect.top - popoverHeight - margin
     } else {
-      // Not enough space either way - position at top with some offset
       top = Math.max(margin, Math.min(rect.top, window.innerHeight - popoverHeight - margin))
     }
 
-    // Calculate left position - ensure popover stays within viewport
     let left = rect.left
     if (left + popoverWidth > window.innerWidth - margin) {
       left = window.innerWidth - popoverWidth - margin
@@ -1798,22 +650,18 @@ const saveInlineEdit = async () => {
       pricingType: inlineForm.pricingType
     }
 
-    // Handle pricing based on type
     const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
     const usesMultipliers =
       roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
 
     if (inlineForm.pricingType === 'per_person' && usesMultipliers) {
-      // OBP with Multipliers: pricePerNight is the base price
-      // Adult and child prices calculated from multipliers at runtime
       data.pricePerNight = inlineForm.pricePerNight || 0
-      data.occupancyPricing = {} // Prices calculated from adultMultipliers
-      data.childOrderPricing = [] // Prices calculated from childMultipliers
-      data.extraInfant = 0 // Prices calculated from infantMultiplier
+      data.occupancyPricing = {}
+      data.childOrderPricing = []
+      data.extraInfant = 0
       data.extraAdult = 0
       data.singleSupplement = 0
     } else if (inlineForm.pricingType === 'per_person') {
-      // OBP without Multipliers: Save direct occupancy pricing
       const occupancyPricing = {}
       for (const [pax, price] of Object.entries(inlineForm.occupancyPricing)) {
         if (price !== '' && price !== null) {
@@ -1821,11 +669,10 @@ const saveInlineEdit = async () => {
         }
       }
       data.occupancyPricing = occupancyPricing
-      data.pricePerNight = 0 // Not used in direct OBP
+      data.pricePerNight = 0
       data.extraAdult = 0
       data.singleSupplement = 0
 
-      // Child pricing for standard OBP
       if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
         data.extraInfant = Number(inlineForm.extraInfant)
       }
@@ -1835,19 +682,15 @@ const saveInlineEdit = async () => {
         )
       }
     } else {
-      // Unit pricing
       data.pricePerNight = inlineForm.pricePerNight
 
-      // Add extra person pricing if set
       if (inlineForm.extraAdult !== '' && inlineForm.extraAdult !== null) {
         data.extraAdult = Number(inlineForm.extraAdult)
       }
-      // Add single supplement if set
       if (inlineForm.singleSupplement !== '' && inlineForm.singleSupplement !== null) {
         data.singleSupplement = Number(inlineForm.singleSupplement)
       }
 
-      // Child pricing for unit pricing
       if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
         data.extraInfant = Number(inlineForm.extraInfant)
       }
@@ -1874,9 +717,8 @@ const saveInlineEdit = async () => {
   }
 }
 
-// Copy all values from quick edit popover to next X days
 const copyPopoverToNextDays = async days => {
-  const copyCount = days || popoverCopyDays.value || 7
+  const copyCount = days || 7
   if (!editingCell.value || !copyCount) return
 
   const { roomTypeId, mealPlanId, date } = editingCell.value
@@ -1887,13 +729,10 @@ const copyPopoverToNextDays = async days => {
   try {
     const promises = []
 
-    // Build data from inlineForm
-    // NOTE: allotment is NOT copied - only prices and restrictions are copied
     const baseData = {
       roomType: roomTypeId,
       mealPlan: mealPlanId,
       market: props.market?._id,
-      // allotment: NOT copied - each day keeps its own allotment
       minStay: inlineForm.minStay,
       stopSale: inlineForm.stopSale,
       singleStop: inlineForm.singleStop,
@@ -1903,22 +742,18 @@ const copyPopoverToNextDays = async days => {
       pricingType: inlineForm.pricingType
     }
 
-    // Handle pricing based on type
     const roomType = props.roomTypes.find(rt => rt._id === roomTypeId)
     const usesMultipliers =
       roomType?.pricingType === 'per_person' && roomType?.useMultipliers === true
 
     if (inlineForm.pricingType === 'per_person' && usesMultipliers) {
-      // OBP with Multipliers: pricePerNight is the base price
-      // Adult and child prices calculated from multipliers at runtime
       baseData.pricePerNight = inlineForm.pricePerNight || 0
-      baseData.occupancyPricing = {} // Prices calculated from adultMultipliers
-      baseData.childOrderPricing = [] // Prices calculated from childMultipliers
-      baseData.extraInfant = 0 // Prices calculated from infantMultiplier
+      baseData.occupancyPricing = {}
+      baseData.childOrderPricing = []
+      baseData.extraInfant = 0
       baseData.extraAdult = 0
       baseData.singleSupplement = 0
     } else if (inlineForm.pricingType === 'per_person') {
-      // OBP: Save occupancy pricing
       const occupancyPricing = {}
       for (const [pax, price] of Object.entries(inlineForm.occupancyPricing)) {
         if (price !== '' && price !== null) {
@@ -1930,7 +765,6 @@ const copyPopoverToNextDays = async days => {
       baseData.extraAdult = 0
       baseData.singleSupplement = 0
 
-      // Child pricing for standard OBP
       if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
         baseData.extraInfant = Number(inlineForm.extraInfant)
       }
@@ -1940,7 +774,6 @@ const copyPopoverToNextDays = async days => {
         )
       }
     } else {
-      // Unit pricing
       baseData.pricePerNight = inlineForm.pricePerNight
       if (inlineForm.extraAdult !== '' && inlineForm.extraAdult !== null) {
         baseData.extraAdult = Number(inlineForm.extraAdult)
@@ -1949,7 +782,6 @@ const copyPopoverToNextDays = async days => {
         baseData.singleSupplement = Number(inlineForm.singleSupplement)
       }
 
-      // Child pricing for unit pricing
       if (inlineForm.extraInfant !== '' && inlineForm.extraInfant !== null) {
         baseData.extraInfant = Number(inlineForm.extraInfant)
       }
@@ -1960,13 +792,11 @@ const copyPopoverToNextDays = async days => {
       }
     }
 
-    // Copy to next X days (starting from day after current)
     for (let i = 1; i <= count; i++) {
       const targetDate = new Date(startDate)
       targetDate.setDate(targetDate.getDate() + i)
       const targetDateStr = formatDateToString(targetDate)
 
-      // Check if within current month
       if (targetDate.getMonth() !== currentDate.value.getMonth()) continue
 
       const existingRate = getRateForCell(roomTypeId, mealPlanId, targetDateStr)
@@ -1977,11 +807,9 @@ const copyPopoverToNextDays = async days => {
       }
 
       if (existingRate?._id) {
-        // Preserve existing allotment when updating
         data.allotment = existingRate.allotment ?? 10
         promises.push(planningService.updateRate(props.hotelId, existingRate._id, data))
       } else {
-        // New rate - use default allotment
         data.allotment = 10
         promises.push(planningService.createRate(props.hotelId, data))
       }
@@ -1999,14 +827,43 @@ const copyPopoverToNextDays = async days => {
   }
 }
 
-// Click outside to close inline edit and context menu
+// Keyboard shortcuts
+const handleKeyDown = e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !editingCell.value) {
+    e.preventDefault()
+    copyWeek()
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.key === 'v' && !editingCell.value) {
+    e.preventDefault()
+    pasteWeek()
+  }
+
+  if (e.key === 'Escape') {
+    if (editingCell.value) {
+      closeInlineEdit()
+    } else {
+      clearSelection()
+    }
+  }
+
+  if (e.key === 'Delete' && selectedCells.value.length > 0 && !editingCell.value) {
+    e.preventDefault()
+    quickAction('stopSale', true)
+  }
+}
+
+// Click outside handlers
 const handleClickOutside = e => {
   const popoverEl = quickEditPopoverRef.value?.popoverRef
   if (popoverEl && !popoverEl.contains(e.target)) {
     closeInlineEdit()
   }
-  // Close context menu on click outside (but not inside the menu)
-  if (showContextMenu.value && contextMenuRef.value && !contextMenuRef.value.contains(e.target)) {
+  if (
+    showContextMenu.value &&
+    contextMenuRef.value?.menuRef &&
+    !contextMenuRef.value.menuRef.contains(e.target)
+  ) {
     closeContextMenu()
   }
 }
@@ -2026,51 +883,13 @@ watch(currentDate, () => {
   clearSelection()
 })
 
-// Emit selection change for AI assistant
-watch(
-  () => [...selectedCells.value],
-  newVal => {
-    emit('selection-change', newVal)
-  }
-)
-
-// Expose clearSelection for parent component (AI assistant)
+// Expose clearSelection for parent component
 defineExpose({
   clearSelection
 })
 </script>
 
 <style scoped>
-.calendar-grid-wrapper {
-  max-height: calc(100vh - 350px);
-}
-
-.calendar-table {
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.calendar-table th,
-.calendar-table td {
-  white-space: nowrap;
-}
-
-.calendar-table tbody tr:hover td:not(.sticky) {
-  background-color: rgba(147, 51, 234, 0.05);
-}
-
-/* Fade transition for clipboard indicator */
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
 /* Slide down transition for details */
 .slide-down-enter-active,
 .slide-down-leave-active {
