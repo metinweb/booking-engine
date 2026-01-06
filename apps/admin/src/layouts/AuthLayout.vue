@@ -2,6 +2,18 @@
   <div
     class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-purple-800"
   >
+    <!-- Top Bar: Language & Theme -->
+    <div class="fixed top-4 right-4 flex items-center gap-2 z-50">
+      <LanguageSelector class="!text-white hover:!bg-white/10" />
+      <button
+        class="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+        :title="isDark ? 'Light Mode' : 'Dark Mode'"
+        @click="toggleTheme"
+      >
+        <span class="material-icons text-xl">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+      </button>
+    </div>
+
     <div class="absolute inset-0 bg-black opacity-10"></div>
     <div class="relative z-10 w-full max-w-md px-6">
       <!-- Logo -->
@@ -53,7 +65,14 @@
 </template>
 
 <script setup>
-// No specific script logic needed for this layout
+import { computed } from 'vue'
+import LanguageSelector from '@/components/common/LanguageSelector.vue'
+import { useUIStore } from '@/stores/ui'
+
+const uiStore = useUIStore()
+
+const isDark = computed(() => uiStore.darkMode)
+const toggleTheme = () => uiStore.toggleDarkMode()
 </script>
 
 <style scoped>

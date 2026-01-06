@@ -4,14 +4,14 @@
  * Split from booking.service.js for better maintainability
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Hotel from '../hotel/hotel.model.js'
 import RoomType from '../planning/roomType.model.js'
 import MealPlan from '../planning/mealPlan.model.js'
 import Market from '../planning/market.model.js'
-import pricingService from '../../services/pricingService.js'
-import { BadRequestError, NotFoundError } from '../../core/errors.js'
-import { getPartnerId } from '../../services/helpers.js'
+import pricingService from '#services/pricingService.js'
+import { BadRequestError, NotFoundError } from '#core/errors.js'
+import { getPartnerId } from '#services/helpers.js'
 
 // ==================== MULTI-HOTEL SEARCH ====================
 

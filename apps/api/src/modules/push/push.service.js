@@ -1,7 +1,7 @@
 import PushSubscription from './pushSubscription.model.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import logger from '../../core/logger.js'
-import config from '../../config/index.js'
+import { asyncHandler } from '#helpers'
+import logger from '#core/logger.js'
+import config from '#config'
 
 /**
  * Subscribe to push notifications

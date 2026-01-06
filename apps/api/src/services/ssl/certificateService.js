@@ -10,14 +10,15 @@ import { promisify } from 'util'
 import fs from 'fs/promises'
 import path from 'path'
 import logger from '../../core/logger.js'
+import appConfig from '../../config/index.js'
 
 const execAsync = promisify(exec)
 
-// Konfigurasyon
+// Konfigurasyon (config module'den alınıyor)
 const CONFIG = {
   // Let's Encrypt
-  certbotEmail: process.env.CERTBOT_EMAIL || 'admin@minires.com',
-  certbotWebroot: process.env.CERTBOT_WEBROOT || '/var/www/certbot',
+  certbotEmail: appConfig.ssl.certbotEmail,
+  certbotWebroot: appConfig.ssl.certbotWebroot,
 
   // Sertifika dizini
   certDir: '/etc/letsencrypt/live'
@@ -34,10 +35,9 @@ export const requestCertificate = async domain => {
 
     // Certbot komutu - webroot modu veya standalone
     // Production'da webroot tercih edilir
-    const certbotCmd =
-      process.env.NODE_ENV === 'production'
-        ? `certbot certonly --webroot -w ${CONFIG.certbotWebroot} -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive`
-        : `certbot certonly --standalone -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive --dry-run`
+    const certbotCmd = !appConfig.isDev
+      ? `certbot certonly --webroot -w ${CONFIG.certbotWebroot} -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive`
+      : `certbot certonly --standalone -d ${domain} --email ${CONFIG.certbotEmail} --agree-tos --non-interactive --dry-run`
 
     const { stdout, stderr } = await execAsync(certbotCmd, { timeout: 120000 })
 
@@ -51,7 +51,7 @@ export const requestCertificate = async domain => {
     const certPath = path.join(CONFIG.certDir, domain)
 
     // Production'da sertifika dosyalarini kontrol et
-    if (process.env.NODE_ENV === 'production') {
+    if (!appConfig.isDev) {
       try {
         await fs.access(path.join(certPath, 'fullchain.pem'))
         await fs.access(path.join(certPath, 'privkey.pem'))

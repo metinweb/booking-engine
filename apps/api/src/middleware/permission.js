@@ -1,177 +1,142 @@
 import { ForbiddenError } from '../core/errors.js'
 
 /**
- * Permission Middleware
- * Checks if user has required permission for a module/action
+ * @module middleware/permission
+ * @description Permission middleware for checking user access rights.
+ * All errors are passed to the error handler middleware via next(error).
  */
 
 /**
- * Require specific permission
+ * Require specific permission for a module/action
  * @param {string} module - Module name (dashboard, planning, booking, etc.)
  * @param {string} action - Action type (view, create, edit, delete)
+ * @returns {import('express').RequestHandler} Express middleware
  */
 export const requirePermission = (module, action) => {
   return (req, res, next) => {
-    try {
-      const user = req.user
-
-      if (!user) {
-        throw new ForbiddenError('UNAUTHORIZED')
-      }
-
-      // PMS users have different permission system
-      if (req.authMode === 'pms') {
-        // PMS admin has all permissions, others only have view
-        if (req.pmsRole === 'pms_admin' || action === 'view') {
-          return next()
-        }
-        throw new ForbiddenError('PERMISSION_DENIED')
-      }
-
-      // Admins have all permissions
-      if (user.role === 'admin') {
-        return next()
-      }
-
-      // Check user's permission using model method
-      if (user.hasPermission && user.hasPermission(module, action)) {
-        return next()
-      }
-
-      // Check raw permissions array (for when user object doesn't have method)
-      if (user.permissions) {
-        const permission = user.permissions.find(p => p.module === module)
-        if (permission && permission.actions?.[action] === true) {
-          return next()
-        }
-      }
-
-      throw new ForbiddenError('PERMISSION_DENIED')
-    } catch (error) {
-      if (error.name === 'ForbiddenError') {
-        return res.status(403).json({
-          success: false,
-          error: error.message
-        })
-      }
-      next(error)
-    }
-  }
-}
-
-/**
- * Require any of the specified permissions
- * @param {Array} permissions - Array of { module, action } objects
- */
-export const requireAnyPermission = permissions => {
-  return (req, res, next) => {
-    try {
-      const user = req.user
-
-      if (!user) {
-        throw new ForbiddenError('UNAUTHORIZED')
-      }
-
-      // Admins have all permissions
-      if (user.role === 'admin') {
-        return next()
-      }
-
-      // Check if user has any of the required permissions
-      const hasAny = permissions.some(({ module, action }) => {
-        if (user.hasPermission) {
-          return user.hasPermission(module, action)
-        }
-        const permission = user.permissions?.find(p => p.module === module)
-        return permission && permission.actions?.[action] === true
-      })
-
-      if (hasAny) {
-        return next()
-      }
-
-      throw new ForbiddenError('PERMISSION_DENIED')
-    } catch (error) {
-      if (error.name === 'ForbiddenError') {
-        return res.status(403).json({
-          success: false,
-          error: error.message
-        })
-      }
-      next(error)
-    }
-  }
-}
-
-/**
- * Require all of the specified permissions
- * @param {Array} permissions - Array of { module, action } objects
- */
-export const requireAllPermissions = permissions => {
-  return (req, res, next) => {
-    try {
-      const user = req.user
-
-      if (!user) {
-        throw new ForbiddenError('UNAUTHORIZED')
-      }
-
-      // Admins have all permissions
-      if (user.role === 'admin') {
-        return next()
-      }
-
-      // Check if user has all required permissions
-      const hasAll = permissions.every(({ module, action }) => {
-        if (user.hasPermission) {
-          return user.hasPermission(module, action)
-        }
-        const permission = user.permissions?.find(p => p.module === module)
-        return permission && permission.actions?.[action] === true
-      })
-
-      if (hasAll) {
-        return next()
-      }
-
-      throw new ForbiddenError('PERMISSION_DENIED')
-    } catch (error) {
-      if (error.name === 'ForbiddenError') {
-        return res.status(403).json({
-          success: false,
-          error: error.message
-        })
-      }
-      next(error)
-    }
-  }
-}
-
-/**
- * Check if user is admin
- */
-export const requireAdmin = (req, res, next) => {
-  try {
     const user = req.user
 
     if (!user) {
-      throw new ForbiddenError('UNAUTHORIZED')
+      return next(new ForbiddenError('UNAUTHORIZED'))
     }
 
-    if (user.role !== 'admin') {
-      throw new ForbiddenError('ADMIN_REQUIRED')
+    // PMS users have different permission system
+    if (req.authMode === 'pms') {
+      // PMS admin has all permissions, others only have view
+      if (req.pmsRole === 'pms_admin' || action === 'view') {
+        return next()
+      }
+      return next(new ForbiddenError('PERMISSION_DENIED'))
     }
 
-    return next()
-  } catch (error) {
-    if (error.name === 'ForbiddenError') {
-      return res.status(403).json({
-        success: false,
-        error: error.message
-      })
+    // Admins have all permissions
+    if (user.role === 'admin') {
+      return next()
     }
-    next(error)
+
+    // Check user's permission using model method
+    if (user.hasPermission && user.hasPermission(module, action)) {
+      return next()
+    }
+
+    // Check raw permissions array (for when user object doesn't have method)
+    if (user.permissions) {
+      const permission = user.permissions.find(p => p.module === module)
+      if (permission && permission.actions?.[action] === true) {
+        return next()
+      }
+    }
+
+    return next(new ForbiddenError('PERMISSION_DENIED'))
   }
+}
+
+/**
+ * Require any of the specified permissions (OR logic)
+ * @param {Array<{module: string, action: string}>} permissions - Array of permission requirements
+ * @returns {import('express').RequestHandler} Express middleware
+ */
+export const requireAnyPermission = permissions => {
+  return (req, res, next) => {
+    const user = req.user
+
+    if (!user) {
+      return next(new ForbiddenError('UNAUTHORIZED'))
+    }
+
+    // Admins have all permissions
+    if (user.role === 'admin') {
+      return next()
+    }
+
+    // Check if user has any of the required permissions
+    const hasAny = permissions.some(({ module, action }) => {
+      if (user.hasPermission) {
+        return user.hasPermission(module, action)
+      }
+      const permission = user.permissions?.find(p => p.module === module)
+      return permission && permission.actions?.[action] === true
+    })
+
+    if (hasAny) {
+      return next()
+    }
+
+    return next(new ForbiddenError('PERMISSION_DENIED'))
+  }
+}
+
+/**
+ * Require all of the specified permissions (AND logic)
+ * @param {Array<{module: string, action: string}>} permissions - Array of permission requirements
+ * @returns {import('express').RequestHandler} Express middleware
+ */
+export const requireAllPermissions = permissions => {
+  return (req, res, next) => {
+    const user = req.user
+
+    if (!user) {
+      return next(new ForbiddenError('UNAUTHORIZED'))
+    }
+
+    // Admins have all permissions
+    if (user.role === 'admin') {
+      return next()
+    }
+
+    // Check if user has all required permissions
+    const hasAll = permissions.every(({ module, action }) => {
+      if (user.hasPermission) {
+        return user.hasPermission(module, action)
+      }
+      const permission = user.permissions?.find(p => p.module === module)
+      return permission && permission.actions?.[action] === true
+    })
+
+    if (hasAll) {
+      return next()
+    }
+
+    return next(new ForbiddenError('PERMISSION_DENIED'))
+  }
+}
+
+/**
+ * Require admin role
+ * @type {import('express').RequestHandler}
+ */
+export const requireAdmin = (req, res, next) => {
+  const user = req.user
+
+  if (!user) {
+    return next(new ForbiddenError('UNAUTHORIZED'))
+  }
+
+  if (user.role !== 'admin') {
+    return next(new ForbiddenError('ADMIN_REQUIRED'))
+  }
+
+  return next()
 }
 
 export default {

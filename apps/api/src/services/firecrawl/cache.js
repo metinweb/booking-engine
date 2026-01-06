@@ -1,4 +1,5 @@
 import logger from '../../core/logger.js'
+import config from '../../config/index.js'
 
 // Cache for API key
 let cachedApiKey = null
@@ -31,9 +32,9 @@ export const getFirecrawlApiKey = async () => {
     logger.warn('Failed to load Firecrawl API key from database:', error.message)
   }
 
-  // Fall back to environment variable
-  if (process.env.FIRECRAWL_API_KEY) {
-    cachedApiKey = process.env.FIRECRAWL_API_KEY
+  // Fall back to config (environment variable)
+  if (config.firecrawl.apiKey) {
+    cachedApiKey = config.firecrawl.apiKey
     cachedApiKeyExpiry = Date.now() + API_KEY_CACHE_TTL
     return cachedApiKey
   }

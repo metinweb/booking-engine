@@ -6,7 +6,7 @@
 import Room from '../pms-housekeeping/room.model.js'
 import Stay, { STAY_STATUS } from './stay.model.js'
 import Booking from '../booking/booking.model.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import { emitPMSEvent, PMS_EVENTS, emitCheckIn, emitRoomStatusChange } from '../pms/pmsSocket.js'
 
 /**

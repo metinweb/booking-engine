@@ -1,10 +1,10 @@
 import Room, { ROOM_STATUS, HOUSEKEEPING_STATUS, HOUSEKEEPING_PRIORITY } from './room.model.js'
 import RoomType from '../planning/roomType.model.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { BadRequestError, NotFoundError } from '../../core/errors.js'
+import { asyncHandler } from '#helpers'
+import { BadRequestError, NotFoundError } from '#core/errors.js'
 import { emitRoomStatusChange, emitHousekeepingUpdate } from '../pms/pmsSocket.js'
 import { notifyHotelUsers } from '../notification/notification.service.js'
-import logger from '../../core/logger.js'
+import logger from '#core/logger.js'
 
 /**
  * Get all rooms for a hotel

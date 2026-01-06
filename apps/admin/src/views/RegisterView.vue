@@ -1,167 +1,300 @@
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4"
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-12 px-4"
   >
-    <div class="w-full max-w-md">
-      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8">
-        <!-- Logo/Brand -->
-        <div class="text-center mb-8">
-          <div
-            class="w-16 h-16 bg-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4"
-          >
-            <span class="material-icons text-white text-3xl">business</span>
+    <!-- Top Bar: Language & Theme -->
+    <div class="fixed top-4 right-4 flex items-center gap-2 z-50">
+      <LanguageSelector />
+      <button
+        class="p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+        :title="isDark ? 'Light Mode' : 'Dark Mode'"
+        @click="toggleTheme"
+      >
+        <span class="material-icons text-xl">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+      </button>
+    </div>
+
+    <div class="w-full max-w-2xl">
+      <!-- Success State -->
+      <div v-if="success" class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 text-center">
+        <div class="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="material-icons text-green-600 dark:text-green-400 text-4xl">check_circle</span>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+          {{ $t('auth.registrationSubmitted') }}
+        </h2>
+        <p class="text-gray-600 dark:text-slate-400 mb-6 max-w-md mx-auto">
+          {{ $t('auth.registrationPendingMessage') }}
+        </p>
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6">
+          <div class="flex items-start gap-3">
+            <span class="material-icons text-blue-600 dark:text-blue-400 mt-0.5">info</span>
+            <div class="text-left text-sm text-blue-700 dark:text-blue-300">
+              <p class="font-medium mb-1">{{ $t('auth.whatHappensNext') }}</p>
+              <ul class="list-disc list-inside space-y-1 text-blue-600 dark:text-blue-400">
+                <li>{{ $t('auth.step1Review') }}</li>
+                <li>{{ $t('auth.step2Approval') }}</li>
+                <li>{{ $t('auth.step3Activation') }}</li>
+              </ul>
+            </div>
           </div>
-          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
-            {{ $t('auth.partnerRegister') }}
-          </h2>
-          <p class="text-gray-600 dark:text-slate-400 mt-2">
-            {{ $t('auth.createPartnerAccount') }}
-          </p>
+        </div>
+        <RouterLink to="/auth/login" class="btn-primary inline-flex items-center">
+          <span class="material-icons mr-2">arrow_back</span>
+          {{ $t('auth.backToLogin') }}
+        </RouterLink>
+      </div>
+
+      <!-- Registration Form -->
+      <div v-else class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-8 py-6 text-white">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center">
+              <span class="material-icons text-3xl">business</span>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold">{{ $t('auth.partnerRegister') }}</h2>
+              <p class="text-purple-100 mt-1">{{ $t('auth.createPartnerAccount') }}</p>
+            </div>
+          </div>
         </div>
 
-        <!-- Error Alert -->
-        <div v-if="error" class="alert alert-error mb-6">
-          <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          <span>{{ error }}</span>
-        </div>
-
-        <!-- Success Alert -->
-        <div v-if="success" class="alert alert-success mb-6">
-          <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          <span>{{ success }}</span>
-        </div>
-
-        <!-- Registration Form -->
-        <form v-if="!success" class="space-y-5" @submit.prevent="handleRegister">
-          <!-- Company Name -->
-          <div>
-            <label for="companyName" class="form-label">{{ $t('auth.companyName') }} *</label>
-            <input
-              id="companyName"
-              v-model="form.companyName"
-              type="text"
-              class="form-input"
-              required
-              :disabled="loading"
-            />
+        <!-- Form Content -->
+        <div class="p-8">
+          <!-- Error Alert -->
+          <div v-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+            <div class="flex items-center gap-3">
+              <span class="material-icons text-red-600 dark:text-red-400">error</span>
+              <span class="text-red-700 dark:text-red-300">{{ error }}</span>
+            </div>
           </div>
 
-          <!-- Full Name -->
-          <div>
-            <label for="name" class="form-label">{{ $t('auth.fullName') }} *</label>
-            <input
-              id="name"
-              v-model="form.name"
-              type="text"
-              class="form-input"
-              required
-              :disabled="loading"
-            />
-          </div>
+          <form class="space-y-6" @submit.prevent="handleRegister" novalidate>
+            <!-- Company Information Section -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-icons text-purple-600">domain</span>
+                {{ $t('auth.companyInfo') }}
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="companyName" class="form-label">{{ $t('auth.companyName') }} *</label>
+                  <input
+                    id="companyName"
+                    v-model="form.companyName"
+                    type="text"
+                    class="form-input"
+                    :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.companyName }"
+                    :placeholder="$t('auth.companyNamePlaceholder')"
+                    :disabled="loading"
+                    @input="clearError('companyName')"
+                  />
+                  <p v-if="errors.companyName" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ errors.companyName }}
+                  </p>
+                </div>
+                <div>
+                  <label for="tradeName" class="form-label">{{ $t('auth.tradeName') }}</label>
+                  <input
+                    id="tradeName"
+                    v-model="form.tradeName"
+                    type="text"
+                    class="form-input"
+                    :placeholder="$t('auth.tradeNamePlaceholder')"
+                    :disabled="loading"
+                  />
+                </div>
+                <div>
+                  <label for="taxOffice" class="form-label">{{ $t('auth.taxOffice') }}</label>
+                  <input
+                    id="taxOffice"
+                    v-model="form.taxOffice"
+                    type="text"
+                    class="form-input"
+                    :placeholder="$t('auth.taxOfficePlaceholder')"
+                    :disabled="loading"
+                  />
+                </div>
+                <div>
+                  <label for="taxNumber" class="form-label">{{ $t('auth.taxNumber') }}</label>
+                  <input
+                    id="taxNumber"
+                    v-model="form.taxNumber"
+                    type="text"
+                    class="form-input"
+                    placeholder="1234567890"
+                    :disabled="loading"
+                  />
+                </div>
+              </div>
+            </div>
 
-          <!-- Email -->
-          <div>
-            <label for="email" class="form-label">{{ $t('auth.email') }} *</label>
-            <input
-              id="email"
-              v-model="form.email"
-              type="email"
-              class="form-input"
-              required
-              :disabled="loading"
-            />
-          </div>
+            <!-- Contact Person Section -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-icons text-purple-600">person</span>
+                {{ $t('auth.contactPerson') }}
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label for="name" class="form-label">{{ $t('auth.fullName') }} *</label>
+                  <input
+                    id="name"
+                    v-model="form.name"
+                    type="text"
+                    class="form-input"
+                    :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.name }"
+                    :placeholder="$t('auth.fullNamePlaceholder')"
+                    :disabled="loading"
+                    @input="clearError('name')"
+                  />
+                  <p v-if="errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ errors.name }}
+                  </p>
+                </div>
+                <div>
+                  <label for="email" class="form-label">{{ $t('auth.email') }} *</label>
+                  <div class="relative">
+                    <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">email</span>
+                    <input
+                      id="email"
+                      v-model="form.email"
+                      type="email"
+                      class="form-input pl-10"
+                      :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.email }"
+                      placeholder="ornek@sirket.com"
+                      :disabled="loading"
+                      @input="clearError('email')"
+                    />
+                  </div>
+                  <p v-if="errors.email" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ errors.email }}
+                  </p>
+                </div>
+                <div>
+                  <label for="phone" class="form-label">{{ $t('auth.phone') }} *</label>
+                  <div class="relative">
+                    <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">phone</span>
+                    <input
+                      id="phone"
+                      v-model="form.phone"
+                      type="tel"
+                      class="form-input pl-10"
+                      :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500': errors.phone }"
+                      placeholder="+90 555 123 45 67"
+                      :disabled="loading"
+                      @input="clearError('phone')"
+                    />
+                  </div>
+                  <p v-if="errors.phone" class="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {{ errors.phone }}
+                  </p>
+                </div>
+              </div>
+            </div>
 
-          <!-- Phone -->
-          <div>
-            <label for="phone" class="form-label">{{ $t('auth.phone') }} *</label>
-            <input
-              id="phone"
-              v-model="form.phone"
-              type="tel"
-              class="form-input"
-              required
-              :disabled="loading"
-            />
-          </div>
+            <!-- Address Section -->
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                <span class="material-icons text-purple-600">location_on</span>
+                {{ $t('auth.address') }}
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                  <label for="street" class="form-label">{{ $t('auth.streetAddress') }}</label>
+                  <input
+                    id="street"
+                    v-model="form.address.street"
+                    type="text"
+                    class="form-input"
+                    :placeholder="$t('auth.streetPlaceholder')"
+                    :disabled="loading"
+                  />
+                </div>
+                <div>
+                  <label for="city" class="form-label">{{ $t('auth.city') }}</label>
+                  <input
+                    id="city"
+                    v-model="form.address.city"
+                    type="text"
+                    class="form-input"
+                    :disabled="loading"
+                  />
+                </div>
+                <div>
+                  <label for="country" class="form-label">{{ $t('auth.country') }}</label>
+                  <CountrySelect v-model="form.address.country" :disabled="loading" />
+                </div>
+              </div>
+            </div>
 
-          <!-- Password -->
-          <div>
-            <label for="password" class="form-label">{{ $t('auth.password') }} *</label>
-            <input
-              id="password"
-              v-model="form.password"
-              type="password"
-              class="form-input"
-              required
-              :disabled="loading"
-              minlength="6"
-            />
-          </div>
-
-          <!-- Confirm Password -->
-          <div>
-            <label for="confirmPassword" class="form-label"
-              >{{ $t('auth.confirmPassword') }} *</label
+            <!-- Terms & Privacy -->
+            <div
+              class="rounded-xl p-4 transition-colors"
+              :class="errors.acceptTerms
+                ? 'bg-red-50 dark:bg-red-900/20 border border-red-300 dark:border-red-700'
+                : 'bg-gray-50 dark:bg-slate-700/50'"
             >
-            <input
-              id="confirmPassword"
-              v-model="form.confirmPassword"
-              type="password"
-              class="form-input"
-              required
+              <label class="flex items-start gap-3 cursor-pointer">
+                <input
+                  v-model="form.acceptTerms"
+                  type="checkbox"
+                  class="mt-1 h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  @change="clearError('acceptTerms')"
+                />
+                <span class="text-sm" :class="errors.acceptTerms ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-slate-400'">
+                  {{ $t('auth.termsPrefix') }}
+                  <a href="#" class="text-purple-600 hover:underline">{{ $t('auth.termsOfService') }}</a>
+                  {{ $t('auth.and') }}
+                  <a href="#" class="text-purple-600 hover:underline">{{ $t('auth.privacyPolicy') }}</a>
+                  {{ $t('auth.termsSuffix') }}
+                </span>
+              </label>
+              <p v-if="errors.acceptTerms" class="mt-2 text-sm text-red-600 dark:text-red-400 ml-7">
+                {{ errors.acceptTerms }}
+              </p>
+            </div>
+
+            <!-- Info Box -->
+            <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+              <div class="flex items-start gap-3">
+                <span class="material-icons text-amber-600 dark:text-amber-400 mt-0.5">lightbulb</span>
+                <p class="text-sm text-amber-700 dark:text-amber-300">
+                  {{ $t('auth.noPasswordNote') }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="w-full btn-primary py-3 text-lg"
               :disabled="loading"
-              minlength="6"
-            />
-          </div>
-
-          <!-- Submit Button -->
-          <button type="submit" class="w-full btn-primary" :disabled="loading">
-            <span v-if="loading" class="flex items-center justify-center">
-              <svg class="animate-spin -ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24">
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                />
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              {{ $t('auth.registering') }}
-            </span>
-            <span v-else>{{ $t('auth.register') }}</span>
-          </button>
-        </form>
-
-        <!-- Login Link -->
-        <div class="mt-6 text-center">
-          <p class="text-sm text-gray-600 dark:text-slate-400">
-            {{ $t('auth.alreadyHaveAccount') }}
-            <RouterLink
-              to="/login"
-              class="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
             >
-              {{ $t('auth.loginHere') }}
-            </RouterLink>
-          </p>
+              <span v-if="loading" class="flex items-center justify-center">
+                <span class="material-icons animate-spin mr-2">sync</span>
+                {{ $t('auth.submitting') }}
+              </span>
+              <span v-else class="flex items-center justify-center">
+                <span class="material-icons mr-2">send</span>
+                {{ $t('auth.submitApplication') }}
+              </span>
+            </button>
+          </form>
+
+          <!-- Login Link -->
+          <div class="mt-6 text-center pt-6 border-t border-gray-200 dark:border-slate-700">
+            <p class="text-gray-600 dark:text-slate-400">
+              {{ $t('auth.alreadyHaveAccount') }}
+              <RouterLink
+                to="/auth/login"
+                class="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium"
+              >
+                {{ $t('auth.loginHere') }}
+              </RouterLink>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -169,65 +302,140 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import apiClient from '@/services/api'
 import { useI18n } from 'vue-i18n'
-import { useAsyncAction } from '@/composables/useAsyncAction'
+import CountrySelect from '@/components/common/CountrySelect.vue'
+import LanguageSelector from '@/components/common/LanguageSelector.vue'
+import { useUIStore } from '@/stores/ui'
 
 const { t } = useI18n()
+const uiStore = useUIStore()
 
-// Async action composable
-const { isLoading: loading, execute: executeRegister } = useAsyncAction({ showSuccessToast: false, showErrorToast: false })
+const isDark = computed(() => uiStore.darkMode)
+const toggleTheme = () => uiStore.toggleDarkMode()
+
+const loading = ref(false)
+const error = ref('')
+const success = ref(false)
 
 const form = ref({
+  companyName: '',
+  tradeName: '',
+  name: '',
+  email: '',
+  phone: '',
+  taxOffice: '',
+  taxNumber: '',
+  address: {
+    street: '',
+    city: '',
+    country: 'TR'
+  },
+  acceptTerms: false
+})
+
+const errors = reactive({
   companyName: '',
   name: '',
   email: '',
   phone: '',
-  password: '',
-  confirmPassword: ''
+  acceptTerms: ''
 })
 
-const error = ref('')
-const success = ref('')
+const clearError = (field) => {
+  errors[field] = ''
+}
+
+const clearAllErrors = () => {
+  Object.keys(errors).forEach(key => {
+    errors[key] = ''
+  })
+}
+
+const validateForm = () => {
+  clearAllErrors()
+  let isValid = true
+
+  // Company name
+  if (!form.value.companyName.trim()) {
+    errors.companyName = t('validation.required', { field: t('auth.companyName') })
+    isValid = false
+  } else if (form.value.companyName.trim().length < 2) {
+    errors.companyName = t('validation.minLength', { field: t('auth.companyName'), min: 2 })
+    isValid = false
+  }
+
+  // Full name
+  if (!form.value.name.trim()) {
+    errors.name = t('validation.required', { field: t('auth.fullName') })
+    isValid = false
+  } else if (form.value.name.trim().length < 2) {
+    errors.name = t('validation.minLength', { field: t('auth.fullName'), min: 2 })
+    isValid = false
+  }
+
+  // Email
+  if (!form.value.email.trim()) {
+    errors.email = t('validation.required', { field: t('auth.email') })
+    isValid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
+    errors.email = t('validation.invalidEmail')
+    isValid = false
+  }
+
+  // Phone
+  if (!form.value.phone.trim()) {
+    errors.phone = t('validation.required', { field: t('auth.phone') })
+    isValid = false
+  } else if (form.value.phone.replace(/\D/g, '').length < 10) {
+    errors.phone = t('validation.invalidPhone')
+    isValid = false
+  }
+
+  // Terms
+  if (!form.value.acceptTerms) {
+    errors.acceptTerms = t('auth.acceptTermsRequired')
+    isValid = false
+  }
+
+  return isValid
+}
 
 const handleRegister = async () => {
   error.value = ''
-  success.value = ''
 
-  // Validate passwords match
-  if (form.value.password !== form.value.confirmPassword) {
-    error.value = t('auth.passwordsDoNotMatch')
+  if (!validateForm()) {
+    // Scroll to first error
+    const firstErrorField = document.querySelector('.border-red-500')
+    if (firstErrorField) {
+      firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
     return
   }
 
-  await executeRegister(
-    () => apiClient.post('/auth/register', {
-      companyName: form.value.companyName,
-      name: form.value.name,
-      email: form.value.email,
-      phone: form.value.phone,
-      password: form.value.password
-    }),
-    {
-      onSuccess: response => {
-        if (response.data.success) {
-          success.value = t('auth.registrationSuccess')
-          form.value = {
-            companyName: '',
-            name: '',
-            email: '',
-            phone: '',
-            password: '',
-            confirmPassword: ''
-          }
-        }
-      },
-      onError: err => {
-        error.value = err.response?.data?.message || t('auth.registrationFailed')
-      }
+  loading.value = true
+
+  try {
+    const response = await apiClient.post('/auth/register', {
+      companyName: form.value.companyName.trim(),
+      tradeName: form.value.tradeName.trim(),
+      name: form.value.name.trim(),
+      email: form.value.email.trim().toLowerCase(),
+      phone: form.value.phone.trim(),
+      taxOffice: form.value.taxOffice.trim(),
+      taxNumber: form.value.taxNumber.trim(),
+      address: form.value.address
+    })
+
+    if (response.data.success) {
+      success.value = true
     }
-  )
+  } catch (err) {
+    error.value = err.response?.data?.message || t('auth.registrationFailed')
+  } finally {
+    loading.value = false
+  }
 }
 </script>

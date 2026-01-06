@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { adminLangString, ADMIN_LANGUAGES } from '../../constants/languages.js'
+import { adminLangString, ADMIN_LANGUAGES } from '#constants/languages.js'
 
 /**
  * Season Model

@@ -1,8 +1,8 @@
 import express from 'express'
 import * as planningService from './planning.service.js'
-import { protect, requireAdmin, requirePlatformAdmin } from '../../middleware/auth.js'
-import { partnerContext } from '../../middlewares/partnerContext.js'
-import { roomTypeUpload } from '../../helpers/roomTypeUpload.js'
+import { protect, requireAdmin, requirePlatformAdmin } from '#middleware/auth.js'
+import { partnerContext } from '#middleware/partnerContext.js'
+import { roomTypeUpload } from '#helpers/roomTypeUpload.js'
 
 const router = express.Router()
 

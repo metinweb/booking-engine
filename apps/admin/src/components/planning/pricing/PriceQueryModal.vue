@@ -777,10 +777,24 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import planningService from '@/services/planningService'
 import DateRangePicker from '@/components/common/DateRangePicker.vue'
+import { useDraggableModal } from '@/composables/useDraggableModal'
+import {
+  formatPrice,
+  formatDate,
+  getRoomTypeName as getRoomTypeNameUtil,
+  getRoomImage as getRoomImageUtil,
+  getMealPlanBadgeClass,
+  getIssueBadgeClass,
+  getIssueShortLabel,
+  getTierPricing,
+  calculateDefaultDates,
+  calculateNights
+} from '@/utils/priceQueryHelpers'
+import { transformApiResultToMpResult, groupResultsByRoomType } from '@/utils/priceResultTransformer'
 
 const { locale } = useI18n()
 
@@ -800,79 +814,8 @@ const loading = ref(false)
 const searched = ref(false)
 const results = ref([])
 
-// Draggable modal
-const modalRef = ref(null)
-const isDragging = ref(false)
-const dragOffset = ref({ x: 0, y: 0 })
-const modalPosition = ref({ x: 0, y: 0 })
-const isPositioned = ref(false)
-
-const modalStyle = computed(() => {
-  if (!isPositioned.value) {
-    return {
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)'
-    }
-  }
-  return {
-    top: `${modalPosition.value.y}px`,
-    left: `${modalPosition.value.x}px`,
-    transform: 'none'
-  }
-})
-
-const startDrag = e => {
-  if (!modalRef.value) return
-  isDragging.value = true
-
-  const rect = modalRef.value.getBoundingClientRect()
-
-  // If first drag, set initial position
-  if (!isPositioned.value) {
-    modalPosition.value = {
-      x: rect.left,
-      y: rect.top
-    }
-    isPositioned.value = true
-  }
-
-  dragOffset.value = {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top
-  }
-
-  document.addEventListener('mousemove', onDrag)
-  document.addEventListener('mouseup', stopDrag)
-}
-
-const onDrag = e => {
-  if (!isDragging.value) return
-
-  const newX = e.clientX - dragOffset.value.x
-  const newY = e.clientY - dragOffset.value.y
-
-  // Keep modal within viewport
-  const maxX = window.innerWidth - (modalRef.value?.offsetWidth || 0)
-  const maxY = window.innerHeight - (modalRef.value?.offsetHeight || 0)
-
-  modalPosition.value = {
-    x: Math.max(0, Math.min(newX, maxX)),
-    y: Math.max(0, Math.min(newY, maxY))
-  }
-}
-
-const stopDrag = () => {
-  isDragging.value = false
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDrag)
-}
-
-// Clean up on unmount
-onUnmounted(() => {
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDrag)
-})
+// Draggable modal composable
+const { modalRef, modalStyle, startDrag, resetPosition } = useDraggableModal()
 
 // Expanded row tracking (roomTypeId + mealPlanId)
 const expandedRow = ref(null)
@@ -907,18 +850,6 @@ const defaultMarket = computed(() => {
 
 const currency = computed(() => defaultMarket.value?.currency || 'EUR')
 
-// Get 3-tier pricing from meal plan result (calculated by API)
-const getTierPricing = mpResult => {
-  // Return API-calculated tier pricing
-  return (
-    mpResult.tierPricing || {
-      hotelCost: 0,
-      b2cPrice: 0,
-      b2bPrice: 0
-    }
-  )
-}
-
 // Date range for DateRangePicker
 const dateRange = ref({ start: '', end: '' })
 
@@ -931,52 +862,7 @@ const query = ref({
 
 // Set default dates based on initialMonth or current date
 const setDefaultDates = () => {
-  const formatDate = date => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
-  let startDate, endDate
-
-  if (props.initialMonth) {
-    // Use the calendar's current month
-    const year = props.initialMonth.year
-    const month = props.initialMonth.month - 1 // JavaScript months are 0-indexed
-
-    // Start from the 1st of the month (or today if current month and past the 1st)
-    const today = new Date()
-    const firstOfMonth = new Date(year, month, 1)
-
-    if (year === today.getFullYear() && month === today.getMonth()) {
-      // Current month - start from tomorrow
-      startDate = new Date(today)
-      startDate.setDate(startDate.getDate() + 1)
-    } else if (firstOfMonth > today) {
-      // Future month - start from the 1st
-      startDate = firstOfMonth
-    } else {
-      // Past month - still use 1st (user may want to check historical)
-      startDate = firstOfMonth
-    }
-
-    // End date: 2 nights later
-    endDate = new Date(startDate)
-    endDate.setDate(endDate.getDate() + 2)
-  } else {
-    // Fallback to tomorrow + 2 nights
-    const today = new Date()
-    startDate = new Date(today)
-    startDate.setDate(startDate.getDate() + 1)
-    endDate = new Date(startDate)
-    endDate.setDate(endDate.getDate() + 2)
-  }
-
-  dateRange.value = {
-    start: formatDate(startDate),
-    end: formatDate(endDate)
-  }
+  dateRange.value = calculateDefaultDates(props.initialMonth)
 }
 
 // Computed
@@ -989,12 +875,7 @@ const isQueryValid = computed(() => {
   )
 })
 
-const nights = computed(() => {
-  if (!dateRange.value.start || !dateRange.value.end) return 0
-  const start = new Date(dateRange.value.start)
-  const end = new Date(dateRange.value.end)
-  return Math.ceil((end - start) / (1000 * 60 * 60 * 24))
-})
+const nights = computed(() => calculateNights(dateRange.value.start, dateRange.value.end))
 
 // Methods
 const updateChildCount = count => {
@@ -1007,86 +888,15 @@ const updateChildCount = count => {
   query.value.childAges = query.value.childAges.slice(0, newCount)
 }
 
-const getRoomTypeName = roomType => {
-  if (!roomType) return ''
-  return roomType.name?.[locale.value] || roomType.name?.tr || roomType.name?.en || roomType.code
-}
+// Wrapper for getRoomTypeName to use locale
+const getRoomTypeName = roomType => getRoomTypeNameUtil(roomType, locale.value)
 
 // API base URL for images
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://api.minires.com/api'
 const imageBaseUrl = apiBaseUrl.replace('/api', '')
 
-const getRoomImage = roomType => {
-  if (!roomType) return null
-  // Check for images array
-  if (roomType.images?.length > 0) {
-    const mainImage = roomType.images.find(img => img.isMain) || roomType.images[0]
-    const imageUrl = mainImage?.url || mainImage
-    if (imageUrl) {
-      // If URL is relative, prepend the base URL
-      if (imageUrl.startsWith('/')) {
-        return imageBaseUrl + imageUrl
-      }
-      return imageUrl
-    }
-  }
-  // Check for single image field
-  if (roomType.image) {
-    if (roomType.image.startsWith('/')) {
-      return imageBaseUrl + roomType.image
-    }
-    return roomType.image
-  }
-  return null
-}
-
-const formatPrice = price => {
-  return Math.round(price).toLocaleString('tr-TR')
-}
-
-const formatDate = dateStr => {
-  if (!dateStr) return ''
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit' })
-}
-
-const getMealPlanBadgeClass = code => {
-  const colors = {
-    RO: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-    BB: 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300',
-    HB: 'bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300',
-    FB: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
-    AI: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300',
-    UAI: 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
-  }
-  return colors[code] || 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-}
-
-const getIssueBadgeClass = type => {
-  const classes = {
-    stop_sale: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-    single_stop: 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400',
-    cta: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-    ctd: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-    min_stay: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-    no_rate: 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
-    capacity: 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
-  }
-  return classes[type] || 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-}
-
-const getIssueShortLabel = type => {
-  const labels = {
-    stop_sale: 'STOP',
-    single_stop: '1P',
-    cta: 'CTA',
-    ctd: 'CTD',
-    min_stay: 'MIN',
-    no_rate: '-',
-    capacity: 'KAP'
-  }
-  return labels[type] || '?'
-}
+// Wrapper for getRoomImage to include base URL
+const getRoomImage = roomType => getRoomImageUtil(roomType, imageBaseUrl)
 
 const searchAvailability = async () => {
   if (!isQueryValid.value) return
@@ -1133,8 +943,6 @@ const searchAvailability = async () => {
         })
         .then(response => {
           const result = response.data?.data || response.data || response
-          console.log('API Response for', q.roomTypeId, q.mealPlanId, ':', result)
-          console.log('Daily breakdown sample:', result?.dailyBreakdown?.[0])
           return { ...q, result }
         })
         .catch(error => ({
@@ -1145,196 +953,13 @@ const searchAvailability = async () => {
 
     const apiResults = await Promise.all(apiPromises)
 
-    // Group results by room type
-    const roomTypeMap = new Map()
-    for (const roomType of props.roomTypes) {
-      roomTypeMap.set(roomType._id, {
-        roomType,
-        mealPlans: []
-      })
-    }
-
-    // Process API results
-    for (const apiResult of apiResults) {
-      const roomResult = roomTypeMap.get(apiResult.roomTypeId)
-      if (!roomResult) continue
-
-      // Transform API result to UI format
-      const mpResult = transformApiResultToMpResult(apiResult)
-      roomResult.mealPlans.push(mpResult)
-    }
-
-    // Convert map to results array
-    results.value = Array.from(roomTypeMap.values())
+    // Use utility to group results by room type
+    results.value = groupResultsByRoomType(apiResults, props.roomTypes)
   } catch (error) {
     console.error('Search error:', error)
   } finally {
     loading.value = false
   }
-}
-
-/**
- * Transform API result to meal plan result format for UI
- */
-const transformApiResultToMpResult = apiResult => {
-  const { mealPlan, result, error } = apiResult
-
-  // Handle API error
-  if (error) {
-    return {
-      mealPlan,
-      hasRates: false,
-      available: false,
-      totalPrice: 0,
-      avgPerNight: 0,
-      issues: [{ type: 'api_error', date: null, message: error }],
-      dailyBreakdown: [],
-      capacityExceeded: error === 'BELOW_MIN_ADULTS' || error.includes('Minimum'),
-      tierPricing: { hotelCost: 0, b2cPrice: 0, b2bPrice: 0 }
-    }
-  }
-
-  // Handle capacity exceeded (from API)
-  if (!result.success && result.error === 'BELOW_MIN_ADULTS') {
-    return {
-      mealPlan,
-      hasRates: false,
-      available: false,
-      totalPrice: 0,
-      avgPerNight: 0,
-      issues: [
-        {
-          type: 'capacity',
-          date: null,
-          message: result.message || `Minimum ${result.minAdults} yetişkin gerekli`
-        }
-      ],
-      dailyBreakdown: [],
-      capacityExceeded: true,
-      tierPricing: { hotelCost: 0, b2cPrice: 0, b2bPrice: 0 }
-    }
-  }
-
-  // Handle no rates found
-  if (!result.success || !result.dailyBreakdown) {
-    return {
-      mealPlan,
-      hasRates: false,
-      available: false,
-      totalPrice: 0,
-      avgPerNight: 0,
-      issues: [{ type: 'no_rate', date: null, message: result.error || 'Fiyat bulunamadı' }],
-      dailyBreakdown: [],
-      capacityExceeded: false,
-      tierPricing: { hotelCost: 0, b2cPrice: 0, b2bPrice: 0 }
-    }
-  }
-
-  // Transform daily breakdown
-  const dailyBreakdown = result.dailyBreakdown.map((day, idx) => ({
-    date: day.date,
-    rate: day.hasRate ? day : null,
-    basePrice: day.basePrice || day.price || 0,
-    extraAdultPrice: day.adultPrice - (day.basePrice || 0) > 0 ? day.adultPrice - day.basePrice : 0,
-    childrenPrice: day.childPrice || 0,
-    singleSupplementPrice: 0,
-    obpPrice: day.pricingType === 'per_person' ? day.price : null,
-    dailyTotal: day.price || 0,
-    hasIssue: day.hasIssue || false,
-    isCheckIn: idx === 0,
-    isCheckOut: idx === result.dailyBreakdown.length - 1,
-    minStayIssue: day.restrictions?.minStay || false,
-    // 3-tier pricing from API
-    hotelCost: day.hotelCost || 0,
-    b2cPrice: day.b2cPrice || 0,
-    b2bPrice: day.b2bPrice || 0,
-    // Campaign info
-    campaignApplied: day.campaignApplied || false,
-    discountAmount: day.discountAmount || 0,
-    isFreeNight: day.isFreeNight || false,
-    appliedCampaigns: day.appliedCampaigns || []
-  }))
-
-  // Build issues array from availability
-  const issues = []
-  if (result.availability?.issues) {
-    for (const issue of result.availability.issues) {
-      issues.push({
-        type: issue.type === 'restriction' ? getIssueTypeFromMessage(issue.message) : issue.type,
-        date: issue.date,
-        message: issue.message
-      })
-    }
-  }
-
-  // Get campaign info
-  const appliedCampaigns = result.campaigns?.applied || []
-  const campaign = appliedCampaigns.length > 0 ? appliedCampaigns[0] : null
-  const discountText = appliedCampaigns.map(c => c.discountText).join(' + ')
-
-  // Determine pricing type from daily breakdown
-  const isOBP = result.dailyBreakdown.some(d => d.pricingType === 'per_person')
-  const isMultiplierOBP = isOBP && result.dailyBreakdown.some(d => d.multiplier !== undefined)
-
-  return {
-    mealPlan,
-    hasRates: result.dailyBreakdown.some(d => d.hasRate),
-    available: result.availability?.isAvailable ?? true,
-    // Prices from API
-    originalPrice: result.pricing?.originalTotal || 0,
-    totalPrice: result.pricing?.finalTotal || 0,
-    avgPerNight: result.pricing?.avgPerNight || 0,
-    // 3-tier pricing from API (aggregated totals)
-    tierPricing: {
-      hotelCost: result.pricing?.hotelCost || 0,
-      b2cPrice: result.pricing?.b2cPrice || 0,
-      b2bPrice: result.pricing?.b2bPrice || 0
-    },
-    // Per night tier pricing
-    tierPricingPerNight: result.pricing?.perNight || {
-      hotelCost: 0,
-      b2cPrice: 0,
-      b2bPrice: 0
-    },
-    // Sales settings info
-    salesSettings: result.salesSettings || {},
-    // Issues and availability
-    issues,
-    dailyBreakdown,
-    capacityExceeded: false,
-    // Pricing type
-    isOBP,
-    isMultiplierOBP,
-    // Totals (for backward compatibility with UI)
-    totals: {
-      basePrice: result.pricing?.originalTotal || 0,
-      extraAdult: 0,
-      children: 0,
-      singleSupplement: 0,
-      obpTotal: isOBP ? result.pricing?.originalTotal || 0 : 0
-    },
-    // Campaign info
-    campaign,
-    campaigns: appliedCampaigns,
-    discountText,
-    discountAmount: result.campaigns?.totalDiscount || 0,
-    totalDiscountAmount: result.campaigns?.totalDiscount || 0,
-    // Non-refundable pricing
-    nonRefundable: result.nonRefundable || { enabled: false }
-  }
-}
-
-/**
- * Map error message to issue type
- */
-const getIssueTypeFromMessage = message => {
-  if (message?.includes('Stop sale') || message?.includes('Satış kapalı')) return 'stop_sale'
-  if (message?.includes('Single') || message?.includes('Tek kişi')) return 'single_stop'
-  if (message?.includes('Arrival') || message?.includes('giriş')) return 'cta'
-  if (message?.includes('Departure') || message?.includes('çıkış')) return 'ctd'
-  if (message?.includes('Minimum') || message?.includes('minimum')) return 'min_stay'
-  if (message?.includes('No rate') || message?.includes('tanımlı değil')) return 'no_rate'
-  return 'restriction'
 }
 
 // Reset on modal open
@@ -1347,7 +972,7 @@ watch(
       results.value = []
       expandedRow.value = null
       // Reset position
-      isPositioned.value = false
+      resetPosition()
     }
   }
 )

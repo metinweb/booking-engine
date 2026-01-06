@@ -4,7 +4,7 @@
  */
 
 import mongoose from 'mongoose'
-import logger from '../../core/logger.js'
+import logger from '#core/logger.js'
 
 // Transaction types
 export const TRANSACTION_TYPES = {

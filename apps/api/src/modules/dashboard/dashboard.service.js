@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Partner from '../partner/partner.model.js'
 import Agency from '../agency/agency.model.js'
 import User from '../user/user.model.js'

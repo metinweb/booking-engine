@@ -1,9 +1,9 @@
 import PlatformSettings from './platformSettings.model.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import logger from '../../core/logger.js'
+import { asyncHandler } from '#helpers'
+import logger from '#core/logger.js'
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
 import axios from 'axios'
-import { decrypt } from '../../helpers/encryption.js'
+import { decrypt } from '#helpers/encryption.js'
 
 /**
  * Get platform settings

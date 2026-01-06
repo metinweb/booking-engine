@@ -57,7 +57,7 @@
             </div>
 
             <!-- Body -->
-            <div class="p-4 max-h-[calc(100vh-200px)] overflow-y-auto" :class="contentClass">
+            <div class="p-4 max-h-[calc(100vh-200px)] overflow-y-auto overflow-x-hidden" :class="contentClass">
               <slot></slot>
             </div>
 

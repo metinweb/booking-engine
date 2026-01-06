@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { B2C_LANGUAGES, b2cLangString } from '../../constants/languages.js'
+import { B2C_LANGUAGES, b2cLangString } from '#constants/languages.js'
 
 /**
  * MealPlan Model

@@ -1,4 +1,5 @@
 import logger from '../core/logger.js'
+import config from '../config/index.js'
 import {
   sendEmail,
   sendBookingConfirmation,
@@ -202,7 +203,7 @@ class NotificationService {
       checkIn: this.formatDate(booking.checkIn),
       checkOut: this.formatDate(booking.checkOut),
       totalPrice: this.formatPrice(booking.totalPrice, booking.currency),
-      bookingUrl: `${process.env.FRONTEND_URL || ''}/bookings/${booking._id}`
+      bookingUrl: `${config.frontendUrl}/bookings/${booking._id}`
     }
 
     return this.send({

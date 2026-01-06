@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
-import config from '../../config/index.js'
+import config from '#config'
 import PmsUser from './pmsUser.model.js'
 import User from '../user/user.model.js'
 import Partner from '../partner/partner.model.js'
-import { UnauthorizedError, ForbiddenError } from '../../core/errors.js'
+import { UnauthorizedError, ForbiddenError } from '#core/errors.js'
 
 /**
  * PMS Authentication Middleware

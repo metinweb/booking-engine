@@ -3,11 +3,11 @@ import User from './user.model.js'
 import Partner from '../partner/partner.model.js'
 import Agency from '../agency/agency.model.js'
 import Session from '../session/session.model.js'
-import { NotFoundError, ForbiddenError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { generate2FASecret, generateQRCode, verify2FAToken } from '../../helpers/twoFactor.js'
-import { send2FASetupEmail, sendActivationEmail } from '../../helpers/mail.js'
-import logger from '../../core/logger.js'
+import { NotFoundError, ForbiddenError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import { generate2FASecret, generateQRCode, verify2FAToken } from '#helpers/twoFactor.js'
+import { send2FASetupEmail, sendActivationEmail } from '#helpers/mail.js'
+import logger from '#core/logger.js'
 
 // ============================================
 // User CRUD

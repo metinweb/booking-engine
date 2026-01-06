@@ -1,7 +1,7 @@
 import PmsUser from './pmsUser.model.js'
 import Hotel from '../hotel/hotel.model.js'
-import { BadRequestError, NotFoundError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { BadRequestError, NotFoundError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
 
 // Get all PMS users for partner
 export const getAll = asyncHandler(async (req, res) => {

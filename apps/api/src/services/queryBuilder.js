@@ -1,21 +1,78 @@
 /**
- * Query Builder Service
- * Centralized helpers for building MongoDB queries with pagination, filtering, and search
- * Replaces 50+ duplicate implementations across modules
+ * @module services/queryBuilder
+ * @description Centralized query building utilities for MongoDB.
+ * Provides pagination, filtering, search, and query construction helpers.
+ * Replaces duplicate implementations across modules.
  */
 
 /**
- * Default pagination options
+ * Pagination result object
+ * @typedef {Object} PaginationResult
+ * @property {number} page - Current page number
+ * @property {number} limit - Items per page
+ * @property {number} skip - Number of items to skip
  */
+
+/**
+ * Pagination info for responses
+ * @typedef {Object} PaginationInfo
+ * @property {number} page - Current page number
+ * @property {number} limit - Items per page
+ * @property {number} total - Total item count
+ * @property {number} pages - Total number of pages
+ */
+
+/**
+ * Paginated query result
+ * @typedef {Object} PaginatedResult
+ * @property {Array} data - Array of results
+ * @property {PaginationInfo} pagination - Pagination metadata
+ */
+
+/**
+ * Query options for paginated queries
+ * @typedef {Object} QueryOptions
+ * @property {number} [page] - Page number
+ * @property {number} [limit] - Items per page
+ * @property {Object} [sort] - Sort criteria
+ * @property {string} [select] - Fields to select
+ * @property {string|Object|Array} [populate] - Population options
+ * @property {boolean} [lean] - Return plain objects
+ */
+
+/**
+ * Filter configuration for buildFilterFromQuery
+ * @typedef {Object} FilterConfig
+ * @property {Object} [baseFilter] - Base filter to extend
+ * @property {string[]} [searchFields] - Fields to search in
+ * @property {string} [statusField] - Status field name
+ * @property {string} [dateField] - Date field name
+ * @property {string[]} [additionalFields] - Additional equality filter fields
+ */
+
+/** @constant {number} Default page number */
 export const DEFAULT_PAGE = 1
+
+/** @constant {number} Default items per page */
 export const DEFAULT_LIMIT = 20
+
+/** @constant {number} Maximum items per page */
 export const MAX_LIMIT = 100
 
 /**
  * Parse pagination parameters from request query
  * @param {Object} query - Request query object
- * @param {Object} options - Override defaults
- * @returns {Object} Parsed pagination params
+ * @param {Object} [options={}] - Override defaults
+ * @param {number} [options.defaultPage] - Default page if not specified
+ * @param {number} [options.defaultLimit] - Default limit if not specified
+ * @param {number} [options.maxLimit] - Maximum allowed limit
+ * @returns {PaginationResult} Parsed pagination parameters
+ * @example
+ * const { page, limit, skip } = parsePagination(req.query)
+ * // { page: 1, limit: 20, skip: 0 }
+ *
+ * const { page, limit, skip } = parsePagination({ page: '3', limit: '50' })
+ * // { page: 3, limit: 50, skip: 100 }
  */
 export const parsePagination = (query, options = {}) => {
   const page = Math.max(1, parseInt(query.page) || options.defaultPage || DEFAULT_PAGE)
@@ -31,10 +88,19 @@ export const parsePagination = (query, options = {}) => {
 
 /**
  * Execute paginated query with count
- * @param {Model} Model - Mongoose model
- * @param {Object} filter - Query filter
- * @param {Object} options - Query options
- * @returns {Promise<{data: Array, pagination: Object}>}
+ * Runs count and find queries in parallel for better performance
+ * @param {import('mongoose').Model} Model - Mongoose model
+ * @param {Object} [filter={}] - Query filter
+ * @param {QueryOptions} [options={}] - Query options
+ * @returns {Promise<PaginatedResult>} Paginated result with data and pagination info
+ * @example
+ * const result = await paginatedQuery(Hotel, { status: 'active' }, {
+ *   page: 1,
+ *   limit: 20,
+ *   sort: { name: 1 },
+ *   populate: 'partner'
+ * })
+ * // { data: [...], pagination: { page: 1, limit: 20, total: 100, pages: 5 } }
  */
 export const paginatedQuery = async (Model, filter = {}, options = {}) => {
   const {
@@ -66,10 +132,11 @@ export const paginatedQuery = async (Model, filter = {}, options = {}) => {
 }
 
 /**
- * Build query with common options
- * @param {Query} query - Mongoose query
+ * Build query with common options (internal helper)
+ * @private
+ * @param {import('mongoose').Query} query - Mongoose query
  * @param {Object} options - Query options
- * @returns {Query} Modified query
+ * @returns {import('mongoose').Query} Modified query
  */
 const buildQuery = (query, options) => {
   const { sort, skip, limit, select, populate, lean } = options
@@ -95,11 +162,17 @@ const buildQuery = (query, options) => {
 }
 
 /**
- * Build search filter for multiple fields
+ * Build search filter for multiple fields using case-insensitive regex
  * @param {string} searchTerm - Search term
- * @param {Array<string>} fields - Fields to search in
- * @param {Object} existingFilter - Existing filter to extend
- * @returns {Object} Filter with $or search condition
+ * @param {string[]} fields - Fields to search in
+ * @param {Object} [existingFilter={}] - Existing filter to extend
+ * @returns {Object} MongoDB filter with $or search condition
+ * @example
+ * const filter = buildSearchFilter('john', ['name', 'email'])
+ * // { $or: [{ name: { $regex: 'john', $options: 'i' } }, { email: { $regex: 'john', $options: 'i' } }] }
+ *
+ * const filter = buildSearchFilter('test', ['name'], { status: 'active' })
+ * // { status: 'active', $or: [{ name: { $regex: 'test', $options: 'i' } }] }
  */
 export const buildSearchFilter = (searchTerm, fields, existingFilter = {}) => {
   if (!searchTerm || !fields?.length) {
@@ -124,12 +197,18 @@ export const buildSearchFilter = (searchTerm, fields, existingFilter = {}) => {
 }
 
 /**
- * Build date range filter
+ * Build date range filter for a field
  * @param {string} field - Date field name
- * @param {string|Date} startDate - Start date
- * @param {string|Date} endDate - End date
- * @param {Object} existingFilter - Existing filter to extend
- * @returns {Object} Filter with date range
+ * @param {string|Date|null} startDate - Start date (inclusive)
+ * @param {string|Date|null} endDate - End date (inclusive, set to end of day)
+ * @param {Object} [existingFilter={}] - Existing filter to extend
+ * @returns {Object} MongoDB filter with date range
+ * @example
+ * const filter = buildDateFilter('createdAt', '2024-01-01', '2024-12-31')
+ * // { createdAt: { $gte: Date, $lte: Date } }
+ *
+ * const filter = buildDateFilter('checkIn', '2024-06-15', null)
+ * // { checkIn: { $gte: Date } }
  */
 export const buildDateFilter = (field, startDate, endDate, existingFilter = {}) => {
   const filter = { ...existingFilter }
@@ -151,11 +230,15 @@ export const buildDateFilter = (field, startDate, endDate, existingFilter = {}) 
 }
 
 /**
- * Build status filter with support for 'all' value
- * @param {string} status - Status value
- * @param {Object} existingFilter - Existing filter to extend
- * @param {string} fieldName - Field name (default: 'status')
- * @returns {Object} Filter with status
+ * Build status filter with support for 'all' value (which returns all statuses)
+ * @param {string|null} status - Status value (null or 'all' returns no filter)
+ * @param {Object} [existingFilter={}] - Existing filter to extend
+ * @param {string} [fieldName='status'] - Status field name
+ * @returns {Object} MongoDB filter with status
+ * @example
+ * buildStatusFilter('active') // { status: 'active' }
+ * buildStatusFilter('all') // {} (no filter)
+ * buildStatusFilter('confirmed', {}, 'bookingStatus') // { bookingStatus: 'confirmed' }
  */
 export const buildStatusFilter = (status, existingFilter = {}, fieldName = 'status') => {
   if (!status || status === 'all') {
@@ -169,10 +252,20 @@ export const buildStatusFilter = (status, existingFilter = {}, fieldName = 'stat
 }
 
 /**
- * Build filter from common query parameters
- * @param {Object} query - Request query
- * @param {Object} config - Filter configuration
- * @returns {Object} Built filter
+ * Build complete filter from request query parameters
+ * Combines search, status, date range, and additional field filters
+ * @param {Object} query - Request query object
+ * @param {FilterConfig} [config={}] - Filter configuration
+ * @returns {Object} Complete MongoDB filter
+ * @example
+ * const filter = buildFilterFromQuery(
+ *   { search: 'john', status: 'active', startDate: '2024-01-01', hotelId: '123' },
+ *   {
+ *     baseFilter: { partner: partnerId },
+ *     searchFields: ['name', 'email'],
+ *     additionalFields: ['hotelId']
+ *   }
+ * )
  */
 export const buildFilterFromQuery = (query, config = {}) => {
   let filter = { ...config.baseFilter }
@@ -210,10 +303,15 @@ export const buildFilterFromQuery = (query, config = {}) => {
 }
 
 /**
- * Send paginated response
- * @param {Response} res - Express response
- * @param {Object} result - Result from paginatedQuery
- * @param {string} dataKey - Key name for data array (default: 'items')
+ * Send paginated response with nested data structure
+ * @param {import('express').Response} res - Express response object
+ * @param {PaginatedResult} result - Result from paginatedQuery
+ * @param {string} [dataKey='items'] - Key name for data array
+ * @returns {void}
+ * @example
+ * const result = await paginatedQuery(Hotel, filter, options)
+ * sendPaginatedResponse(res, result, 'hotels')
+ * // Response: { success: true, data: { hotels: [...], pagination: {...} } }
  */
 export const sendPaginatedResponse = (res, result, dataKey = 'items') => {
   res.json({
@@ -226,8 +324,13 @@ export const sendPaginatedResponse = (res, result, dataKey = 'items') => {
 }
 
 /**
- * Send paginated response with flat structure
- * Some endpoints expect data and pagination at root level
+ * Send paginated response with flat structure (data and pagination at root level)
+ * @param {import('express').Response} res - Express response object
+ * @param {PaginatedResult} result - Result from paginatedQuery
+ * @returns {void}
+ * @example
+ * sendFlatPaginatedResponse(res, result)
+ * // Response: { success: true, data: [...], pagination: {...} }
  */
 export const sendFlatPaginatedResponse = (res, result) => {
   res.json({

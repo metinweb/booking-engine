@@ -3,7 +3,7 @@
  * Handles cashier/POS operations
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Transaction, {
   TRANSACTION_TYPES,
   TRANSACTION_CATEGORIES,
@@ -18,7 +18,7 @@ import Stay from '../pms-frontdesk/stay.model.js'
 import Hotel from '../hotel/hotel.model.js'
 import PmsSettings from '../pms-settings/pmsSettings.model.js'
 import { emitTransactionUpdate } from '../pms/pmsSocket.js'
-import { getExchangeRates, convertCurrency } from '../../services/currencyService.js'
+import { getExchangeRates, convertCurrency } from '#services/currencyService.js'
 
 // ==========================================
 // SHIFT MANAGEMENT

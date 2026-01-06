@@ -1,6 +1,6 @@
 import express from 'express'
 import * as dashboardService from './dashboard.service.js'
-import { protect, requirePlatformAdmin, requirePartnerOrAdmin } from '../../middleware/auth.js'
+import { protect, requirePlatformAdmin, requirePartnerOrAdmin } from '#middleware/auth.js'
 
 const router = express.Router()
 

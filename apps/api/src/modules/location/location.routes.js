@@ -1,6 +1,6 @@
 import express from 'express'
 import * as locationService from './location.service.js'
-import { protect, requireAdmin } from '../../middleware/auth.js'
+import { protect, requireAdmin } from '#middleware/auth.js'
 
 const router = express.Router()
 

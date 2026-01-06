@@ -4,14 +4,14 @@
  * Split from booking.service.js for better maintainability
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Hotel from '../hotel/hotel.model.js'
 import Market from '../planning/market.model.js'
 import Booking from './booking.model.js'
-import pricingService from '../../services/pricingService.js'
-import { BadRequestError, NotFoundError, ForbiddenError } from '../../core/errors.js'
+import pricingService from '#services/pricingService.js'
+import { BadRequestError, NotFoundError, ForbiddenError } from '#core/errors.js'
 import { emitReservationUpdate, getGuestDisplayName } from '../pms/pmsSocket.js'
-import logger from '../../core/logger.js'
+import logger from '#core/logger.js'
 import { validateData } from '@booking-engine/validation/adapters/mongoose'
 import {
   leadGuestSchema,
@@ -21,7 +21,7 @@ import {
   paymentValidationSchema,
   bookingValidationSchema
 } from '@booking-engine/validation/schemas'
-import { getPartnerId, getSourceInfo } from '../../services/helpers.js'
+import { getPartnerId, getSourceInfo } from '#services/helpers.js'
 import { sanitizeRoomGuests, createGuestFromBooking, createPendingStayFromBooking } from './helpers.js'
 
 // ==================== DRAFT BOOKING MANAGEMENT ====================
@@ -108,6 +108,12 @@ export const createDraft = asyncHandler(async (req, res) => {
   // Generate draft booking number
   const bookingNumber = await Booking.generateBookingNumber(partnerId, 'draft')
 
+  // Determine sales channel from request or searchCriteria
+  // searchCriteria.channel is 'B2B' or 'B2C', salesChannel is 'b2b' or 'b2c'
+  const salesChannel = req.body.salesChannel ||
+    (searchCriteria?.channel?.toLowerCase()) ||
+    'b2c'
+
   // Create draft
   const draft = new Booking({
     bookingNumber,
@@ -119,6 +125,7 @@ export const createDraft = asyncHandler(async (req, res) => {
     hotelName: hotel.name?.tr || hotel.name?.en || hotel.name,
     market: market?._id,
     marketCode: market?.code,
+    salesChannel, // Save sales channel for consistent pricing
     checkIn: checkIn || searchCriteria?.dateRange?.start,
     checkOut: checkOut || searchCriteria?.dateRange?.end,
     searchCriteria,
@@ -395,8 +402,10 @@ export const completeDraft = asyncHandler(async (req, res) => {
   const errors = []
 
   // Lead Guest validation
+  // Convert Mongoose subdocument to plain object for validation
+  const leadGuestObj = draft.leadGuest?.toObject ? draft.leadGuest.toObject() : (draft.leadGuest || {})
   const leadGuestData = {
-    ...draft.leadGuest,
+    ...leadGuestObj,
     email: draft.contact?.email,
     phone: draft.contact?.phone
   }
@@ -410,7 +419,9 @@ export const completeDraft = asyncHandler(async (req, res) => {
     draft.roomGuests.forEach((room, roomIndex) => {
       room.forEach((guest, guestIndex) => {
         if (roomIndex === 0 && guestIndex === 0 && guest.type === 'adult') return
-        const guestResult = validateData(guest, roomGuestSchema)
+        // Convert Mongoose subdocument to plain object for validation
+        const guestObj = guest?.toObject ? guest.toObject() : (guest || {})
+        const guestResult = validateData(guestObj, roomGuestSchema)
         if (!guestResult.valid) {
           guestResult.errors.forEach(e =>
             errors.push({ ...e, section: 'roomGuest', roomIndex, guestIndex })
@@ -422,19 +433,26 @@ export const completeDraft = asyncHandler(async (req, res) => {
 
   // Invoice validation
   if (draft.invoiceDetails?.type === 'individual') {
-    const invoiceResult = validateData(draft.invoiceDetails.individual, invoiceIndividualValidation)
+    const individualObj = draft.invoiceDetails.individual?.toObject
+      ? draft.invoiceDetails.individual.toObject()
+      : (draft.invoiceDetails.individual || {})
+    const invoiceResult = validateData(individualObj, invoiceIndividualValidation)
     if (!invoiceResult.valid) {
       invoiceResult.errors.forEach(e => errors.push({ ...e, section: 'invoiceIndividual' }))
     }
   } else if (draft.invoiceDetails?.type === 'corporate') {
-    const invoiceResult = validateData(draft.invoiceDetails.corporate, invoiceCorporateValidation)
+    const corporateObj = draft.invoiceDetails.corporate?.toObject
+      ? draft.invoiceDetails.corporate.toObject()
+      : (draft.invoiceDetails.corporate || {})
+    const invoiceResult = validateData(corporateObj, invoiceCorporateValidation)
     if (!invoiceResult.valid) {
       invoiceResult.errors.forEach(e => errors.push({ ...e, section: 'invoiceCorporate' }))
     }
   }
 
   // Payment validation
-  const paymentResult = validateData(draft.payment, paymentValidationSchema)
+  const paymentObj = draft.payment?.toObject ? draft.payment.toObject() : (draft.payment || {})
+  const paymentResult = validateData(paymentObj, paymentValidationSchema)
   if (!paymentResult.valid) {
     paymentResult.errors.forEach(e => errors.push({ ...e, section: 'payment' }))
   }

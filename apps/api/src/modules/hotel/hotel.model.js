@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
-import auditPlugin from '../../plugins/auditPlugin.js'
-import { B2C_LANGUAGES, b2cLangString } from '../../constants/languages.js'
+import auditPlugin from '#plugins/auditPlugin.js'
+import { B2C_LANGUAGES, b2cLangString } from '#constants/languages.js'
 
 /**
  * Hotel Model

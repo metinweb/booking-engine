@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken'
-import config from '../../config/index.js'
+import config from '#config'
 import PmsUser from './pmsUser.model.js'
 import Hotel from '../hotel/hotel.model.js'
 import Partner from '../partner/partner.model.js'
-import { UnauthorizedError, BadRequestError, NotFoundError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { UnauthorizedError, BadRequestError, NotFoundError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
 
 // Generate PMS JWT token
 export const generatePmsToken = (user, hotelId) => {

@@ -6,7 +6,7 @@
 
 import Guest from '../pms-guest/guest.model.js'
 import Stay, { STAY_STATUS, PAYMENT_STATUS } from '../pms-frontdesk/stay.model.js'
-import logger from '../../core/logger.js'
+import logger from '#core/logger.js'
 
 /**
  * Sanitize guest data before saving

@@ -1,11 +1,13 @@
 /**
- * KBS (Kimlik Bildirim Sistemi) SOAP Client
- * Handles communication with EGM and Jandarma web services
+ * @module modules/pms-guest/kbsClient
+ * @description KBS (Kimlik Bildirim Sistemi) SOAP Client.
+ * Handles communication with EGM and Jandarma web services for guest registration.
  */
 
 import soap from 'soap'
 import PmsSettings from '../pms-settings/pmsSettings.model.js'
-import logger from '../../core/logger.js'
+import logger from '#core/logger.js'
+import { NotFoundError, BadRequestError, ServiceUnavailableError } from '#core/errors.js'
 
 // KBS Error Codes
 export const KBS_ERROR_CODES = {
@@ -39,7 +41,10 @@ const createClient = async wsdlUrl => {
     return client
   } catch (error) {
     logger.error('[KBS Client] Failed to create SOAP client:', error.message)
-    throw new Error(`KBS bağlantısı kurulamadı: ${error.message}`)
+    throw new ServiceUnavailableError('KBS_CONNECTION_FAILED', {
+      wsdlUrl,
+      originalError: error.message
+    })
   }
 }
 
@@ -51,10 +56,10 @@ const createClient = async wsdlUrl => {
 const getKbsSettings = async hotelId => {
   const settings = await PmsSettings.findOne({ hotel: hotelId })
   if (!settings || !settings.kbs) {
-    throw new Error('KBS ayarları bulunamadı')
+    throw new NotFoundError('KBS_SETTINGS_NOT_FOUND', { hotelId })
   }
   if (!settings.kbs.enabled) {
-    throw new Error('KBS entegrasyonu aktif değil')
+    throw new BadRequestError('KBS_INTEGRATION_DISABLED', { hotelId })
   }
   return settings.kbs
 }

@@ -10,7 +10,7 @@ import {
   pmsDualRequirePartnerOrAdmin,
   pmsSetPartnerFromHotel
 } from './pmsAuth.middleware.js'
-import { protect, requirePartnerOrAdmin } from '../../middleware/auth.js'
+import { protect, requirePartnerOrAdmin } from '#middleware/auth.js'
 
 const router = express.Router()
 

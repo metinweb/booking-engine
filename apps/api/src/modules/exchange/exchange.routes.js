@@ -4,16 +4,16 @@
  */
 
 import { Router } from 'express'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { protect, requireAdmin } from '../../middleware/auth.js'
-import { getSchedulerStatus, forceFetchRates } from '../../services/exchangeScheduler.js'
+import { asyncHandler } from '#helpers'
+import { protect, requireAdmin } from '#middleware/auth.js'
+import { getSchedulerStatus, forceFetchRates } from '#services/exchangeScheduler.js'
 import {
   getExchangeRates,
   setManualRate,
   convertCurrency,
   getRateHistory,
   SUPPORTED_CURRENCIES
-} from '../../services/currencyService.js'
+} from '#services/currencyService.js'
 
 const router = Router()
 

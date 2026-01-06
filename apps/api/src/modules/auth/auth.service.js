@@ -1,19 +1,19 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
-import config from '../../config/index.js'
+import config from '#config'
 import User from '../user/user.model.js'
 import Partner from '../partner/partner.model.js'
 import Agency from '../agency/agency.model.js'
-import { UnauthorizedError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { verify2FAToken } from '../../helpers/twoFactor.js'
-import { sendPasswordResetEmail, getAdminUrl } from '../../helpers/mail.js'
+import { UnauthorizedError, BadRequestError, TooManyRequestsError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import { verify2FAToken } from '#helpers/twoFactor.js'
+import { sendPasswordResetEmail, getAdminUrl } from '#helpers/mail.js'
 import {
   checkLoginLockout,
   recordFailedLogin,
   clearFailedLogins
-} from '../../middleware/rateLimiter.js'
-import logger from '../../core/logger.js'
+} from '#middleware/rateLimiter.js'
+import logger from '#core/logger.js'
 
 // Generate JWT tokens
 export const generateTokens = (user, account) => {
@@ -48,12 +48,7 @@ export const login = asyncHandler(async (req, res) => {
   const lockoutStatus = checkLoginLockout(email)
   if (lockoutStatus.isLocked) {
     logger.warn(`Login attempt for locked account: ${email}`)
-    return res.status(429).json({
-      success: false,
-      error: 'ACCOUNT_LOCKED',
-      message: req.t
-        ? req.t('ACCOUNT_LOCKED_TRY_LATER', { minutes: lockoutStatus.lockoutMinutes })
-        : `Account temporarily locked. Try again in ${lockoutStatus.lockoutMinutes} minutes.`,
+    throw new TooManyRequestsError('ACCOUNT_LOCKED', {
       lockoutMinutes: lockoutStatus.lockoutMinutes
     })
   }
@@ -69,20 +64,12 @@ export const login = asyncHandler(async (req, res) => {
     logger.warn(`Failed login attempt for ${email}. Remaining attempts: ${failedResult.remainingAttempts}`)
 
     if (failedResult.isLocked) {
-      return res.status(429).json({
-        success: false,
-        error: 'ACCOUNT_LOCKED',
-        message: req.t
-          ? req.t('ACCOUNT_LOCKED_TRY_LATER', { minutes: failedResult.lockoutMinutes })
-          : `Too many failed attempts. Account locked for ${failedResult.lockoutMinutes} minutes.`,
+      throw new TooManyRequestsError('ACCOUNT_LOCKED', {
         lockoutMinutes: failedResult.lockoutMinutes
       })
     }
 
-    return res.status(401).json({
-      success: false,
-      error: 'INVALID_CREDENTIALS',
-      message: req.t ? req.t('INVALID_CREDENTIALS') : 'Invalid email or password',
+    throw new UnauthorizedError('INVALID_CREDENTIALS', {
       remainingAttempts: failedResult.remainingAttempts
     })
   }
@@ -319,12 +306,12 @@ export const changePassword = asyncHandler(async (req, res) => {
   })
 })
 
-// Partner registration (public endpoint)
+// Partner registration (public endpoint - no password required)
 export const register = asyncHandler(async (req, res) => {
-  const { companyName, name, email, phone, password } = req.body
+  const { companyName, tradeName, name, email, phone, taxOffice, taxNumber, address } = req.body
 
   // Validation
-  if (!companyName || !name || !email || !phone || !password) {
+  if (!companyName || !name || !email || !phone) {
     throw new BadRequestError('REQUIRED_REGISTRATION_FIELDS')
   }
 
@@ -342,23 +329,28 @@ export const register = asyncHandler(async (req, res) => {
   // Create partner in pending status
   const partner = await Partner.create({
     companyName,
+    tradeName,
     email: email.toLowerCase(),
     phone,
+    taxOffice,
+    taxNumber,
+    address,
     status: 'pending'
   })
 
-  // Create admin user for partner (also in inactive status)
-  // User will be activated when partner is approved
+  // Create admin user for partner (inactive, no password yet)
+  // Password will be set when partner is approved via activation link
   await User.create({
     accountType: 'partner',
     accountId: partner._id,
     name,
     email: email.toLowerCase(),
-    password,
     phone,
     role: 'admin',
-    status: 'inactive' // Will be activated on approval
+    status: 'pending_activation' // Will be activated on approval
   })
+
+  logger.info(`New partner registration: ${companyName} (${email})`)
 
   res.status(201).json({
     success: true,

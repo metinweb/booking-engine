@@ -4,17 +4,17 @@
  * Split from booking.service.js for better maintainability
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Hotel from '../hotel/hotel.model.js'
 import RoomType from '../planning/roomType.model.js'
 import MealPlan from '../planning/mealPlan.model.js'
 import Market from '../planning/market.model.js'
 import Booking from './booking.model.js'
-import pricingService from '../../services/pricingService.js'
-import { BadRequestError, NotFoundError } from '../../core/errors.js'
+import pricingService from '#services/pricingService.js'
+import { BadRequestError, NotFoundError } from '#core/errors.js'
 import { emitReservationUpdate, getGuestDisplayName } from '../pms/pmsSocket.js'
-import logger from '../../core/logger.js'
-import { getPartnerId, getSourceInfo } from '../../services/helpers.js'
+import logger from '#core/logger.js'
+import { getPartnerId, getSourceInfo } from '#services/helpers.js'
 import { sanitizeGuest, sanitizeRoomGuests, createGuestFromBooking } from './helpers.js'
 
 // ==================== BOOKING CRUD ====================
@@ -84,7 +84,7 @@ export const listBookings = asyncHandler(async (req, res) => {
   const [bookings, total] = await Promise.all([
     Booking.find(query)
       .select(
-        'bookingNumber status hotel hotelName hotelCode checkIn checkOut nights totalRooms totalAdults totalChildren leadGuest contact pricing payment source expiresAt lastActivityAt createdAt rooms.roomTypeName rooms.roomTypeCode rooms.mealPlanName rooms.mealPlanCode rooms.pricing rooms.rateType rooms.nonRefundableDiscount market marketCode marketName season seasonCode seasonName modifications'
+        'bookingNumber status hotel hotelName hotelCode checkIn checkOut nights totalRooms totalAdults totalChildren leadGuest contact pricing payment source expiresAt lastActivityAt createdAt rooms.roomTypeName rooms.roomTypeCode rooms.mealPlanName rooms.mealPlanCode rooms.pricing rooms.rateType rooms.nonRefundableDiscount market marketCode marketName season seasonCode seasonName modifications salesChannel searchCriteria.channel'
       )
       .populate('hotel', 'name slug code')
       .populate('market', '_id name code currency')
@@ -174,7 +174,9 @@ export const listBookings = asyncHandler(async (req, res) => {
       rateType: r.rateType,
       nonRefundableDiscount: r.nonRefundableDiscount
     })),
-    modifications: b.modifications || []
+    modifications: b.modifications || [],
+    salesChannel: b.salesChannel,
+    searchCriteria: b.searchCriteria ? { channel: b.searchCriteria.channel } : null
   }))
 
   res.json({

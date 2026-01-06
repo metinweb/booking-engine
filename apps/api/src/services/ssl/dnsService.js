@@ -9,6 +9,7 @@ import { exec } from 'child_process'
 import { promisify } from 'util'
 import dns from 'dns'
 import logger from '../../core/logger.js'
+import config from '../../config/index.js'
 
 const execAsync = promisify(exec)
 const dnsResolve4 = promisify(dns.resolve4)
@@ -19,9 +20,9 @@ const dnsResolve4 = promisify(dns.resolve4)
  */
 export const getServerIP = async () => {
   try {
-    // Önce environment variable'dan kontrol et
-    if (process.env.SERVER_PUBLIC_IP) {
-      return process.env.SERVER_PUBLIC_IP
+    // Önce config'den kontrol et
+    if (config.ssl.serverPublicIp) {
+      return config.ssl.serverPublicIp
     }
 
     // curl ile public IP al

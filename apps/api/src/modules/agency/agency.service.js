@@ -1,11 +1,11 @@
 import Agency from './agency.model.js'
 import Partner from '../partner/partner.model.js'
 import User from '../user/user.model.js'
-import { NotFoundError, ConflictError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { sendWelcomeEmail } from '../../helpers/mail.js'
+import { NotFoundError, ConflictError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import { sendWelcomeEmail } from '#helpers/mail.js'
 import crypto from 'crypto'
-import logger from '../../core/logger.js'
+import logger from '#core/logger.js'
 
 // Generate random password
 const generatePassword = () => {

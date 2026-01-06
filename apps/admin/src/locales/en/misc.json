@@ -705,6 +705,7 @@
     "approvePartner": "Approve Partner",
     "approve": "Approve",
     "approveConfirm": "Are you sure you want to approve this partner? The partner and user will be activated and an email will be sent.",
+    "approveSuccess": "Partner approved successfully. Activation email has been sent.",
     "partnerName": "Partner Name",
     "tradeName": "Trade Name",
     "code": "Partner Code",

@@ -1,6 +1,6 @@
 import express from 'express'
 import * as tagService from './tag.service.js'
-import { protect, requireAdmin } from '../../middleware/auth.js'
+import { protect, requireAdmin } from '#middleware/auth.js'
 
 const router = express.Router()
 

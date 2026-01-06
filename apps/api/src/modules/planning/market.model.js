@@ -4,7 +4,7 @@ import {
   b2cLangString,
   ADMIN_LANGUAGES,
   B2C_LANGUAGES
-} from '../../constants/languages.js'
+} from '#constants/languages.js'
 
 /**
  * Market Model

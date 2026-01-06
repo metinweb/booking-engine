@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import auditPlugin from '../../plugins/auditPlugin.js'
+import auditPlugin from '#plugins/auditPlugin.js'
 
 /**
  * Rate Model (Daily Rate)

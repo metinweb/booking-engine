@@ -1,13 +1,34 @@
 /**
- * Cache Service
- * In-memory caching with TTL support
- * In production, replace with Redis for distributed caching
+ * @module services/cacheService
+ * @description In-memory caching service with TTL support.
+ * Provides cache-aside pattern, statistics, and automatic cleanup.
+ * In production, replace with Redis for distributed caching.
  */
 
-// In-memory cache store
+/**
+ * Cache entry structure
+ * @typedef {Object} CacheEntry
+ * @property {*} value - Cached value
+ * @property {number} expiresAt - Expiration timestamp
+ * @property {number} createdAt - Creation timestamp
+ */
+
+/**
+ * Cache statistics
+ * @typedef {Object} CacheStats
+ * @property {number} hits - Number of cache hits
+ * @property {number} misses - Number of cache misses
+ * @property {number} sets - Number of cache sets
+ * @property {number} deletes - Number of cache deletes
+ * @property {string} hitRate - Hit rate percentage
+ * @property {number} size - Current cache size
+ * @property {string} memoryEstimate - Estimated memory usage
+ */
+
+/** @type {Map<string, CacheEntry>} In-memory cache store */
 const cacheStore = new Map()
 
-// Cache statistics
+/** @type {{hits: number, misses: number, sets: number, deletes: number}} */
 let stats = {
   hits: 0,
   misses: 0,
@@ -15,10 +36,15 @@ let stats = {
   deletes: 0
 }
 
-// Default TTL: 5 minutes
+/** @constant {number} Default TTL: 5 minutes (in ms) */
 const DEFAULT_TTL = 5 * 60 * 1000
 
-// Cache prefixes for different data types
+/**
+ * Cache prefixes for different data types
+ * @constant {Object.<string, string>}
+ * @example
+ * const key = `${CACHE_PREFIXES.HOTEL_INFO}${hotelId}`
+ */
 export const CACHE_PREFIXES = {
   PRICE_CALCULATION: 'price:',
   EXCHANGE_RATE: 'exchange:',
@@ -30,7 +56,12 @@ export const CACHE_PREFIXES = {
   RATE: 'rate:'
 }
 
-// TTL values for different cache types (in ms)
+/**
+ * TTL values for different cache types (in milliseconds)
+ * @constant {Object.<string, number>}
+ * @example
+ * set(key, value, CACHE_TTL.EXCHANGE_RATE) // 6 hours TTL
+ */
 export const CACHE_TTL = {
   PRICE_CALCULATION: 5 * 60 * 1000, // 5 minutes
   EXCHANGE_RATE: 6 * 60 * 60 * 1000, // 6 hours
@@ -43,10 +74,15 @@ export const CACHE_TTL = {
 }
 
 /**
- * Generate cache key from params
- * @param {string} prefix - Cache prefix
+ * Generate cache key from parameters
+ * Keys are generated consistently by sorting object keys
+ * @param {string} prefix - Cache prefix from CACHE_PREFIXES
  * @param {Object|string} params - Parameters to generate key from
  * @returns {string} Cache key
+ * @example
+ * generateCacheKey(CACHE_PREFIXES.HOTEL_INFO, '123') // 'hotel:123'
+ * generateCacheKey(CACHE_PREFIXES.PRICE_CALCULATION, { hotelId: '123', date: '2024-01-15' })
+ * // 'price:date:2024-01-15|hotelId:123'
  */
 export function generateCacheKey(prefix, params) {
   if (typeof params === 'string') {
@@ -74,8 +110,14 @@ export function generateCacheKey(prefix, params) {
 
 /**
  * Get value from cache
+ * Returns null if key doesn't exist or has expired
  * @param {string} key - Cache key
  * @returns {*} Cached value or null if not found/expired
+ * @example
+ * const data = get('hotel:123')
+ * if (data) {
+ *   // Use cached data
+ * }
  */
 export function get(key) {
   const entry = cacheStore.get(key)
@@ -97,10 +139,13 @@ export function get(key) {
 }
 
 /**
- * Set value in cache
+ * Set value in cache with TTL
  * @param {string} key - Cache key
- * @param {*} value - Value to cache
- * @param {number} ttl - Time to live in milliseconds
+ * @param {*} value - Value to cache (will be stored as-is)
+ * @param {number} [ttl=300000] - Time to live in milliseconds (default: 5 minutes)
+ * @returns {void}
+ * @example
+ * set('hotel:123', hotelData, CACHE_TTL.HOTEL_INFO)
  */
 export function set(key, value, ttl = DEFAULT_TTL) {
   stats.sets++
@@ -114,6 +159,9 @@ export function set(key, value, ttl = DEFAULT_TTL) {
 /**
  * Delete value from cache
  * @param {string} key - Cache key
+ * @returns {void}
+ * @example
+ * del('hotel:123')
  */
 export function del(key) {
   stats.deletes++
@@ -121,8 +169,11 @@ export function del(key) {
 }
 
 /**
- * Delete all keys matching a pattern
+ * Delete all keys matching a pattern (prefix match)
  * @param {string} pattern - Pattern to match (prefix)
+ * @returns {number} Number of deleted entries
+ * @example
+ * deleteByPattern('price:hotelId:123') // Delete all price cache for hotel 123
  */
 export function deleteByPattern(pattern) {
   let count = 0
@@ -138,6 +189,8 @@ export function deleteByPattern(pattern) {
 
 /**
  * Clear entire cache
+ * Use with caution - removes all cached data
+ * @returns {void}
  */
 export function clear() {
   const size = cacheStore.size
@@ -146,8 +199,11 @@ export function clear() {
 }
 
 /**
- * Get cache statistics
- * @returns {Object} Cache stats
+ * Get cache statistics including hit rate and memory usage
+ * @returns {CacheStats} Cache statistics
+ * @example
+ * const stats = getStats()
+ * console.log(`Hit rate: ${stats.hitRate}, Size: ${stats.size}`)
  */
 export function getStats() {
   const hitRate =
@@ -164,7 +220,9 @@ export function getStats() {
 }
 
 /**
- * Reset statistics
+ * Reset cache statistics counters to zero
+ * Does not clear the cache itself
+ * @returns {void}
  */
 export function resetStats() {
   stats = {
@@ -177,7 +235,8 @@ export function resetStats() {
 
 /**
  * Estimate memory usage (rough estimate)
- * @returns {string} Memory usage in human readable format
+ * @private
+ * @returns {string} Memory usage in human readable format (B, KB, or MB)
  */
 function estimateMemoryUsage() {
   let bytes = 0
@@ -193,7 +252,9 @@ function estimateMemoryUsage() {
 }
 
 /**
- * Clean up expired entries (run periodically)
+ * Clean up expired entries
+ * Automatically runs every 5 minutes via setInterval
+ * @returns {number} Number of cleaned entries
  */
 export function cleanup() {
   const now = Date.now()
@@ -211,10 +272,17 @@ export function cleanup() {
 
 /**
  * Get or set cached value (cache-aside pattern)
+ * If value exists in cache, returns it. Otherwise, calls fetchFn and caches the result.
  * @param {string} key - Cache key
  * @param {Function} fetchFn - Async function to fetch value if not cached
- * @param {number} ttl - Time to live in milliseconds
+ * @param {number} [ttl=300000] - Time to live in milliseconds
  * @returns {Promise<*>} Cached or fetched value
+ * @example
+ * const hotel = await getOrSet(
+ *   `${CACHE_PREFIXES.HOTEL_INFO}${hotelId}`,
+ *   () => Hotel.findById(hotelId),
+ *   CACHE_TTL.HOTEL_INFO
+ * )
  */
 export async function getOrSet(key, fetchFn, ttl = DEFAULT_TTL) {
   const cached = get(key)
@@ -232,8 +300,13 @@ export async function getOrSet(key, fetchFn, ttl = DEFAULT_TTL) {
 
 /**
  * Invalidate cache for specific entity
- * @param {string} entityType - Entity type (hotel, rate, etc.)
+ * Clears all related cache entries when an entity is updated
+ * @param {'hotel'|'rate'|'campaign'} entityType - Entity type
  * @param {string} entityId - Entity ID
+ * @returns {void}
+ * @example
+ * // When a hotel is updated, invalidate all related caches
+ * invalidateEntity('hotel', hotelId)
  */
 export function invalidateEntity(entityType, entityId) {
   const patterns = []

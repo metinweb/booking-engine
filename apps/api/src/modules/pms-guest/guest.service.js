@@ -3,7 +3,7 @@
  * API handlers for guest management
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Guest, { VIP_LEVELS, ID_TYPES } from './guest.model.js'
 import Stay from '../pms-frontdesk/stay.model.js'
 import Hotel from '../hotel/hotel.model.js'

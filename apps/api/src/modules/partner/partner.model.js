@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
-import auditPlugin from '../../plugins/auditPlugin.js'
-import { encrypt, decrypt, isEncrypted } from '../../helpers/encryption.js'
+import auditPlugin from '#plugins/auditPlugin.js'
+import { encrypt, decrypt, isEncrypted } from '#helpers/encryption.js'
 
 const partnerSchema = new mongoose.Schema(
   {

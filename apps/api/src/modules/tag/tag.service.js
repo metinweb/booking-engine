@@ -1,8 +1,8 @@
 import Tag, { TAG_LANGUAGES } from './tag.model.js'
-import { NotFoundError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { batchTranslate } from '../../services/geminiService.js'
-import logger from '../../core/logger.js'
+import { NotFoundError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import { batchTranslate } from '#services/geminiService.js'
+import logger from '#core/logger.js'
 
 /**
  * Get all tags

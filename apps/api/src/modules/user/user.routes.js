@@ -1,8 +1,8 @@
 import express from 'express'
 import * as userService from './user.service.js'
-import { protect, requireAdmin } from '../../middleware/auth.js'
-import { partnerContext } from '../../middlewares/partnerContext.js'
-import { requirePermission } from '../../middleware/permission.js'
+import { protect, requireAdmin } from '#middleware/auth.js'
+import { partnerContext } from '#middleware/partnerContext.js'
+import { requirePermission } from '#middleware/permission.js'
 
 const router = express.Router()
 

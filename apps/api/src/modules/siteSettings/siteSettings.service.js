@@ -1,11 +1,11 @@
 import SiteSettings from './siteSettings.model.js'
 import Partner from '../partner/partner.model.js'
-import { NotFoundError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { getSiteFileUrl, deleteSiteFile } from '../../helpers/siteUpload.js'
-import logger from '../../core/logger.js'
-import sslService from '../../services/sslService.js'
-import { getPartnerId } from '../../services/helpers.js'
+import { NotFoundError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import { getSiteFileUrl, deleteSiteFile } from '#helpers/siteUpload.js'
+import logger from '#core/logger.js'
+import sslService from '#services/sslService.js'
+import { getPartnerId } from '#services/helpers.js'
 
 // Get site settings
 export const getSiteSettings = asyncHandler(async (req, res) => {

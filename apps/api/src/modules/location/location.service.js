@@ -1,9 +1,9 @@
 import City from './city.model.js'
 import District from './district.model.js'
 import TourismRegion from './tourismRegion.model.js'
-import { NotFoundError, BadRequestError, ForbiddenError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import logger from '../../core/logger.js'
+import { NotFoundError, BadRequestError, ForbiddenError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import logger from '#core/logger.js'
 
 // Check if user is platform admin
 const isPlatformAdmin = req => {

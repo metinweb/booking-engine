@@ -1,8 +1,8 @@
 import express from 'express'
 import * as agencyService from './agency.service.js'
-import { protect, requireAdmin } from '../../middleware/auth.js'
-import { partnerContext } from '../../middlewares/partnerContext.js'
-import upload from '../../helpers/upload.js'
+import { protect, requireAdmin } from '#middleware/auth.js'
+import { partnerContext } from '#middleware/partnerContext.js'
+import upload from '#helpers/upload.js'
 
 const router = express.Router()
 

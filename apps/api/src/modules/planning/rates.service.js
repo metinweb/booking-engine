@@ -7,10 +7,10 @@
 import Rate from './rate.model.js'
 import Market from './market.model.js'
 import AuditLog from '../audit/audit.model.js'
-import { NotFoundError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import logger from '../../core/logger.js'
-import { getPartnerId, verifyHotelOwnership, getAuditActor } from '../../services/helpers.js'
+import { NotFoundError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import logger from '#core/logger.js'
+import { getPartnerId, verifyHotelOwnership, getAuditActor } from '#services/helpers.js'
 
 // ==================== RATES ====================
 

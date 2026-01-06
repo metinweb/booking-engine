@@ -3,7 +3,7 @@
  * Generates various operational and financial reports
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import mongoose from 'mongoose'
 import Room from '../pms-housekeeping/room.model.js'
 import Stay from './stay.model.js'

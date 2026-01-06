@@ -4,10 +4,10 @@
  * Split from booking.service.js for better maintainability
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Hotel from '../hotel/hotel.model.js'
-import { BadRequestError } from '../../core/errors.js'
-import { getPartnerId } from '../../services/helpers.js'
+import { BadRequestError } from '#core/errors.js'
+import { getPartnerId } from '#services/helpers.js'
 
 // ==================== HOTEL LISTING ====================
 

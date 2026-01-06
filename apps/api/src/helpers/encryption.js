@@ -1,16 +1,17 @@
 import crypto from 'crypto'
 import logger from '../core/logger.js'
+import config from '../config/index.js'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 16
 const AUTH_TAG_LENGTH = 16
 
 /**
- * Get encryption key from environment
+ * Get encryption key from config
  * Key must be 32 bytes (64 hex characters)
  */
 const getKey = () => {
-  const keyHex = process.env.ENCRYPTION_KEY
+  const keyHex = config.encryption.key
 
   if (!keyHex) {
     throw new Error('ENCRYPTION_KEY environment variable is not set')

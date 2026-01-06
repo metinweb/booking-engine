@@ -3,8 +3,8 @@
  * Handles real-time event broadcasting for PMS operations
  */
 
-import { emitToRoom } from '../../core/socket.js'
-import logger from '../../core/logger.js'
+import { emitToRoom } from '#core/socket.js'
+import logger from '#core/logger.js'
 
 // PMS Event Types
 export const PMS_EVENTS = {

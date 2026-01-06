@@ -5,10 +5,10 @@
  */
 
 import Campaign from './campaign.model.js'
-import { NotFoundError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import logger from '../../core/logger.js'
-import { getPartnerId, verifyHotelOwnership } from '../../services/helpers.js'
+import { NotFoundError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import logger from '#core/logger.js'
+import { getPartnerId, verifyHotelOwnership } from '#services/helpers.js'
 
 // ==================== CAMPAIGNS ====================
 

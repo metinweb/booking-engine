@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Payment from './payment.model.js'
 import Booking from './booking.model.js'
 

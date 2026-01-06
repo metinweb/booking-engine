@@ -9,7 +9,11 @@ import {
   generateDefaultChildMultipliers,
   generateCombinationKey,
   generateCombinationName,
-  calculateCombinationMultiplier
+  calculateCombinationMultiplier,
+  generateCombinationTable,
+  getEffectiveMultiplier,
+  calculatePrice,
+  validateCombinationTable
 } from '../../utils/multiplierUtils.js'
 
 describe('Multiplier Utils', () => {
@@ -225,6 +229,200 @@ describe('Multiplier Utils', () => {
       const result = calculateCombinationMultiplier(1, children, testAdultMults, testChildMults)
       // Should be 0.333 + 0.666 = 0.999, rounded to 1.0
       expect(result).toBe(1)
+    })
+  })
+
+  describe('calculatePrice', () => {
+    it('should calculate raw price without rounding', () => {
+      expect(calculatePrice(100, 1.5, 'none')).toBe(150)
+      expect(calculatePrice(100, 0.8, 'none')).toBe(80)
+      expect(calculatePrice(200, 1.25, 'none')).toBe(250)
+    })
+
+    it('should round to nearest integer', () => {
+      expect(calculatePrice(100, 1.234, 'nearest')).toBe(123)
+      expect(calculatePrice(100, 1.236, 'nearest')).toBe(124)
+      expect(calculatePrice(100, 1.235, 'nearest')).toBe(124) // 0.5 rounds up
+    })
+
+    it('should round up (ceiling)', () => {
+      expect(calculatePrice(100, 1.231, 'up')).toBe(124)
+      expect(calculatePrice(100, 1.239, 'up')).toBe(124)
+      expect(calculatePrice(100, 1.201, 'up')).toBe(121)
+    })
+
+    it('should round down (floor)', () => {
+      expect(calculatePrice(100, 1.239, 'down')).toBe(123)
+      expect(calculatePrice(100, 1.999, 'down')).toBe(199)
+    })
+
+    it('should round to nearest 5', () => {
+      expect(calculatePrice(100, 1.22, 'nearest5')).toBe(120)
+      expect(calculatePrice(100, 1.23, 'nearest5')).toBe(125)
+      expect(calculatePrice(100, 1.27, 'nearest5')).toBe(125)
+      expect(calculatePrice(100, 1.28, 'nearest5')).toBe(130)
+    })
+
+    it('should round to nearest 10', () => {
+      expect(calculatePrice(100, 1.24, 'nearest10')).toBe(120)
+      expect(calculatePrice(100, 1.25, 'nearest10')).toBe(130)
+      expect(calculatePrice(100, 1.35, 'nearest10')).toBe(140)
+    })
+
+    it('should default to no rounding for unknown rule', () => {
+      expect(calculatePrice(100, 1.234, 'invalid')).toBe(123.4)
+    })
+  })
+
+  describe('getEffectiveMultiplier', () => {
+    it('should return null for inactive combinations', () => {
+      const combo = { isActive: false, calculatedMultiplier: 1.0, overrideMultiplier: null }
+      expect(getEffectiveMultiplier(combo)).toBeNull()
+    })
+
+    it('should return calculated multiplier when no override', () => {
+      const combo = { isActive: true, calculatedMultiplier: 1.2, overrideMultiplier: null }
+      expect(getEffectiveMultiplier(combo)).toBe(1.2)
+    })
+
+    it('should return calculated multiplier when override is undefined', () => {
+      const combo = { isActive: true, calculatedMultiplier: 1.2, overrideMultiplier: undefined }
+      expect(getEffectiveMultiplier(combo)).toBe(1.2)
+    })
+
+    it('should return override multiplier when set', () => {
+      const combo = { isActive: true, calculatedMultiplier: 1.2, overrideMultiplier: 1.5 }
+      expect(getEffectiveMultiplier(combo)).toBe(1.5)
+    })
+
+    it('should return 0 override (free) when explicitly set', () => {
+      const combo = { isActive: true, calculatedMultiplier: 1.2, overrideMultiplier: 0 }
+      expect(getEffectiveMultiplier(combo)).toBe(0)
+    })
+  })
+
+  describe('generateCombinationTable', () => {
+    const occupancy = {
+      maxAdults: 3,
+      minAdults: 1,
+      maxChildren: 2,
+      totalMaxGuests: 4,
+      baseOccupancy: 2
+    }
+    const ageGroups = [
+      { code: 'infant' },
+      { code: 'child' }
+    ]
+
+    it('should generate combinations for all adult counts', () => {
+      const table = generateCombinationTable(occupancy, ageGroups)
+
+      const adultOnly = table.filter(c => c.children.length === 0)
+      expect(adultOnly).toHaveLength(3)
+      expect(adultOnly.map(c => c.adults).sort()).toEqual([1, 2, 3])
+    })
+
+    it('should generate adult+child combinations', () => {
+      const table = generateCombinationTable(occupancy, ageGroups)
+
+      const twoAdultOneChild = table.filter(c => c.adults === 2 && c.children.length === 1)
+      expect(twoAdultOneChild).toHaveLength(2) // infant, child
+    })
+
+    it('should respect totalMaxGuests limit', () => {
+      const table = generateCombinationTable(occupancy, ageGroups)
+
+      // 3 adults + 2 children = 5, exceeds totalMaxGuests (4)
+      const threeAdultsTwoChildren = table.filter(c => c.adults === 3 && c.children.length === 2)
+      expect(threeAdultsTwoChildren).toHaveLength(0)
+
+      // 3 adults + 1 child = 4, should exist
+      const threeAdultsOneChild = table.filter(c => c.adults === 3 && c.children.length === 1)
+      expect(threeAdultsOneChild).toHaveLength(2)
+    })
+
+    it('should mark all combinations as active by default', () => {
+      const table = generateCombinationTable(occupancy, ageGroups)
+      expect(table.every(c => c.isActive === true)).toBe(true)
+    })
+
+    it('should set overrideMultiplier to null by default', () => {
+      const table = generateCombinationTable(occupancy, ageGroups)
+      expect(table.every(c => c.overrideMultiplier === null)).toBe(true)
+    })
+
+    it('should calculate correct multipliers', () => {
+      const table = generateCombinationTable(occupancy, ageGroups)
+
+      const single = table.find(c => c.key === '1')
+      const double = table.find(c => c.key === '2')
+      const triple = table.find(c => c.key === '3')
+
+      expect(single.calculatedMultiplier).toBe(0.8)
+      expect(double.calculatedMultiplier).toBe(1.0)
+      expect(triple.calculatedMultiplier).toBe(1.2)
+    })
+  })
+
+  describe('validateCombinationTable', () => {
+    it('should pass for valid table', () => {
+      const table = [
+        { key: '1', adults: 1, children: [], isActive: true, calculatedMultiplier: 0.8, overrideMultiplier: null },
+        { key: '2', adults: 2, children: [], isActive: true, calculatedMultiplier: 1.0, overrideMultiplier: null }
+      ]
+
+      const result = validateCombinationTable(table)
+      expect(result.isValid).toBe(true)
+      expect(result.errors).toHaveLength(0)
+    })
+
+    it('should fail if no active combinations', () => {
+      const table = [
+        { key: '2', adults: 2, children: [], isActive: false, calculatedMultiplier: 1.0, overrideMultiplier: null }
+      ]
+
+      const result = validateCombinationTable(table)
+      expect(result.isValid).toBe(false)
+      expect(result.errors).toContain('En az bir kombinasyon aktif olmalı')
+    })
+
+    it('should fail if double (2 adults) is inactive', () => {
+      const table = [
+        { key: '1', adults: 1, children: [], isActive: true, calculatedMultiplier: 0.8, overrideMultiplier: null },
+        { key: '2', adults: 2, children: [], isActive: false, calculatedMultiplier: 1.0, overrideMultiplier: null }
+      ]
+
+      const result = validateCombinationTable(table)
+      expect(result.isValid).toBe(false)
+      expect(result.errors.some(e => e.includes('Çift kişilik'))).toBe(true)
+    })
+
+    it('should skip double validation if minAdults > 2', () => {
+      const table = [
+        { key: '3', adults: 3, children: [], isActive: true, calculatedMultiplier: 1.0, overrideMultiplier: null }
+      ]
+
+      const result = validateCombinationTable(table, 3)
+      expect(result.isValid).toBe(true)
+    })
+
+    it('should fail for negative override multipliers', () => {
+      const table = [
+        { key: '2', adults: 2, children: [], isActive: true, calculatedMultiplier: 1.0, overrideMultiplier: -0.5 }
+      ]
+
+      const result = validateCombinationTable(table)
+      expect(result.isValid).toBe(false)
+      expect(result.errors.some(e => e.includes('negatif çarpan'))).toBe(true)
+    })
+
+    it('should allow zero override multiplier (free)', () => {
+      const table = [
+        { key: '2', adults: 2, children: [], isActive: true, calculatedMultiplier: 1.0, overrideMultiplier: 0 }
+      ]
+
+      const result = validateCombinationTable(table)
+      expect(result.isValid).toBe(true)
     })
   })
 })

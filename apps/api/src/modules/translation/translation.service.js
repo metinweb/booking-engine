@@ -1,6 +1,6 @@
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { BadRequestError } from '../../core/errors.js'
-import geminiService from '../../services/geminiService.js'
+import { asyncHandler } from '#helpers'
+import { BadRequestError } from '#core/errors.js'
+import geminiService from '#services/geminiService.js'
 
 /**
  * Translate single text

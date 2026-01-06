@@ -100,55 +100,18 @@ app.get('/api', (req, res) => {
   res.json({
     success: true,
     message: 'Booking Engine API',
-    version: '1.0.0'
+    version: '1.0.0',
+    docs: '/api/docs'
   })
 })
 
-// Module routes
-import authRoutes from './modules/auth/auth.routes.js'
-import partnerRoutes from './modules/partner/partner.routes.js'
-import agencyRoutes from './modules/agency/agency.routes.js'
-import userRoutes from './modules/user/user.routes.js'
-import sessionRoutes from './modules/session/session.routes.js'
-import siteSettingsRoutes from './modules/siteSettings/siteSettings.routes.js'
-import translationRoutes from './modules/translation/translation.routes.js'
-import hotelRoutes from './modules/hotel/hotel.routes.js'
-import planningRoutes from './modules/planning/planning.routes.js'
-import tagRoutes from './modules/tag/tag.routes.js'
-import locationRoutes from './modules/location/location.routes.js'
-import auditRoutes from './modules/audit/audit.routes.js'
-import publicRoutes from './modules/public/public.routes.js'
-import bookingRoutes from './modules/booking/booking.routes.js'
-import pmsRoutes from './modules/pms/pms.routes.js'
-import platformSettingsRoutes from './modules/platform-settings/platformSettings.routes.js'
-import pushRoutes from './modules/push/push.routes.js'
-import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
-import exchangeRoutes from './modules/exchange/exchange.routes.js'
-import notificationRoutes from './modules/notification/notification.routes.js'
-import paximumRoutes from './modules/paximum/paximum.routes.js'
-// Validation API removed - now using @booking-engine/validation shared package
+// Swagger API Documentation
+import { setupSwagger } from './loaders/swagger.js'
+setupSwagger(app)
 
-app.use('/api/auth', authRoutes)
-app.use('/api/partners', partnerRoutes)
-app.use('/api/agencies', agencyRoutes)
-app.use('/api/users', userRoutes)
-app.use('/api/sessions', sessionRoutes)
-app.use('/api/site-settings', siteSettingsRoutes)
-app.use('/api/translation', translationRoutes)
-app.use('/api/hotels', hotelRoutes)
-app.use('/api/planning', planningRoutes)
-app.use('/api/tags', tagRoutes)
-app.use('/api/locations', locationRoutes)
-app.use('/api/audit-logs', auditRoutes)
-app.use('/api/public', publicRoutes)
-app.use('/api/bookings', bookingRoutes)
-app.use('/api/pms', pmsRoutes)
-app.use('/api/platform-settings', platformSettingsRoutes)
-app.use('/api/push', pushRoutes)
-app.use('/api/dashboard', dashboardRoutes)
-app.use('/api/exchange', exchangeRoutes)
-app.use('/api/notifications', notificationRoutes)
-app.use('/api/paximum', paximumRoutes)
+// Auto-load module routes
+import { loadRoutes } from './loaders/routes.js'
+await loadRoutes(app)
 
 // 404 handler
 app.use(notFoundHandler)

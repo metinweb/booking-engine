@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
 import logger from '../../core/logger.js'
+import config from '../../config/index.js'
 
 export const GEMINI_MODEL = 'gemini-3-flash-preview'
 
@@ -62,11 +63,11 @@ const getGeminiApiKey = async () => {
     logger.warn('Failed to load Gemini API key from database:', error.message)
   }
 
-  // Fall back to environment variable
-  if (process.env.GEMINI_API_KEY) {
-    cachedApiKey = process.env.GEMINI_API_KEY
+  // Fall back to config (environment variable)
+  if (config.gemini.apiKey) {
+    cachedApiKey = config.gemini.apiKey
     cachedApiKeyExpiry = Date.now() + API_KEY_CACHE_TTL
-    logger.info('Using Gemini API key from environment')
+    logger.info('Using Gemini API key from config')
     return cachedApiKey
   }
 

@@ -30,3 +30,11 @@ uploads/
 # Temp files
 *.tmp
 *.temp
+*.swp
+*~
+
+# Turbo cache
+.turbo/
+
+# Coverage reports
+coverage/

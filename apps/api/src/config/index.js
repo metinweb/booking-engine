@@ -57,6 +57,35 @@ const config = {
     password: process.env.REDIS_PASSWORD || '',
     db: parseInt(process.env.REDIS_DB) || 0,
     keyPrefix: process.env.REDIS_KEY_PREFIX || 'booking:'
+  },
+
+  // Encryption - Used for sensitive data encryption
+  encryption: {
+    key: process.env.ENCRYPTION_KEY
+  },
+
+  // External APIs
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY
+  },
+
+  firecrawl: {
+    apiKey: process.env.FIRECRAWL_API_KEY
+  },
+
+  // SSL/Nginx Configuration
+  ssl: {
+    serverPublicIp: process.env.SERVER_PUBLIC_IP,
+    certbotEmail: process.env.CERTBOT_EMAIL || 'admin@minires.com',
+    certbotWebroot: process.env.CERTBOT_WEBROOT || '/var/www/certbot',
+    nginxSitesAvailable: process.env.NGINX_SITES_AVAILABLE || '/etc/nginx/sites-available',
+    nginxSitesEnabled: process.env.NGINX_SITES_ENABLED || '/etc/nginx/sites-enabled',
+    frontendPorts: {
+      b2c: parseInt(process.env.B2C_FRONTEND_PORT) || 3000,
+      b2b: parseInt(process.env.B2B_FRONTEND_PORT) || 3001,
+      pms: parseInt(process.env.PMS_FRONTEND_PORT) || 3002
+    },
+    apiBackend: process.env.API_BACKEND_URL || 'http://localhost:4000'
   }
 }
 

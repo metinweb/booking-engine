@@ -1,12 +1,12 @@
 import Partner from './partner.model.js'
 import User from '../user/user.model.js'
 import Agency from '../agency/agency.model.js'
-import { NotFoundError, ConflictError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { sendWelcomeEmail, sendEmail } from '../../helpers/mail.js'
-import sesIdentityService from '../../services/sesIdentityService.js'
+import { NotFoundError, ConflictError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import { sendWelcomeEmail, sendEmail, sendActivationEmail, getAdminUrl } from '#helpers/mail.js'
+import sesIdentityService from '#services/sesIdentityService.js'
 import crypto from 'crypto'
-import logger from '../../core/logger.js'
+import logger from '#core/logger.js'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
@@ -214,7 +214,7 @@ export const deactivatePartner = asyncHandler(async (req, res) => {
   })
 })
 
-// Approve partner (activate partner and user)
+// Approve partner (activate partner and send activation email to user)
 export const approvePartner = asyncHandler(async (req, res) => {
   const partner = await Partner.findById(req.params.id)
 
@@ -226,21 +226,55 @@ export const approvePartner = asyncHandler(async (req, res) => {
     throw new ConflictError('PARTNER_NOT_PENDING')
   }
 
+  // Find the admin user for this partner
+  const adminUser = await User.findOne({
+    accountType: 'partner',
+    accountId: partner._id,
+    role: 'admin'
+  })
+
+  if (!adminUser) {
+    throw new NotFoundError('PARTNER_ADMIN_USER_NOT_FOUND')
+  }
+
   // Activate partner
   await partner.activate()
 
-  // Activate partner admin user
-  await User.updateOne(
-    { accountType: 'partner', accountId: partner._id, role: 'admin' },
-    { status: 'active' }
-  )
+  // Generate activation token for user to set their password
+  const activationToken = adminUser.generateActivationToken()
+  adminUser.status = 'pending_activation' // Keep as pending_activation until they set password
+  await adminUser.save()
 
-  // Note: Email notification will be sent via Partner model post-save hook
+  // Send activation email
+  let activationEmailSent = false
+  try {
+    logger.info(`Attempting to send activation email to: ${adminUser.email}`)
+    await sendActivationEmail({
+      to: adminUser.email,
+      name: adminUser.name,
+      inviterName: 'Booking Engine',
+      accountName: partner.companyName,
+      userRole: 'Partner Admin',
+      token: activationToken,
+      partnerId: partner._id,
+      partnerCity: partner.address?.city || ''
+    })
+    activationEmailSent = true
+    logger.info(`Activation email sent successfully to partner admin: ${adminUser.email}`)
+  } catch (error) {
+    logger.error(`Failed to send activation email to ${adminUser.email}:`, error.message || error)
+    logger.error('Full error:', JSON.stringify(error, null, 2))
+    // Don't fail the approval if email fails - they can request a new one
+  }
 
   res.json({
     success: true,
     message: req.t('PARTNER_APPROVED'),
-    data: partner
+    data: {
+      partner,
+      activationEmailSent,
+      adminEmail: adminUser.email
+    }
   })
 })
 

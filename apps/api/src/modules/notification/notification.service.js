@@ -1,6 +1,6 @@
 import Notification from './notification.model.js'
-import { getIO } from '../../core/socket.js'
-import logger from '../../core/logger.js'
+import { getIO } from '#core/socket.js'
+import logger from '#core/logger.js'
 
 /**
  * Icon mapping for notification types

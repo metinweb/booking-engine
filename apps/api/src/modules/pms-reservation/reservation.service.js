@@ -3,7 +3,7 @@
  * Handles reservation management for PMS frontdesk operations
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Booking from '../booking/booking.model.js'
 import Room from '../pms-housekeeping/room.model.js'
 import RoomType from '../planning/roomType.model.js'

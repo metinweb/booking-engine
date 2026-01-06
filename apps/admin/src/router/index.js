@@ -398,11 +398,6 @@ const router = createRouter({
           component: LoginView
         },
         {
-          path: 'register',
-          name: 'register',
-          component: RegisterView
-        },
-        {
           path: 'force-password-change',
           name: 'force-password-change',
           component: ForcePasswordChangeView,
@@ -419,6 +414,13 @@ const router = createRouter({
           component: () => import('../views/ResetPasswordView.vue')
         }
       ]
+    },
+
+    // Register page (standalone, no layout wrapper)
+    {
+      path: '/auth/register',
+      name: 'register',
+      component: RegisterView
     },
 
     // Invite Accept (legacy - for old invite links)

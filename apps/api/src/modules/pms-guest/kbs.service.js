@@ -9,7 +9,7 @@
 import Stay, { STAY_STATUS } from '../pms-frontdesk/stay.model.js'
 import Guest, { KBS_STATUS, ID_TYPES } from './guest.model.js'
 import Room from '../pms-housekeeping/room.model.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import * as kbsClient from './kbsClient.js'
 
 /**

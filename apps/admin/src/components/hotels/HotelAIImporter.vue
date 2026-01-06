@@ -106,137 +106,11 @@
     </div>
 
     <!-- Step 2: Loading with Progress -->
-    <div v-else-if="step === 'loading'" class="py-8">
-      <!-- Progress Header -->
-      <div class="text-center mb-8">
-        <div class="relative inline-block">
-          <div
-            class="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-purple-600 mx-auto"
-          ></div>
-          <!-- Elapsed Time in Center -->
-          <div class="absolute inset-0 flex items-center justify-center">
-            <span class="text-sm font-mono font-semibold text-purple-600 dark:text-purple-400">
-              {{ formatElapsedTime(elapsedTime) }}
-            </span>
-          </div>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-1 mt-4">
-          {{ progress.currentStepLabel || $t('hotels.aiImport.analyzing') }}
-        </h3>
-        <p class="text-sm text-gray-500 dark:text-slate-400">
-          {{ progress.currentStepDetail || $t('hotels.aiImport.pleaseWait') }}
-        </p>
-      </div>
-
-      <!-- Progress Steps -->
-      <div v-if="progress.steps.length" class="max-w-md mx-auto space-y-3">
-        <div
-          v-for="(progressStep, idx) in progress.steps"
-          :key="progressStep.id"
-          class="flex items-center gap-3 p-3 rounded-lg transition-all"
-          :class="{
-            'bg-green-50 dark:bg-green-900/20': progressStep.status === 'completed',
-            'bg-purple-50 dark:bg-purple-900/20': progressStep.status === 'in_progress',
-            'bg-gray-50 dark:bg-slate-700/30': progressStep.status === 'pending',
-            'bg-red-50 dark:bg-red-900/20': progressStep.status === 'failed'
-          }"
-        >
-          <!-- Step Icon -->
-          <div
-            class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-            :class="{
-              'bg-green-500 text-white': progressStep.status === 'completed',
-              'bg-purple-500 text-white': progressStep.status === 'in_progress',
-              'bg-gray-300 dark:bg-slate-600 text-gray-500 dark:text-slate-400':
-                progressStep.status === 'pending',
-              'bg-red-500 text-white': progressStep.status === 'failed'
-            }"
-          >
-            <span v-if="progressStep.status === 'completed'" class="material-icons text-sm">check</span>
-            <span
-              v-else-if="progressStep.status === 'in_progress'"
-              class="material-icons text-sm animate-spin"
-              >sync</span
-            >
-            <span v-else-if="progressStep.status === 'failed'" class="material-icons text-sm">close</span>
-            <span v-else class="text-xs font-medium">{{ idx + 1 }}</span>
-          </div>
-
-          <!-- Step Content -->
-          <div class="flex-1 min-w-0">
-            <p
-              class="text-sm font-medium"
-              :class="{
-                'text-green-700 dark:text-green-300': progressStep.status === 'completed',
-                'text-purple-700 dark:text-purple-300': progressStep.status === 'in_progress',
-                'text-gray-500 dark:text-slate-400': progressStep.status === 'pending',
-                'text-red-700 dark:text-red-300': progressStep.status === 'failed'
-              }"
-            >
-              {{ progressStep.label?.tr || progressStep.label?.en || progressStep.id }}
-            </p>
-
-            <!-- Step Details -->
-            <p
-              v-if="progressStep.data && progressStep.status !== 'pending'"
-              class="text-xs text-gray-500 dark:text-slate-400 truncate"
-            >
-              <template v-if="progressStep.id === 'crawl'">
-                <span v-if="progressStep.data.pagesScraped"
-                  >{{ progressStep.data.pagesScraped }} sayfa tarandı</span
-                >
-                <span v-if="progressStep.data.totalChars">
-                  • {{ formatNumber(progressStep.data.totalChars) }} karakter</span
-                >
-                <span v-if="progressStep.data.uniqueImages"> • {{ progressStep.data.uniqueImages }} görsel</span>
-              </template>
-              <template v-else-if="progressStep.id === 'preprocess'">
-                <span v-if="progressStep.data.roomsFound"
-                  >{{ progressStep.data.roomsFound }} oda tespit edildi</span
-                >
-                <span v-if="progressStep.data.imagesFound"> • {{ progressStep.data.imagesFound }} görsel</span>
-              </template>
-              <template v-else-if="progressStep.id === 'extract'">
-                <span v-if="progressStep.data.roomTemplates"
-                  >{{ progressStep.data.roomTemplates }} oda şablonu çıkarıldı</span
-                >
-              </template>
-              <template v-else-if="progressStep.id === 'validate' && progressStep.data.roomCodes">
-                Odalar: {{ progressStep.data.roomCodes.slice(0, 5).join(', ')
-                }}{{ progressStep.data.roomCodes.length > 5 ? '...' : '' }}
-              </template>
-            </p>
-
-            <!-- Duration -->
-            <p v-if="progressStep.duration" class="text-xs text-gray-400 dark:text-slate-500">
-              {{ (progressStep.duration / 1000).toFixed(1) }}s
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Current Page Being Scraped -->
-      <div v-if="progress.currentPage" class="mt-4 text-center">
-        <p class="text-xs text-gray-400 dark:text-slate-500 truncate max-w-md mx-auto">
-          {{ progress.currentPage }}
-        </p>
-      </div>
-
-      <!-- Elapsed Time Footer -->
-      <div class="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700 text-center">
-        <div
-          class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-slate-700/50 rounded-full"
-        >
-          <span class="material-icons text-sm text-gray-500 dark:text-slate-400">schedule</span>
-          <span class="text-sm font-medium text-gray-600 dark:text-slate-300">
-            Geçen süre:
-            <span class="font-mono text-purple-600 dark:text-purple-400">{{
-              formatElapsedTime(elapsedTime)
-            }}</span>
-          </span>
-        </div>
-      </div>
-    </div>
+    <ExtractionProgress
+      v-else-if="step === 'loading'"
+      :progress="progress"
+      :elapsed-time="elapsedTime"
+    />
 
     <!-- Step 3: Preview Results -->
     <div v-else-if="step === 'preview'" class="space-y-6">
@@ -759,30 +633,18 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onUnmounted, h } from 'vue'
+import { ref, computed } from 'vue'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/common/Modal.vue'
+import ConfidenceBadge from './ConfidenceBadge.vue'
+import ExtractionProgress from './ExtractionProgress.vue'
 import hotelService from '@/services/hotelService'
-import { useSocket } from '@/composables/useSocket'
+import { useExtractionProgress } from '@/composables/useExtractionProgress'
+import { initializeExtractedData, prepareHotelDataForSave } from '@/utils/hotelDataInitializer'
 import { createLogger } from '@/utils/logger'
 
 const logger = createLogger('HotelAIImporter')
-
-// Confidence Badge Component (using render function)
-const ConfidenceBadge = {
-  props: { score: { type: Number, default: 0 } },
-  render() {
-    if (!this.score) return null
-    const colorClass =
-      this.score >= 80
-        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-        : this.score >= 50
-          ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-    return h('span', { class: `text-xs px-2 py-0.5 rounded-full ${colorClass}` }, `${this.score}%`)
-  }
-}
 
 defineProps({
   show: {
@@ -795,7 +657,19 @@ const emit = defineEmits(['close', 'imported'])
 
 const toast = useToast()
 const { t } = useI18n()
-const { join, leave, on, off, isConnected } = useSocket()
+
+// Use extraction progress composable
+const {
+  progress,
+  elapsedTime,
+  isSocketConnected,
+  startElapsedTimer,
+  stopElapsedTimer,
+  resetProgress,
+  startExtraction,
+  pollForResult,
+  cleanupSocketListeners
+} = useExtractionProgress()
 
 // State
 const step = ref('input') // input, loading, preview, error
@@ -810,164 +684,6 @@ const saving = ref(false)
 const importImages = ref(true)
 const importLogo = ref(true)
 const importRoomTemplates = ref(true)
-const operationId = ref(null)
-
-// Progress state
-const progress = reactive({
-  steps: [],
-  currentStep: null,
-  currentStepLabel: '',
-  currentStepDetail: '',
-  currentPage: ''
-})
-
-// Elapsed time tracking
-const elapsedTime = ref(0)
-const startTime = ref(null)
-let elapsedTimer = null
-
-const startElapsedTimer = () => {
-  startTime.value = Date.now()
-  elapsedTime.value = 0
-  elapsedTimer = setInterval(() => {
-    elapsedTime.value = Math.floor((Date.now() - startTime.value) / 1000)
-  }, 1000)
-}
-
-const stopElapsedTimer = () => {
-  if (elapsedTimer) {
-    clearInterval(elapsedTimer)
-    elapsedTimer = null
-  }
-}
-
-const formatElapsedTime = seconds => {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  if (mins > 0) {
-    return `${mins}dk ${secs}sn`
-  }
-  return `${secs}sn`
-}
-
-// Format number helper
-const formatNumber = num => {
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K'
-  }
-  return num
-}
-
-// Socket event handlers
-const setupSocketListeners = opId => {
-  const eventPrefix = 'hotel-extract:'
-
-  // Init - receive steps list
-  on(`${eventPrefix}init`, data => {
-    if (data.operationId !== opId) return
-    progress.steps = data.steps.map(s => ({ ...s, status: 'pending', data: null }))
-  })
-
-  // Step started
-  on(`${eventPrefix}step:start`, data => {
-    if (data.operationId !== opId) return
-    progress.currentStep = data.stepId
-    progress.currentStepLabel = data.label?.tr || data.label?.en || data.stepId
-    progress.currentStepDetail = ''
-    if (progress.steps[data.stepIndex]) {
-      progress.steps[data.stepIndex].status = 'in_progress'
-    }
-  })
-
-  // Step progress update
-  on(`${eventPrefix}step:update`, data => {
-    if (data.operationId !== opId) return
-    if (progress.steps[data.stepIndex]) {
-      progress.steps[data.stepIndex].data = { ...progress.steps[data.stepIndex].data, ...data.data }
-    }
-    // Update current page for crawl step
-    if (data.data?.currentPage) {
-      progress.currentPage = data.data.currentPage
-    }
-    // Update detail text
-    if (data.data?.pagesScraped) {
-      progress.currentStepDetail = `${data.data.pagesScraped} sayfa tarandı...`
-    }
-  })
-
-  // Step completed
-  on(`${eventPrefix}step:complete`, data => {
-    if (data.operationId !== opId) return
-    if (progress.steps[data.stepIndex]) {
-      progress.steps[data.stepIndex].status = 'completed'
-      progress.steps[data.stepIndex].duration = data.duration
-      progress.steps[data.stepIndex].data = { ...progress.steps[data.stepIndex].data, ...data.data }
-    }
-    progress.currentPage = ''
-  })
-
-  // Step failed
-  on(`${eventPrefix}step:fail`, data => {
-    if (data.operationId !== opId) return
-    if (progress.steps[data.stepIndex]) {
-      progress.steps[data.stepIndex].status = 'failed'
-      progress.steps[data.stepIndex].error = data.error
-    }
-  })
-
-  // Complete
-  on(`${eventPrefix}complete`, async data => {
-    if (data.operationId !== opId) return
-    // Fetch the final result
-    stopElapsedTimer()
-    try {
-      const result = await hotelService.getExtractionResult(opId)
-      if (result.success && result.data) {
-        extractedData.value = initializeExtractedData(result.data)
-        step.value = 'preview'
-      } else {
-        throw new Error('No extraction data')
-      }
-    } catch {
-      errorMessage.value = t('hotels.aiImport.fetchResultFailed')
-      step.value = 'error'
-    }
-    cleanupSocketListeners()
-  })
-
-  // Fail
-  on(`${eventPrefix}fail`, data => {
-    if (data.operationId !== opId) return
-    stopElapsedTimer()
-    errorMessage.value = data.error || t('hotels.aiImport.extractionFailed')
-    step.value = 'error'
-    cleanupSocketListeners()
-  })
-}
-
-const cleanupSocketListeners = () => {
-  const eventPrefix = 'hotel-extract:'
-  const events = [
-    'init',
-    'step:start',
-    'step:update',
-    'step:complete',
-    'step:fail',
-    'complete',
-    'fail'
-  ]
-  events.forEach(event => off(`${eventPrefix}${event}`))
-  if (operationId.value) {
-    leave(operationId.value)
-  }
-  operationId.value = null
-}
-
-// Cleanup on unmount
-onUnmounted(() => {
-  cleanupSocketListeners()
-  stopElapsedTimer()
-})
 
 const inputTabs = [
   { id: 'text', label: t('hotels.aiImport.tabText'), icon: 'notes' },
@@ -1005,43 +721,47 @@ const extractData = async () => {
   step.value = 'loading'
   errorMessage.value = ''
 
-  // Start elapsed timer
+  // Reset and start progress tracking
+  resetProgress()
   startElapsedTimer()
-
-  // Reset progress
-  progress.steps = []
-  progress.currentStep = null
-  progress.currentStepLabel = ''
-  progress.currentStepDetail = ''
-  progress.currentPage = ''
 
   try {
     // For URL extraction, use async endpoint with socket progress
     if (inputType.value === 'url') {
-      // Start async extraction
-      const startResponse = await hotelService.startAiExtraction({
-        contentType: 'url',
-        url: urlInput.value
-      })
-
-      if (startResponse.success && startResponse.operationId) {
-        operationId.value = startResponse.operationId
-
-        // Join socket room for this operation
-        join(startResponse.operationId)
-
-        // Setup socket listeners
-        setupSocketListeners(startResponse.operationId)
-
-        // Wait for socket events - the listeners will handle step changes
-        // If socket is not connected, fall back to polling
-        if (!isConnected.value) {
-          logger.warn('Socket not connected, falling back to polling')
-          await pollForResult(startResponse.operationId)
+      const callbacks = {
+        onComplete: async () => {
+          try {
+            const result = await hotelService.getExtractionResult(progress.operationId)
+            if (result.success && result.data) {
+              extractedData.value = initializeExtractedData(result.data)
+              step.value = 'preview'
+            } else {
+              throw new Error('No extraction data')
+            }
+          } catch {
+            errorMessage.value = t('hotels.aiImport.fetchResultFailed')
+            step.value = 'error'
+          }
+        },
+        onFail: data => {
+          errorMessage.value = data.error || t('hotels.aiImport.extractionFailed')
+          step.value = 'error'
         }
-        // Otherwise, socket listeners will handle the rest
-        return
       }
+
+      const result = await startExtraction(urlInput.value, callbacks)
+
+      // If socket is not connected, fall back to polling
+      if (!result.isSocketConnected) {
+        logger.warn('Socket not connected, falling back to polling')
+        const data = await pollForResult(result.operationId, callbacks)
+        if (data) {
+          extractedData.value = initializeExtractedData(data)
+          step.value = 'preview'
+        }
+      }
+      // Otherwise, socket listeners will handle the rest
+      return
     }
 
     // For text and PDF, use synchronous endpoint
@@ -1050,7 +770,6 @@ const extractData = async () => {
     if (inputType.value === 'text') {
       params = { content: textContent.value, contentType: 'text' }
     } else if (inputType.value === 'pdf') {
-      // Read PDF as text (for now, we'll just read the file content)
       const text = await readFileAsText(pdfFile.value)
       params = { content: text, contentType: 'pdf' }
     }
@@ -1073,40 +792,6 @@ const extractData = async () => {
   }
 }
 
-// Fallback polling for when socket is not available
-const pollForResult = async opId => {
-  const maxAttempts = 120 // 2 minutes with 1s intervals
-  let attempts = 0
-
-  while (attempts < maxAttempts) {
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    attempts++
-
-    try {
-      const result = await hotelService.getExtractionResult(opId)
-
-      if (result.status === 'completed' && result.data) {
-        stopElapsedTimer()
-        extractedData.value = initializeExtractedData(result.data)
-        step.value = 'preview'
-        return
-      } else if (result.status === 'failed') {
-        stopElapsedTimer()
-        throw new Error(result.error || 'Extraction failed')
-      }
-      // Still pending, continue polling
-    } catch (e) {
-      if (e.response?.status === 404) {
-        // Operation not found, it might have expired
-        throw new Error(t('hotels.aiImport.operationExpired'))
-      }
-      // Continue polling on other errors
-    }
-  }
-
-  throw new Error(t('hotels.aiImport.operationTimeout'))
-}
-
 // Read file as text
 const readFileAsText = file => {
   return new Promise((resolve, reject) => {
@@ -1115,151 +800,6 @@ const readFileAsText = file => {
     reader.onerror = e => reject(e)
     reader.readAsText(file)
   })
-}
-
-// Initialize extracted data - keep all AI extracted data intact
-const initializeExtractedData = data => {
-  // Create empty multilang object
-  const emptyMultiLang = () => ({ tr: '', en: '' })
-
-  return {
-    // Basic info
-    name: data.name || '',
-    description: {
-      tr: data.description?.tr || '',
-      en: data.description?.en || '',
-      ...data.description
-    },
-    slug: data.slug || '',
-    logo: data.logo || '',
-    stars: data.stars || 3,
-    type: data.type || 'hotel',
-    category: data.category || 'standard',
-
-    // Address with coordinates
-    address: {
-      street: data.address?.street || '',
-      district: data.address?.district || '',
-      city: data.address?.city || '',
-      country: data.address?.country || '',
-      postalCode: data.address?.postalCode || '',
-      formattedAddress: data.address?.formattedAddress || '',
-      coordinates: {
-        lat: data.address?.coordinates?.lat || null,
-        lng: data.address?.coordinates?.lng || null
-      }
-    },
-
-    // Contact info
-    contact: {
-      phone: data.contact?.phone || '',
-      email: data.contact?.email || '',
-      website: data.contact?.website || '',
-      callCenter: data.contact?.callCenter || '',
-      fax: data.contact?.fax || '',
-      authorizedPerson: data.contact?.authorizedPerson || '',
-      authorizedEmail: data.contact?.authorizedEmail || '',
-      authorizedPhone: data.contact?.authorizedPhone || '',
-      socialMedia: data.contact?.socialMedia || {}
-    },
-
-    // Amenities
-    amenities: data.amenities || [],
-
-    // Room config
-    roomConfig: {
-      totalRooms: data.roomConfig?.totalRooms || 0,
-      floors: data.roomConfig?.floors || 1,
-      hasElevator: data.roomConfig?.hasElevator || false
-    },
-
-    // Policies
-    policies: {
-      checkIn: data.policies?.checkIn || '14:00',
-      checkOut: data.policies?.checkOut || '12:00',
-      maxBabyAge: data.policies?.maxBabyAge || 2,
-      maxChildAge: data.policies?.maxChildAge || 12,
-      childPolicy: data.policies?.childPolicy || emptyMultiLang(),
-      petPolicy: data.policies?.petPolicy || emptyMultiLang(),
-      additionalInfo: data.policies?.additionalInfo || emptyMultiLang(),
-      cancellationRules: data.policies?.cancellationRules || [],
-      freeCancellation: data.policies?.freeCancellation || { enabled: false, daysBeforeCheckIn: 1 }
-    },
-
-    // Full profile with all sections
-    profile: {
-      overview: {
-        content: data.profile?.overview?.content || emptyMultiLang(),
-        establishedYear: data.profile?.overview?.establishedYear || null,
-        renovationYear: data.profile?.overview?.renovationYear || null,
-        chainBrand: data.profile?.overview?.chainBrand || ''
-      },
-      facilities: {
-        content: data.profile?.facilities?.content || emptyMultiLang(),
-        features: data.profile?.facilities?.features || []
-      },
-      dining: {
-        content: data.profile?.dining?.content || emptyMultiLang(),
-        features: data.profile?.dining?.features || [],
-        restaurants: data.profile?.dining?.restaurants || []
-      },
-      sportsEntertainment: {
-        content: data.profile?.sportsEntertainment?.content || emptyMultiLang(),
-        features: data.profile?.sportsEntertainment?.features || []
-      },
-      spaWellness: {
-        content: data.profile?.spaWellness?.content || emptyMultiLang(),
-        features: data.profile?.spaWellness?.features || [],
-        spaDetails: data.profile?.spaWellness?.spaDetails || {}
-      },
-      familyKids: {
-        content: data.profile?.familyKids?.content || emptyMultiLang(),
-        features: data.profile?.familyKids?.features || [],
-        kidsClubAges: data.profile?.familyKids?.kidsClubAges || { min: 4, max: 12 }
-      },
-      beachPool: {
-        content: data.profile?.beachPool?.content || emptyMultiLang(),
-        features: data.profile?.beachPool?.features || [],
-        beachDetails: data.profile?.beachPool?.beachDetails || {},
-        pools: data.profile?.beachPool?.pools || []
-      },
-      honeymoon: {
-        content: data.profile?.honeymoon?.content || emptyMultiLang(),
-        features: data.profile?.honeymoon?.features || [],
-        available: data.profile?.honeymoon?.available || false
-      },
-      importantInfo: {
-        content: data.profile?.importantInfo?.content || emptyMultiLang()
-      },
-      location: {
-        content: data.profile?.location?.content || emptyMultiLang(),
-        distances: data.profile?.location?.distances || []
-      }
-    },
-
-    // Images extracted from website
-    images: (data.images || []).filter(img => img.url && img.url.startsWith('http')),
-
-    // Room templates extracted from website
-    roomTemplates: (data.roomTemplates || []).map(room => ({
-      code: room.code || '',
-      name: room.name || emptyMultiLang(),
-      description: room.description || emptyMultiLang(),
-      images: (room.images || []).filter(img => img.url && img.url.startsWith('http')),
-      amenities: room.amenities || [],
-      size: room.size || null,
-      bedConfiguration: room.bedConfiguration || [],
-      occupancy: {
-        maxAdults: room.occupancy?.maxAdults || 2,
-        maxChildren: room.occupancy?.maxChildren || 2,
-        maxInfants: room.occupancy?.maxInfants || 1,
-        totalMaxGuests: room.occupancy?.totalMaxGuests || 4
-      }
-    })),
-
-    // Keep confidence scores for display
-    confidence: data.confidence || {}
-  }
 }
 
 // Save as base hotel
@@ -1272,55 +812,12 @@ const saveHotel = async () => {
   saving.value = true
 
   try {
-    // Prepare data for base hotel creation
-    const hotelData = {
-      ...extractedData.value,
-      hotelType: 'base',
-      status: 'draft'
-    }
-
-    // Remove confidence scores before saving
-    delete hotelData.confidence
-
-    // Handle images - if import is enabled, include image URLs for backend to download
-    if (importImages.value && extractedData.value.images?.length) {
-      hotelData.externalImages = extractedData.value.images
-        .filter(img => !img.broken && img.url)
-        .map(img => ({
-          url: img.url,
-          alt: img.alt || '',
-          category: img.category || 'other'
-        }))
-    }
-    delete hotelData.images
-
-    // Handle logo
-    if (importLogo.value && extractedData.value.logo) {
-      hotelData.externalLogo = extractedData.value.logo
-    }
-    delete hotelData.logo
-
-    // Handle room templates
-    if (importRoomTemplates.value && extractedData.value.roomTemplates?.length) {
-      hotelData.roomTemplates = extractedData.value.roomTemplates.map(room => ({
-        code: room.code,
-        name: room.name,
-        description: room.description,
-        amenities: room.amenities,
-        size: room.size,
-        bedConfiguration: room.bedConfiguration,
-        occupancy: room.occupancy,
-        // Include external images for backend to download
-        externalImages: (room.images || [])
-          .filter(img => img.url)
-          .map(img => ({
-            url: img.url,
-            caption: img.caption || {}
-          }))
-      }))
-    } else {
-      delete hotelData.roomTemplates
-    }
+    // Prepare data using utility function
+    const hotelData = prepareHotelDataForSave(extractedData.value, {
+      importImages: importImages.value,
+      importLogo: importLogo.value,
+      importRoomTemplates: importRoomTemplates.value
+    })
 
     const response = await hotelService.createBaseHotel(hotelData)
 

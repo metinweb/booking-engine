@@ -1,6 +1,6 @@
 import express from 'express'
 import * as auditService from './audit.service.js'
-import { protect, requirePlatformAdmin } from '../../middleware/auth.js'
+import { protect, requirePlatformAdmin } from '#middleware/auth.js'
 
 const router = express.Router()
 

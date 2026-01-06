@@ -4,10 +4,10 @@
  * Split from booking.service.js for better maintainability
  */
 
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import Booking from './booking.model.js'
-import { BadRequestError } from '../../core/errors.js'
-import { getPartnerId } from '../../services/helpers.js'
+import { BadRequestError } from '#core/errors.js'
+import { getPartnerId } from '#services/helpers.js'
 
 // ==================== STATISTICS ====================
 

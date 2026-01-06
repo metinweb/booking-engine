@@ -705,6 +705,7 @@
     "approvePartner": "Partner Onayla",
     "approve": "Onayla",
     "approveConfirm": "Bu partner'ı onaylamak istediğinize emin misiniz? Partner ve kullanıcı aktif hale gelecek ve e-posta gönderilecek.",
+    "approveSuccess": "Partner başarıyla onaylandı. Aktivasyon e-postası gönderildi.",
     "partnerName": "Partner Adı",
     "tradeName": "Ticari İsim",
     "code": "Partner Kodu",

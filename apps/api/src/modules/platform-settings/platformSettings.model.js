@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { encrypt, decrypt, isEncrypted } from '../../helpers/encryption.js'
+import { encrypt, decrypt, isEncrypted } from '#helpers/encryption.js'
 
 const platformSettingsSchema = new mongoose.Schema(
   {

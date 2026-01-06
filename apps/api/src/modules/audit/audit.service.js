@@ -1,6 +1,6 @@
 import AuditLog from './audit.model.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import { NotFoundError, BadRequestError } from '../../core/errors.js'
+import { asyncHandler } from '#helpers'
+import { NotFoundError, BadRequestError } from '#core/errors.js'
 
 /**
  * Get all audit logs with filtering and pagination

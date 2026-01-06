@@ -5,16 +5,16 @@
  */
 
 import mongoose from 'mongoose'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import RoomType from '../planning/roomType.model.js'
 import MealPlan from '../planning/mealPlan.model.js'
 import Market from '../planning/market.model.js'
 import Booking from './booking.model.js'
-import pricingService from '../../services/pricingService.js'
-import { BadRequestError, NotFoundError } from '../../core/errors.js'
+import pricingService from '#services/pricingService.js'
+import { BadRequestError, NotFoundError } from '#core/errors.js'
 import { emitReservationUpdate, getGuestDisplayName } from '../pms/pmsSocket.js'
-import logger from '../../core/logger.js'
-import { getPartnerId } from '../../services/helpers.js'
+import logger from '#core/logger.js'
+import { getPartnerId } from '#services/helpers.js'
 import { createBookingSnapshot, compareValues, detectAmendmentType } from './helpers.js'
 
 // ==================== AMENDMENT (BOOKING MODIFICATION) ====================
@@ -324,7 +324,12 @@ export const previewAmendment = asyncHandler(async (req, res) => {
   }
 
   // Determine sales channel from booking or request
-  const effectiveSalesChannel = req.body.salesChannel || booking.salesChannel || 'b2c'
+  // Priority: request body > booking.salesChannel > searchCriteria.channel > default 'b2c'
+  // searchCriteria.channel is 'B2B' or 'B2C', salesChannel is 'b2b' or 'b2c'
+  const effectiveSalesChannel = req.body.salesChannel ||
+    booking.salesChannel ||
+    (booking.searchCriteria?.channel?.toLowerCase()) ||
+    'b2c'
 
   // Use centralized multi-room pricing calculation
   const pricingResult = await pricingService.calculateMultiRoomBookingPrice({
@@ -539,6 +544,13 @@ export const applyAmendment = asyncHandler(async (req, res) => {
     throw new BadRequestError('BOOKING_CANNOT_BE_AMENDED')
   }
 
+  // Determine sales channel from booking or request
+  // Priority: request body > booking.salesChannel > searchCriteria.channel > default 'b2c'
+  const effectiveSalesChannel = req.body.salesChannel ||
+    booking.salesChannel ||
+    (booking.searchCriteria?.channel?.toLowerCase()) ||
+    'b2c'
+
   // Create snapshot of current state BEFORE any changes
   const snapshot = {
     snapshotId: new mongoose.Types.ObjectId().toString(),
@@ -695,9 +707,16 @@ export const applyAmendment = asyncHandler(async (req, res) => {
       const roomType = await RoomType.findById(roomData.roomTypeId).select('code name').lean()
       const mealPlan = await MealPlan.findById(roomData.mealPlanId).select('code name').lean()
 
-      let finalPrice = priceResult.pricing.finalTotal
+      // Select price based on sales channel
+      // B2C: Use b2cPrice (with B2C markup)
+      // B2B: Use b2bPrice (with agency commission)
+      let finalPrice = effectiveSalesChannel === 'b2b'
+        ? priceResult.pricing.b2bPrice
+        : priceResult.pricing.b2cPrice
       if (roomData.rateType === 'non_refundable' && priceResult.nonRefundable?.enabled) {
-        finalPrice = priceResult.nonRefundable.discountedTotal
+        finalPrice = effectiveSalesChannel === 'b2b'
+          ? priceResult.nonRefundable.pricing?.b2bPrice
+          : priceResult.nonRefundable.pricing?.b2cPrice
       }
 
       // Get season info from daily breakdown

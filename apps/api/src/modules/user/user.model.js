@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
-import auditPlugin from '../../plugins/auditPlugin.js'
+import auditPlugin from '#plugins/auditPlugin.js'
 
 const userSchema = new mongoose.Schema(
   {
@@ -149,7 +149,7 @@ const userSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ['pending', 'active', 'inactive'],
+        values: ['pending', 'pending_activation', 'active', 'inactive'],
         message: 'INVALID_STATUS'
       },
       default: 'active'

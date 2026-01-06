@@ -1,14 +1,39 @@
 /**
- * Input Validation Middleware
- * Provides request validation utilities for API endpoints
+ * @module middleware/validation
+ * @description Input validation middleware and utilities for API endpoints.
+ * Provides validators, sanitizers, and Express middleware for request validation.
  */
 
 import { BadRequestError } from '../core/errors.js'
 
 /**
- * Validate ObjectId format
+ * Validation error detail
+ * @typedef {Object} ValidationErrorDetail
+ * @property {string} field - Field name that failed validation
+ * @property {string} message - Error message
+ */
+
+/**
+ * Schema validation rule
+ * @typedef {Object} ValidationRule
+ * @property {'string'|'number'|'integer'|'boolean'|'array'|'object'|'date'|'objectId'|'email'|'phone'|'currency'} [type] - Expected type
+ * @property {boolean} [required] - Whether field is required
+ * @property {string} [message] - Custom error message
+ * @property {number} [min] - Minimum value (for numbers)
+ * @property {number} [max] - Maximum value (for numbers)
+ * @property {number} [minLength] - Minimum length (for strings)
+ * @property {number} [maxLength] - Maximum length (for strings)
+ * @property {Array} [enum] - Allowed values
+ * @property {Function} [validate] - Custom validation function
+ */
+
+/**
+ * Validate MongoDB ObjectId format (24 hex characters)
  * @param {string} id - ID to validate
- * @returns {boolean}
+ * @returns {boolean} True if valid ObjectId format
+ * @example
+ * isValidObjectId('507f1f77bcf86cd799439011') // true
+ * isValidObjectId('invalid') // false
  */
 export function isValidObjectId(id) {
   if (!id) return false
@@ -18,7 +43,11 @@ export function isValidObjectId(id) {
 /**
  * Validate date string format (YYYY-MM-DD)
  * @param {string} dateStr - Date string to validate
- * @returns {boolean}
+ * @returns {boolean} True if valid date format
+ * @example
+ * isValidDateString('2024-01-15') // true
+ * isValidDateString('01-15-2024') // false
+ * isValidDateString('2024-13-01') // false (invalid month)
  */
 export function isValidDateString(dateStr) {
   if (!dateStr) return false
@@ -30,9 +59,12 @@ export function isValidDateString(dateStr) {
 }
 
 /**
- * Validate date is not in the past
- * @param {string} dateStr - Date string to validate
- * @returns {boolean}
+ * Validate date is not in the past (today or future)
+ * @param {string} dateStr - Date string to validate (YYYY-MM-DD)
+ * @returns {boolean} True if date is today or in the future
+ * @example
+ * isNotPastDate('2030-01-01') // true
+ * isNotPastDate('2020-01-01') // false
  */
 export function isNotPastDate(dateStr) {
   if (!isValidDateString(dateStr)) return false
@@ -44,8 +76,11 @@ export function isNotPastDate(dateStr) {
 
 /**
  * Validate email format
- * @param {string} email - Email to validate
- * @returns {boolean}
+ * @param {string} email - Email address to validate
+ * @returns {boolean} True if valid email format
+ * @example
+ * isValidEmail('user@example.com') // true
+ * isValidEmail('invalid-email') // false
  */
 export function isValidEmail(email) {
   if (!email) return false
@@ -54,9 +89,13 @@ export function isValidEmail(email) {
 }
 
 /**
- * Validate phone number format
+ * Validate phone number format (8-15 digits, optional leading +)
  * @param {string} phone - Phone number to validate
- * @returns {boolean}
+ * @returns {boolean} True if valid phone format
+ * @example
+ * isValidPhone('+905551234567') // true
+ * isValidPhone('5551234567') // true
+ * isValidPhone('123') // false (too short)
  */
 export function isValidPhone(phone) {
   if (!phone) return false
@@ -66,7 +105,8 @@ export function isValidPhone(phone) {
 }
 
 /**
- * Validate currency code
+ * List of supported currency codes
+ * @constant {string[]}
  */
 export const VALID_CURRENCIES = [
   'TRY',
@@ -81,15 +121,27 @@ export const VALID_CURRENCIES = [
   'CNY'
 ]
 
+/**
+ * Validate currency code against supported currencies
+ * @param {string} currency - Currency code to validate
+ * @returns {boolean} True if valid currency
+ * @example
+ * isValidCurrency('USD') // true
+ * isValidCurrency('usd') // true (case-insensitive)
+ * isValidCurrency('XYZ') // false
+ */
 export function isValidCurrency(currency) {
   return VALID_CURRENCIES.includes(currency?.toUpperCase())
 }
 
 /**
- * Sanitize string input
+ * Sanitize string input by trimming and truncating
  * @param {string} str - String to sanitize
- * @param {number} maxLength - Maximum allowed length
- * @returns {string}
+ * @param {number} [maxLength=255] - Maximum allowed length
+ * @returns {string} Sanitized string
+ * @example
+ * sanitizeString('  hello  ', 10) // 'hello'
+ * sanitizeString('long string', 4) // 'long'
  */
 export function sanitizeString(str, maxLength = 255) {
   if (!str) return ''
@@ -97,10 +149,22 @@ export function sanitizeString(str, maxLength = 255) {
 }
 
 /**
- * Parse and validate integer
- * @param {any} value - Value to parse
- * @param {Object} options - { min, max, defaultValue }
- * @returns {number|null}
+ * Parse integer options
+ * @typedef {Object} ParseIntegerOptions
+ * @property {number|null} [min] - Minimum value (clamps if below)
+ * @property {number|null} [max] - Maximum value (clamps if above)
+ * @property {number|null} [defaultValue] - Default if parsing fails
+ */
+
+/**
+ * Parse and validate integer with optional clamping
+ * @param {*} value - Value to parse
+ * @param {ParseIntegerOptions} [options={}] - Parsing options
+ * @returns {number|null} Parsed integer or null/defaultValue if invalid
+ * @example
+ * parseInteger('42') // 42
+ * parseInteger('5', { min: 10 }) // 10 (clamped to min)
+ * parseInteger('abc', { defaultValue: 0 }) // 0
  */
 export function parseInteger(value, options = {}) {
   const { min = null, max = null, defaultValue = null } = options
@@ -121,10 +185,14 @@ export function parseInteger(value, options = {}) {
 }
 
 /**
- * Parse and validate positive number
- * @param {any} value - Value to parse
- * @param {number} defaultValue - Default value if invalid
- * @returns {number}
+ * Parse and validate positive number (>= 0)
+ * @param {*} value - Value to parse
+ * @param {number} [defaultValue=0] - Default value if invalid
+ * @returns {number} Parsed positive number or default
+ * @example
+ * parsePositiveNumber('3.14') // 3.14
+ * parsePositiveNumber('-5', 0) // 0 (negative returns default)
+ * parsePositiveNumber('abc', 10) // 10
  */
 export function parsePositiveNumber(value, defaultValue = 0) {
   if (value === undefined || value === null || value === '') {
@@ -140,7 +208,9 @@ export function parsePositiveNumber(value, defaultValue = 0) {
 }
 
 /**
- * Validation schema types
+ * Built-in validation type checkers
+ * @private
+ * @type {Object.<string, Function>}
  */
 const SCHEMA_TYPES = {
   string: value => typeof value === 'string',
@@ -158,8 +228,16 @@ const SCHEMA_TYPES = {
 
 /**
  * Validate request body against schema
- * @param {Object} schema - Validation schema
- * @returns {Function} Express middleware
+ * Creates Express middleware that validates req.body
+ * @param {Object.<string, ValidationRule>} schema - Validation schema
+ * @returns {import('express').RequestHandler} Express middleware
+ * @throws {BadRequestError} Throws VALIDATION_ERROR with details if validation fails
+ * @example
+ * router.post('/booking', validateBody({
+ *   guestName: { type: 'string', required: true, minLength: 2 },
+ *   email: { type: 'email', required: true },
+ *   adults: { type: 'integer', min: 1, max: 10 }
+ * }), createBooking)
  */
 export function validateBody(schema) {
   return (req, res, next) => {
@@ -255,8 +333,17 @@ export function validateBody(schema) {
 
 /**
  * Validate query parameters
- * @param {Object} schema - Validation schema
- * @returns {Function} Express middleware
+ * Creates Express middleware that validates and coerces req.query
+ * Note: Query params are strings by default, this middleware coerces numbers/booleans
+ * @param {Object.<string, ValidationRule>} schema - Validation schema
+ * @returns {import('express').RequestHandler} Express middleware
+ * @throws {BadRequestError} Throws VALIDATION_ERROR with details if validation fails
+ * @example
+ * router.get('/hotels', validateQuery({
+ *   page: { type: 'integer', min: 1 },
+ *   limit: { type: 'integer', min: 1, max: 100 },
+ *   active: { type: 'boolean' }
+ * }), listHotels)
  */
 export function validateQuery(schema) {
   return (req, res, next) => {
@@ -313,9 +400,15 @@ export function validateQuery(schema) {
 }
 
 /**
- * Validate route parameters
- * @param {Object} schema - Validation schema
- * @returns {Function} Express middleware
+ * Validate route parameters (URL params)
+ * Creates Express middleware that validates req.params
+ * @param {Object.<string, ValidationRule>} schema - Validation schema
+ * @returns {import('express').RequestHandler} Express middleware
+ * @throws {BadRequestError} Throws VALIDATION_ERROR with details if validation fails
+ * @example
+ * router.get('/hotels/:id', validateParams({
+ *   id: { type: 'objectId' }
+ * }), getHotel)
  */
 export function validateParams(schema) {
   return (req, res, next) => {
@@ -342,7 +435,14 @@ export function validateParams(schema) {
 }
 
 /**
- * Common validation schemas for reuse
+ * Common validation schemas for reuse across endpoints
+ * @constant {Object.<string, Object.<string, ValidationRule>>}
+ * @example
+ * // Use spread to combine schemas
+ * validateBody({
+ *   ...commonSchemas.dateRange,
+ *   hotelId: { type: 'objectId', required: true }
+ * })
  */
 export const commonSchemas = {
   // Booking/Price calculation

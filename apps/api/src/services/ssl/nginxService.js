@@ -10,27 +10,24 @@ import { promisify } from 'util'
 import fs from 'fs/promises'
 import path from 'path'
 import logger from '../../core/logger.js'
+import appConfig from '../../config/index.js'
 
 const execAsync = promisify(exec)
 
-// Konfigurasyon
+// Konfigurasyon (config module'den alınıyor)
 const CONFIG = {
   // Nginx config dizini
-  nginxSitesAvailable: process.env.NGINX_SITES_AVAILABLE || '/etc/nginx/sites-available',
-  nginxSitesEnabled: process.env.NGINX_SITES_ENABLED || '/etc/nginx/sites-enabled',
+  nginxSitesAvailable: appConfig.ssl.nginxSitesAvailable,
+  nginxSitesEnabled: appConfig.ssl.nginxSitesEnabled,
 
   // Let's Encrypt
-  certbotWebroot: process.env.CERTBOT_WEBROOT || '/var/www/certbot',
+  certbotWebroot: appConfig.ssl.certbotWebroot,
 
   // Frontend build dizinleri (proxy icin)
-  frontendPorts: {
-    b2c: process.env.B2C_FRONTEND_PORT || 3000,
-    b2b: process.env.B2B_FRONTEND_PORT || 3001,
-    pms: process.env.PMS_FRONTEND_PORT || 3002
-  },
+  frontendPorts: appConfig.ssl.frontendPorts,
 
   // API backend
-  apiBackend: process.env.API_BACKEND_URL || 'http://localhost:4000',
+  apiBackend: appConfig.ssl.apiBackend,
 
   // Sertifika dizini
   certDir: '/etc/letsencrypt/live'

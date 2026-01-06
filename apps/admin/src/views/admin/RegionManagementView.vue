@@ -554,20 +554,19 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 
 // Components
 import Modal from '@/components/common/Modal.vue'
 
 // Composables
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { useCountrySelector } from '@/composables/useCountrySelector'
+import { useRegionMap } from '@/composables/useRegionMap'
 
-// Data & Services
-import { COUNTRIES } from '@/data/countries'
+// Services
 import {
   getCities,
   createCity,
@@ -579,34 +578,20 @@ import {
   deleteRegion as deleteRegionApi
 } from '@/services/locationService'
 
-// Fix Leaflet default icon paths
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+// Helpers
+import {
+  getCityName,
+  getRegionName,
+  normalizeCoordinates,
+  createEmptyCityForm,
+  createCityFormFromCity,
+  createEmptyRegionForm,
+  createRegionFormFromRegion,
+  prepareCityData,
+  prepareRegionData
+} from '@/utils/regionHelpers'
 
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow
-})
-
-// Custom icons
-const cityIcon = L.divIcon({
-  className: 'custom-marker',
-  html: '<div style="background-color: #a855f7; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
-})
-
-const regionIcon = L.divIcon({
-  className: 'custom-marker',
-  html: '<div style="background-color: #22c55e; width: 20px; height: 20px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10]
-})
-
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const toast = useToast()
 
 // Async action composables
@@ -617,134 +602,58 @@ const { isLoading: savingRegion, execute: executeSaveRegion } = useAsyncAction({
 const { execute: executeDeleteCity } = useAsyncAction({ showErrorToast: false })
 const { execute: executeDeleteRegion } = useAsyncAction({ showErrorToast: false })
 
-// LocalStorage key
-const STORAGE_KEY = 'regionManagement_selectedCountry'
+// Country selector composable
+const {
+  selectedCountryCode,
+  showCountryDropdown,
+  countrySearch,
+  countryDropdownRef,
+  countrySearchInput,
+  filteredCountries,
+  selectedCountry,
+  getCountryName,
+  toggleCountryDropdown,
+  selectCountry: baseSelectCountry,
+  selectFirstCountry
+} = useCountrySelector(loadCities)
 
-// State - load from localStorage if available
-const selectedCountryCode = ref(localStorage.getItem(STORAGE_KEY) || '')
+// Region map composable
+const {
+  initMainMap,
+  destroyMainMap,
+  updateMainMapMarkers,
+  focusOnMap,
+  initCityModalMap,
+  destroyCityModalMap,
+  initRegionModalMap,
+  destroyRegionModalMap
+} = useRegionMap()
+
+// State
 const cities = ref([])
 const regions = ref([])
 const selectedCity = ref(null)
 
-// Country dropdown state
-const showCountryDropdown = ref(false)
-const countrySearch = ref('')
-const countryDropdownRef = ref(null)
-const countrySearchInput = ref(null)
-
-// Watch country change and save to localStorage
-watch(selectedCountryCode, newVal => {
-  if (newVal) {
-    localStorage.setItem(STORAGE_KEY, newVal)
-  } else {
-    localStorage.removeItem(STORAGE_KEY)
-  }
-})
-
 // City Modal
 const showCityModal = ref(false)
 const editingCity = ref(null)
-const cityForm = ref({
-  name: '',
-  coordinates: { lat: null, lng: null },
-  zoom: 10
-})
+const cityForm = ref(createEmptyCityForm())
 
 // Region Modal
 const showRegionModal = ref(false)
 const editingRegion = ref(null)
-const regionForm = ref({
-  name: '',
-  coordinates: { lat: null, lng: null },
-  zoom: 14
-})
+const regionForm = ref(createEmptyRegionForm())
 
-// Map refs
+// Map container ref
 const mainMapContainer = ref(null)
-let mainMap = null
-let cityModalMap = null
-let regionModalMap = null
-let cityModalMarker = null
-let regionModalMarker = null
-let mainMapMarkers = []
-let mainCityMarker = null
 
-// Countries sorted by name
-const countries = computed(() => {
-  return [...COUNTRIES].sort((a, b) => {
-    const nameA = getCountryName(a)
-    const nameB = getCountryName(b)
-    return nameA.localeCompare(nameB, locale.value)
-  })
-})
-
-// Filtered countries based on search
-const filteredCountries = computed(() => {
-  if (!countrySearch.value) return countries.value
-  const search = countrySearch.value.toLowerCase()
-  return countries.value.filter(c => {
-    const name = getCountryName(c).toLowerCase()
-    return name.includes(search) || c.code.toLowerCase().includes(search)
-  })
-})
-
-// Selected country object
-const selectedCountry = computed(() => {
-  if (!selectedCountryCode.value) return null
-  return countries.value.find(c => c.code === selectedCountryCode.value)
-})
-
-// Toggle country dropdown
-const toggleCountryDropdown = () => {
-  showCountryDropdown.value = !showCountryDropdown.value
-  if (showCountryDropdown.value) {
-    countrySearch.value = ''
-    nextTick(() => {
-      countrySearchInput.value?.focus()
-    })
-  }
-}
-
-// Select country from dropdown
+// Select country wrapper (calls loadCities via composable callback)
 const selectCountry = country => {
-  selectedCountryCode.value = country.code
-  showCountryDropdown.value = false
-  countrySearch.value = ''
-  loadCities()
-}
-
-// Select first filtered country on Enter
-const selectFirstCountry = () => {
-  if (filteredCountries.value.length > 0) {
-    selectCountry(filteredCountries.value[0])
-  }
-}
-
-// Handle click outside to close dropdown
-const handleClickOutside = event => {
-  if (countryDropdownRef.value && !countryDropdownRef.value.contains(event.target)) {
-    showCountryDropdown.value = false
-  }
-}
-
-// Helpers
-const getCountryName = country => {
-  return country.name[locale.value] || country.name.tr || country.name.en || country.code
-}
-
-// City and region names are now simple strings (not multilingual)
-const getCityName = city => {
-  if (!city) return ''
-  return city.name || ''
-}
-
-const getRegionName = region => {
-  if (!region) return ''
-  return region.name || ''
+  baseSelectCountry(country)
 }
 
 // Load cities for selected country
-const loadCities = async () => {
+async function loadCities() {
   if (!selectedCountryCode.value) {
     cities.value = []
     selectedCity.value = null
@@ -757,12 +666,7 @@ const loadCities = async () => {
     {
       onSuccess: result => {
         if (result.success) {
-          // Ensure coordinates object exists
-          cities.value = result.data.map(city => ({
-            ...city,
-            coordinates: city.coordinates || { lat: null, lng: null },
-            zoom: city.zoom || 10
-          }))
+          cities.value = result.data.map(city => normalizeCoordinates(city, 10))
         }
       },
       onError: error => {
@@ -780,12 +684,7 @@ const loadCities = async () => {
 
 // Select a city
 const selectCity = async city => {
-  // Ensure coordinates object exists
-  selectedCity.value = {
-    ...city,
-    coordinates: city.coordinates || { lat: null, lng: null },
-    zoom: city.zoom || 10
-  }
+  selectedCity.value = normalizeCoordinates(city, 10)
   await loadRegionsForCity(city._id)
 }
 
@@ -796,14 +695,10 @@ const loadRegionsForCity = async cityId => {
     {
       onSuccess: result => {
         if (result.success) {
-          regions.value = result.data.map(region => ({
-            ...region,
-            coordinates: region.coordinates || { lat: null, lng: null },
-            zoom: region.zoom || 14
-          }))
+          regions.value = result.data.map(region => normalizeCoordinates(region, 14))
           nextTick(() => {
-            initMainMap()
-            updateMainMapMarkers()
+            initMainMap(selectedCity.value)
+            updateMainMapMarkers(selectedCity.value, regions.value, getCityName, getRegionName)
           })
         }
       },
@@ -818,23 +713,11 @@ const loadRegionsForCity = async cityId => {
 // ============= City Modal =============
 const openCityModal = (city = null) => {
   editingCity.value = city
-  if (city) {
-    cityForm.value = {
-      name: city.name || '',
-      coordinates: city.coordinates ? { ...city.coordinates } : { lat: null, lng: null },
-      zoom: city.zoom || 10
-    }
-  } else {
-    cityForm.value = {
-      name: '',
-      coordinates: { lat: null, lng: null },
-      zoom: 10
-    }
-  }
+  cityForm.value = city ? createCityFormFromCity(city) : createEmptyCityForm()
   showCityModal.value = true
 
   nextTick(() => {
-    setTimeout(() => initCityModalMap(), 200)
+    setTimeout(() => initCityModalMap(cityForm.value), 200)
   })
 }
 
@@ -844,11 +727,7 @@ const saveCity = async () => {
     return
   }
 
-  const data = {
-    name: cityForm.value.name,
-    coordinates: cityForm.value.coordinates.lat ? cityForm.value.coordinates : null,
-    zoom: cityForm.value.zoom
-  }
+  const data = prepareCityData(cityForm.value)
 
   const actionFn = editingCity.value
     ? () => updateCity(editingCity.value._id, data)
@@ -892,26 +771,13 @@ const confirmDeleteCity = async city => {
 // ============= Region Modal =============
 const openRegionModal = (region = null) => {
   editingRegion.value = region
-  if (region) {
-    regionForm.value = {
-      name: region.name || '',
-      coordinates: region.coordinates ? { ...region.coordinates } : { lat: null, lng: null },
-      zoom: region.zoom || 14
-    }
-  } else {
-    // Default to city coordinates if available
-    regionForm.value = {
-      name: '',
-      coordinates: selectedCity.value?.coordinates?.lat
-        ? { ...selectedCity.value.coordinates }
-        : { lat: null, lng: null },
-      zoom: 14
-    }
-  }
+  regionForm.value = region
+    ? createRegionFormFromRegion(region)
+    : createEmptyRegionForm(selectedCity.value)
   showRegionModal.value = true
 
   nextTick(() => {
-    setTimeout(() => initRegionModalMap(), 200)
+    setTimeout(() => initRegionModalMap(regionForm.value, selectedCity.value), 200)
   })
 }
 
@@ -921,11 +787,7 @@ const saveRegion = async () => {
     return
   }
 
-  const data = {
-    name: regionForm.value.name,
-    coordinates: regionForm.value.coordinates.lat ? regionForm.value.coordinates : null,
-    zoom: regionForm.value.zoom
-  }
+  const data = prepareRegionData(regionForm.value)
 
   const actionFn = editingRegion.value
     ? () => updateRegion(editingRegion.value._id, data)
@@ -962,246 +824,17 @@ const confirmDeleteRegion = async region => {
   )
 }
 
-// ============= Main Map Functions =============
-const initMainMap = () => {
-  if (mainMap) return
-
-  const mapElement = document.getElementById('region-main-map')
-  if (!mapElement) return
-
-  // Default center or city coordinates
-  const center = selectedCity.value?.coordinates?.lat
-    ? [selectedCity.value.coordinates.lat, selectedCity.value.coordinates.lng]
-    : [39.0, 35.0]
-  const zoom = selectedCity.value?.zoom || 6
-
-  mainMap = L.map('region-main-map', {
-    center: center,
-    zoom: zoom,
-    zoomControl: true
-  })
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19
-  }).addTo(mainMap)
-
-  setTimeout(() => mainMap.invalidateSize(), 100)
-}
-
-const destroyMainMap = () => {
-  if (mainMap) {
-    mainMap.remove()
-    mainMap = null
-    mainMapMarkers = []
-    mainCityMarker = null
-  }
-}
-
-const updateMainMapMarkers = () => {
-  if (!mainMap) return
-
-  // Clear existing markers
-  mainMapMarkers.forEach(marker => mainMap.removeLayer(marker))
-  mainMapMarkers = []
-  if (mainCityMarker) {
-    mainMap.removeLayer(mainCityMarker)
-    mainCityMarker = null
-  }
-
-  const bounds = []
-
-  // Add city marker
-  if (selectedCity.value?.coordinates?.lat) {
-    mainCityMarker = L.marker(
-      [selectedCity.value.coordinates.lat, selectedCity.value.coordinates.lng],
-      { icon: cityIcon }
-    )
-      .addTo(mainMap)
-      .bindPopup(
-        `<strong>${getCityName(selectedCity.value)}</strong><br><small>Şehir Merkezi</small>`
-      )
-
-    bounds.push([selectedCity.value.coordinates.lat, selectedCity.value.coordinates.lng])
-  }
-
-  // Add region markers
-  regions.value.forEach(region => {
-    if (region.coordinates?.lat && region.coordinates?.lng) {
-      const marker = L.marker([region.coordinates.lat, region.coordinates.lng], {
-        icon: regionIcon
-      })
-        .addTo(mainMap)
-        .bindPopup(
-          `<strong>${getRegionName(region)}</strong><br><small>${region.coordinates.lat.toFixed(5)}, ${region.coordinates.lng.toFixed(5)}</small>`
-        )
-
-      mainMapMarkers.push(marker)
-      bounds.push([region.coordinates.lat, region.coordinates.lng])
-    }
-  })
-
-  // Fit bounds
-  if (bounds.length > 0) {
-    mainMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 })
-  } else if (selectedCity.value?.coordinates?.lat) {
-    mainMap.setView(
-      [selectedCity.value.coordinates.lat, selectedCity.value.coordinates.lng],
-      selectedCity.value.zoom || 10
-    )
-  }
-}
-
-const focusOnMap = region => {
-  if (!mainMap || !region.coordinates?.lat) return
-  mainMap.setView([region.coordinates.lat, region.coordinates.lng], region.zoom || 14)
-
-  const marker = mainMapMarkers.find(m => {
-    const latlng = m.getLatLng()
-    return (
-      Math.abs(latlng.lat - region.coordinates.lat) < 0.0001 &&
-      Math.abs(latlng.lng - region.coordinates.lng) < 0.0001
-    )
-  })
-  if (marker) marker.openPopup()
-}
-
-// ============= City Modal Map =============
-const initCityModalMap = () => {
-  if (cityModalMap) {
-    cityModalMap.remove()
-    cityModalMap = null
-    cityModalMarker = null
-  }
-
-  const mapElement = document.getElementById('city-modal-map')
-  if (!mapElement) return
-
-  const hasCoords = cityForm.value.coordinates?.lat && cityForm.value.coordinates?.lng
-  const center = hasCoords
-    ? [cityForm.value.coordinates.lat, cityForm.value.coordinates.lng]
-    : [39.0, 35.0]
-
-  cityModalMap = L.map('city-modal-map', {
-    center: center,
-    zoom: hasCoords ? cityForm.value.zoom || 10 : 6,
-    zoomControl: true
-  })
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap',
-    maxZoom: 19
-  }).addTo(cityModalMap)
-
-  if (hasCoords) {
-    cityModalMarker = L.marker(center, { icon: cityIcon }).addTo(cityModalMap)
-  }
-
-  cityModalMap.on('click', e => {
-    const { lat, lng } = e.latlng
-    cityForm.value.coordinates.lat = parseFloat(lat.toFixed(6))
-    cityForm.value.coordinates.lng = parseFloat(lng.toFixed(6))
-    cityForm.value.zoom = cityModalMap.getZoom()
-
-    if (cityModalMarker) {
-      cityModalMarker.setLatLng([lat, lng])
-    } else {
-      cityModalMarker = L.marker([lat, lng], { icon: cityIcon }).addTo(cityModalMap)
-    }
-  })
-
-  setTimeout(() => cityModalMap.invalidateSize(), 100)
-}
-
-// ============= Region Modal Map =============
-const initRegionModalMap = () => {
-  if (regionModalMap) {
-    regionModalMap.remove()
-    regionModalMap = null
-    regionModalMarker = null
-  }
-
-  const mapElement = document.getElementById('region-modal-map')
-  if (!mapElement) return
-
-  const hasCoords = regionForm.value.coordinates?.lat && regionForm.value.coordinates?.lng
-  const center = hasCoords
-    ? [regionForm.value.coordinates.lat, regionForm.value.coordinates.lng]
-    : selectedCity.value?.coordinates?.lat
-      ? [selectedCity.value.coordinates.lat, selectedCity.value.coordinates.lng]
-      : [39.0, 35.0]
-
-  regionModalMap = L.map('region-modal-map', {
-    center: center,
-    zoom: hasCoords ? regionForm.value.zoom || 14 : selectedCity.value?.zoom || 10,
-    zoomControl: true
-  })
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap',
-    maxZoom: 19
-  }).addTo(regionModalMap)
-
-  if (hasCoords) {
-    regionModalMarker = L.marker(center, { icon: regionIcon }).addTo(regionModalMap)
-  }
-
-  regionModalMap.on('click', e => {
-    const { lat, lng } = e.latlng
-    regionForm.value.coordinates.lat = parseFloat(lat.toFixed(6))
-    regionForm.value.coordinates.lng = parseFloat(lng.toFixed(6))
-    regionForm.value.zoom = regionModalMap.getZoom()
-
-    if (regionModalMarker) {
-      regionModalMarker.setLatLng([lat, lng])
-    } else {
-      regionModalMarker = L.marker([lat, lng], { icon: regionIcon }).addTo(regionModalMap)
-    }
-  })
-
-  // Zoom change handler - update zoom input in real-time
-  regionModalMap.on('zoomend', () => {
-    regionForm.value.zoom = regionModalMap.getZoom()
-  })
-
-  setTimeout(() => regionModalMap.invalidateSize(), 100)
-}
-
-// Watch for modal close to cleanup
+// Watch for modal close to cleanup maps
 watch(showCityModal, val => {
-  if (!val && cityModalMap) {
-    cityModalMap.remove()
-    cityModalMap = null
-    cityModalMarker = null
+  if (!val) {
+    destroyCityModalMap()
   }
 })
 
 watch(showRegionModal, val => {
-  if (!val && regionModalMap) {
-    regionModalMap.remove()
-    regionModalMap = null
-    regionModalMarker = null
+  if (!val) {
+    destroyRegionModalMap()
   }
-})
-
-// Lifecycle
-onMounted(() => {
-  // Load cities if country was saved in localStorage
-  if (selectedCountryCode.value) {
-    loadCities()
-  }
-
-  // Add click outside listener for dropdown
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  destroyMainMap()
-  if (cityModalMap) cityModalMap.remove()
-  if (regionModalMap) regionModalMap.remove()
-
-  // Remove click outside listener
-  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 

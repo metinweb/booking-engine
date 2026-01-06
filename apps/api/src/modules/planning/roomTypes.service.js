@@ -7,11 +7,11 @@
 import RoomType from './roomType.model.js'
 import Rate from './rate.model.js'
 import Hotel from '../hotel/hotel.model.js'
-import { NotFoundError, BadRequestError } from '../../core/errors.js'
-import { asyncHandler } from '../../helpers/asyncHandler.js'
-import logger from '../../core/logger.js'
-import { getRoomTypeFileUrl, deleteRoomTypeFile } from '../../helpers/roomTypeUpload.js'
-import { getPartnerId, verifyHotelOwnership } from '../../services/helpers.js'
+import { NotFoundError, BadRequestError } from '#core/errors.js'
+import { asyncHandler } from '#helpers'
+import logger from '#core/logger.js'
+import { getRoomTypeFileUrl, deleteRoomTypeFile } from '#helpers/roomTypeUpload.js'
+import { getPartnerId, verifyHotelOwnership } from '#services/helpers.js'
 
 // ==================== ROOM TYPES ====================
 

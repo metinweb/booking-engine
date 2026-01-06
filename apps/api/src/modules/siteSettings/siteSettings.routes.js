@@ -1,8 +1,8 @@
 import express from 'express'
 import * as siteSettingsService from './siteSettings.service.js'
-import { protect, requireAdmin } from '../../middleware/auth.js'
-import { partnerContext } from '../../middlewares/partnerContext.js'
-import { siteUpload } from '../../helpers/siteUpload.js'
+import { protect, requireAdmin } from '#middleware/auth.js'
+import { partnerContext } from '#middleware/partnerContext.js'
+import { siteUpload } from '#helpers/siteUpload.js'
 
 const router = express.Router()
 

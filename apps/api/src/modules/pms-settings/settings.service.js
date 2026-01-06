@@ -1,4 +1,4 @@
-import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { asyncHandler } from '#helpers'
 import PmsSettings from './pmsSettings.model.js'
 import Hotel from '../hotel/hotel.model.js'
 

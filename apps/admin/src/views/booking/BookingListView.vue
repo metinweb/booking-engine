@@ -179,6 +179,14 @@
                   ></span>
                   {{ getBookingStatusLabel(row.status) }}
                 </span>
+                <!-- Sales Channel Badge -->
+                <span
+                  v-if="row.salesChannel || row.searchCriteria?.channel"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase"
+                  :class="getSalesChannelClass(row)"
+                >
+                  {{ getSalesChannelLabel(row) }}
+                </span>
                 <!-- Expiry warning for drafts -->
                 <span
                   v-if="row.status === 'draft' && row.expiresAt"
@@ -1056,6 +1064,28 @@ const getRoomChildren = room => {
     return room.guests.filter(g => g.type === 'child' || g.type === 'infant').length
   }
   return 0
+}
+
+// Get sales channel from booking (salesChannel field or searchCriteria.channel)
+const getSalesChannel = booking => {
+  if (booking.salesChannel) return booking.salesChannel.toLowerCase()
+  if (booking.searchCriteria?.channel) return booking.searchCriteria.channel.toLowerCase()
+  return null
+}
+
+// Get sales channel label
+const getSalesChannelLabel = booking => {
+  const channel = getSalesChannel(booking)
+  return channel === 'b2b' ? 'B2B' : 'B2C'
+}
+
+// Get sales channel badge class
+const getSalesChannelClass = booking => {
+  const channel = getSalesChannel(booking)
+  if (channel === 'b2b') {
+    return 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300'
+  }
+  return 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
 }
 
 </script>

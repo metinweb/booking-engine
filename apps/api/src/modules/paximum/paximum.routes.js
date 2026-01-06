@@ -5,7 +5,7 @@
  */
 
 import express from 'express'
-import { protect, requirePartnerOrAdmin } from '../../middleware/auth.js'
+import { protect, requirePartnerOrAdmin } from '#middleware/auth.js'
 import * as paximumController from './paximum.controller.js'
 
 const router = express.Router()

@@ -18,7 +18,9 @@ booking-engine/
 │   ├── api/          # Express.js Backend (Port 4000)
 │   └── admin/        # Vue 3 Frontend (Port 5173)
 ├── packages/
-│   └── validation/   # Shared validation schemas
+│   ├── constants/    # Shared constants
+│   ├── validation/   # Shared validation schemas
+│   └── utils/        # Shared utilities (@booking-engine/utils)
 └── turbo.json        # Monorepo config
 ```
 
@@ -44,14 +46,75 @@ booking-engine/
 
 ---
 
+## 🚀 YENİ MODÜL OLUŞTURMA
+
+Yeni backend/frontend modülü oluşturmak için **module generator** kullan:
+
+```bash
+# Temel modül (model + service + routes + frontend service)
+pnpm create-module room-inventory
+
+# Store ile birlikte
+pnpm create-module room-inventory --with-store
+
+# Model olmadan (sadece service endpoints)
+pnpm create-module room-inventory --no-model
+```
+
+Generator şunları oluşturur:
+- `apps/api/src/modules/{name}/{name}.model.js`
+- `apps/api/src/modules/{name}/{name}.service.js`
+- `apps/api/src/modules/{name}/{name}.routes.js`
+- `apps/admin/src/services/{name}Service.js`
+- `apps/admin/src/stores/{name}.js` (--with-store ile)
+
+**Route'lar otomatik yüklenir!** `/api/{module-name}` endpoint'i hazır.
+
+**Sonraki adımlar:**
+1. Çevirileri ekle (`locales/{tr,en}.json`)
+2. (Opsiyonel) Özel path için `loaders/routes.js` ROUTE_CONFIG'i düzenle
+
+---
+
+## 📦 BACKEND PATH ALIASES
+
+Backend'de relative import yerine **path aliases** kullan:
+
+```javascript
+// ❌ Eski yöntem
+import { asyncHandler } from '../../helpers/asyncHandler.js'
+import { NotFoundError } from '../../core/errors.js'
+
+// ✅ Yeni yöntem
+import { asyncHandler } from '#helpers'
+import { NotFoundError } from '#core/errors.js'
+```
+
+**Mevcut Aliases:**
+| Alias | Yol |
+|-------|-----|
+| `#config` | `./src/config/index.js` |
+| `#constants/*` | `./src/constants/*` |
+| `#core/*` | `./src/core/*` |
+| `#helpers` | `./src/helpers/index.js` |
+| `#helpers/*` | `./src/helpers/*` |
+| `#middleware/*` | `./src/middleware/*` |
+| `#modules/*` | `./src/modules/*` |
+| `#services/*` | `./src/services/*` |
+| `#plugins/*` | `./src/plugins/*` |
+| `#utils/*` | `./src/utils/*` |
+
+---
+
 ## 💡 GELİŞTİRME KURALLARI
 
 1. **PMS Context**: `usePmsContextInjection()` ile `hotelId` al, tüm PMS sorgularında kullan
 2. **API İstekleri**: `services/` klasöründeki fonksiyonları kullan, component içinde axios çağırma
-3. **Yeni Özellik**: İlgili `modules/` klasöründe çalış (DDD yapısı)
+3. **Yeni Modül**: `pnpm create-module <isim>` kullan, manuel oluşturma
 4. **Çeviri Ekleme**: Hem `tr.json` hem `en.json`'a ekle
 5. **Component Seçimi**: Önce UI → Common → PMS Shared sırasıyla kontrol et
 6. **E-posta Şablonları**: Tüm e-postalar Maizzle ile hazırlanmalı (`packages/emails/`)
+7. **Backend Imports**: Path aliases kullan (`#helpers`, `#core/*` vb.)
 
 ---
 
@@ -89,6 +152,29 @@ booking-engine/
 
 ---
 
+## 📦 SHARED UTILS PAKETİ
+
+Hem backend hem frontend'de kullanılabilecek ortak utility fonksiyonları:
+
+```javascript
+// Backend veya Frontend'de kullanım
+import { formatDate, getNights, formatCurrency, formatPhone, capitalize } from '@booking-engine/utils'
+
+// Veya modül bazlı import
+import { formatDate, getNights } from '@booking-engine/utils/date'
+import { formatCurrency, formatPhone } from '@booking-engine/utils/format'
+import { roundPrice, calculatePrice } from '@booking-engine/utils/pricing'
+import { capitalize, slugify, getInitials } from '@booking-engine/utils/string'
+```
+
+**Modüller:**
+- `date` - Tarih formatlama, gece hesaplama, tarih aralıkları
+- `format` - Para birimi, telefon, yüzde, dosya boyutu formatlama
+- `pricing` - Fiyat yuvarlama, indirim hesaplama, ADR
+- `string` - Capitalize, slugify, initials, HTML escape
+
+---
+
 ## 🔗 REFERANSLAR
 
 - Güvenlik notları: `docs/SECURITY.md`
@@ -97,4 +183,4 @@ booking-engine/
 
 ---
 
-**Son Güncelleme:** 2026-01-05
+**Son Güncelleme:** 2026-01-06

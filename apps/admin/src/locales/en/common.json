@@ -95,6 +95,9 @@
     "more": "more",
     "refresh": "Refresh",
     "confirmDelete": "Are you sure you want to delete?",
+    "records": "records",
+    "perPage": "per page",
+    "activeFilters": "Active Filters",
     "languages": {
       "tr": "Turkish",
       "en": "English",
