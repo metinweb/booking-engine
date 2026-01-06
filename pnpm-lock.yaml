@@ -26,6 +26,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@booking-engine/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@booking-engine/validation':
         specifier: workspace:*
         version: link:../../packages/validation
@@ -114,6 +117,9 @@ importers:
       '@aws-sdk/client-sesv2':
         specifier: ^3.958.0
         version: 3.958.0
+      '@booking-engine/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@booking-engine/validation':
         specifier: workspace:*
         version: link:../../packages/validation
@@ -187,6 +193,8 @@ importers:
       nodemon:
         specifier: ^3.0.2
         version: 3.1.11
+
+  packages/constants: {}
 
   packages/validation: {}
 

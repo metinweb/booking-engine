@@ -13,6 +13,7 @@
     "lint:fix": "eslint src/ --fix"
   },
   "dependencies": {
+    "@booking-engine/constants": "workspace:*",
     "@booking-engine/validation": "workspace:*",
     "@tiptap/extension-link": "^3.14.0",
     "@tiptap/extension-underline": "^3.14.0",

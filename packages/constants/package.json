@@ -1,0 +1,23 @@
+{
+  "name": "@booking-engine/constants",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./languages": "./src/languages.js",
+    "./currencies": "./src/currencies.js",
+    "./payment": "./src/payment.js",
+    "./transaction": "./src/transaction.js",
+    "./booking": "./src/booking.js",
+    "./status": "./src/status.js"
+  },
+  "files": [
+    "src"
+  ],
+  "keywords": [
+    "constants",
+    "booking-engine",
+    "shared"
+  ]
+}
