@@ -202,7 +202,7 @@ const seasonSchema = new mongoose.Schema(
 
         // Minimum adults override
         useMinAdultsOverride: { type: Boolean, default: false },
-        minAdults: { type: Number, min: 1, max: 10, default: null },
+        minAdults: { type: Number, min: 1, max: 30, default: null },
 
         // If true, use the multiplier override below instead of room's template
         useMultiplierOverride: { type: Boolean, default: false },
