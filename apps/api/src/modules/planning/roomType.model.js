@@ -69,12 +69,12 @@ const roomTypeSchema = new mongoose.Schema(
 
     // Booking.com style occupancy
     occupancy: {
-      maxAdults: { type: Number, min: 1, max: 10, default: 2 },
-      minAdults: { type: Number, min: 1, max: 10, default: 1 }, // Minimum adults for this room
+      maxAdults: { type: Number, min: 1, max: 12, default: 2 },
+      minAdults: { type: Number, min: 1, max: 12, default: 1 }, // Minimum adults for this room
       maxChildren: { type: Number, min: 0, max: 6, default: 2 },
       maxInfants: { type: Number, min: 0, max: 4, default: 1 },
-      totalMaxGuests: { type: Number, min: 1, max: 12, default: 4 },
-      baseOccupancy: { type: Number, min: 1, max: 10, default: 2 } // Standard pricing occupancy
+      totalMaxGuests: { type: Number, min: 1, max: 20, default: 4 }, // Increased for villas/suites
+      baseOccupancy: { type: Number, min: 1, max: 12, default: 2 } // Standard pricing occupancy
     },
 
     // Room physical properties
@@ -255,7 +255,7 @@ roomTypeSchema.index({ displayOrder: 1 })
 // Multiplier validation constants
 const MULTIPLIER_MIN = 0
 const MULTIPLIER_MAX = 5 // Max 5x multiplier (e.g., 500% of base price)
-const ADULT_COUNT_MAX = 10
+const ADULT_COUNT_MAX = 12 // Max adults per room (for villas/suites)
 const CHILD_ORDER_MAX = 6
 
 /**

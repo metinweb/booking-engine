@@ -256,6 +256,11 @@ OTEL VERI SEMASI:
       }
     }
   ],
+
+ÖNEMLI - Kapasite Limitleri:
+- maxAdults: 1-12 arası (standart oda: 2-4, suite: 6-8, villa: 10-12)
+- maxChildren: 0-6 arası
+- totalMaxGuests: maxAdults + maxChildren toplamı, maksimum 20
   "confidence": {
     "name": 95,
     "description": 80,
@@ -747,6 +752,11 @@ OTEL VERI SEMASI:
       }
     }
   ],
+
+ÖNEMLI - Kapasite Limitleri:
+- maxAdults: 1-12 arası (standart oda: 2-4, suite: 6-8, villa: 10-12)
+- maxChildren: 0-6 arası
+- totalMaxGuests: maxAdults + maxChildren toplamı, maksimum 20
   "confidence": {
     "name": 95,
     "description": 80,
