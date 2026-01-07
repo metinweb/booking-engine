@@ -249,6 +249,7 @@ export default {
   updateBookingStatus,
   cancelBooking,
   addBookingNote,
+  deleteBooking,
   getBookingStats,
   // Draft functions
   getMyDrafts,
