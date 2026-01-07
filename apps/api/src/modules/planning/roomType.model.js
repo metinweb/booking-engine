@@ -58,7 +58,8 @@ const roomTypeSchema = new mongoose.Schema(
       type: String,
       uppercase: true,
       trim: true,
-      required: [true, 'REQUIRED_CODE']
+      required: [true, 'REQUIRED_CODE'],
+      maxlength: [10, 'CODE_MAX_LENGTH']
     },
 
     description: multiLangString(),

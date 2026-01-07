@@ -230,7 +230,7 @@ OTEL VERI SEMASI:
   "logo": "https://hotel.com/logo.png (otel logosu tam URL, varsa)",
   "roomTemplates": [
     {
-      "code": "STD|DLX|STE|FAM|SGL|DBL|TWN|SUITE|BUNG|VILLA (kisa kod)",
+      "code": "STD|DLX|STE|FAM|SGL|DBL|TWN|SUITE|BUNG|VILLA (ÖNEMLI: maksimum 10 karakter)",
       "name": { "tr": "Standart Oda", "en": "Standard Room" },
       "description": { "tr": "Oda aciklamasi", "en": "Room description" },
       "images": [
@@ -272,6 +272,7 @@ OTEL VERI SEMASI:
 ODA SABLONLARI TALIMATLARI (COK ÖNEMLI!):
 - "BULUNAN ODA TIPLERI" bölümünde listelenen TÜM odalari cikar - HICBIRINI ATLAMA!
 - Her oda icin BENZERSIZ kod kullan (ayni kodu iki odada kullanma!)
+- KRITIK: Oda kodlari MAKSIMUM 10 KARAKTER olmali! (ör: STD, DLX, DELUXE, SUITE, VILLA gibi kisa kodlar)
 - Oda olanaklarini (amenities) sadece yukaridaki listeden sec
 - Oda boyutunu (m2), yatak tipini ve kapasiteyi cikar
 
@@ -720,7 +721,7 @@ OTEL VERI SEMASI:
   "logo": "https://hotel.com/logo.png (otel logosu tam URL, varsa)",
   "roomTemplates": [
     {
-      "code": "STD|DLX|STE|FAM|SGL|DBL|TWN|SUITE|BUNG|VILLA (kisa kod)",
+      "code": "STD|DLX|STE|FAM|SGL|DBL|TWN|SUITE|BUNG|VILLA (ÖNEMLI: maksimum 10 karakter)",
       "name": { "tr": "Standart Oda", "en": "Standard Room" },
       "description": { "tr": "Oda aciklamasi", "en": "Room description" },
       "images": [
@@ -761,7 +762,8 @@ OTEL VERI SEMASI:
 
 ODA SABLONLARI TALIMATLARI (ÖNEMLI!):
 - Otel web sitesinden TÜM oda tiplerini cikar (en az 3-5 farkli oda tipi bul)
-- Her oda tipi icin: kod (STD, DLX, STE, FAM, SGL, DBL, TWN, SUITE, BUNG, VILLA vb.), isim, aciklama bul
+- Her oda tipi icin: kod, isim, aciklama bul
+- KRITIK: Oda kodlari MAKSIMUM 10 KARAKTER olmali! Kisa ve anlamli kodlar kullan (ör: STD, DLX, SUITE, FAMILY, VILLA)
 - ÖNEMLI: Her oda tipi icin TÜM görselleri al (oda basina 5-10 görsel olabilir). Galeri, slider veya fotograf koleksiyonundaki tüm resimleri dahil et!
 - Oda görsellerini oda tipine göre grupla (sadece o odaya ait fotograflari al)
 - Oda olanaklarini (amenities) sadece yukaridaki listeden sec
