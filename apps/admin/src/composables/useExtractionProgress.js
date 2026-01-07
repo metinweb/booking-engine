@@ -175,27 +175,39 @@ export function useExtractionProgress() {
     resetProgress()
     startElapsedTimer()
 
-    const startResponse = await hotelService.startAiExtraction({
-      contentType: 'url',
-      url
-    })
+    try {
+      const startResponse = await hotelService.startAiExtraction({
+        contentType: 'url',
+        url
+      })
 
-    if (startResponse.success && startResponse.operationId) {
-      operationId.value = startResponse.operationId
+      if (startResponse.success && startResponse.operationId) {
+        operationId.value = startResponse.operationId
 
-      // Join socket room for this operation
-      join(startResponse.operationId)
+        // Join socket room for this operation
+        join(startResponse.operationId)
 
-      // Setup socket listeners
-      setupSocketListeners(startResponse.operationId, callbacks)
+        // Setup socket listeners
+        setupSocketListeners(startResponse.operationId, callbacks)
 
-      return {
-        operationId: startResponse.operationId,
-        isSocketConnected: isConnected.value
+        return {
+          operationId: startResponse.operationId,
+          isSocketConnected: isConnected.value
+        }
       }
-    }
 
-    throw new Error('Failed to start extraction')
+      // Response came back but no operationId
+      throw new Error(startResponse.message || 'Failed to start extraction')
+    } catch (error) {
+      stopElapsedTimer()
+      // Re-throw with better error message
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to start extraction'
+      throw new Error(errorMessage)
+    }
   }
 
   /**

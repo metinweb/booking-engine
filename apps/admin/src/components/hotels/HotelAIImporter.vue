@@ -732,6 +732,11 @@ const extractData = async () => {
       const callbacks = {
         onComplete: async () => {
           try {
+            // Make sure we have a valid operationId before fetching result
+            if (!operationId.value) {
+              throw new Error('No operation ID available')
+            }
+
             const result = await hotelService.getExtractionResult(operationId.value)
             if (result.success && result.data) {
               extractedData.value = initializeExtractedData(result.data)
@@ -739,29 +744,48 @@ const extractData = async () => {
             } else {
               throw new Error('No extraction data')
             }
-          } catch {
-            errorMessage.value = t('hotels.aiImport.fetchResultFailed')
+          } catch (err) {
+            logger.error('Failed to fetch extraction result:', err)
+            errorMessage.value = err.message || t('hotels.aiImport.fetchResultFailed')
             step.value = 'error'
           }
         },
         onFail: data => {
+          logger.error('Extraction failed:', data)
           errorMessage.value = data.error || t('hotels.aiImport.extractionFailed')
           step.value = 'error'
         }
       }
 
-      const result = await startExtraction(urlInput.value, callbacks)
+      try {
+        const result = await startExtraction(urlInput.value, callbacks)
 
-      // If socket is not connected, fall back to polling
-      if (!result.isSocketConnected) {
-        logger.warn('Socket not connected, falling back to polling')
-        const data = await pollForResult(result.operationId, callbacks)
-        if (data) {
-          extractedData.value = initializeExtractedData(data)
-          step.value = 'preview'
+        if (!result || !result.operationId) {
+          throw new Error('Failed to start extraction - no operation ID returned')
         }
+
+        // If socket is not connected, fall back to polling
+        if (!result.isSocketConnected) {
+          logger.warn('Socket not connected, falling back to polling')
+          const data = await pollForResult(result.operationId, callbacks)
+          if (data) {
+            extractedData.value = initializeExtractedData(data)
+            step.value = 'preview'
+          }
+        }
+        // Otherwise, socket listeners will handle the rest
+      } catch (startError) {
+        logger.error('Start extraction error:', startError)
+        // Show detailed error message
+        const errorMsg =
+          startError.response?.data?.error ||
+          startError.response?.data?.message ||
+          startError.message ||
+          t('hotels.aiImport.startFailed')
+        errorMessage.value = errorMsg
+        step.value = 'error'
+        stopElapsedTimer()
       }
-      // Otherwise, socket listeners will handle the rest
       return
     }
 
