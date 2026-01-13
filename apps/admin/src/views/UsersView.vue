@@ -117,8 +117,8 @@
       <template #cell-name="{ row }">
         <div class="flex items-center gap-3">
           <img
-            v-if="row.avatar"
-            :src="row.avatar"
+            v-if="row.avatar?.url"
+            :src="row.avatar.url"
             :alt="row.name"
             class="w-10 h-10 rounded-full object-cover shadow-sm cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all"
             @click="openAvatarModal(row)"
@@ -306,7 +306,7 @@
           </button>
           <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl">
             <img
-              :src="avatarUser.avatar"
+              :src="avatarUser.avatar?.url"
               :alt="avatarUser.name"
               class="w-full h-auto max-h-[70vh] object-contain"
             />
