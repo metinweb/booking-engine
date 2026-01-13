@@ -356,14 +356,19 @@ const toast = useToast()
 const partnerStore = usePartnerStore()
 const authStore = useAuthStore()
 
-// API base URL for avatar images
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || ''
-
-// Get full avatar URL
+// Get full avatar URL from API server
 const getAvatarUrl = (avatarPath) => {
   if (!avatarPath) return null
   if (avatarPath.startsWith('http')) return avatarPath
-  return `${API_BASE_URL}${avatarPath}`
+
+  // Extract base URL (protocol + host) from API URL
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || ''
+  try {
+    const url = new URL(apiUrl)
+    return `${url.protocol}//${url.host}${avatarPath}`
+  } catch {
+    return avatarPath
+  }
 }
 
 // DataTable columns
