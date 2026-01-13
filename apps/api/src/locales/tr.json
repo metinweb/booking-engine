@@ -81,6 +81,7 @@
   "USER_UPDATED": "Kullanıcı başarıyla güncellendi",
   "USER_DELETED": "Kullanıcı başarıyla silindi",
   "USER_NOT_FOUND": "Kullanıcı bulunamadı",
+  "PENDING_USER_NO_PASSWORD": "Şifresi olmayan bekleyen kullanıcı aktif edilemez. Önce aktivasyon mailini yeniden gönderin.",
   "PASSWORD_CHANGED": "Şifre başarıyla değiştirildi",
   "CURRENT_PASSWORD_INCORRECT": "Mevcut şifre hatalı",
   "CANNOT_DELETE_YOURSELF": "Kendi hesabınızı silemezsiniz",

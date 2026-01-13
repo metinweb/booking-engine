@@ -184,7 +184,8 @@ export const getUser = asyncHandler(async (req, res) => {
 
 // Update user
 export const updateUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id)
+  // Select password field to check if user has a password (for pending users)
+  const user = await User.findById(req.params.id).select('+password')
 
   if (!user) {
     throw new NotFoundError('USER_NOT_FOUND')
@@ -197,6 +198,11 @@ export const updateUser = asyncHandler(async (req, res) => {
     }
   }
 
+  // Prevent activating pending users without password
+  if (req.body.status === 'active' && user.status === 'pending' && !user.password) {
+    throw new BadRequestError('PENDING_USER_NO_PASSWORD')
+  }
+
   // Update only allowed fields (security: prevent mass assignment)
   const allowedFields = [
     'name',
@@ -206,7 +212,8 @@ export const updateUser = asyncHandler(async (req, res) => {
     'permissions',
     'preferredLanguage',
     'avatar',
-    'notificationSettings'
+    'notificationSettings',
+    'status'
   ]
 
   allowedFields.forEach(field => {

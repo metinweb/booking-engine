@@ -81,6 +81,7 @@
   "USER_UPDATED": "User updated successfully",
   "USER_DELETED": "User deleted successfully",
   "USER_NOT_FOUND": "User not found",
+  "PENDING_USER_NO_PASSWORD": "Cannot activate pending user without password. Please resend activation email first.",
   "PASSWORD_CHANGED": "Password changed successfully",
   "CURRENT_PASSWORD_INCORRECT": "Current password is incorrect",
   "CANNOT_DELETE_YOURSELF": "You cannot delete your own account",
