@@ -276,16 +276,38 @@ const authStore = useAuthStore()
 const uiStore = useUIStore()
 const hotelStore = useHotelStore()
 
-// API base URL for avatar
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
-const fileBaseUrl = apiBaseUrl.replace('/api', '')
+// File base URL for uploads (avatars, attachments, etc.)
+const getFileBaseUrl = () => {
+  // Use dedicated file URL if available
+  if (import.meta.env.VITE_FILE_BASE_URL) {
+    return import.meta.env.VITE_FILE_BASE_URL
+  }
+
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+
+  // If API URL is absolute (starts with http), extract origin
+  if (apiUrl.startsWith('http')) {
+    try {
+      const url = new URL(apiUrl)
+      return url.origin
+    } catch {
+      return ''
+    }
+  }
+
+  // For relative paths or invalid URLs, use empty string (relative to current origin)
+  return ''
+}
+
+const fileBaseUrl = getFileBaseUrl()
 
 // User avatar URL
 const userAvatarUrl = computed(() => {
   const avatar = authStore.user?.avatar
   if (!avatar?.url) return null
   if (avatar.url.startsWith('http')) return avatar.url
-  return `${fileBaseUrl}${avatar.url}`
+  // Use relative path if fileBaseUrl is empty
+  return fileBaseUrl ? `${fileBaseUrl}${avatar.url}` : avatar.url
 })
 
 // Routes that need hotel selector

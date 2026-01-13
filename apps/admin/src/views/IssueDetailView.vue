@@ -379,15 +379,29 @@ import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/auth'
 import issueService from '@/services/issueService'
 
-// API base URL for file access
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
-const fileBaseUrl = apiBaseUrl.replace('/api', '')
+// File base URL for uploads
+const getFileBaseUrl = () => {
+  if (import.meta.env.VITE_FILE_BASE_URL) {
+    return import.meta.env.VITE_FILE_BASE_URL
+  }
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+  if (apiUrl.startsWith('http')) {
+    try {
+      const url = new URL(apiUrl)
+      return url.origin
+    } catch {
+      return ''
+    }
+  }
+  return ''
+}
+const fileBaseUrl = getFileBaseUrl()
 
 // Get full URL for attachment
 const getFileUrl = (url) => {
   if (!url) return ''
   if (url.startsWith('http')) return url
-  return `${fileBaseUrl}${url}`
+  return fileBaseUrl ? `${fileBaseUrl}${url}` : url
 }
 
 // Simple markdown renderer (basic formatting without external dependency)
@@ -431,7 +445,7 @@ const currentUser = computed(() => authStore.user)
 const getUserAvatarUrl = (user) => {
   if (!user?.avatar?.url) return null
   if (user.avatar.url.startsWith('http')) return user.avatar.url
-  return `${fileBaseUrl}${user.avatar.url}`
+  return fileBaseUrl ? `${fileBaseUrl}${user.avatar.url}` : user.avatar.url
 }
 
 // Is watching

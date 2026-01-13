@@ -428,9 +428,23 @@ const toast = useToast()
 const authStore = useAuthStore()
 const uiStore = useUIStore()
 
-// API base URL for avatar
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
-const fileBaseUrl = apiBaseUrl.replace('/api', '')
+// File base URL for uploads
+const getFileBaseUrl = () => {
+  if (import.meta.env.VITE_FILE_BASE_URL) {
+    return import.meta.env.VITE_FILE_BASE_URL
+  }
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+  if (apiUrl.startsWith('http')) {
+    try {
+      const url = new URL(apiUrl)
+      return url.origin
+    } catch {
+      return ''
+    }
+  }
+  return ''
+}
+const fileBaseUrl = getFileBaseUrl()
 
 // Async action composables
 const { isLoading: savingNotifications, execute: executeSaveNotifications } = useAsyncAction()
@@ -441,7 +455,7 @@ const avatarUrl = computed(() => {
   const avatar = authStore.user?.avatar
   if (!avatar?.url) return null
   if (avatar.url.startsWith('http')) return avatar.url
-  return `${fileBaseUrl}${avatar.url}`
+  return fileBaseUrl ? `${fileBaseUrl}${avatar.url}` : avatar.url
 })
 
 // Avatar cropper modal
