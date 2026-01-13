@@ -116,7 +116,15 @@
       <!-- User Info Cell -->
       <template #cell-name="{ row }">
         <div class="flex items-center gap-3">
+          <img
+            v-if="row.avatar"
+            :src="row.avatar"
+            :alt="row.name"
+            class="w-10 h-10 rounded-full object-cover shadow-sm cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all"
+            @click="openAvatarModal(row)"
+          />
           <div
+            v-else
             class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-sm"
           >
             {{ getInitials(row.name) }}
@@ -280,6 +288,40 @@
       @confirm="confirmDelete"
       @cancel="showDeleteConfirm = false"
     />
+
+    <!-- Avatar Preview Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showAvatarModal && avatarUser"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        @click.self="showAvatarModal = false"
+      >
+        <div class="absolute inset-0 bg-black/70" @click="showAvatarModal = false"></div>
+        <div class="relative z-10 max-w-lg w-full">
+          <button
+            class="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors"
+            @click="showAvatarModal = false"
+          >
+            <span class="material-icons text-3xl">close</span>
+          </button>
+          <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+            <img
+              :src="avatarUser.avatar"
+              :alt="avatarUser.name"
+              class="w-full h-auto max-h-[70vh] object-contain"
+            />
+            <div class="p-4 text-center">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                {{ avatarUser.name }}
+              </h3>
+              <p class="text-sm text-gray-500 dark:text-slate-400">
+                {{ avatarUser.email }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -393,8 +435,10 @@ const showEditModal = ref(false)
 const showPermissionsModal = ref(false)
 const showSessionsModal = ref(false)
 const showDeleteConfirm = ref(false)
+const showAvatarModal = ref(false)
 const selectedUser = ref(null)
 const userToDelete = ref(null)
+const avatarUser = ref(null)
 
 // Stats
 const stats = computed(() => {
@@ -505,6 +549,11 @@ const handleActionSelect = (item, row) => {
 }
 
 // Modal handlers
+const openAvatarModal = user => {
+  avatarUser.value = user
+  showAvatarModal.value = true
+}
+
 const openEditModal = user => {
   selectedUser.value = user
   showEditModal.value = true

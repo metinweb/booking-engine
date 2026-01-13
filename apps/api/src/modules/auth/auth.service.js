@@ -4,6 +4,7 @@ import config from '#config'
 import User from '../user/user.model.js'
 import Partner from '../partner/partner.model.js'
 import Agency from '../agency/agency.model.js'
+import Session from '../session/session.model.js'
 import { UnauthorizedError, BadRequestError, TooManyRequestsError, ValidationError } from '#core/errors.js'
 import { asyncHandler } from '#helpers'
 import { verify2FAToken } from '#helpers/twoFactor.js'
@@ -128,6 +129,17 @@ export const login = asyncHandler(async (req, res) => {
   // Generate tokens
   const { accessToken, refreshToken } = generateTokens(user, account)
 
+  // Create session for tracking
+  try {
+    await Session.createFromToken(user._id, accessToken, {
+      userAgent: req.headers['user-agent'],
+      ipAddress: req.ip || req.connection?.remoteAddress || req.headers['x-forwarded-for']?.split(',')[0]
+    })
+  } catch (sessionError) {
+    logger.error('Failed to create session:', sessionError)
+    // Don't block login if session creation fails
+  }
+
   logger.info(`Successful ${accountType} login for ${email}`)
 
   res.json({
@@ -198,6 +210,19 @@ export const refreshToken = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (req, res) => {
   // Set user offline
   await req.user.setOffline()
+
+  // Terminate current session
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '')
+    if (token) {
+      const session = await Session.findByToken(token)
+      if (session) {
+        await session.terminate(req.user._id, 'logout')
+      }
+    }
+  } catch (sessionError) {
+    logger.error('Failed to terminate session on logout:', sessionError)
+  }
 
   res.json({
     success: true,
