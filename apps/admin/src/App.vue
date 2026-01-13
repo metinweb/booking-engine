@@ -83,12 +83,14 @@ onMounted(async () => {
 <style>
 /* Remove default margins and ensure full height */
 html,
-body,
-#app {
+body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+}
+
+#app {
+  min-height: 100%;
 }
 
 /* Ensure smooth scrolling */
