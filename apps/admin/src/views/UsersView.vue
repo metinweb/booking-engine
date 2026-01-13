@@ -223,80 +223,10 @@
           >
             <span class="material-icons text-lg">edit</span>
           </button>
-          <div class="relative" @click.stop>
-            <button
-              class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-              :title="$t('common.moreActions')"
-              @click="toggleActionMenu(row._id)"
-            >
-              <span class="material-icons text-lg">more_vert</span>
-            </button>
-            <!-- Dropdown Menu -->
-            <div
-              v-if="activeActionMenu === row._id"
-              class="absolute right-0 mt-1 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 z-50"
-            >
-              <button
-                v-if="row.status === 'pending'"
-                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                @click="handleResendActivation(row)"
-              >
-                <span class="material-icons text-purple-500 text-lg">send</span>
-                {{ $t('users.actions.resendActivation') }}
-              </button>
-              <button
-                v-if="row.status === 'inactive'"
-                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                @click="handleActivate(row)"
-              >
-                <span class="material-icons text-green-500 text-lg">check_circle</span>
-                {{ $t('users.actions.activate') }}
-              </button>
-              <button
-                v-if="row.status === 'active'"
-                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                @click="handleDeactivate(row)"
-              >
-                <span class="material-icons text-yellow-500 text-lg">pause_circle</span>
-                {{ $t('users.actions.deactivate') }}
-              </button>
-              <button
-                v-if="row.status !== 'pending'"
-                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                @click="handleForcePasswordReset(row)"
-              >
-                <span class="material-icons text-blue-500 text-lg">lock_reset</span>
-                {{ $t('users.actions.forcePasswordReset') }}
-              </button>
-              <button
-                v-if="row.twoFactorEnabled"
-                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                @click="handleReset2FA(row)"
-              >
-                <span class="material-icons text-orange-500 text-lg">shield</span>
-                {{ $t('users.actions.reset2FA') }}
-              </button>
-              <button
-                v-if="authStore.user?.accountType === 'platform'"
-                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2"
-                @click="handleUnblockAccount(row)"
-              >
-                <span class="material-icons text-emerald-500 text-lg">lock_open</span>
-                {{ $t('users.actions.unblockAccount') }}
-              </button>
-              <!-- Cannot delete yourself -->
-              <template v-if="row._id !== authStore.user?.id">
-                <hr class="my-1 border-gray-200 dark:border-slate-700" />
-                <button
-                  class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
-                  @click="handleDelete(row)"
-                >
-                  <span class="material-icons text-lg">delete</span>
-                  {{ $t('common.delete') }}
-                </button>
-              </template>
-            </div>
-          </div>
+          <ActionMenu
+            :items="getActionMenuItems(row)"
+            @select="item => handleActionSelect(item, row)"
+          />
         </div>
       </template>
 
@@ -354,7 +284,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from '@/composables/useToast'
 import { usePartnerStore } from '@/stores/partner'
@@ -377,6 +307,7 @@ import UserEditModal from '@/components/users/UserEditModal.vue'
 import PermissionsModal from '@/components/users/PermissionsModal.vue'
 import SessionsModal from '@/components/users/SessionsModal.vue'
 import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog.vue'
+import ActionMenu from '@/components/ui/buttons/ActionMenu.vue'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -455,7 +386,6 @@ const { execute: executeResendActivation } = useAsyncAction({ showErrorToast: fa
 const { execute: executeUnblock } = useAsyncAction({ showErrorToast: false })
 
 // Additional state
-const activeActionMenu = ref(null)
 
 // Modals
 const showAddModal = ref(false)
@@ -517,38 +447,81 @@ const formatRelativeTime = dateString => {
   return t('notifications.daysAgo', { n: days })
 }
 
-// Toggle action menu
-const toggleActionMenu = userId => {
-  activeActionMenu.value = activeActionMenu.value === userId ? null : userId
+// Get action menu items for a user row
+const getActionMenuItems = row => {
+  const items = []
+
+  if (row.status === 'pending') {
+    items.push({ key: 'resendActivation', label: t('users.actions.resendActivation'), icon: 'send' })
+  }
+  if (row.status === 'inactive') {
+    items.push({ key: 'activate', label: t('users.actions.activate'), icon: 'check_circle' })
+  }
+  if (row.status === 'active') {
+    items.push({ key: 'deactivate', label: t('users.actions.deactivate'), icon: 'pause_circle' })
+  }
+  if (row.status !== 'pending') {
+    items.push({ key: 'forcePasswordReset', label: t('users.actions.forcePasswordReset'), icon: 'lock_reset' })
+  }
+  if (row.twoFactorEnabled) {
+    items.push({ key: 'reset2FA', label: t('users.actions.reset2FA'), icon: 'shield' })
+  }
+  if (authStore.user?.accountType === 'platform') {
+    items.push({ key: 'unblockAccount', label: t('users.actions.unblockAccount'), icon: 'lock_open' })
+  }
+  if (row._id !== authStore.user?.id) {
+    items.push({ divider: true })
+    items.push({ key: 'delete', label: t('common.delete'), icon: 'delete', danger: true })
+  }
+
+  return items
 }
 
-// Close action menu on outside click
-const handleClickOutside = () => {
-  activeActionMenu.value = null
+// Handle action menu selection
+const handleActionSelect = (item, row) => {
+  switch (item.key) {
+    case 'resendActivation':
+      handleResendActivation(row)
+      break
+    case 'activate':
+      handleActivate(row)
+      break
+    case 'deactivate':
+      handleDeactivate(row)
+      break
+    case 'forcePasswordReset':
+      handleForcePasswordReset(row)
+      break
+    case 'reset2FA':
+      handleReset2FA(row)
+      break
+    case 'unblockAccount':
+      handleUnblockAccount(row)
+      break
+    case 'delete':
+      handleDelete(row)
+      break
+  }
 }
 
 // Modal handlers
 const openEditModal = user => {
   selectedUser.value = user
   showEditModal.value = true
-  activeActionMenu.value = null
 }
 
 const openPermissionsModal = user => {
   selectedUser.value = user
   showPermissionsModal.value = true
-  activeActionMenu.value = null
 }
 
 const openSessionsModal = user => {
   selectedUser.value = user
   showSessionsModal.value = true
-  activeActionMenu.value = null
 }
 
 // Action handlers
 const handleActivate = async user => {
-  activeActionMenu.value = null
   await executeActivate(
     () => activateUser(user._id),
     {
@@ -560,8 +533,7 @@ const handleActivate = async user => {
 }
 
 const handleDeactivate = async user => {
-  activeActionMenu.value = null
-  await executeDeactivate(
+    await executeDeactivate(
     () => deactivateUser(user._id),
     {
       successMessage: 'users.deactivated',
@@ -572,8 +544,7 @@ const handleDeactivate = async user => {
 }
 
 const handleForcePasswordReset = async user => {
-  activeActionMenu.value = null
-  await executeForcePasswordReset(
+    await executeForcePasswordReset(
     () => forcePasswordReset(user._id),
     {
       successMessage: 'users.passwordResetForced',
@@ -583,8 +554,7 @@ const handleForcePasswordReset = async user => {
 }
 
 const handleReset2FA = async user => {
-  activeActionMenu.value = null
-  await executeReset2FA(
+    await executeReset2FA(
     () => resetUser2FA(user._id),
     {
       successMessage: 'users.twoFactorReset',
@@ -595,8 +565,7 @@ const handleReset2FA = async user => {
 }
 
 const handleUnblockAccount = async user => {
-  activeActionMenu.value = null
-  await executeUnblock(
+    await executeUnblock(
     () => authService.unblockAccount(user.email),
     {
       successMessage: 'users.accountUnblocked',
@@ -608,8 +577,7 @@ const handleUnblockAccount = async user => {
 const handleDelete = user => {
   userToDelete.value = user
   showDeleteConfirm.value = true
-  activeActionMenu.value = null
-}
+  }
 
 const confirmDelete = async () => {
   if (!userToDelete.value) return
@@ -652,8 +620,7 @@ const handlePermissionsSuccess = () => {
 
 // Resend activation email for pending user
 const handleResendActivation = async user => {
-  activeActionMenu.value = null
-  await executeResendActivation(
+    await executeResendActivation(
     () => resendActivation(user._id),
     {
       successMessage: 'users.activationResent',
@@ -665,15 +632,10 @@ const handleResendActivation = async user => {
 // Lifecycle
 onMounted(() => {
   fetchUsers()
-  document.addEventListener('click', handleClickOutside)
 })
 
 // Re-fetch when selected partner changes
 watch(() => partnerStore.selectedPartner, () => {
   fetchUsers()
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
 })
 </script>
