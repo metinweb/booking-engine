@@ -276,6 +276,14 @@
                 <span class="material-icons text-orange-500 text-lg">shield</span>
                 {{ $t('users.actions.reset2FA') }}
               </button>
+              <button
+                v-if="authStore.user?.accountType === 'platform'"
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                @click="handleUnblockAccount(row)"
+              >
+                <span class="material-icons text-emerald-500 text-lg">lock_open</span>
+                {{ $t('users.actions.unblockAccount') }}
+              </button>
               <!-- Cannot delete yourself -->
               <template v-if="row._id !== authStore.user?.id">
                 <hr class="my-1 border-gray-200 dark:border-slate-700" />
@@ -362,6 +370,7 @@ import {
   deleteUser,
   resendActivation
 } from '@/services/userService'
+import authService from '@/services/authService'
 import DataTable from '@/components/ui/data/DataTable.vue'
 import AddUserModal from '@/components/users/AddUserModal.vue'
 import UserEditModal from '@/components/users/UserEditModal.vue'
@@ -443,6 +452,7 @@ const { execute: executeDeactivate } = useAsyncAction({ showErrorToast: false })
 const { execute: executeForcePasswordReset } = useAsyncAction({ showErrorToast: false })
 const { execute: executeReset2FA } = useAsyncAction({ showErrorToast: false })
 const { execute: executeResendActivation } = useAsyncAction({ showErrorToast: false })
+const { execute: executeUnblock } = useAsyncAction({ showErrorToast: false })
 
 // Additional state
 const activeActionMenu = ref(null)
@@ -579,6 +589,17 @@ const handleReset2FA = async user => {
     {
       successMessage: 'users.twoFactorReset',
       onSuccess: () => fetchUsers(),
+      onError: error => toast.error(error.message)
+    }
+  )
+}
+
+const handleUnblockAccount = async user => {
+  activeActionMenu.value = null
+  await executeUnblock(
+    () => authService.unblockAccount(user.email),
+    {
+      successMessage: 'users.accountUnblocked',
       onError: error => toast.error(error.message)
     }
   )

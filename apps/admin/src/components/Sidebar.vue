@@ -160,7 +160,8 @@ const currentModuleIcon = computed(() => {
     '/bookings': 'book_online',
     '/profile': 'person',
     '/developers': 'code',
-    '/pms-integration': 'link'
+    '/pms-integration': 'link',
+    '/my-subscription': 'card_membership'
   }
 
   // Find matching route
@@ -271,6 +272,16 @@ const mainSection = computed(() => {
     }
     if (hasPermission('settings')) {
       items.push({ name: 'developers', to: '/developers', icon: 'code', label: t('nav.developers') })
+    }
+
+    // Only real partner users can see their own subscription
+    if (authStore.accountType === 'partner') {
+      items.push({
+        name: 'my-subscription',
+        to: '/my-subscription',
+        icon: 'card_membership',
+        label: t('nav.mySubscription')
+      })
     }
   }
 

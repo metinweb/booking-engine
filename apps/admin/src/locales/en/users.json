@@ -103,8 +103,10 @@
       "reset2FA": "Reset 2FA",
       "viewPermissions": "View Permissions",
       "viewSessions": "View Sessions",
-      "resendActivation": "Resend Activation"
+      "resendActivation": "Resend Activation",
+      "unblockAccount": "Unblock Account"
     },
+    "accountUnblocked": "User account has been unblocked",
     "activationResent": "Activation email resent",
     "activated": "User activated",
     "deactivated": "User deactivated",

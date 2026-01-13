@@ -21,6 +21,9 @@
   "LOGIN_FAILED": "Invalid email or password",
   "INVALID_CREDENTIALS": "Invalid email or password",
   "ACCOUNT_INACTIVE": "Your account is not active",
+  "ACCOUNT_UNBLOCKED": "Account has been unblocked successfully",
+  "ACCOUNT_LOCKED": "Your account has been locked due to too many failed login attempts",
+  "ACCOUNT_BLOCKED": "Your account has been permanently blocked. Please contact administrator",
   "REQUIRED_EMAIL_PASSWORD": "Email and password are required",
   "REQUIRED_REFRESH_TOKEN": "Refresh token is required",
 
@@ -142,5 +145,10 @@
   "RATE_LIMIT_EXCEEDED": "Too many requests. Please wait a moment.",
   "NGINX_CONFIG_INSTALLED": "Nginx configuration installed successfully",
   "NGINX_CONFIG_FAILED": "Nginx configuration failed",
-  "SERVER_IP_FETCH_FAILED": "Failed to fetch server IP address"
+  "SERVER_IP_FETCH_FAILED": "Failed to fetch server IP address",
+
+  "PMS_HOTEL_LIMIT_REACHED": "PMS hotel limit reached. Upgrade your plan to add more hotels.",
+  "INVALID_SUBSCRIPTION_PLAN": "Invalid subscription plan",
+  "INVALID_PMS_LIMIT": "Invalid PMS limit value",
+  "SUBSCRIPTION_UPDATED": "Subscription updated successfully"
 }

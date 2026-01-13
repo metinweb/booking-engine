@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import auditPlugin from '#plugins/auditPlugin.js'
 import { encrypt, decrypt, isEncrypted } from '#helpers/encryption.js'
+import { SUBSCRIPTION_PLANS } from '#constants/subscriptionPlans.js'
 
 const partnerSchema = new mongoose.Schema(
   {
@@ -368,6 +369,86 @@ const partnerSchema = new mongoose.Schema(
           default: 0
         }
       }
+    },
+
+    // Abonelik ve Paket Bilgileri
+    subscription: {
+      // Genel abonelik durumu (en son satın alınan pakete göre)
+      status: {
+        type: String,
+        enum: ['active', 'expired', 'grace_period', 'cancelled', 'suspended'],
+        default: 'active'
+      },
+
+      // Özel limitler (tüm paketler için geçerli override)
+      customLimits: {
+        pmsMaxHotels: { type: Number, default: null } // null = paket limiti kullan
+      },
+
+      // Satın alınan paketler (yıllık)
+      purchases: [
+        {
+          // Paket tipi
+          plan: {
+            type: String,
+            enum: ['business', 'professional', 'enterprise'],
+            required: true
+          },
+
+          // Paket dönemi
+          period: {
+            startDate: { type: Date, required: true },
+            endDate: { type: Date, required: true }
+          },
+
+          // Fiyat bilgisi
+          price: {
+            amount: { type: Number, required: true },
+            currency: { type: String, default: 'USD' }
+          },
+
+          // Ödeme bilgisi (pending durumda boş olabilir)
+          payment: {
+            date: Date,
+            method: {
+              type: String,
+              enum: ['bank_transfer', 'credit_card', 'cash', 'other'],
+              default: 'bank_transfer'
+            },
+            reference: String,
+            notes: String
+          },
+
+          // Fatura referansı
+          invoice: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'SubscriptionInvoice'
+          },
+
+          // Paket durumu
+          status: {
+            type: String,
+            enum: ['pending', 'active', 'expired', 'cancelled', 'refunded'],
+            default: 'active'
+          },
+
+          // Meta
+          createdAt: { type: Date, default: Date.now },
+          createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+          },
+          cancelledAt: Date,
+          cancelledBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+          },
+          cancellationReason: String
+        }
+      ],
+
+      // Admin notları
+      notes: String
     }
   },
   {
@@ -392,6 +473,232 @@ partnerSchema.virtual('agencies', {
 // Methods
 partnerSchema.methods.isActive = function () {
   return this.status === 'active'
+}
+
+// Get current active purchase
+partnerSchema.methods.getCurrentPurchase = function () {
+  if (!this.subscription?.purchases?.length) return null
+
+  const now = new Date()
+  // Find active purchase (status active and within period)
+  const activePurchase = this.subscription.purchases.find(
+    p => p.status === 'active' && new Date(p.period.startDate) <= now && new Date(p.period.endDate) >= now
+  )
+
+  if (activePurchase) return activePurchase
+
+  // If no active within period, find the most recent one for grace period check
+  const sortedPurchases = [...this.subscription.purchases]
+    .filter(p => p.status !== 'cancelled' && p.status !== 'refunded')
+    .sort((a, b) => new Date(b.period.endDate) - new Date(a.period.endDate))
+
+  return sortedPurchases[0] || null
+}
+
+// Get current plan from active purchase
+partnerSchema.methods.getCurrentPlan = function () {
+  const purchase = this.getCurrentPurchase()
+  return purchase?.plan || 'business'
+}
+
+// Get PMS hotel limit
+// Returns: number (-1 = unlimited, 0 = PMS disabled, >0 = limit)
+partnerSchema.methods.getPmsLimit = function () {
+  // First check custom limit
+  if (this.subscription?.customLimits?.pmsMaxHotels != null) {
+    return this.subscription.customLimits.pmsMaxHotels
+  }
+  // Fall back to plan defaults from current purchase
+  const planKey = this.getCurrentPlan()
+  const plan = SUBSCRIPTION_PLANS[planKey]
+  return plan?.pmsMaxHotels || 0
+}
+
+// Check if partner can provision more hotels to PMS
+partnerSchema.methods.canProvisionMoreHotels = function () {
+  const limit = this.getPmsLimit()
+  if (limit === -1) return true // Unlimited
+  if (limit === 0) return false // PMS disabled
+
+  const provisionedCount =
+    this.pmsIntegration?.provisionedHotels?.filter(h => h.status === 'active').length || 0
+  return provisionedCount < limit
+}
+
+// Check if PMS is enabled for this partner
+partnerSchema.methods.isPmsEnabled = function () {
+  // Custom limit > 0 enables PMS
+  if (this.subscription?.customLimits?.pmsMaxHotels > 0) return true
+  // Custom limit === -1 (unlimited) enables PMS
+  if (this.subscription?.customLimits?.pmsMaxHotels === -1) return true
+
+  // Fall back to plan defaults from current purchase
+  const planKey = this.getCurrentPlan()
+  const plan = SUBSCRIPTION_PLANS[planKey]
+  return plan?.pmsEnabled || false
+}
+
+// Calculate subscription status based on current purchase
+partnerSchema.methods.calculateSubscriptionStatus = function () {
+  const sub = this.subscription
+  if (sub?.status === 'cancelled') return 'cancelled'
+  if (sub?.status === 'suspended') return 'suspended'
+
+  const purchase = this.getCurrentPurchase()
+  if (!purchase) return 'expired' // No purchase means expired
+
+  const now = new Date()
+  const endDate = new Date(purchase.period.endDate)
+
+  // Check if within subscription period
+  if (now <= endDate) {
+    return 'active'
+  }
+
+  // Check grace period (14 days after end date)
+  const gracePeriodEnd = new Date(endDate)
+  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 14)
+
+  if (now <= gracePeriodEnd) {
+    return 'grace_period'
+  }
+
+  return 'expired'
+}
+
+// Check if subscription is active (including grace period)
+partnerSchema.methods.isSubscriptionActive = function () {
+  const status = this.calculateSubscriptionStatus()
+  return ['active', 'grace_period'].includes(status)
+}
+
+// Check if PMS can be used (not expired)
+partnerSchema.methods.canUsePms = function () {
+  const status = this.calculateSubscriptionStatus()
+  if (['expired', 'suspended', 'cancelled'].includes(status)) {
+    return false
+  }
+  return this.isPmsEnabled()
+}
+
+// Get remaining days until subscription expires
+partnerSchema.methods.getRemainingDays = function () {
+  const purchase = this.getCurrentPurchase()
+  if (!purchase?.period?.endDate) return null
+
+  const diffTime = new Date(purchase.period.endDate) - new Date()
+  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
+}
+
+// Get remaining days in grace period
+partnerSchema.methods.getGracePeriodRemainingDays = function () {
+  const status = this.calculateSubscriptionStatus()
+  if (status !== 'grace_period') return null
+
+  const purchase = this.getCurrentPurchase()
+  if (!purchase?.period?.endDate) return null
+
+  // Grace period is 14 days after end date
+  const gracePeriodEnd = new Date(purchase.period.endDate)
+  gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 14)
+
+  const diffTime = gracePeriodEnd - new Date()
+  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)))
+}
+
+// Get status label for display
+partnerSchema.methods.getStatusLabel = function (status) {
+  const labels = {
+    active: 'Aktif',
+    expired: 'Süresi Doldu',
+    grace_period: 'Ek Süre',
+    cancelled: 'İptal Edildi',
+    suspended: 'Askıya Alındı'
+  }
+  return labels[status] || status
+}
+
+// Get subscription status summary (extended)
+partnerSchema.methods.getSubscriptionStatus = function () {
+  const currentPurchase = this.getCurrentPurchase()
+  const planKey = currentPurchase?.plan || 'business'
+  const plan = SUBSCRIPTION_PLANS[planKey]
+  const limit = this.getPmsLimit()
+  const provisionedCount =
+    this.pmsIntegration?.provisionedHotels?.filter(h => h.status === 'active').length || 0
+
+  const status = this.calculateSubscriptionStatus()
+  const remainingDays = this.getRemainingDays()
+  const gracePeriodRemainingDays = this.getGracePeriodRemainingDays()
+
+  // Calculate grace period end date from current purchase
+  let gracePeriodEndDate = null
+  if (currentPurchase?.period?.endDate) {
+    gracePeriodEndDate = new Date(currentPurchase.period.endDate)
+    gracePeriodEndDate.setDate(gracePeriodEndDate.getDate() + 14)
+  }
+
+  // Sort purchases by date (newest first)
+  const sortedPurchases = [...(this.subscription?.purchases || [])]
+    .sort((a, b) => new Date(b.period.startDate) - new Date(a.period.startDate))
+
+  return {
+    // Current plan info
+    plan: planKey,
+    planName: plan?.name || 'Business',
+    planPrice: plan?.price,
+    status,
+    statusLabel: this.getStatusLabel(status),
+
+    // Current purchase info
+    currentPurchase: currentPurchase
+      ? {
+          _id: currentPurchase._id,
+          plan: currentPurchase.plan,
+          planName: SUBSCRIPTION_PLANS[currentPurchase.plan]?.name || currentPurchase.plan,
+          startDate: currentPurchase.period.startDate,
+          endDate: currentPurchase.period.endDate,
+          price: currentPurchase.price,
+          status: currentPurchase.status
+        }
+      : null,
+
+    // All purchases (for history)
+    purchases: sortedPurchases.map(p => ({
+      _id: p._id,
+      plan: p.plan,
+      planName: SUBSCRIPTION_PLANS[p.plan]?.name || p.plan,
+      period: p.period,
+      price: p.price,
+      payment: p.payment,
+      invoice: p.invoice,
+      status: p.status,
+      createdAt: p.createdAt
+    })),
+
+    // Custom limits
+    customLimits: this.subscription?.customLimits,
+
+    // PMS status
+    pmsStatus: {
+      enabled: this.canUsePms(),
+      maxHotels: limit,
+      maxHotelsDisplay: limit === -1 ? 'unlimited' : limit,
+      provisionedHotels: provisionedCount,
+      canProvisionMore: this.canProvisionMoreHotels() && this.canUsePms(),
+      remainingSlots: limit === -1 ? 'unlimited' : Math.max(0, limit - provisionedCount)
+    },
+
+    // Dates (from current purchase)
+    startDate: currentPurchase?.period?.startDate,
+    endDate: currentPurchase?.period?.endDate,
+    gracePeriodEndDate,
+    remainingDays,
+    gracePeriodRemainingDays,
+
+    // Notes
+    notes: this.subscription?.notes
+  }
 }
 
 partnerSchema.methods.activate = async function () {

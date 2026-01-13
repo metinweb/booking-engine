@@ -17,6 +17,7 @@ router.get('/', partnerService.getPartners)
 
 // Static routes (must be before /:id to avoid conflicts)
 router.get('/sms-providers', partnerService.getSMSProviders)
+router.get('/subscription-plans', partnerService.getSubscriptionPlans)
 
 router.get('/:id', partnerService.getPartner)
 router.put('/:id', partnerService.updatePartner)
@@ -30,6 +31,14 @@ router.post('/:id/approve', partnerService.approvePartner)
 // PMS Integration
 router.post('/:id/activate-pms', partnerService.activatePms)
 router.get('/:id/pms-status', partnerService.getPmsStatus)
+
+// Subscription Management (purchases & PMS limits)
+router.get('/:id/subscription', partnerService.getSubscription)
+router.put('/:id/subscription', partnerService.updateSubscription)
+router.post('/:id/subscription/purchases', partnerService.addPurchase)
+router.put('/:id/subscription/purchases/:purchaseId', partnerService.updatePurchase)
+router.post('/:id/subscription/purchases/:purchaseId/cancel', partnerService.cancelPurchase)
+router.post('/:id/subscription/purchases/:purchaseId/mark-paid', partnerService.markPurchaseAsPaid)
 
 // Document upload
 router.post('/:id/upload', upload.single('document'), partnerService.uploadDocument)

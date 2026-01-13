@@ -11,7 +11,8 @@ import { sendPasswordResetEmail, getAdminUrl } from '#helpers/mail.js'
 import {
   checkLoginLockout,
   recordFailedLogin,
-  clearFailedLogins
+  clearFailedLogins,
+  unblockAccount
 } from '#middleware/rateLimiter.js'
 import logger from '#core/logger.js'
 
@@ -47,6 +48,10 @@ export const login = asyncHandler(async (req, res) => {
   // Check if account is locked out due to too many failed attempts
   const lockoutStatus = checkLoginLockout(email)
   if (lockoutStatus.isLocked) {
+    if (lockoutStatus.isBlocked) {
+      logger.warn(`Login attempt for permanently blocked account: ${email}`)
+      throw new TooManyRequestsError('ACCOUNT_BLOCKED')
+    }
     logger.warn(`Login attempt for locked account: ${email}`)
     throw new TooManyRequestsError('ACCOUNT_LOCKED', {
       lockoutMinutes: lockoutStatus.lockoutMinutes
@@ -64,6 +69,9 @@ export const login = asyncHandler(async (req, res) => {
     logger.warn(`Failed login attempt for ${email}. Remaining attempts: ${failedResult.remainingAttempts}`)
 
     if (failedResult.isLocked) {
+      if (failedResult.isBlocked) {
+        throw new TooManyRequestsError('ACCOUNT_BLOCKED')
+      }
       throw new TooManyRequestsError('ACCOUNT_LOCKED', {
         lockoutMinutes: failedResult.lockoutMinutes
       })
@@ -473,5 +481,24 @@ export const resetPassword = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     message: req.t ? req.t('PASSWORD_RESET_SUCCESS') : 'Password has been reset successfully. You can now login with your new password.'
+  })
+})
+
+// Admin: Unblock a locked/blocked account
+export const unblockLoginBlock = asyncHandler(async (req, res) => {
+  const { email } = req.body
+
+  if (!email) {
+    throw new BadRequestError('REQUIRED_EMAIL')
+  }
+
+  const result = await unblockAccount(email)
+
+  logger.info(`Account unblocked by admin ${req.user.email}: ${email}`)
+
+  res.json({
+    success: true,
+    message: req.t ? req.t('ACCOUNT_UNBLOCKED') : 'Account has been unblocked successfully.',
+    data: result
   })
 })

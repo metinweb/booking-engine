@@ -21,6 +21,9 @@
   "LOGIN_FAILED": "Email veya şifre hatalı",
   "INVALID_CREDENTIALS": "Email veya şifre hatalı",
   "ACCOUNT_INACTIVE": "Hesabınız aktif değil",
+  "ACCOUNT_UNBLOCKED": "Hesap blokesi başarıyla kaldırıldı",
+  "ACCOUNT_LOCKED": "Hesabınız çok fazla başarısız giriş denemesi nedeniyle kilitlendi",
+  "ACCOUNT_BLOCKED": "Hesabınız kalıcı olarak bloke edildi. Lütfen yöneticiyle iletişime geçin",
   "REQUIRED_EMAIL_PASSWORD": "Email ve şifre gereklidir",
   "REQUIRED_REFRESH_TOKEN": "Refresh token gereklidir",
 
@@ -142,5 +145,10 @@
   "RATE_LIMIT_EXCEEDED": "Çok fazla istek yapıldı. Lütfen bir süre bekleyin.",
   "NGINX_CONFIG_INSTALLED": "Nginx yapılandırması başarıyla kuruldu",
   "NGINX_CONFIG_FAILED": "Nginx yapılandırması başarısız oldu",
-  "SERVER_IP_FETCH_FAILED": "Sunucu IP adresi alınamadı"
+  "SERVER_IP_FETCH_FAILED": "Sunucu IP adresi alınamadı",
+
+  "PMS_HOTEL_LIMIT_REACHED": "PMS otel limitine ulaşıldı. Daha fazla otel eklemek için paketinizi yükseltin.",
+  "INVALID_SUBSCRIPTION_PLAN": "Geçersiz abonelik paketi",
+  "INVALID_PMS_LIMIT": "Geçersiz PMS limit değeri",
+  "SUBSCRIPTION_UPDATED": "Abonelik başarıyla güncellendi"
 }

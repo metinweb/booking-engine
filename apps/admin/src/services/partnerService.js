@@ -106,6 +106,88 @@ const provisionHotelToPms = async (hotelId, options = {}) => {
   }
 }
 
+// Subscription Management
+const getSubscriptionPlans = async () => {
+  try {
+    const response = await apiClient.get('/partners/subscription-plans')
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Get subscription plans failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+const getSubscription = async partnerId => {
+  try {
+    const response = await apiClient.get(`/partners/${partnerId}/subscription`)
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Get subscription failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+const updateSubscription = async (partnerId, data) => {
+  try {
+    const response = await apiClient.put(`/partners/${partnerId}/subscription`, data)
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Update subscription failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+const addPurchase = async (partnerId, data) => {
+  try {
+    const response = await apiClient.post(`/partners/${partnerId}/subscription/purchases`, data)
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Add purchase failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+const updatePurchase = async (partnerId, purchaseId, data) => {
+  try {
+    const response = await apiClient.put(`/partners/${partnerId}/subscription/purchases/${purchaseId}`, data)
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Update purchase failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+const cancelPurchase = async (partnerId, purchaseId, reason) => {
+  try {
+    const response = await apiClient.post(`/partners/${partnerId}/subscription/purchases/${purchaseId}/cancel`, { reason })
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Cancel purchase failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+const markPurchaseAsPaid = async (partnerId, purchaseId, paymentData) => {
+  try {
+    const response = await apiClient.post(`/partners/${partnerId}/subscription/purchases/${purchaseId}/mark-paid`, paymentData)
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Mark purchase as paid failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+// Get my subscription (for partner users)
+const getMySubscription = async () => {
+  try {
+    const response = await apiClient.get('/my/subscription')
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Get my subscription failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
 export default {
   getPartners,
   getPartner,
@@ -116,5 +198,13 @@ export default {
   uploadDocument,
   deleteDocument,
   getHotelPmsStatus,
-  provisionHotelToPms
+  provisionHotelToPms,
+  getSubscriptionPlans,
+  getSubscription,
+  updateSubscription,
+  addPurchase,
+  updatePurchase,
+  cancelPurchase,
+  markPurchaseAsPaid,
+  getMySubscription
 }

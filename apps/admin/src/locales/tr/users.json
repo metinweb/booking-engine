@@ -103,8 +103,10 @@
       "reset2FA": "2FA Sifirla",
       "viewPermissions": "Izinleri Gor",
       "viewSessions": "Oturumlari Gor",
-      "resendActivation": "Aktivasyonu Tekrar Gonder"
+      "resendActivation": "Aktivasyonu Tekrar Gonder",
+      "unblockAccount": "Blok Kaldir"
     },
+    "accountUnblocked": "Kullanici blokesi kaldirildi",
     "activationResent": "Aktivasyon maili tekrar gonderildi",
     "activated": "Kullanici aktif edildi",
     "deactivated": "Kullanici pasif edildi",

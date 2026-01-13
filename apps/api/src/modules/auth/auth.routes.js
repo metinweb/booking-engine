@@ -1,6 +1,6 @@
 import express from 'express'
 import * as authService from './auth.service.js'
-import { protect } from '#middleware/auth.js'
+import { protect, requirePlatformAdmin } from '#middleware/auth.js'
 import { strictLimiter, loginLimiter } from '#middleware/rateLimiter.js'
 
 const router = express.Router()
@@ -288,5 +288,36 @@ router.put('/notification-preferences', protect, authService.updateNotificationP
  *         description: New password too short
  */
 router.put('/change-password', protect, strictLimiter, authService.changePassword)
+
+/**
+ * @swagger
+ * /api/auth/admin/unblock-account:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Unblock a locked/blocked account
+ *     description: Remove login lockout for a user account. Platform admin only.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email of the account to unblock
+ *     responses:
+ *       200:
+ *         description: Account unblocked successfully
+ *       400:
+ *         description: Email is required
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         description: Platform admin access required
+ */
+router.post('/admin/unblock-account', protect, requirePlatformAdmin, authService.unblockLoginBlock)
 
 export default router

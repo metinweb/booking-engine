@@ -98,6 +98,16 @@ const resetPassword = async (token, password) => {
   }
 }
 
+const unblockAccount = async email => {
+  try {
+    const response = await apiClient.post('/auth/admin/unblock-account', { email })
+    return response.data
+  } catch (error) {
+    apiLogger.error('Auth Service: Unblock account failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
 export default {
   login,
   verify2FA,
@@ -106,5 +116,6 @@ export default {
   updateNotificationPreferences,
   refreshToken,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  unblockAccount
 }

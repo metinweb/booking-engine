@@ -515,6 +515,299 @@
           </div>
         </div>
       </div>
+
+      <!-- Billing / Invoice Settings -->
+      <div
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+      >
+        <div
+          class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 flex items-center gap-3"
+        >
+          <span class="material-icons text-emerald-500">receipt_long</span>
+          <div>
+            <h2 class="font-semibold text-gray-900 dark:text-white">
+              {{ $t('platformSettings.billing.title') }}
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-slate-400">
+              {{ $t('platformSettings.billing.description') }}
+            </p>
+          </div>
+        </div>
+        <div class="p-6 space-y-6">
+          <!-- Company Info -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
+              {{ $t('platformSettings.billing.companyInfo') }}
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.companyName') }}
+                </label>
+                <input
+                  v-model="settings.billing.companyName"
+                  type="text"
+                  :placeholder="$t('platformSettings.billing.companyNamePlaceholder')"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.taxNumber') }}
+                </label>
+                <input
+                  v-model="settings.billing.taxNumber"
+                  type="text"
+                  placeholder="1234567890"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.taxOffice') }}
+                </label>
+                <input
+                  v-model="settings.billing.taxOffice"
+                  type="text"
+                  :placeholder="$t('platformSettings.billing.taxOfficePlaceholder')"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.email') }}
+                </label>
+                <input
+                  v-model="settings.billing.email"
+                  type="email"
+                  placeholder="billing@company.com"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.phone') }}
+                </label>
+                <input
+                  v-model="settings.billing.phone"
+                  type="tel"
+                  placeholder="+90 212 123 4567"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="pt-4 border-t border-gray-200 dark:border-slate-700">
+            <h3 class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
+              {{ $t('platformSettings.billing.address') }}
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.street') }}
+                </label>
+                <input
+                  v-model="settings.billing.address.street"
+                  type="text"
+                  :placeholder="$t('platformSettings.billing.streetPlaceholder')"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.city') }}
+                </label>
+                <input
+                  v-model="settings.billing.address.city"
+                  type="text"
+                  placeholder="Istanbul"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.country') }}
+                </label>
+                <input
+                  v-model="settings.billing.address.country"
+                  type="text"
+                  placeholder="Türkiye"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.postalCode') }}
+                </label>
+                <input
+                  v-model="settings.billing.address.postalCode"
+                  type="text"
+                  placeholder="34000"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Invoice Settings -->
+          <div class="pt-4 border-t border-gray-200 dark:border-slate-700">
+            <h3 class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
+              {{ $t('platformSettings.billing.invoiceSettings') }}
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.invoicePrefix') }}
+                </label>
+                <input
+                  v-model="settings.billing.invoicePrefix"
+                  type="text"
+                  placeholder="INV"
+                  maxlength="10"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+                <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                  {{ $t('platformSettings.billing.invoicePrefixHint') }}
+                </p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.defaultTaxRate') }}
+                </label>
+                <div class="flex items-center gap-2">
+                  <input
+                    v-model.number="settings.billing.defaultTaxRate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    class="w-24 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                  />
+                  <span class="text-gray-500">%</span>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                  {{ $t('platformSettings.billing.defaultTaxRateHint') }}
+                </p>
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                  {{ $t('platformSettings.billing.invoiceNotes') }}
+                </label>
+                <textarea
+                  v-model="settings.billing.invoiceNotes"
+                  rows="3"
+                  :placeholder="$t('platformSettings.billing.invoiceNotesPlaceholder')"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                ></textarea>
+                <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
+                  {{ $t('platformSettings.billing.invoiceNotesHint') }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank Accounts -->
+          <div class="pt-4 border-t border-gray-200 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-medium text-gray-700 dark:text-slate-300">
+                {{ $t('platformSettings.billing.bankAccounts') }}
+              </h3>
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
+                @click="addBankAccount"
+              >
+                <span class="material-icons text-sm">add</span>
+                {{ $t('common.add') }}
+              </button>
+            </div>
+            <div v-if="settings.billing.bankAccounts.length === 0" class="text-center py-6 text-gray-500 dark:text-slate-400">
+              {{ $t('platformSettings.billing.noBankAccounts') }}
+            </div>
+            <div v-else class="space-y-4">
+              <div
+                v-for="(account, index) in settings.billing.bankAccounts"
+                :key="index"
+                class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-lg"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <span class="text-sm font-medium text-gray-700 dark:text-slate-300">
+                    {{ $t('platformSettings.billing.bankAccount') }} #{{ index + 1 }}
+                  </span>
+                  <button
+                    type="button"
+                    class="text-red-500 hover:text-red-600 p-1"
+                    @click="removeBankAccount(index)"
+                  >
+                    <span class="material-icons text-sm">delete</span>
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                      {{ $t('platformSettings.billing.bankName') }}
+                    </label>
+                    <input
+                      v-model="account.bankName"
+                      type="text"
+                      placeholder="Garanti BBVA"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                      {{ $t('platformSettings.billing.accountName') }}
+                    </label>
+                    <input
+                      v-model="account.accountName"
+                      type="text"
+                      :placeholder="$t('platformSettings.billing.accountNamePlaceholder')"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div class="md:col-span-2">
+                    <label class="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                      IBAN
+                    </label>
+                    <input
+                      v-model="account.iban"
+                      type="text"
+                      placeholder="TR00 0000 0000 0000 0000 0000 00"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                      SWIFT/BIC
+                    </label>
+                    <input
+                      v-model="account.swift"
+                      type="text"
+                      placeholder="TGBATRIS"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                      {{ $t('platformSettings.billing.currency') }}
+                    </label>
+                    <select
+                      v-model="account.currency"
+                      class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
+                    >
+                      <option value="USD">USD</option>
+                      <option value="EUR">EUR</option>
+                      <option value="TRY">TRY</option>
+                      <option value="GBP">GBP</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -580,6 +873,23 @@ const settings = ref({
     publicKey: '',
     privateKey: '',
     contactEmail: ''
+  },
+  billing: {
+    companyName: '',
+    taxNumber: '',
+    taxOffice: '',
+    email: '',
+    phone: '',
+    address: {
+      street: '',
+      city: '',
+      country: '',
+      postalCode: ''
+    },
+    invoicePrefix: 'INV',
+    defaultTaxRate: 0,
+    invoiceNotes: '',
+    bankAccounts: []
   }
 })
 
@@ -628,6 +938,23 @@ const loadSettings = async () => {
             publicKey: data.webPush?.publicKey || '',
             privateKey: '', // Don't show masked value
             contactEmail: data.webPush?.contactEmail || ''
+          },
+          billing: {
+            companyName: data.billing?.companyName || '',
+            taxNumber: data.billing?.taxNumber || '',
+            taxOffice: data.billing?.taxOffice || '',
+            email: data.billing?.email || '',
+            phone: data.billing?.phone || '',
+            address: {
+              street: data.billing?.address?.street || '',
+              city: data.billing?.address?.city || '',
+              country: data.billing?.address?.country || '',
+              postalCode: data.billing?.address?.postalCode || ''
+            },
+            invoicePrefix: data.billing?.invoicePrefix || 'INV',
+            defaultTaxRate: data.billing?.defaultTaxRate ?? 0,
+            invoiceNotes: data.billing?.invoiceNotes || '',
+            bankAccounts: data.billing?.bankAccounts || []
           }
         }
       },
@@ -669,6 +996,18 @@ const saveSettings = async () => {
       enabled: settings.value.webPush.enabled,
       publicKey: settings.value.webPush.publicKey,
       contactEmail: settings.value.webPush.contactEmail
+    },
+    billing: {
+      companyName: settings.value.billing.companyName,
+      taxNumber: settings.value.billing.taxNumber,
+      taxOffice: settings.value.billing.taxOffice,
+      email: settings.value.billing.email,
+      phone: settings.value.billing.phone,
+      address: settings.value.billing.address,
+      invoicePrefix: settings.value.billing.invoicePrefix,
+      defaultTaxRate: settings.value.billing.defaultTaxRate,
+      invoiceNotes: settings.value.billing.invoiceNotes,
+      bankAccounts: settings.value.billing.bankAccounts
     }
   }
 
@@ -785,6 +1124,22 @@ const copyToClipboard = async text => {
   } catch {
     toast.error(t('common.copyFailed'))
   }
+}
+
+// Add bank account
+const addBankAccount = () => {
+  settings.value.billing.bankAccounts.push({
+    bankName: '',
+    accountName: '',
+    iban: '',
+    swift: '',
+    currency: 'USD'
+  })
+}
+
+// Remove bank account
+const removeBankAccount = index => {
+  settings.value.billing.bankAccounts.splice(index, 1)
 }
 
 onMounted(() => {

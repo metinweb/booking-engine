@@ -417,9 +417,14 @@ export const provisionHotelToPms = asyncHandler(async (req, res) => {
     throw new NotFoundError('PARTNER_NOT_FOUND')
   }
 
-  // Check if PMS integration is enabled for partner
-  if (!partner.pmsIntegration?.enabled) {
+  // Check if PMS integration is enabled for partner (using subscription-aware method)
+  if (!partner.isPmsEnabled()) {
     throw new BadRequestError('PMS_NOT_ENABLED')
+  }
+
+  // Check if partner can provision more hotels (limit check)
+  if (!partner.canProvisionMoreHotels()) {
+    throw new BadRequestError('PMS_HOTEL_LIMIT_REACHED')
   }
 
   // Check if already provisioned

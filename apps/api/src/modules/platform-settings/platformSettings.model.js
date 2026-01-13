@@ -187,6 +187,69 @@ const platformSettingsSchema = new mongoose.Schema(
         min: 0,
         max: 100
       }
+    },
+
+    // Billing / Invoice Settings (Platform as seller)
+    billing: {
+      companyName: {
+        type: String,
+        default: 'Platform Company',
+        trim: true
+      },
+      taxNumber: {
+        type: String,
+        trim: true
+      },
+      taxOffice: {
+        type: String,
+        trim: true
+      },
+      address: {
+        street: String,
+        city: String,
+        country: String,
+        postalCode: String
+      },
+      email: {
+        type: String,
+        lowercase: true,
+        trim: true
+      },
+      phone: {
+        type: String,
+        trim: true
+      },
+      // Default tax rate for subscription invoices (e.g., 18 for 18% VAT)
+      defaultTaxRate: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100
+      },
+      // Invoice number prefix
+      invoicePrefix: {
+        type: String,
+        default: 'INV',
+        trim: true
+      },
+      // Standard notes to include on every invoice
+      invoiceNotes: {
+        type: String,
+        trim: true
+      },
+      // Bank accounts for payment
+      bankAccounts: [
+        {
+          bankName: String,
+          accountName: String,
+          iban: String,
+          swift: String,
+          currency: {
+            type: String,
+            default: 'USD'
+          }
+        }
+      ]
     }
   },
   {

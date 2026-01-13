@@ -213,10 +213,46 @@ export const globalLimiter = createRateLimiter({
 
 /**
  * Failed Login Tracking (with Redis support)
+ * Progressive lockout system:
+ * - 3 attempts  → 1 min lockout
+ * - 5 attempts  → 5 min lockout
+ * - 10 attempts → 10 min lockout
+ * - 20 attempts → permanent block (requires admin intervention)
  */
-const MAX_FAILED_ATTEMPTS = 5
-const LOCKOUT_DURATION = 30 * 60 * 1000 // 30 minutes
-const ATTEMPT_WINDOW = 60 * 60 * 1000 // 1 hour
+const ATTEMPT_WINDOW = 24 * 60 * 60 * 1000 // 24 hours for tracking attempts
+
+// Progressive lockout thresholds
+const LOCKOUT_THRESHOLDS = [
+  { attempts: 3, duration: 1 * 60 * 1000 },      // 3 attempts → 1 min
+  { attempts: 5, duration: 5 * 60 * 1000 },      // 5 attempts → 5 min
+  { attempts: 10, duration: 10 * 60 * 1000 },    // 10 attempts → 10 min
+  { attempts: 20, duration: -1 }                  // 20 attempts → permanent block
+]
+
+/**
+ * Get lockout duration based on attempt count
+ */
+function getLockoutDuration(attempts) {
+  // Find the highest threshold that matches
+  for (let i = LOCKOUT_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (attempts >= LOCKOUT_THRESHOLDS[i].attempts) {
+      return LOCKOUT_THRESHOLDS[i].duration
+    }
+  }
+  return 0
+}
+
+/**
+ * Get next lockout threshold
+ */
+function getNextThreshold(attempts) {
+  for (const threshold of LOCKOUT_THRESHOLDS) {
+    if (attempts < threshold.attempts) {
+      return threshold.attempts
+    }
+  }
+  return null
+}
 
 /**
  * Record a failed login attempt
@@ -244,58 +280,113 @@ async function recordFailedLoginRedis(key, now) {
   let attempts = 1
   let lockoutUntil = 0
   let resetTime = now + ATTEMPT_WINDOW
+  let isBlocked = false
 
   if (data) {
+    // Check if permanently blocked
+    if (data.isBlocked) {
+      return {
+        isLocked: true,
+        isBlocked: true,
+        remainingAttempts: 0,
+        lockoutMinutes: -1,
+        totalAttempts: data.attempts,
+        message: 'ACCOUNT_BLOCKED'
+      }
+    }
+
+    // Check if currently locked out
     if (now < data.lockoutUntil) {
       return {
         isLocked: true,
+        isBlocked: false,
         remainingAttempts: 0,
         lockoutMinutes: Math.ceil((data.lockoutUntil - now) / 60000),
         totalAttempts: data.attempts
       }
     }
+
+    // Continue counting attempts within window
     if (now <= data.resetTime) {
       attempts = data.attempts + 1
       resetTime = data.resetTime
     }
   }
 
-  if (attempts >= MAX_FAILED_ATTEMPTS) {
-    lockoutUntil = now + LOCKOUT_DURATION
+  // Calculate lockout based on progressive thresholds
+  const lockoutDuration = getLockoutDuration(attempts)
+  if (lockoutDuration === -1) {
+    // Permanent block
+    isBlocked = true
+    lockoutUntil = 0
+    logger.warn(`Account blocked due to excessive failed login attempts: ${key}`)
+  } else if (lockoutDuration > 0) {
+    lockoutUntil = now + lockoutDuration
   }
 
   await redisRateLimitStore.set(
     key,
-    { attempts, resetTime, lockoutUntil, firstAttempt: data?.firstAttempt || now },
+    { attempts, resetTime, lockoutUntil, isBlocked, firstAttempt: data?.firstAttempt || now },
     ATTEMPT_WINDOW
   )
 
-  if (attempts >= MAX_FAILED_ATTEMPTS) {
+  if (isBlocked) {
     return {
       isLocked: true,
+      isBlocked: true,
       remainingAttempts: 0,
-      lockoutMinutes: 30,
+      lockoutMinutes: -1,
+      totalAttempts: attempts,
+      message: 'ACCOUNT_BLOCKED'
+    }
+  }
+
+  if (lockoutUntil > 0) {
+    return {
+      isLocked: true,
+      isBlocked: false,
+      remainingAttempts: 0,
+      lockoutMinutes: Math.ceil(lockoutDuration / 60000),
       totalAttempts: attempts
     }
   }
 
+  const nextThreshold = getNextThreshold(attempts)
   return {
     isLocked: false,
-    remainingAttempts: MAX_FAILED_ATTEMPTS - attempts,
+    isBlocked: false,
+    remainingAttempts: nextThreshold ? nextThreshold - attempts : 0,
     lockoutMinutes: 0,
-    totalAttempts: attempts
+    totalAttempts: attempts,
+    nextLockoutAt: nextThreshold
   }
 }
 
 function recordFailedLoginMemory(key, now) {
   let data = failedLoginStore.get(key)
 
-  if (data && now < data.lockoutUntil) {
-    return {
-      isLocked: true,
-      remainingAttempts: 0,
-      lockoutMinutes: Math.ceil((data.lockoutUntil - now) / 60000),
-      totalAttempts: data.attempts
+  if (data) {
+    // Check if permanently blocked
+    if (data.isBlocked) {
+      return {
+        isLocked: true,
+        isBlocked: true,
+        remainingAttempts: 0,
+        lockoutMinutes: -1,
+        totalAttempts: data.attempts,
+        message: 'ACCOUNT_BLOCKED'
+      }
+    }
+
+    // Check if currently locked out
+    if (now < data.lockoutUntil) {
+      return {
+        isLocked: true,
+        isBlocked: false,
+        remainingAttempts: 0,
+        lockoutMinutes: Math.ceil((data.lockoutUntil - now) / 60000),
+        totalAttempts: data.attempts
+      }
     }
   }
 
@@ -304,29 +395,52 @@ function recordFailedLoginMemory(key, now) {
       attempts: 0,
       resetTime: now + ATTEMPT_WINDOW,
       lockoutUntil: 0,
+      isBlocked: false,
       firstAttempt: now
     }
   }
 
   data.attempts++
 
-  if (data.attempts >= MAX_FAILED_ATTEMPTS) {
-    data.lockoutUntil = now + LOCKOUT_DURATION
+  // Calculate lockout based on progressive thresholds
+  const lockoutDuration = getLockoutDuration(data.attempts)
+  if (lockoutDuration === -1) {
+    // Permanent block
+    data.isBlocked = true
+    data.lockoutUntil = 0
+    failedLoginStore.set(key, data)
+    logger.warn(`Account blocked due to excessive failed login attempts: ${key}`)
+    return {
+      isLocked: true,
+      isBlocked: true,
+      remainingAttempts: 0,
+      lockoutMinutes: -1,
+      totalAttempts: data.attempts,
+      message: 'ACCOUNT_BLOCKED'
+    }
+  }
+
+  if (lockoutDuration > 0) {
+    data.lockoutUntil = now + lockoutDuration
     failedLoginStore.set(key, data)
     return {
       isLocked: true,
+      isBlocked: false,
       remainingAttempts: 0,
-      lockoutMinutes: 30,
+      lockoutMinutes: Math.ceil(lockoutDuration / 60000),
       totalAttempts: data.attempts
     }
   }
 
   failedLoginStore.set(key, data)
+  const nextThreshold = getNextThreshold(data.attempts)
   return {
     isLocked: false,
-    remainingAttempts: MAX_FAILED_ATTEMPTS - data.attempts,
+    isBlocked: false,
+    remainingAttempts: nextThreshold ? nextThreshold - data.attempts : 0,
     lockoutMinutes: 0,
-    totalAttempts: data.attempts
+    totalAttempts: data.attempts,
+    nextLockoutAt: nextThreshold
   }
 }
 
@@ -341,26 +455,73 @@ export async function checkLoginLockout(email) {
   if (isRedisConnected()) {
     try {
       const data = await redisRateLimitStore.get(key)
-      if (data && now < data.lockoutUntil) {
-        return {
-          isLocked: true,
-          lockoutMinutes: Math.ceil((data.lockoutUntil - now) / 60000)
+      if (data) {
+        // Check if permanently blocked
+        if (data.isBlocked) {
+          return {
+            isLocked: true,
+            isBlocked: true,
+            lockoutMinutes: -1,
+            message: 'ACCOUNT_BLOCKED'
+          }
+        }
+        // Check if temporarily locked
+        if (now < data.lockoutUntil) {
+          return {
+            isLocked: true,
+            isBlocked: false,
+            lockoutMinutes: Math.ceil((data.lockoutUntil - now) / 60000)
+          }
         }
       }
-      return { isLocked: false, lockoutMinutes: 0 }
+      return { isLocked: false, isBlocked: false, lockoutMinutes: 0 }
     } catch {
       // Fallback to memory
     }
   }
 
   const data = failedLoginStore.get(key)
-  if (data && now < data.lockoutUntil) {
-    return {
-      isLocked: true,
-      lockoutMinutes: Math.ceil((data.lockoutUntil - now) / 60000)
+  if (data) {
+    // Check if permanently blocked
+    if (data.isBlocked) {
+      return {
+        isLocked: true,
+        isBlocked: true,
+        lockoutMinutes: -1,
+        message: 'ACCOUNT_BLOCKED'
+      }
+    }
+    // Check if temporarily locked
+    if (now < data.lockoutUntil) {
+      return {
+        isLocked: true,
+        isBlocked: false,
+        lockoutMinutes: Math.ceil((data.lockoutUntil - now) / 60000)
+      }
     }
   }
-  return { isLocked: false, lockoutMinutes: 0 }
+  return { isLocked: false, isBlocked: false, lockoutMinutes: 0 }
+}
+
+/**
+ * Unblock a blocked account (admin function)
+ */
+export async function unblockAccount(email) {
+  const key = `failed:${email.toLowerCase()}`
+
+  // Clear from Redis
+  if (isRedisConnected()) {
+    try {
+      await redisRateLimitStore.delete(key)
+    } catch {
+      // Ignore Redis errors
+    }
+  }
+
+  // Clear from memory
+  failedLoginStore.delete(key)
+  logger.info(`Account unblocked: ${email}`)
+  return { success: true, message: 'Account unblocked' }
 }
 
 /**
@@ -461,5 +622,6 @@ export default {
   recordFailedLogin,
   checkLoginLockout,
   clearFailedLogins,
+  unblockAccount,
   getFailedLoginStats
 }

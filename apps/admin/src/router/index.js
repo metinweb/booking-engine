@@ -302,6 +302,16 @@ const router = createRouter({
           name: 'pms-integration',
           component: () => import('../views/PmsIntegrationView.vue'),
           meta: { requiresPartnerOrAdmin: true }
+        },
+        // My Subscription (for partner users only)
+        {
+          path: 'my-subscription',
+          name: 'my-subscription',
+          component: () => import('../views/MySubscriptionView.vue'),
+          meta: {
+            requiresPartner: true,
+            titleKey: 'mySubscription.title'
+          }
         }
       ]
     },
@@ -405,6 +415,7 @@ router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const requiresPlatformAdmin = to.matched.some(record => record.meta.requiresPlatformAdmin)
   const requiresPartnerOrAdmin = to.matched.some(record => record.meta.requiresPartnerOrAdmin)
+  const requiresPartner = to.matched.some(record => record.meta.requiresPartner)
 
   // Check authentication on first load
   if (authStore.token && !authStore.user) {
@@ -433,6 +444,10 @@ router.beforeEach(async (to, from, next) => {
   ) {
     // Redirect to dashboard if not partner or platform admin
     routerLogger.warn('Authorization failed: User is not a partner or platform admin')
+    next({ name: 'dashboard' })
+  } else if (requiresPartner && authStore.accountType !== 'partner') {
+    // Redirect to dashboard if not a partner user (partner-only routes)
+    routerLogger.warn('Authorization failed: User is not a partner')
     next({ name: 'dashboard' })
   } else if ((to.name === 'login' || to.name === 'register') && authStore.isAuthenticated) {
     // Redirect to dashboard if already logged in
