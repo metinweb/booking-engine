@@ -66,4 +66,37 @@ export const getRoomImageUrl = roomType => {
   return mainImage?.url ? getImageUrl(mainImage.url) : null
 }
 
+/**
+ * Get full file URL from API server (for avatars, documents, etc.)
+ * @param {string} relativePath - Relative path (e.g., /uploads/avatars/xxx.png)
+ * @returns {string|null} Full URL or null
+ */
+export const getFileUrl = relativePath => {
+  if (!relativePath) return null
+
+  // If already a full URL, return as-is
+  if (relativePath.startsWith('http://') || relativePath.startsWith('https://')) {
+    return relativePath
+  }
+
+  // Extract base URL (protocol + host) from API URL
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || ''
+  try {
+    const url = new URL(apiUrl)
+    return `${url.protocol}//${url.host}${relativePath}`
+  } catch {
+    return relativePath
+  }
+}
+
+/**
+ * Get avatar URL from user/partner/agency object
+ * @param {Object} entity - Object with avatar property
+ * @returns {string|null} Avatar URL or null
+ */
+export const getAvatarUrl = entity => {
+  if (!entity?.avatar?.url) return null
+  return getFileUrl(entity.avatar.url)
+}
+
 export default getImageUrl

@@ -118,7 +118,7 @@
         <div class="flex items-center gap-3">
           <img
             v-if="row.avatar?.url"
-            :src="getAvatarUrl(row.avatar.url)"
+            :src="getFileUrl(row.avatar.url)"
             :alt="row.name"
             class="w-10 h-10 rounded-full object-cover shadow-sm cursor-pointer hover:ring-2 hover:ring-purple-500 transition-all"
             @click="openAvatarModal(row)"
@@ -306,7 +306,7 @@
           </button>
           <div class="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-2xl">
             <img
-              :src="getAvatarUrl(avatarUser.avatar?.url)"
+              :src="getFileUrl(avatarUser.avatar?.url)"
               :alt="avatarUser.name"
               class="w-full h-auto max-h-[70vh] object-contain"
             />
@@ -350,26 +350,12 @@ import PermissionsModal from '@/components/users/PermissionsModal.vue'
 import SessionsModal from '@/components/users/SessionsModal.vue'
 import ConfirmDialog from '@/components/ui/feedback/ConfirmDialog.vue'
 import ActionMenu from '@/components/ui/buttons/ActionMenu.vue'
+import { getFileUrl } from '@/utils/imageUrl'
 
 const { t } = useI18n()
 const toast = useToast()
 const partnerStore = usePartnerStore()
 const authStore = useAuthStore()
-
-// Get full avatar URL from API server
-const getAvatarUrl = (avatarPath) => {
-  if (!avatarPath) return null
-  if (avatarPath.startsWith('http')) return avatarPath
-
-  // Extract base URL (protocol + host) from API URL
-  const apiUrl = import.meta.env.VITE_API_BASE_URL || ''
-  try {
-    const url = new URL(apiUrl)
-    return `${url.protocol}//${url.host}${avatarPath}`
-  } catch {
-    return avatarPath
-  }
-}
 
 // DataTable columns
 const columns = computed(() => [
