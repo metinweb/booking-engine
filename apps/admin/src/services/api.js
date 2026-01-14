@@ -50,9 +50,17 @@ apiClient.interceptors.response.use(
   async error => {
     const originalRequest = error.config
     const errorMessage = error.response?.data?.message
+    const status = error.response?.status
+
+    // Handle rate limit (429) - don't logout, just throttle
+    if (status === 429) {
+      apiLogger.warn('Rate limited:', originalRequest.url)
+      // Just reject - don't try to refresh or logout
+      return Promise.reject(error)
+    }
 
     // If error is 401 and we haven't already tried to refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
       try {

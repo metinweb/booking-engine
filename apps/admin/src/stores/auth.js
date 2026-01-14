@@ -155,6 +155,16 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (error) {
       storeLogger.error('Token refresh failed:', error)
+
+      // Check if it's a rate limit error (429) - don't logout, just throttle
+      const status = error.response?.status
+      if (status === 429) {
+        storeLogger.warn('Rate limited on token refresh, will retry later')
+        // Return current token - it might still be valid
+        return token.value
+      }
+
+      // For actual auth failures (401, 403, invalid token), logout
       logout()
       return null
     } finally {
