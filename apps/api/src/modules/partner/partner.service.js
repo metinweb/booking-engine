@@ -143,7 +143,8 @@ export const updatePartner = asyncHandler(async (req, res) => {
     'settings',
     'contactPerson',
     'notes',
-    'code'
+    'code',
+    'status'
   ]
 
   allowedFields.forEach(field => {
