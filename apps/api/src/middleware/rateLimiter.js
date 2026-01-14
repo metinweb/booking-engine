@@ -242,18 +242,18 @@ export const globalLimiter = createRateLimiter({
 /**
  * Failed Login Tracking (with Redis support)
  * Progressive lockout system:
- * - 3 attempts  → 1 min lockout
- * - 5 attempts  → 5 min lockout
- * - 10 attempts → 10 min lockout
+ * - 5 attempts  → 1 min lockout
+ * - 8 attempts  → 5 min lockout
+ * - 12 attempts → 10 min lockout
  * - 20 attempts → permanent block (requires admin intervention)
  */
 const ATTEMPT_WINDOW = 24 * 60 * 60 * 1000 // 24 hours for tracking attempts
 
 // Progressive lockout thresholds
 const LOCKOUT_THRESHOLDS = [
-  { attempts: 3, duration: 1 * 60 * 1000 },      // 3 attempts → 1 min
-  { attempts: 5, duration: 5 * 60 * 1000 },      // 5 attempts → 5 min
-  { attempts: 10, duration: 10 * 60 * 1000 },    // 10 attempts → 10 min
+  { attempts: 5, duration: 1 * 60 * 1000 },      // 5 attempts → 1 min
+  { attempts: 8, duration: 5 * 60 * 1000 },      // 8 attempts → 5 min
+  { attempts: 12, duration: 10 * 60 * 1000 },    // 12 attempts → 10 min
   { attempts: 20, duration: -1 }                  // 20 attempts → permanent block
 ]
 
