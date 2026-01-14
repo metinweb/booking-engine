@@ -25,7 +25,7 @@
     "emailLogs": "Email Logs",
     "payment": "Payment System"
   },
-  "payment": {
+  "paymentSystem": {
     "title": "Payment System",
     "description": "Virtual POS and payment management",
     "tabs": {

@@ -25,7 +25,7 @@
     "emailLogs": "E-posta Logları",
     "payment": "Ödeme Sistemi"
   },
-  "payment": {
+  "paymentSystem": {
     "title": "Ödeme Sistemi",
     "description": "Virtual POS ve ödeme yönetimi",
     "tabs": {

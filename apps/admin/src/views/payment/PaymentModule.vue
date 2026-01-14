@@ -16,16 +16,16 @@ const isPlatformView = computed(() => authStore.isPlatformAdmin && !partnerStore
 // Tabs - Partner view'da komisyonlar ve BIN listesi gizli
 const tabs = computed(() => {
   const list = [
-    { id: 'test', label: t('payment.tabs.test'), icon: 'credit_card', path: '/payment/test' },
-    { id: 'transactions', label: t('payment.tabs.transactions'), icon: 'receipt_long', path: '/payment/transactions' },
-    { id: 'pos', label: t('payment.tabs.pos'), icon: 'point_of_sale', path: '/payment/pos' }
+    { id: 'test', label: t('paymentSystem.tabs.test'), icon: 'credit_card', path: '/payment/test' },
+    { id: 'transactions', label: t('paymentSystem.tabs.transactions'), icon: 'receipt_long', path: '/payment/transactions' },
+    { id: 'pos', label: t('paymentSystem.tabs.pos'), icon: 'point_of_sale', path: '/payment/pos' }
   ]
 
   // Sadece platform view'da göster
   if (isPlatformView.value) {
     list.push(
-      { id: 'commissions', label: t('payment.tabs.commissions'), icon: 'percent', path: '/payment/commissions' },
-      { id: 'bins', label: t('payment.tabs.bins'), icon: 'credit_score', path: '/payment/bins' }
+      { id: 'commissions', label: t('paymentSystem.tabs.commissions'), icon: 'percent', path: '/payment/commissions' },
+      { id: 'bins', label: t('paymentSystem.tabs.bins'), icon: 'credit_score', path: '/payment/bins' }
     )
   }
 

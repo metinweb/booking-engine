@@ -870,6 +870,7 @@ onUnmounted(() => {
 
 // Expose
 defineExpose({
+  viewMode,
   clearSelection,
   clearAllFilters,
   applyFilters

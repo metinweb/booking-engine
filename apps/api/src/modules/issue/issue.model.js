@@ -40,7 +40,8 @@ const activitySchema = new mongoose.Schema({
       'priority_changed', 'label_added', 'label_removed', 'comment_added',
       'comment_edited', 'comment_deleted', 'attachment_added', 'attachment_removed',
       'due_date_set', 'due_date_removed', 'watcher_added', 'watcher_removed',
-      'related_added', 'related_removed', 'reopened', 'resolved', 'closed'
+      'related_added', 'related_removed', 'reopened', 'resolved', 'closed',
+      'nudge_sent'
     ],
     required: true
   },

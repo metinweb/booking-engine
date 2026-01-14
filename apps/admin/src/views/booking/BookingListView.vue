@@ -86,11 +86,40 @@
             <option value="upcoming">{{ $t('booking.upcoming') }}</option>
             <option value="past">{{ $t('booking.past') }}</option>
           </select>
+
+          <!-- View Toggle -->
+          <div class="flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden">
+            <button
+              class="p-2"
+              :class="
+                viewMode === 'table'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
+              "
+              :title="$t('common.tableView')"
+              @click="viewMode = 'table'"
+            >
+              <span class="material-icons text-xl">table_rows</span>
+            </button>
+            <button
+              class="p-2"
+              :class="
+                viewMode === 'cards'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
+              "
+              :title="$t('common.cardView')"
+              @click="viewMode = 'cards'"
+            >
+              <span class="material-icons text-xl">grid_view</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- Bookings DataTable -->
       <DataTable
+        ref="dataTableRef"
         :data="bookings"
         :columns="columns"
         :loading="isLoading"
@@ -98,7 +127,8 @@
         :page="currentPage"
         :per-page="perPage"
         :show-header="false"
-        responsive
+        :responsive="false"
+        :default-view-mode="viewMode"
         :card-title-key="'bookingNumber'"
         :empty-icon="'event_busy'"
         :empty-text="filters.status ? $t('booking.noBookingsForStatus') : $t('booking.noBookingsDescription')"
@@ -127,9 +157,12 @@
             </span>
             <div>
               <div class="flex items-center">
-                <span class="font-medium text-gray-900 dark:text-white">
+                <button
+                  class="font-medium text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+                  @click.stop="viewBooking(row)"
+                >
                   {{ row.bookingNumber }}
-                </span>
+                </button>
                 <!-- Amendment indicator with popover -->
                 <div
                   v-if="row.modifications?.length > 0"
@@ -203,15 +236,55 @@
           </div>
         </template>
 
-        <!-- Hotel Cell -->
+        <!-- Hotel Cell (with room type and market/season tags) -->
         <template #cell-hotelName="{ row }">
-          <div class="max-w-[200px]">
+          <div class="max-w-[280px]">
             <p class="font-medium text-gray-900 dark:text-white truncate">
               {{ row.hotelName || '-' }}
             </p>
-            <p v-if="row.hotelCode" class="text-xs text-gray-500 dark:text-slate-400">
-              {{ row.hotelCode }}
-            </p>
+            <!-- Room type, meal plan, and market/season tags -->
+            <div class="flex flex-wrap items-center gap-1 mt-1">
+              <!-- Room type & meal plan -->
+              <template v-if="row.rooms?.length">
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                  {{ row.rooms[0].roomTypeCode }}
+                </span>
+                <span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                  {{ row.rooms[0].mealPlanCode }}
+                </span>
+                <span
+                  v-if="row.rooms[0].rateType === 'non_refundable'"
+                  class="px-1 py-0.5 text-[10px] font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded"
+                >
+                  NR
+                </span>
+                <span
+                  v-if="row.rooms.length > 1"
+                  class="px-1 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded"
+                >
+                  +{{ row.rooms.length - 1 }}
+                </span>
+              </template>
+              <!-- Market & season -->
+              <span
+                v-if="row.market"
+                class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                :title="getLocalizedName(row.market.name)"
+              >
+                {{ row.market.code }}
+              </span>
+              <span
+                v-if="row.season"
+                class="px-1.5 py-0.5 rounded text-[10px] font-medium"
+                :style="{
+                  backgroundColor: row.season.color ? `${row.season.color}20` : '#fef3c7',
+                  color: row.season.color || '#d97706'
+                }"
+                :title="getLocalizedName(row.season.name)"
+              >
+                {{ row.season.code }}
+              </span>
+            </div>
           </div>
         </template>
 
@@ -235,146 +308,22 @@
 
         <!-- Dates Cell -->
         <template #cell-checkIn="{ row }">
-          <div v-if="row.checkIn" class="flex items-center">
+          <div v-if="row.checkIn" class="flex items-center gap-2">
             <div class="text-sm">
-              <p class="font-medium text-gray-900 dark:text-white">
-                {{ formatDate(row.checkIn) }}
+              <p class="font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                {{ formatShortDate(row.checkIn) }}
               </p>
-              <p class="text-gray-500 dark:text-slate-400 flex items-center">
-                <span class="material-icons text-xs mr-1">arrow_right_alt</span>
-                {{ formatDate(row.checkOut) }}
-                <span class="ml-2 text-purple-600 dark:text-purple-400 font-medium">
-                  ({{ row.nights }} {{ $t('booking.night') }})
-                </span>
+              <p class="text-gray-500 dark:text-slate-400 whitespace-nowrap">
+                {{ formatShortDate(row.checkOut) }}
               </p>
             </div>
+            <!-- Nights badge with moon icon -->
+            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium">
+              <span class="material-icons text-xs">nightlight</span>
+              {{ row.nights }}
+            </span>
           </div>
           <span v-else class="text-gray-400 dark:text-slate-500 italic text-sm">-</span>
-        </template>
-
-        <!-- Rooms Cell -->
-        <template #cell-rooms="{ row }">
-          <!-- Rooms with popover -->
-          <div v-if="row.rooms?.length" class="relative group">
-            <!-- Trigger: badges -->
-            <div class="flex items-center gap-1 cursor-pointer">
-              <span
-                class="px-2 py-0.5 rounded text-xs font-medium bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
-              >
-                {{ row.rooms[0].roomTypeCode }}
-              </span>
-              <span
-                class="px-2 py-0.5 rounded text-xs font-medium bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300"
-              >
-                {{ row.rooms[0].mealPlanCode }}
-              </span>
-              <span
-                v-if="row.rooms[0].rateType === 'non_refundable'"
-                class="px-1.5 py-0.5 text-[10px] font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded"
-              >
-                NR
-              </span>
-              <span
-                v-if="row.rooms.length > 1"
-                class="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-slate-300 rounded"
-              >
-                +{{ row.rooms.length - 1 }}
-              </span>
-            </div>
-            <!-- Popover -->
-            <div class="absolute left-0 top-full mt-1 z-50 hidden group-hover:block">
-              <div
-                class="bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 p-3 min-w-[280px]"
-              >
-                <div
-                  class="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-2"
-                >
-                  {{ $t('booking.roomDetails') }}
-                </div>
-                <div
-                  v-for="(room, roomIdx) in row.rooms"
-                  :key="roomIdx"
-                  class="py-2"
-                  :class="{ 'border-t border-gray-100 dark:border-slate-700': roomIdx > 0 }"
-                >
-                  <div class="flex items-start justify-between gap-3">
-                    <div class="flex-1">
-                      <div class="font-medium text-gray-900 dark:text-white text-sm">
-                        {{ getLocalizedName(room.roomTypeName) }}
-                      </div>
-                      <div class="text-xs text-gray-500 dark:text-slate-400 mt-0.5">
-                        {{ getLocalizedName(room.mealPlanName) }}
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-slate-300">
-                      <span class="flex items-center" :title="$t('booking.adults')">
-                        <span class="material-icons text-sm mr-0.5">person</span>
-                        {{ getRoomAdults(room) }}
-                      </span>
-                      <span
-                        v-if="getRoomChildren(room) > 0"
-                        class="flex items-center"
-                        :title="$t('booking.children')"
-                      >
-                        <span class="material-icons text-sm mr-0.5">child_care</span>
-                        {{ getRoomChildren(room) }}
-                      </span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-1 mt-1.5">
-                    <span
-                      class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300"
-                    >
-                      {{ room.roomTypeCode }}
-                    </span>
-                    <span
-                      class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300"
-                    >
-                      {{ room.mealPlanCode }}
-                    </span>
-                    <span
-                      v-if="room.rateType === 'non_refundable'"
-                      class="px-1.5 py-0.5 text-[10px] font-medium bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded"
-                    >
-                      {{ $t('booking.nonRefundableRate') }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- No rooms -->
-          <div v-else class="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
-            <span class="material-icons text-base">king_bed</span>
-            {{ row.totalRooms || '-' }}
-          </div>
-        </template>
-
-        <!-- Market & Season Cell -->
-        <template #cell-market="{ row }">
-          <div class="flex flex-wrap gap-1">
-            <span
-              v-if="row.market"
-              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 cursor-default"
-              :title="getLocalizedName(row.market.name)"
-            >
-              {{ row.market.code }}
-            </span>
-            <span
-              v-if="row.season"
-              class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium cursor-default"
-              :style="{
-                backgroundColor: row.season.color ? `${row.season.color}20` : '#fef3c7',
-                color: row.season.color || '#d97706'
-              }"
-              :title="getLocalizedName(row.season.name)"
-            >
-              {{ row.season.code }}
-            </span>
-            <span v-if="!row.market && !row.season" class="text-gray-400 dark:text-slate-500 text-sm"
-              >-</span
-            >
-          </div>
         </template>
 
         <!-- Price Cell -->
@@ -424,31 +373,30 @@
         <!-- Row Actions (visible in table view) -->
         <template #row-actions="{ row }">
           <div class="flex items-center justify-end gap-1">
-            <!-- Continue Draft Button -->
+            <!-- Continue Draft Button (hidden below xl, available in ActionMenu) -->
             <button
               v-if="row.status === 'draft'"
-              class="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+              class="hidden xl:inline-flex items-center px-3 py-1.5 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
               @click.stop="continueDraft(row)"
             >
               <span class="material-icons text-sm mr-1">play_arrow</span>
-              <span class="hidden sm:inline">{{ $t('booking.continueBooking') }}</span>
-              <span class="sm:hidden">{{ $t('booking.continue') }}</span>
+              {{ $t('booking.continueBooking') }}
             </button>
 
-            <!-- View Button -->
+            <!-- View Button (hidden below xl, available in ActionMenu) -->
             <button
               v-else
-              class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+              class="hidden xl:inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
               @click.stop="viewBooking(row)"
             >
               <span class="material-icons text-sm mr-1">visibility</span>
-              <span class="hidden sm:inline">{{ $t('common.view') }}</span>
+              {{ $t('common.view') }}
             </button>
 
-            <!-- Amend Button (hidden on small screens, shown in menu) -->
+            <!-- Amend Button (hidden below xl, available in ActionMenu) -->
             <button
               v-if="canAmend(row)"
-              class="hidden md:inline-flex items-center px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-800/40 transition-colors"
+              class="hidden xl:inline-flex items-center px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-800/40 transition-colors"
               @click.stop="openAmendment(row)"
             >
               <span class="material-icons text-sm mr-1">edit</span>
@@ -457,20 +405,9 @@
 
             <!-- More Actions Menu -->
             <ActionMenu
-              v-if="row.status !== 'draft'"
               :items="getActionMenuItems(row)"
               @select="handleActionSelect($event, row)"
             />
-
-            <!-- Delete Draft -->
-            <button
-              v-if="row.status === 'draft'"
-              class="p-1.5 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-              :title="$t('common.delete')"
-              @click.stop="deleteDraft(row)"
-            >
-              <span class="material-icons text-sm">delete</span>
-            </button>
           </div>
         </template>
 
@@ -602,11 +539,19 @@
       @close="showPaymentModal = false; selectedBookingForPayment = null"
       @updated="handlePaymentUpdated"
     />
+
+    <!-- Booking Quick View Modal -->
+    <BookingQuickViewModal
+      v-model="showBookingModal"
+      :booking="selectedBookingForView"
+      @close="showBookingModal = false; selectedBookingForView = null"
+      @amend="handleAmendFromModal"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { usePartnerContext } from '@/composables/usePartnerContext'
@@ -625,6 +570,7 @@ import ActionMenu from '@/components/ui/buttons/ActionMenu.vue'
 import BookingAmendmentModal from '@/components/booking/amendment/BookingAmendmentModal.vue'
 import PaymentModal from '@/components/booking/payment/PaymentModal.vue'
 import PaymentStatusBadge from '@/components/booking/payment/PaymentStatusBadge.vue'
+import BookingQuickViewModal from '@/components/booking/BookingQuickViewModal.vue'
 
 const { locale, t } = useI18n()
 const router = useRouter()
@@ -660,14 +606,12 @@ const navItems = computed(() => [
   }
 ])
 
-// DataTable columns
+// DataTable columns (rooms and market moved to hotel cell)
 const columns = computed(() => [
   { key: 'bookingNumber', label: t('booking.bookingNumber'), sortable: true },
   { key: 'hotelName', label: t('booking.hotel'), sortable: true },
   { key: 'leadGuest', label: t('booking.guest'), sortable: false },
   { key: 'checkIn', label: t('booking.dates'), sortable: true },
-  { key: 'rooms', label: t('booking.rooms'), sortable: false },
-  { key: 'market', label: t('booking.marketSeason'), sortable: false },
   { key: 'pricing', label: t('booking.totalPrice'), sortable: true },
   { key: 'payment', label: t('payment.paidAmount'), sortable: false }
 ])
@@ -693,6 +637,19 @@ const showAmendmentModal = ref(false)
 const selectedBookingForAmendment = ref(null)
 const showPaymentModal = ref(false)
 const selectedBookingForPayment = ref(null)
+const showBookingModal = ref(false)
+const selectedBookingForView = ref(null)
+
+// View mode for DataTable
+const viewMode = ref('table')
+const dataTableRef = ref(null)
+
+// Watch viewMode and update DataTable
+watch(viewMode, newMode => {
+  if (dataTableRef.value) {
+    dataTableRef.value.viewMode = newMode
+  }
+})
 
 // Filters
 const filters = ref({
@@ -914,9 +871,10 @@ const toggleMenu = id => {
 }
 
 
-// View booking
+// View booking (open modal)
 const viewBooking = booking => {
-  router.push(`/bookings/${booking._id}`)
+  selectedBookingForView.value = booking
+  showBookingModal.value = true
 }
 
 // Continue draft
@@ -976,7 +934,7 @@ const cancelBooking = booking => {
 // Print booking
 const printBooking = booking => {
   openMenuId.value = null
-  window.open(`/bookings/${booking._id}/print`, '_blank')
+  router.push(`/bookings/${booking._id}`)
 }
 
 // Can confirm
@@ -998,6 +956,13 @@ const canAmend = booking => {
 const openAmendment = booking => {
   selectedBookingForAmendment.value = booking
   showAmendmentModal.value = true
+}
+
+// Handle amend from quick view modal
+const handleAmendFromModal = booking => {
+  showBookingModal.value = false
+  selectedBookingForView.value = null
+  openAmendment(booking)
 }
 
 // Handle amendment complete
@@ -1037,6 +1002,17 @@ const formatDate = date => {
     day: '2-digit',
     month: 'short',
     year: 'numeric'
+  })
+}
+
+// Format short date (e.g., "18 Şub 26")
+const formatShortDate = date => {
+  if (!date) return '-'
+  const d = new Date(date)
+  return d.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: '2-digit'
   })
 }
 
@@ -1171,7 +1147,31 @@ const getSalesChannelClass = booking => {
 const getActionMenuItems = row => {
   const items = []
 
-  // Amend option (for mobile - hidden as separate button on small screens)
+  // Draft specific actions
+  if (row.status === 'draft') {
+    items.push({
+      key: 'continue',
+      label: t('booking.continueBooking'),
+      icon: 'play_arrow'
+    })
+    items.push({ divider: true })
+    items.push({
+      key: 'deleteDraft',
+      label: t('common.delete'),
+      icon: 'delete',
+      danger: true
+    })
+    return items
+  }
+
+  // View option (shown in menu for smaller screens)
+  items.push({
+    key: 'view',
+    label: t('common.view'),
+    icon: 'visibility'
+  })
+
+  // Amend option (for smaller screens - hidden as separate button)
   if (canAmend(row)) {
     items.push({
       key: 'amend',
@@ -1220,6 +1220,15 @@ const getActionMenuItems = row => {
 // Handle action menu selection
 const handleActionSelect = (item, row) => {
   switch (item.key) {
+    case 'continue':
+      continueDraft(row)
+      break
+    case 'deleteDraft':
+      deleteDraft(row)
+      break
+    case 'view':
+      viewBooking(row)
+      break
     case 'amend':
       openAmendment(row)
       break
