@@ -148,7 +148,7 @@
 
     "hints": {
       "pasteScreenshot": "veya Ctrl+V ile ekran görüntüsü yapıştır",
-      "markdownAndMention": "Markdown desteklenir. @kullanıcı ile bahsetme yapabilirsiniz."
+      "markdownAndMention": "Markdown desteklenir. {'@'}kullanıcı ile bahsetme yapabilirsiniz."
     },
 
     "confirmations": {

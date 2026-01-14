@@ -148,7 +148,7 @@
 
     "hints": {
       "pasteScreenshot": "or paste screenshot with Ctrl+V",
-      "markdownAndMention": "Markdown supported. Use @username to mention someone."
+      "markdownAndMention": "Markdown supported. Use {'@'}username to mention someone."
     },
 
     "confirmations": {
