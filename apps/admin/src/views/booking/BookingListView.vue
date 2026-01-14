@@ -421,7 +421,7 @@
           <span v-else class="text-gray-400 dark:text-slate-500 italic text-sm">-</span>
         </template>
 
-        <!-- Row Actions -->
+        <!-- Row Actions (visible in table view) -->
         <template #row-actions="{ row }">
           <div class="flex items-center justify-end gap-1">
             <!-- Continue Draft Button -->
@@ -431,7 +431,8 @@
               @click.stop="continueDraft(row)"
             >
               <span class="material-icons text-sm mr-1">play_arrow</span>
-              {{ $t('booking.continueBooking') }}
+              <span class="hidden sm:inline">{{ $t('booking.continueBooking') }}</span>
+              <span class="sm:hidden">{{ $t('booking.continue') }}</span>
             </button>
 
             <!-- View Button -->
@@ -441,13 +442,13 @@
               @click.stop="viewBooking(row)"
             >
               <span class="material-icons text-sm mr-1">visibility</span>
-              {{ $t('common.view') }}
+              <span class="hidden sm:inline">{{ $t('common.view') }}</span>
             </button>
 
-            <!-- Amend Button -->
+            <!-- Amend Button (hidden on small screens, shown in menu) -->
             <button
               v-if="canAmend(row)"
-              class="inline-flex items-center px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-800/40 transition-colors"
+              class="hidden md:inline-flex items-center px-3 py-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-lg text-sm font-medium hover:bg-indigo-200 dark:hover:bg-indigo-800/40 transition-colors"
               @click.stop="openAmendment(row)"
             >
               <span class="material-icons text-sm mr-1">edit</span>
@@ -470,6 +471,59 @@
             >
               <span class="material-icons text-sm">delete</span>
             </button>
+          </div>
+        </template>
+
+        <!-- Card Footer (for card view on mobile) -->
+        <template #card-footer="{ row }">
+          <div class="flex items-center justify-between gap-2">
+            <!-- Primary Action -->
+            <button
+              v-if="row.status === 'draft'"
+              class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+              @click.stop="continueDraft(row)"
+            >
+              <span class="material-icons text-sm mr-1.5">play_arrow</span>
+              {{ $t('booking.continueBooking') }}
+            </button>
+            <button
+              v-else
+              class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+              @click.stop="viewBooking(row)"
+            >
+              <span class="material-icons text-sm mr-1.5">visibility</span>
+              {{ $t('common.view') }}
+            </button>
+
+            <!-- Secondary Actions -->
+            <div class="flex items-center gap-1">
+              <!-- Amend Button -->
+              <button
+                v-if="canAmend(row)"
+                class="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                :title="$t('booking.amend')"
+                @click.stop="openAmendment(row)"
+              >
+                <span class="material-icons text-xl">edit</span>
+              </button>
+
+              <!-- More Actions -->
+              <ActionMenu
+                v-if="row.status !== 'draft'"
+                :items="getActionMenuItems(row)"
+                @select="handleActionSelect($event, row)"
+              />
+
+              <!-- Delete Draft -->
+              <button
+                v-if="row.status === 'draft'"
+                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                :title="$t('common.delete')"
+                @click.stop="deleteDraft(row)"
+              >
+                <span class="material-icons text-xl">delete</span>
+              </button>
+            </div>
           </div>
         </template>
       </DataTable>
@@ -1117,6 +1171,15 @@ const getSalesChannelClass = booking => {
 const getActionMenuItems = row => {
   const items = []
 
+  // Amend option (for mobile - hidden as separate button on small screens)
+  if (canAmend(row)) {
+    items.push({
+      key: 'amend',
+      label: t('booking.amend'),
+      icon: 'edit'
+    })
+  }
+
   if (canConfirm(row)) {
     items.push({
       key: 'confirm',
@@ -1157,6 +1220,9 @@ const getActionMenuItems = row => {
 // Handle action menu selection
 const handleActionSelect = (item, row) => {
   switch (item.key) {
+    case 'amend':
+      openAmendment(row)
+      break
     case 'confirm':
       confirmBooking(row)
       break

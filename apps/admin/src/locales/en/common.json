@@ -96,6 +96,8 @@
     "max": "Max",
     "more": "more",
     "refresh": "Refresh",
+    "tableView": "Table View",
+    "cardView": "Card View",
     "confirmDelete": "Are you sure you want to delete?",
     "records": "records",
     "items": "items",
@@ -160,5 +162,58 @@
     "NL": "Netherlands",
     "BE": "Belgium",
     "OTHER": "Other"
+  },
+  "payment": {
+    "paidAmount": "Paid",
+    "status": {
+      "pending": "Pending",
+      "partial": "Partial",
+      "paid": "Paid",
+      "completed": "Completed",
+      "refunded": "Refunded",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "total": "Total",
+    "paid": "Paid",
+    "remaining": "Remaining",
+    "addNew": "Add Payment",
+    "confirm": {
+      "title": "Confirm Payment"
+    },
+    "delete": {
+      "title": "Delete Payment"
+    },
+    "refund": {
+      "title": "Refund"
+    },
+    "edit": {
+      "title": "Edit Payment"
+    },
+    "noPayments": "No payment records yet",
+    "selectType": "Select payment type",
+    "type": {
+      "credit_card": "Credit Card",
+      "bank_transfer": "Bank Transfer",
+      "cash": "Cash",
+      "agency_credit": "Agency Credit",
+      "pay_at_checkin": "Pay at Check-in"
+    },
+    "amount": "Amount",
+    "remainingLabel": "Remaining Amount",
+    "bankTransfer": {
+      "details": "Transfer Details",
+      "bankName": "Bank Name",
+      "bankNamePlaceholder": "e.g. Chase Bank",
+      "reference": "Reference No",
+      "referencePlaceholder": "Transfer reference number",
+      "iban": "IBAN",
+      "accountHolder": "Account Holder",
+      "accountHolderPlaceholder": "Account holder name",
+      "receipt": "Receipt",
+      "uploadReceipt": "Upload Receipt"
+    },
+    "notes": "Notes",
+    "notesPlaceholder": "Notes about this payment..."
   }
 }

@@ -56,7 +56,7 @@
         <!-- View Toggle (Table/Card) -->
         <div
           v-if="responsive"
-          class="hidden sm:flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden"
+          class="flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden"
         >
           <button
             class="p-2"
@@ -65,6 +65,7 @@
                 ? 'bg-indigo-600 text-white'
                 : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
             "
+            :title="$t('common.tableView', 'Tablo Görünümü')"
             @click="viewMode = 'table'"
           >
             <span class="material-icons text-xl">table_rows</span>
@@ -76,6 +77,7 @@
                 ? 'bg-indigo-600 text-white'
                 : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
             "
+            :title="$t('common.cardView', 'Kart Görünümü')"
             @click="viewMode = 'cards'"
           >
             <span class="material-icons text-xl">grid_view</span>
@@ -386,9 +388,41 @@
       v-if="paginated && total > 0"
       class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-slate-700"
     >
-      <!-- Info -->
-      <div class="text-sm text-gray-600 dark:text-gray-400">
-        {{ from }}-{{ to }} / {{ total }} {{ countLabel || $t('common.records', 'kayit') }}
+      <!-- Info + View Toggle (for mobile when header is hidden) -->
+      <div class="flex items-center gap-3">
+        <div class="text-sm text-gray-600 dark:text-gray-400">
+          {{ from }}-{{ to }} / {{ total }} {{ countLabel || $t('common.records', 'kayit') }}
+        </div>
+        <!-- View Toggle in pagination (visible when header is hidden) -->
+        <div
+          v-if="responsive && !showHeader"
+          class="flex border border-gray-300 dark:border-slate-600 rounded-lg overflow-hidden"
+        >
+          <button
+            class="p-1.5"
+            :class="
+              viewMode === 'table'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
+            "
+            :title="$t('common.tableView', 'Tablo Görünümü')"
+            @click="viewMode = 'table'"
+          >
+            <span class="material-icons text-lg">table_rows</span>
+          </button>
+          <button
+            class="p-1.5"
+            :class="
+              viewMode === 'cards'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white dark:bg-slate-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-600'
+            "
+            :title="$t('common.cardView', 'Kart Görünümü')"
+            @click="viewMode = 'cards'"
+          >
+            <span class="material-icons text-lg">grid_view</span>
+          </button>
+        </div>
       </div>
 
       <!-- Per Page -->

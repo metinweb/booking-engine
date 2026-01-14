@@ -96,6 +96,8 @@
     "max": "Maks",
     "more": "daha fazla",
     "refresh": "Yenile",
+    "tableView": "Tablo Görünümü",
+    "cardView": "Kart Görünümü",
     "confirmDelete": "Silmek istediğinize emin misiniz?",
     "records": "kayıt",
     "items": "öğe",
@@ -161,5 +163,58 @@
     "NL": "Hollanda",
     "BE": "Belçika",
     "OTHER": "Diğer"
+  },
+  "payment": {
+    "paidAmount": "Ödenen",
+    "status": {
+      "pending": "Bekliyor",
+      "partial": "Kısmi Ödeme",
+      "paid": "Ödendi",
+      "completed": "Tamamlandı",
+      "refunded": "İade Edildi",
+      "failed": "Başarısız",
+      "cancelled": "İptal Edildi"
+    },
+    "total": "Toplam",
+    "paid": "Ödenen",
+    "remaining": "Kalan",
+    "addNew": "Yeni Ödeme Ekle",
+    "confirm": {
+      "title": "Ödemeyi Onayla"
+    },
+    "delete": {
+      "title": "Ödemeyi Sil"
+    },
+    "refund": {
+      "title": "İade Et"
+    },
+    "edit": {
+      "title": "Ödemeyi Düzenle"
+    },
+    "noPayments": "Henüz ödeme kaydı yok",
+    "selectType": "Ödeme türü seçin",
+    "type": {
+      "credit_card": "Kredi Kartı",
+      "bank_transfer": "Banka Havalesi",
+      "cash": "Nakit",
+      "agency_credit": "Acente Kredisi",
+      "pay_at_checkin": "Girişte Öde"
+    },
+    "amount": "Tutar",
+    "remainingLabel": "Kalan Tutar",
+    "bankTransfer": {
+      "details": "Havale Bilgileri",
+      "bankName": "Banka Adı",
+      "bankNamePlaceholder": "Örn: Garanti Bankası",
+      "reference": "Referans No",
+      "referencePlaceholder": "Havale referans numarası",
+      "iban": "IBAN",
+      "accountHolder": "Hesap Sahibi",
+      "accountHolderPlaceholder": "Hesap sahibi adı",
+      "receipt": "Dekont",
+      "uploadReceipt": "Dekont Yükle"
+    },
+    "notes": "Notlar",
+    "notesPlaceholder": "Ödeme ile ilgili notlar..."
   }
 }
