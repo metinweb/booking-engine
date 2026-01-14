@@ -180,11 +180,39 @@ export const generalLimiter = createRateLimiter({
   message: 'Too many requests. Please try again later.'
 })
 
-// Strict limiter for sensitive operations
+// Strict limiter for sensitive operations (unauthenticated only)
 export const strictLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   maxRequests: 5,
-  message: 'Too many attempts. Please try again later.'
+  message: 'Too many attempts. Please try again later.',
+  skip: req => !!req.user // Skip if user is authenticated
+})
+
+// Authenticated user limiter - generous limits per user
+export const authenticatedLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 300,
+  message: 'Too many requests. Please slow down.',
+  keyGenerator: req => {
+    // Use user ID if authenticated, otherwise use IP
+    if (req.user?._id) {
+      return `user:${req.user._id}`
+    }
+    const forwarded = req.headers['x-forwarded-for']
+    return forwarded ? forwarded.split(',')[0].trim() : req.ip
+  }
+})
+
+// Token refresh limiter - separate higher limit for token refresh
+export const tokenRefreshLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 30,
+  message: 'Too many token refresh attempts.',
+  keyGenerator: req => {
+    const forwarded = req.headers['x-forwarded-for']
+    const ip = forwarded ? forwarded.split(',')[0].trim() : req.ip
+    return `refresh:${ip}`
+  }
 })
 
 // Login-specific rate limiter
@@ -615,6 +643,8 @@ export default {
   pricingLimiter,
   generalLimiter,
   strictLimiter,
+  authenticatedLimiter,
+  tokenRefreshLimiter,
   loginLimiter,
   globalLimiter,
   getRateLimiterStats,

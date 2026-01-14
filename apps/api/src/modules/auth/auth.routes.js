@@ -1,7 +1,7 @@
 import express from 'express'
 import * as authService from './auth.service.js'
 import { protect, requirePlatformAdmin } from '#middleware/auth.js'
-import { strictLimiter, loginLimiter } from '#middleware/rateLimiter.js'
+import { strictLimiter, loginLimiter, tokenRefreshLimiter } from '#middleware/rateLimiter.js'
 import { avatarUpload } from '#helpers/avatarUpload.js'
 
 // Auth routes - handles authentication, profile, and avatar management
@@ -119,7 +119,7 @@ router.post('/register', strictLimiter, authService.register)
  *       401:
  *         description: Invalid or expired refresh token
  */
-router.post('/refresh-token', strictLimiter, authService.refreshToken)
+router.post('/refresh-token', tokenRefreshLimiter, authService.refreshToken)
 
 /**
  * @swagger
