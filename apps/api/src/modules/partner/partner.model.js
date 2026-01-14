@@ -25,33 +25,6 @@ const partnerSchema = new mongoose.Schema(
       default: 'agency'
     },
 
-    // Partner Kodu (PMS girişi için)
-    code: {
-      type: String,
-      unique: true,
-      sparse: true,
-      uppercase: true,
-      trim: true,
-      maxlength: [20, 'CODE_MAX_LENGTH'],
-      validate: {
-        validator: function (v) {
-          // Allow empty/null values
-          if (!v || v.trim() === '') return true
-          // If provided, must be at least 3 chars and match pattern
-          if (v.length < 3) {
-            this.invalidate('code', 'CODE_MIN_LENGTH')
-            return false
-          }
-          if (!/^[A-Z0-9_-]+$/.test(v)) {
-            this.invalidate('code', 'INVALID_CODE_FORMAT')
-            return false
-          }
-          return true
-        },
-        message: 'INVALID_CODE'
-      }
-    },
-
     // Şirket Bilgileri
     companyName: {
       type: String,
@@ -923,11 +896,6 @@ partnerSchema.pre('save', function (next) {
   // Track previous status for post-save hook
   if (this.isModified('status')) {
     this._previousStatus = this.constructor.findOne({ _id: this._id }).then(doc => doc?.status)
-  }
-
-  // Clear empty code to prevent unique constraint issues
-  if (this.code !== undefined && (!this.code || this.code.trim() === '')) {
-    this.code = undefined
   }
 
   // Lowercase email and domains

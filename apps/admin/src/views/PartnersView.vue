@@ -289,20 +289,6 @@
               </div>
 
               <div>
-                <label class="form-label">{{ $t('partners.code') }}</label>
-                <div class="relative">
-                  <input
-                    v-model="form.code"
-                    type="text"
-                    class="form-input uppercase pl-10"
-                    :placeholder="$t('partners.codePlaceholder')"
-                    maxlength="20"
-                  />
-                  <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">tag</span>
-                </div>
-              </div>
-
-              <div>
                 <label class="form-label">{{ $t('common.status.label') }}</label>
                 <div class="flex gap-2">
                   <label
@@ -1214,7 +1200,6 @@ const formatDate = dateStr => {
 const form = ref({
   companyName: '',
   tradeName: '',
-  code: '',
   email: '',
   phone: '',
   taxOffice: '',
@@ -1232,7 +1217,6 @@ const form = ref({
 const columns = [
   { key: 'companyName', label: t('partners.partnerName') },
   { key: 'partnerType', label: t('partners.partnerType') },
-  { key: 'code', label: t('partners.code') },
   { key: 'website', label: t('partners.website') },
   { key: 'subscription', label: t('partners.subscription.plan') },
   { key: 'subscriptionStatus', label: t('partners.subscription.status') },
@@ -1337,7 +1321,6 @@ const openCreateModalInternal = () => {
   form.value = {
     companyName: '',
     tradeName: '',
-    code: '',
     email: '',
     phone: '',
     taxOffice: '',
@@ -1365,7 +1348,6 @@ const openEditModal = partner => {
   form.value = {
     companyName: partner.companyName,
     tradeName: partner.tradeName || '',
-    code: partner.code || '',
     email: partner.email,
     phone: partner.phone || '',
     taxOffice: partner.taxOffice || '',

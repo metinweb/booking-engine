@@ -143,7 +143,6 @@ export const updatePartner = asyncHandler(async (req, res) => {
     'settings',
     'contactPerson',
     'notes',
-    'code',
     'status',
     'partnerType'
   ]
