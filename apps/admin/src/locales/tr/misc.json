@@ -837,6 +837,18 @@
       "hotel": "Otel",
       "agency": "Acente"
     },
+    "typeDesc": {
+      "hotel": "Kendi otellerinizi yönetin",
+      "agency": "Seyahat acentesi olarak çalışın"
+    },
+    "companyInfo": "Şirket Bilgileri",
+    "contactInfo": "İletişim Bilgileri",
+    "taxInfo": "Vergi Bilgileri",
+    "companyNamePlaceholder": "Şirket adını girin",
+    "tradeNamePlaceholder": "Ticari unvanı girin (opsiyonel)",
+    "tradeNameHint": "Resmi şirket unvanı (fatura ve sözleşmelerde kullanılır)",
+    "streetPlaceholder": "Cadde/Sokak ve numara",
+    "taxOfficePlaceholder": "Örn: Kadıköy",
     "website": "Web Sitesi",
     "membershipDate": "Üyelik Tarihi",
     "tradeName": "Ticari İsim",

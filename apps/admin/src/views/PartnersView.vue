@@ -197,102 +197,261 @@
     <Modal
       v-model="showModal"
       :title="isEditing ? $t('partners.editPartner') : $t('partners.addPartner')"
-      size="lg"
+      size="xl"
       :close-on-overlay="false"
     >
       <form class="space-y-6" @submit.prevent="handleSubmit">
-        <!-- Basic Information -->
-        <div>
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">
-            {{ $t('partners.basicInfo') }}
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="form-label">{{ $t('partners.partnerName') }} *</label>
-              <input v-model="form.companyName" type="text" class="form-input" required />
-            </div>
+        <!-- Partner Type Selection -->
+        <div class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-5">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            {{ $t('partners.partnerType') }}
+          </label>
+          <div class="grid grid-cols-2 gap-4">
+            <label
+              class="relative flex flex-col items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
+              :class="form.partnerType === 'hotel'
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-lg shadow-blue-500/20'
+                : 'border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-700 bg-white dark:bg-slate-800'"
+            >
+              <input v-model="form.partnerType" type="radio" value="hotel" class="sr-only" />
+              <div
+                class="w-14 h-14 rounded-full flex items-center justify-center mb-2"
+                :class="form.partnerType === 'hotel'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'"
+              >
+                <span class="material-icons text-2xl">apartment</span>
+              </div>
+              <span class="font-semibold text-gray-800 dark:text-white">{{ $t('partners.types.hotel') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400 text-center mt-1">{{ $t('partners.typeDesc.hotel') }}</span>
+              <div v-if="form.partnerType === 'hotel'" class="absolute top-2 right-2">
+                <span class="material-icons text-blue-500">check_circle</span>
+              </div>
+            </label>
 
-            <div>
-              <label class="form-label">{{ $t('partners.code') }}</label>
-              <input
-                v-model="form.code"
-                type="text"
-                class="form-input uppercase"
-                maxlength="20"
-              />
-              <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
-                {{ $t('partners.codeDescription') }}
-              </p>
-            </div>
+            <label
+              class="relative flex flex-col items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
+              :class="form.partnerType === 'agency'
+                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30 shadow-lg shadow-purple-500/20'
+                : 'border-gray-200 dark:border-slate-600 hover:border-purple-300 dark:hover:border-purple-700 bg-white dark:bg-slate-800'"
+            >
+              <input v-model="form.partnerType" type="radio" value="agency" class="sr-only" />
+              <div
+                class="w-14 h-14 rounded-full flex items-center justify-center mb-2"
+                :class="form.partnerType === 'agency'
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400'"
+              >
+                <span class="material-icons text-2xl">storefront</span>
+              </div>
+              <span class="font-semibold text-gray-800 dark:text-white">{{ $t('partners.types.agency') }}</span>
+              <span class="text-xs text-gray-500 dark:text-slate-400 text-center mt-1">{{ $t('partners.typeDesc.agency') }}</span>
+              <div v-if="form.partnerType === 'agency'" class="absolute top-2 right-2">
+                <span class="material-icons text-purple-500">check_circle</span>
+              </div>
+            </label>
+          </div>
+        </div>
 
-            <div>
-              <label class="form-label">{{ $t('partners.partnerType') }} *</label>
-              <select v-model="form.partnerType" class="form-input" required>
-                <option value="hotel">{{ $t('partners.types.hotel') }}</option>
-                <option value="agency">{{ $t('partners.types.agency') }}</option>
-              </select>
-            </div>
+        <!-- Company Information Card -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+          <div class="bg-gray-50 dark:bg-slate-700/50 px-5 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center gap-2">
+            <span class="material-icons text-gray-500 dark:text-slate-400">business</span>
+            <h3 class="font-semibold text-gray-800 dark:text-white">{{ $t('partners.companyInfo') }}</h3>
+          </div>
+          <div class="p-5 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="form-label">
+                  {{ $t('partners.partnerName') }}
+                  <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="form.companyName"
+                  type="text"
+                  class="form-input"
+                  :placeholder="$t('partners.companyNamePlaceholder')"
+                  required
+                />
+              </div>
 
-            <div>
-              <label class="form-label">{{ $t('partners.contactEmail') }} *</label>
-              <input v-model="form.email" type="email" class="form-input" required />
-            </div>
+              <div class="md:col-span-2">
+                <label class="form-label">{{ $t('partners.tradeName') }}</label>
+                <input
+                  v-model="form.tradeName"
+                  type="text"
+                  class="form-input"
+                  :placeholder="$t('partners.tradeNamePlaceholder')"
+                />
+                <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                  {{ $t('partners.tradeNameHint') }}
+                </p>
+              </div>
 
-            <div>
-              <label class="form-label">{{ $t('partners.contactPhone') }}</label>
-              <input v-model="form.phone" type="text" class="form-input" />
-            </div>
+              <div>
+                <label class="form-label">{{ $t('partners.code') }}</label>
+                <div class="relative">
+                  <input
+                    v-model="form.code"
+                    type="text"
+                    class="form-input uppercase pl-10"
+                    :placeholder="$t('partners.codePlaceholder')"
+                    maxlength="20"
+                  />
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">tag</span>
+                </div>
+                <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">
+                  {{ $t('partners.codeDescription') }}
+                </p>
+              </div>
 
-            <div class="md:col-span-2">
-              <label class="form-label">{{ $t('partners.tradeName') }}</label>
-              <input v-model="form.tradeName" type="text" class="form-input" />
-            </div>
-
-            <div>
-              <label class="form-label">{{ $t('partners.taxOffice') }}</label>
-              <input v-model="form.taxOffice" type="text" class="form-input" />
-            </div>
-
-            <div>
-              <label class="form-label">{{ $t('partners.taxNumber') }}</label>
-              <input v-model="form.taxNumber" type="text" class="form-input" />
-            </div>
-
-            <div>
-              <label class="form-label">{{ $t('common.status.label') }}</label>
-              <select v-model="form.status" class="form-input">
-                <option value="active">{{ $t('common.active') }}</option>
-                <option value="inactive">{{ $t('common.inactive') }}</option>
-                <option value="pending">{{ $t('common.pending') }}</option>
-              </select>
+              <div>
+                <label class="form-label">{{ $t('common.status.label') }}</label>
+                <div class="flex gap-2">
+                  <label
+                    v-for="statusOption in statusOptions"
+                    :key="statusOption.value"
+                    class="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-all"
+                    :class="form.status === statusOption.value
+                      ? `border-${statusOption.color}-500 bg-${statusOption.color}-50 dark:bg-${statusOption.color}-900/20`
+                      : 'border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700'"
+                  >
+                    <input v-model="form.status" type="radio" :value="statusOption.value" class="sr-only" />
+                    <span
+                      class="w-2 h-2 rounded-full"
+                      :class="{
+                        'bg-green-500': statusOption.value === 'active',
+                        'bg-red-500': statusOption.value === 'inactive',
+                        'bg-yellow-500': statusOption.value === 'pending'
+                      }"
+                    />
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ statusOption.label }}</span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Address -->
-        <div>
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-3">
-            {{ $t('partners.address') }}
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <label class="form-label">{{ $t('partners.street') }}</label>
-              <input v-model="form.address.street" type="text" class="form-input" />
-            </div>
+        <!-- Contact Information Card -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+          <div class="bg-gray-50 dark:bg-slate-700/50 px-5 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center gap-2">
+            <span class="material-icons text-gray-500 dark:text-slate-400">contact_mail</span>
+            <h3 class="font-semibold text-gray-800 dark:text-white">{{ $t('partners.contactInfo') }}</h3>
+          </div>
+          <div class="p-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">
+                  {{ $t('partners.contactEmail') }}
+                  <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    class="form-input pl-10"
+                    placeholder="ornek@sirket.com"
+                    required
+                  />
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">email</span>
+                </div>
+              </div>
 
-            <div>
-              <label class="form-label">{{ $t('partners.city') }}</label>
-              <input v-model="form.address.city" type="text" class="form-input" />
+              <div>
+                <label class="form-label">{{ $t('partners.contactPhone') }}</label>
+                <div class="relative">
+                  <input
+                    v-model="form.phone"
+                    type="text"
+                    class="form-input pl-10"
+                    placeholder="+90 5XX XXX XX XX"
+                  />
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 material-icons text-gray-400 text-lg">phone</span>
+                </div>
+              </div>
             </div>
+          </div>
+        </div>
 
-            <div>
-              <label class="form-label">{{ $t('partners.country') }}</label>
-              <input v-model="form.address.country" type="text" class="form-input" />
+        <!-- Tax Information Card -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+          <div class="bg-gray-50 dark:bg-slate-700/50 px-5 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center gap-2">
+            <span class="material-icons text-gray-500 dark:text-slate-400">receipt_long</span>
+            <h3 class="font-semibold text-gray-800 dark:text-white">{{ $t('partners.taxInfo') }}</h3>
+          </div>
+          <div class="p-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="form-label">{{ $t('partners.taxOffice') }}</label>
+                <input
+                  v-model="form.taxOffice"
+                  type="text"
+                  class="form-input"
+                  :placeholder="$t('partners.taxOfficePlaceholder')"
+                />
+              </div>
+
+              <div>
+                <label class="form-label">{{ $t('partners.taxNumber') }}</label>
+                <input
+                  v-model="form.taxNumber"
+                  type="text"
+                  class="form-input"
+                  placeholder="1234567890"
+                />
+              </div>
             </div>
+          </div>
+        </div>
 
-            <div>
-              <label class="form-label">{{ $t('partners.postalCode') }}</label>
-              <input v-model="form.address.postalCode" type="text" class="form-input" />
+        <!-- Address Card -->
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+          <div class="bg-gray-50 dark:bg-slate-700/50 px-5 py-3 border-b border-gray-200 dark:border-slate-700 flex items-center gap-2">
+            <span class="material-icons text-gray-500 dark:text-slate-400">location_on</span>
+            <h3 class="font-semibold text-gray-800 dark:text-white">{{ $t('partners.address') }}</h3>
+          </div>
+          <div class="p-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="form-label">{{ $t('partners.street') }}</label>
+                <input
+                  v-model="form.address.street"
+                  type="text"
+                  class="form-input"
+                  :placeholder="$t('partners.streetPlaceholder')"
+                />
+              </div>
+
+              <div>
+                <label class="form-label">{{ $t('partners.city') }}</label>
+                <input
+                  v-model="form.address.city"
+                  type="text"
+                  class="form-input"
+                  placeholder="İstanbul"
+                />
+              </div>
+
+              <div>
+                <label class="form-label">{{ $t('partners.country') }}</label>
+                <input
+                  v-model="form.address.country"
+                  type="text"
+                  class="form-input"
+                  placeholder="Türkiye"
+                />
+              </div>
+
+              <div>
+                <label class="form-label">{{ $t('partners.postalCode') }}</label>
+                <input
+                  v-model="form.address.postalCode"
+                  type="text"
+                  class="form-input"
+                  placeholder="34000"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -309,30 +468,45 @@
       </form>
 
       <template #footer>
-        <button type="button" class="btn-secondary" @click="showModal = false">
-          {{ $t('common.cancel') }}
-        </button>
-        <button type="submit" class="btn-primary" :disabled="submitting" @click="handleSubmit">
-          <span v-if="submitting" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              />
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            {{ $t('common.loading') }}
-          </span>
-          <span v-else>{{ $t('common.save') }}</span>
-        </button>
+        <div class="flex items-center justify-between w-full">
+          <p class="text-xs text-gray-400 dark:text-slate-500">
+            <span class="text-red-500">*</span> {{ $t('common.requiredFields') }}
+          </p>
+          <div class="flex gap-3">
+            <button type="button" class="btn-secondary" @click="showModal = false">
+              {{ $t('common.cancel') }}
+            </button>
+            <button
+              type="submit"
+              class="btn-primary flex items-center gap-2"
+              :disabled="submitting"
+              @click="handleSubmit"
+            >
+              <span v-if="submitting" class="flex items-center">
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  />
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                {{ $t('common.loading') }}
+              </span>
+              <template v-else>
+                <span class="material-icons text-lg">save</span>
+                {{ $t('common.save') }}
+              </template>
+            </button>
+          </div>
+        </div>
       </template>
     </Modal>
 
@@ -1075,6 +1249,13 @@ const subscriptionStatusMap = {
   cancelled: { variant: 'secondary', label: t('partners.subscription.statusCancelled') },
   suspended: { variant: 'danger', label: t('partners.subscription.statusSuspended') }
 }
+
+// Status options for form
+const statusOptions = [
+  { value: 'active', label: t('common.active'), color: 'green' },
+  { value: 'pending', label: t('common.pending'), color: 'yellow' },
+  { value: 'inactive', label: t('common.inactive'), color: 'red' }
+]
 
 // Plan badge variants
 const getPlanBadgeVariant = plan => {

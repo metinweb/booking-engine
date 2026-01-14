@@ -837,6 +837,18 @@
       "hotel": "Hotel",
       "agency": "Agency"
     },
+    "typeDesc": {
+      "hotel": "Manage your own hotels",
+      "agency": "Work as a travel agency"
+    },
+    "companyInfo": "Company Information",
+    "contactInfo": "Contact Information",
+    "taxInfo": "Tax Information",
+    "companyNamePlaceholder": "Enter company name",
+    "tradeNamePlaceholder": "Enter trade name (optional)",
+    "tradeNameHint": "Official company trade name (used in invoices and contracts)",
+    "streetPlaceholder": "Street address and number",
+    "taxOfficePlaceholder": "E.g.: Main Street",
     "website": "Website",
     "membershipDate": "Membership Date",
     "tradeName": "Trade Name",
