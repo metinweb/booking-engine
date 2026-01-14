@@ -38,6 +38,36 @@
             </span>
           </template>
 
+          <template #cell-partnerType="{ value }">
+            <span
+              class="badge"
+              :class="{
+                'badge-info': value === 'hotel',
+                'badge-purple': value === 'agency'
+              }"
+            >
+              {{ $t(`partners.types.${value || 'agency'}`) }}
+            </span>
+          </template>
+
+          <template #cell-website="{ row }">
+            <a
+              v-if="row.branding?.siteDomain"
+              :href="`https://${row.branding.siteDomain}`"
+              target="_blank"
+              class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
+            >
+              {{ row.branding.siteDomain }}
+            </a>
+            <span v-else class="text-sm text-gray-400 dark:text-slate-500">-</span>
+          </template>
+
+          <template #cell-createdAt="{ value }">
+            <span class="text-sm text-gray-600 dark:text-slate-400">
+              {{ formatDate(value) }}
+            </span>
+          </template>
+
           <template #cell-subscription="{ row }">
             <div class="flex flex-col gap-1">
               <span
@@ -193,6 +223,14 @@
               <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
                 {{ $t('partners.codeDescription') }}
               </p>
+            </div>
+
+            <div>
+              <label class="form-label">{{ $t('partners.partnerType') }} *</label>
+              <select v-model="form.partnerType" class="form-input" required>
+                <option value="hotel">{{ $t('partners.types.hotel') }}</option>
+                <option value="agency">{{ $t('partners.types.agency') }}</option>
+              </select>
             </div>
 
             <div>
@@ -1014,15 +1052,18 @@ const form = ref({
     country: '',
     postalCode: ''
   },
-  status: 'active'
+  status: 'active',
+  partnerType: 'agency'
 })
 
 const columns = [
   { key: 'companyName', label: t('partners.partnerName') },
+  { key: 'partnerType', label: t('partners.partnerType') },
   { key: 'code', label: t('partners.code') },
+  { key: 'website', label: t('partners.website') },
   { key: 'subscription', label: t('partners.subscription.plan') },
-  { key: 'pms', label: t('partners.subscription.pms') },
   { key: 'subscriptionStatus', label: t('partners.subscription.status') },
+  { key: 'createdAt', label: t('partners.membershipDate') },
   { key: 'status', label: t('common.status.label') }
 ]
 
@@ -1127,7 +1168,8 @@ const openCreateModal = () => {
       country: '',
       postalCode: ''
     },
-    status: 'active'
+    status: 'active',
+    partnerType: 'agency'
   }
   showModal.value = true
 }
@@ -1149,7 +1191,8 @@ const openEditModal = partner => {
       country: partner.address?.country || '',
       postalCode: partner.address?.postalCode || ''
     },
-    status: partner.status || 'active'
+    status: partner.status || 'active',
+    partnerType: partner.partnerType || 'agency'
   }
   showModal.value = true
 }

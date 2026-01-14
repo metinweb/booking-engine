@@ -15,6 +15,16 @@ const partnerSchema = new mongoose.Schema(
       default: 'pending'
     },
 
+    // Partner Tipi
+    partnerType: {
+      type: String,
+      enum: {
+        values: ['hotel', 'agency'],
+        message: 'INVALID_PARTNER_TYPE'
+      },
+      default: 'agency'
+    },
+
     // Partner Kodu (PMS girişi için)
     code: {
       type: String,

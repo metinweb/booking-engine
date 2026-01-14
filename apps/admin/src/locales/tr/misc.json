@@ -832,6 +832,13 @@
     "approveConfirm": "Bu partner'ı onaylamak istediğinize emin misiniz? Partner ve kullanıcı aktif hale gelecek ve e-posta gönderilecek.",
     "approveSuccess": "Partner başarıyla onaylandı. Aktivasyon e-postası gönderildi.",
     "partnerName": "Partner Adı",
+    "partnerType": "Partner Tipi",
+    "types": {
+      "hotel": "Otel",
+      "agency": "Acente"
+    },
+    "website": "Web Sitesi",
+    "membershipDate": "Üyelik Tarihi",
     "tradeName": "Ticari İsim",
     "code": "Partner Kodu",
     "codePlaceholder": "Örn: HOTEL001",

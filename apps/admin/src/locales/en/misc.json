@@ -832,6 +832,13 @@
     "approveConfirm": "Are you sure you want to approve this partner? The partner and user will be activated and an email will be sent.",
     "approveSuccess": "Partner approved successfully. Activation email has been sent.",
     "partnerName": "Partner Name",
+    "partnerType": "Partner Type",
+    "types": {
+      "hotel": "Hotel",
+      "agency": "Agency"
+    },
+    "website": "Website",
+    "membershipDate": "Membership Date",
     "tradeName": "Trade Name",
     "code": "Partner Code",
     "codePlaceholder": "E.g.: HOTEL001",
