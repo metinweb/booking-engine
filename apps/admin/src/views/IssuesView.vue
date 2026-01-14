@@ -118,7 +118,7 @@
             </button>
 
             <!-- New Issue Button -->
-            <button class="btn-primary flex items-center whitespace-nowrap" @click="showCreateModal = true">
+            <button class="btn-primary flex items-center whitespace-nowrap" @click="openCreateModal">
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
@@ -278,6 +278,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useToast } from '@/composables/useToast'
+import { usePermissions } from '@/composables/usePermissions'
 import DataTable from '@/components/ui/data/DataTable.vue'
 import IssueCreateModal from '@/components/issues/IssueCreateModal.vue'
 import issueService from '@/services/issueService'
@@ -294,6 +295,7 @@ const debounce = (fn, delay) => {
 const { t } = useI18n()
 const router = useRouter()
 const toast = useToast()
+const { executeWithPermission } = usePermissions()
 
 // State
 const loading = ref(false)
@@ -326,6 +328,13 @@ const filters = reactive({
 const toggleShowResolved = () => {
   showResolved.value = !showResolved.value
   loadIssues(1)
+}
+
+// Open create modal with permission check
+const openCreateModal = () => {
+  executeWithPermission('issues', 'create', () => {
+    showCreateModal.value = true
+  })
 }
 
 // Options

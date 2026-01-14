@@ -288,6 +288,7 @@ import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import { useI18n } from 'vue-i18n'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { usePermissions } from '@/composables/usePermissions'
 import hotelService from '@/services/hotelService'
 import Modal from '@/components/common/Modal.vue'
 import DataTable from '@/components/ui/data/DataTable.vue'
@@ -297,6 +298,7 @@ import { getImageUrl } from '@/utils/imageUrl'
 const router = useRouter()
 const toast = useToast()
 const { t } = useI18n()
+const { navigateWithPermission } = usePermissions()
 
 // Async action composables
 const { isLoading: loading, execute: executeLoad } = useAsyncAction({ showSuccessToast: false, showErrorToast: false })
@@ -400,8 +402,8 @@ const handlePageChange = ({ page, perPage }) => {
 
 // Open create modal / navigate to create page
 const openCreateModal = () => {
-  // Navigate to hotel detail page with base type
-  router.push({ name: 'hotel-base-new' })
+  // Navigate to hotel detail page with base type (with permission check)
+  navigateWithPermission('hotels', 'create', { name: 'hotel-base-new' })
 }
 
 // Edit hotel

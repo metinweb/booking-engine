@@ -20,7 +20,7 @@
         @filter="() => {}"
         @clear-filters="clearAllFilters"
         @refresh="fetchAgencies"
-        @create="openCreateModal"
+        @create="openCreateModalWithPermission"
       />
 
       <!-- DataTable -->
@@ -37,7 +37,7 @@
       >
         <!-- Empty State Action -->
         <template #empty-action>
-          <button class="btn-primary mt-4" @click="openCreateModal">
+          <button class="btn-primary mt-4" @click="openCreateModalWithPermission">
             <span class="material-icons mr-2">add</span>
             {{ $t('agencies.addAgency') }}
           </button>
@@ -221,6 +221,7 @@ import DataTable from '@/components/ui/data/DataTable.vue'
 import { formatCurrency, getInitials } from '@/utils/formatters'
 import { getCountryName } from '@/data/countries'
 import { DEFAULT_COMMISSION_RATES } from '@/constants'
+import { usePermissions } from '@/composables/usePermissions'
 import {
   AgencyStatsCards,
   AgencyToolbar,
@@ -296,6 +297,13 @@ const {
   // i18n
   locale
 } = useAgenciesView()
+
+// Permission checks
+const { executeWithPermission } = usePermissions()
+
+const openCreateModalWithPermission = () => {
+  executeWithPermission('agencies', 'create', openCreateModal)
+}
 
 // Country label helper
 const getCountryLabel = (code) => getCountryName(code, locale.value)

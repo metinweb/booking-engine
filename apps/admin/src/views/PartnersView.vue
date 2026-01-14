@@ -1108,8 +1108,10 @@ import partnerService from '@/services/partnerService'
 import subscriptionInvoiceService from '@/services/subscriptionInvoiceService'
 import { useI18n } from 'vue-i18n'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { usePermissions } from '@/composables/usePermissions'
 
 const { t } = useI18n()
+const { executeWithPermission } = usePermissions()
 
 // Use async action composables
 const { isLoading: loading, execute: executeFetch } = useAsyncAction({ showSuccessToast: false })
@@ -1330,7 +1332,7 @@ const fetchPartners = async () => {
   )
 }
 
-const openCreateModal = () => {
+const openCreateModalInternal = () => {
   isEditing.value = false
   form.value = {
     companyName: '',
@@ -1350,6 +1352,11 @@ const openCreateModal = () => {
     partnerType: 'agency'
   }
   showModal.value = true
+}
+
+// Permission-checked create modal
+const openCreateModal = () => {
+  executeWithPermission('partners', 'create', openCreateModalInternal)
 }
 
 const openEditModal = partner => {

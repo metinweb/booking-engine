@@ -107,7 +107,7 @@
         >
           <span class="material-icons" :class="{ 'animate-spin': loading }">refresh</span>
         </button>
-        <button class="btn-primary flex items-center gap-2" @click="showAddModal = true">
+        <button class="btn-primary flex items-center gap-2" @click="openAddUserModal">
           <span class="material-icons text-lg">person_add</span>
           <span class="hidden sm:inline">{{ $t('users.addUser') }}</span>
         </button>
@@ -240,7 +240,7 @@
 
       <!-- Empty State Action -->
       <template #empty-action>
-        <button class="btn-primary mt-4" @click="showAddModal = true">
+        <button class="btn-primary mt-4" @click="openAddUserModal">
           <span class="material-icons mr-2">person_add</span>
           {{ $t('users.addUser') }}
         </button>
@@ -333,6 +333,7 @@ import { usePartnerStore } from '@/stores/partner'
 import { useAuthStore } from '@/stores/auth'
 import { useListView } from '@/composables/useListView'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { usePermissions } from '@/composables/usePermissions'
 import {
   getUsers,
   activateUser,
@@ -356,6 +357,14 @@ const { t } = useI18n()
 const toast = useToast()
 const partnerStore = usePartnerStore()
 const authStore = useAuthStore()
+const { executeWithPermission } = usePermissions()
+
+// Permission-checked add user
+const openAddUserModal = () => {
+  executeWithPermission('users', 'create', () => {
+    showAddModal.value = true
+  })
+}
 
 // DataTable columns
 const columns = computed(() => [

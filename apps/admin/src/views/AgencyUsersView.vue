@@ -206,10 +206,12 @@ import agencyService from '@/services/agencyService'
 import { useI18n } from 'vue-i18n'
 import { usePartnerContext } from '@/composables/usePartnerContext'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { usePermissions } from '@/composables/usePermissions'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const { executeWithPermission } = usePermissions()
 
 // Async action composables
 const { isLoading: loading, execute: executeFetch } = useAsyncAction({ showSuccessToast: false })
@@ -256,7 +258,7 @@ const fetchAgencyAndUsers = async () => {
   )
 }
 
-const openCreateModal = () => {
+const openCreateModalInternal = () => {
   isEditing.value = false
   form.value = {
     name: '',
@@ -267,6 +269,10 @@ const openCreateModal = () => {
     status: 'active'
   }
   showModal.value = true
+}
+
+const openCreateModal = () => {
+  executeWithPermission('agencies', 'create', openCreateModalInternal)
 }
 
 const openEditModal = user => {

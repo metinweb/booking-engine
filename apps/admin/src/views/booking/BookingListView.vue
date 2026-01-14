@@ -106,10 +106,14 @@
       >
         <!-- Empty State Action -->
         <template #empty-action>
-          <router-link to="/bookings/new" class="mt-4 btn-primary inline-flex items-center">
+          <button
+            type="button"
+            class="mt-4 btn-primary inline-flex items-center"
+            @click="goToCreateBooking"
+          >
             <span class="material-icons mr-2">add</span>
             {{ $t('booking.createFirstBooking') }}
-          </router-link>
+          </button>
         </template>
 
         <!-- Booking Number Cell -->
@@ -556,6 +560,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useStatusHelpers } from '@/composables/useStatusHelpers'
 import { useDateFiltering } from '@/composables/useDateFiltering'
+import { usePermissions } from '@/composables/usePermissions'
 import { formatPrice, formatDateTime, formatDaysUntil, getCountryFlag } from '@/utils/formatters'
 import { DEFAULT_PAGE_SIZE, BOOKING_STATUSES } from '@/constants'
 import bookingService from '@/services/bookingService'
@@ -569,6 +574,12 @@ import PaymentStatusBadge from '@/components/booking/payment/PaymentStatusBadge.
 
 const { locale, t } = useI18n()
 const router = useRouter()
+const { navigateWithPermission } = usePermissions()
+
+// Permission-checked navigation
+const goToCreateBooking = () => {
+  navigateWithPermission('booking', 'create', '/bookings/new')
+}
 const authStore = useAuthStore()
 
 // Check if user is superadmin (platform admin)
