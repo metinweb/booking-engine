@@ -48,6 +48,7 @@
     "confirm": "Onayla",
     "yes": "Evet",
     "no": "Hayır",
+    "permissionDenied": "Bu işlem için yetkiniz bulunmuyor",
     "upload": "Yükle",
     "uploading": "Yükleniyor...",
     "uploadFailed": "Yükleme başarısız oldu",

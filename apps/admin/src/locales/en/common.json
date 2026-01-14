@@ -48,6 +48,7 @@
     "confirm": "Confirm",
     "yes": "Yes",
     "no": "No",
+    "permissionDenied": "You don't have permission for this action",
     "upload": "Upload",
     "uploading": "Uploading...",
     "uploadFailed": "Upload failed",

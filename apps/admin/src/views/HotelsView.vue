@@ -83,10 +83,14 @@
             <span class="hidden sm:inline">{{ $t('hotels.export') }}</span>
           </button>
           <!-- Add Hotel -->
-          <router-link to="/hotels/new" class="btn-primary flex items-center">
+          <button
+            type="button"
+            class="btn-primary flex items-center"
+            @click="goToAddHotel"
+          >
             <span class="material-icons text-lg mr-2">add</span>
             {{ $t('hotels.addHotel') }}
-          </router-link>
+          </button>
         </div>
 
         <!-- Toolbar -->
@@ -452,10 +456,15 @@
             <button v-if="activeFilterCount > 0" class="btn-secondary mt-4" @click="clearAllFilters">
               {{ $t('hotels.clearFilters') }}
             </button>
-            <router-link v-else to="/hotels/new" class="btn-primary mt-4 inline-flex items-center">
+            <button
+              v-else
+              type="button"
+              class="btn-primary mt-4 inline-flex items-center"
+              @click="goToAddHotel"
+            >
               <span class="material-icons text-lg mr-2">add</span>
               {{ $t('hotels.addHotel') }}
-            </router-link>
+            </button>
           </template>
         </DataTable>
       </div>
@@ -508,10 +517,17 @@ import { usePartnerContext } from '@/composables/usePartnerContext'
 import { useListView } from '@/composables/useListView'
 import { useBulkActions } from '@/composables/useBulkActions'
 import { useAsyncAction } from '@/composables/useAsyncAction'
+import { usePermissions } from '@/composables/usePermissions'
 import { getImageUrl } from '@/utils/imageUrl'
 
 const { t, locale } = useI18n()
 const toast = useToast()
+const { canCreate, navigateWithPermission } = usePermissions()
+
+// Permission-checked navigation to add hotel
+const goToAddHotel = () => {
+  navigateWithPermission('hotels', 'create', '/hotels/new')
+}
 
 // Additional state not covered by composables
 const cities = ref([])
