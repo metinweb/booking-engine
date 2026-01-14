@@ -44,6 +44,14 @@
             </svg>
             {{ isWatching ? $t('issues.actions.unwatch') : $t('issues.actions.watch') }}
           </button>
+
+          <button
+            class="btn-secondary flex items-center gap-2"
+            @click="showNudgeModal = true"
+          >
+            <span class="material-icons text-lg">notifications_active</span>
+            {{ $t('issues.actions.nudge') }}
+          </button>
         </div>
       </div>
     </div>
@@ -155,7 +163,7 @@
                     </button>
                   </div>
                 </div>
-                <div class="text-gray-700 dark:text-slate-300 whitespace-pre-wrap">{{ comment.content }}</div>
+                <div class="text-gray-700 dark:text-slate-300 whitespace-pre-wrap" v-html="renderCommentWithMentions(comment.content)" />
               </div>
             </div>
 
@@ -173,11 +181,15 @@
               {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
             </div>
             <div class="flex-1">
-              <textarea
+              <MentionInput
+                ref="mentionInputRef"
                 v-model="newComment"
-                class="form-input w-full min-h-[80px]"
+                :users="platformUsers"
                 :placeholder="$t('issues.comments.placeholder')"
-                @keydown.ctrl.enter="submitComment"
+                :rows="3"
+                textarea-class="form-input w-full min-h-[80px]"
+                @mentions-change="commentMentions = $event"
+                @submit="submitComment"
               />
               <div class="flex justify-end mt-2">
                 <button
@@ -364,6 +376,13 @@
         </svg>
       </button>
     </div>
+
+    <!-- Nudge Modal -->
+    <NudgeModal
+      v-model="showNudgeModal"
+      :issue="issue"
+      @sent="loadIssue"
+    />
   </div>
 
   <div v-else class="text-center py-12">
@@ -372,7 +391,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useToast } from '@/composables/useToast'
@@ -380,6 +399,8 @@ import { useAuthStore } from '@/stores/auth'
 import issueService from '@/services/issueService'
 import { sanitizeMarkdown } from '@/utils/sanitize'
 import { getFileUrl, getAvatarUrl } from '@/utils/imageUrl'
+import MentionInput from '@/components/issues/MentionInput.vue'
+import NudgeModal from '@/components/issues/NudgeModal.vue'
 
 // Simple markdown renderer (basic formatting without external dependency)
 const simpleMarkdown = (text) => {
@@ -401,6 +422,23 @@ const simpleMarkdown = (text) => {
     .replace(/\n/g, '<br>')
 }
 
+// Render comment with highlighted mentions
+const renderCommentWithMentions = (content) => {
+  if (!content) return ''
+  // Escape HTML first
+  let escaped = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+  // Highlight @mentions
+  escaped = escaped.replace(
+    /@(\w+)/g,
+    '<span class="text-purple-600 dark:text-purple-400 font-medium">@$1</span>'
+  )
+  // Convert newlines to br
+  return escaped.replace(/\n/g, '<br>')
+}
+
 const route = useRoute()
 const { t } = useI18n()
 const toast = useToast()
@@ -411,9 +449,12 @@ const loading = ref(true)
 const issue = ref(null)
 const platformUsers = ref([])
 const newComment = ref('')
+const commentMentions = ref([])
 const submittingComment = ref(false)
 const selectedAssignee = ref('')
 const lightboxImage = ref(null)
+const mentionInputRef = ref(null)
+const showNudgeModal = ref(false)
 
 // Current user
 const currentUser = computed(() => authStore.user)
@@ -560,8 +601,10 @@ const submitComment = async () => {
 
   submittingComment.value = true
   try {
-    await issueService.addComment(issue.value._id, newComment.value)
+    await issueService.addComment(issue.value._id, newComment.value, commentMentions.value)
     newComment.value = ''
+    commentMentions.value = []
+    mentionInputRef.value?.clear()
     await loadIssue()
     toast.success(t('issues.messages.commentAdded'))
   } catch (error) {
@@ -663,9 +706,45 @@ const formatDateTime = (date) => {
   })
 }
 
+// Clipboard paste handler - doğrudan upload
+const handlePaste = async (e) => {
+  // Issue yüklenmemişse işlem yapma
+  if (!issue.value) return
+
+  const items = e.clipboardData?.items
+  if (!items) return
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault()
+      const file = item.getAsFile()
+      if (file) {
+        // Dosya adı oluştur: screenshot-2024-01-14-143052.png
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+        const extension = file.type.split('/')[1] || 'png'
+        const namedFile = new File([file], `screenshot-${timestamp}.${extension}`, { type: file.type })
+
+        try {
+          await issueService.uploadAttachment(issue.value._id, namedFile)
+          await loadIssue()
+          toast.success(t('issues.messages.screenshotAdded'))
+        } catch (error) {
+          toast.error(t('common.error'))
+          console.error('Failed to upload screenshot:', error)
+        }
+      }
+    }
+  }
+}
+
 // Init
 onMounted(() => {
   loadIssue()
   loadPlatformUsers()
+  document.addEventListener('paste', handlePaste)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('paste', handlePaste)
 })
 </script>

@@ -23,14 +23,16 @@
       <!-- Description -->
       <div>
         <label class="form-label">{{ $t('issues.fields.description') }} *</label>
-        <textarea
+        <MentionInput
           v-model="form.description"
-          class="form-input min-h-[150px]"
+          :users="platformUsers"
           :placeholder="$t('issues.placeholders.enterDescription')"
-          required
+          :rows="5"
+          textarea-class="form-input w-full min-h-[150px]"
+          @mentions-change="form.mentions = $event"
         />
         <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">
-          Markdown desteklenir
+          {{ $t('issues.hints.markdownAndMention') }}
         </p>
       </div>
 
@@ -156,6 +158,9 @@
         <p class="text-xs text-gray-400 dark:text-slate-500 mt-1">
           JPEG, PNG, GIF, WEBP, PDF (max 10MB)
         </p>
+        <p class="text-xs text-purple-500 dark:text-purple-400 mt-2">
+          {{ $t('issues.hints.pasteScreenshot') }}
+        </p>
         <input
           ref="fileInput"
           type="file"
@@ -187,10 +192,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from '@/composables/useToast'
 import Modal from '@/components/ui/overlay/Modal.vue'
+import MentionInput from '@/components/issues/MentionInput.vue'
 import issueService from '@/services/issueService'
 
 const props = defineProps({
@@ -218,12 +224,46 @@ const form = reactive({
   category: 'other',
   assignee: '',
   dueDate: '',
-  labels: []
+  labels: [],
+  mentions: []
 })
 
 // Computed
 const today = computed(() => {
   return new Date().toISOString().split('T')[0]
+})
+
+// Clipboard paste handler
+const handlePaste = (e) => {
+  // Modal kapalıysa işlem yapma
+  if (!props.modelValue) return
+
+  const items = e.clipboardData?.items
+  if (!items) return
+
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      e.preventDefault()
+      const file = item.getAsFile()
+      if (file) {
+        // Dosya adı oluştur: screenshot-2024-01-14-143052.png
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+        const extension = file.type.split('/')[1] || 'png'
+        const namedFile = new File([file], `screenshot-${timestamp}.${extension}`, { type: file.type })
+        files.value = [...files.value, namedFile]
+        toast.success(t('issues.messages.screenshotAdded'))
+      }
+    }
+  }
+}
+
+// Lifecycle - paste event listener
+onMounted(() => {
+  document.addEventListener('paste', handlePaste)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('paste', handlePaste)
 })
 
 // Reset form when modal opens
@@ -236,6 +276,7 @@ watch(() => props.modelValue, (val) => {
     form.assignee = ''
     form.dueDate = ''
     form.labels = []
+    form.mentions = []
     files.value = []
     newLabel.value = ''
   }

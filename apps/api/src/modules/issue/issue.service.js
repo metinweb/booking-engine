@@ -5,8 +5,10 @@ import Notification from '#modules/notification/notification.model.js'
 import { asyncHandler } from '#helpers'
 import { NotFoundError, ForbiddenError, ValidationError } from '#core/errors.js'
 import { getIssueFileUrl, deleteIssueFile, deleteIssueFolder } from '#helpers/issueUpload.js'
+import { sendIssueNudgeEmail } from '#helpers/mail.js'
 import logger from '#core/logger.js'
 import { emitToUser } from '#core/socket.js'
+import config from '#config'
 
 // Helper to send in-app notification
 const sendIssueNotification = async (userId, type, title, message, issueId) => {
@@ -699,4 +701,99 @@ export const getPlatformUsers = asyncHandler(async (req, res) => {
   }).select('name email avatar role').lean()
 
   res.json({ success: true, data: users })
+})
+
+// Nudge Issue - Send reminder to assignee/watchers
+export const nudgeIssue = asyncHandler(async (req, res) => {
+  const { id } = req.params
+  const { recipients, message, channels = ['notification'] } = req.body
+  // recipients: 'assignee' | 'watchers' | 'all' | array of userIds
+  // channels: ['notification', 'email']
+
+  const issue = await Issue.findById(id)
+    .populate('assignee', 'name email preferredLanguage')
+    .populate('watchers', 'name email preferredLanguage')
+
+  if (!issue) {
+    throw new NotFoundError('ISSUE_NOT_FOUND')
+  }
+
+  // Determine target users
+  let targetUsers = []
+
+  if (recipients === 'assignee' && issue.assignee) {
+    targetUsers = [issue.assignee]
+  } else if (recipients === 'watchers') {
+    targetUsers = issue.watchers || []
+  } else if (recipients === 'all') {
+    const allUsers = [issue.assignee, ...(issue.watchers || [])].filter(Boolean)
+    // Remove duplicates
+    const userMap = new Map()
+    allUsers.forEach(u => userMap.set(u._id.toString(), u))
+    targetUsers = Array.from(userMap.values())
+  } else if (Array.isArray(recipients)) {
+    targetUsers = await User.find({ _id: { $in: recipients } }).select('name email preferredLanguage')
+  }
+
+  // Remove the sender from recipients
+  targetUsers = targetUsers.filter(u => u._id.toString() !== req.user._id.toString())
+
+  if (targetUsers.length === 0) {
+    throw new ValidationError('NO_RECIPIENTS')
+  }
+
+  const issueUrl = `${config.adminUrl}/issues/${issue._id}`
+  let notificationsSent = 0
+  let emailsSent = 0
+
+  // Send notifications
+  for (const user of targetUsers) {
+    // In-app notification
+    if (channels.includes('notification')) {
+      await sendIssueNotification(
+        user._id,
+        'issue_nudge',
+        `[${issue.issueNumber}] Hatırlatma`,
+        message || `${req.user.name} bu talep hakkında sizi bilgilendirdi.`,
+        issue._id
+      )
+      notificationsSent++
+    }
+
+    // Email notification
+    if (channels.includes('email') && user.email) {
+      try {
+        await sendIssueNudgeEmail({
+          to: user.email,
+          recipientName: user.name,
+          senderName: req.user.name,
+          issueNumber: issue.issueNumber,
+          issueTitle: issue.title,
+          issueUrl,
+          message,
+          language: user.preferredLanguage || 'tr'
+        })
+        emailsSent++
+      } catch (err) {
+        logger.error(`Failed to send nudge email to ${user.email}:`, err.message)
+      }
+    }
+  }
+
+  // Add activity log
+  issue.addActivity('nudge_sent', req.user._id, {
+    recipients: targetUsers.length,
+    channels,
+    message: message ? message.substring(0, 100) : null
+  })
+  await issue.save()
+
+  res.json({
+    success: true,
+    data: {
+      recipientsCount: targetUsers.length,
+      notificationsSent,
+      emailsSent
+    }
+  })
 })

@@ -870,6 +870,102 @@ export const sendNightAuditReports = async ({
   })
 }
 
+/**
+ * Send Issue Nudge Email
+ * Sends a reminder/notification email about an issue
+ */
+export const sendIssueNudgeEmail = async ({
+  to,
+  recipientName,
+  senderName,
+  issueNumber,
+  issueTitle,
+  issueUrl,
+  message,
+  language = 'tr'
+}) => {
+  const isEn = language === 'en'
+
+  const subject = isEn
+    ? `[${issueNumber}] Reminder: ${issueTitle}`
+    : `[${issueNumber}] Hatırlatma: ${issueTitle}`
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+        .container { max-width: 600px; margin: 0 auto; background: white; }
+        .header { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); padding: 30px; text-align: center; }
+        .header h1 { color: white; margin: 0; font-size: 24px; }
+        .header p { color: rgba(255,255,255,0.9); margin: 10px 0 0; font-size: 14px; }
+        .content { padding: 30px; }
+        .issue-box { background: #f8fafc; border-left: 4px solid #7c3aed; padding: 15px 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+        .issue-number { color: #6b7280; font-size: 13px; font-family: monospace; }
+        .issue-title { color: #1f2937; font-size: 18px; font-weight: 600; margin-top: 5px; }
+        .message-box { background: #fef3c7; border-radius: 8px; padding: 15px 20px; margin: 20px 0; }
+        .message-label { color: #92400e; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .message-text { color: #78350f; font-size: 15px; line-height: 1.5; }
+        .btn { display: inline-block; background: #7c3aed; color: white !important; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600; margin: 20px 0; }
+        .btn:hover { background: #6d28d9; }
+        .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+        .sender-info { color: #6b7280; font-size: 14px; margin-bottom: 15px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🔔 ${isEn ? 'Issue Reminder' : 'Talep Hatırlatması'}</h1>
+          <p>${isEn ? 'You have a pending issue that needs attention' : 'Dikkatinizi bekleyen bir talep var'}</p>
+        </div>
+        <div class="content">
+          <p>${isEn ? 'Hi' : 'Merhaba'} ${recipientName},</p>
+
+          <p class="sender-info">
+            <strong>${senderName}</strong> ${isEn ? 'sent you a reminder about this issue:' : 'bu talep hakkında size bir hatırlatma gönderdi:'}
+          </p>
+
+          <div class="issue-box">
+            <div class="issue-number">${issueNumber}</div>
+            <div class="issue-title">${issueTitle}</div>
+          </div>
+
+          ${message ? `
+          <div class="message-box">
+            <div class="message-label">${isEn ? 'Message' : 'Mesaj'}</div>
+            <div class="message-text">${message}</div>
+          </div>
+          ` : ''}
+
+          <div style="text-align: center;">
+            <a href="${issueUrl}" class="btn">${isEn ? 'View Issue' : 'Talebi Görüntüle'}</a>
+          </div>
+
+          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+            ${isEn
+              ? 'This email was sent because someone wanted to remind you about this issue.'
+              : 'Bu e-posta, birisi bu talep hakkında sizi bilgilendirmek istediği için gönderildi.'}
+          </p>
+        </div>
+        <div class="footer">
+          © ${new Date().getFullYear()} Booking Engine
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+
+  return sendEmail({
+    to,
+    subject,
+    html,
+    type: 'issue-nudge'
+  })
+}
+
 export default {
   sendEmail,
   sendEmailWithAttachments,
@@ -880,6 +976,7 @@ export default {
   sendBookingCancellation,
   sendPasswordResetEmail,
   sendNightAuditReports,
+  sendIssueNudgeEmail,
   clearEmailCache,
   getAdminUrl
 }

@@ -61,7 +61,26 @@
       "uploadFile": "Upload File",
       "resolve": "Mark as Resolved",
       "close": "Close",
-      "reopen": "Reopen"
+      "reopen": "Reopen",
+      "nudge": "Nudge"
+    },
+
+    "nudge": {
+      "title": "Send Reminder",
+      "recipients": "Recipients",
+      "assigneeOnly": "Assignee",
+      "watchersLabel": "Watchers",
+      "allLabel": "Everyone",
+      "allDescription": "Assignee and all watchers",
+      "people": "people",
+      "noRecipients": "This issue has no assignee or watchers",
+      "channels": "Notification Channels",
+      "channelNotification": "In-app",
+      "channelEmail": "Email",
+      "message": "Message (Optional)",
+      "messagePlaceholder": "Message to send with the reminder...",
+      "send": "Send",
+      "sent": "Reminder sent to {count} people"
     },
 
     "comments": {
@@ -90,7 +109,8 @@
       "watcher_removed": "removed watcher",
       "resolved": "marked as resolved",
       "closed": "closed",
-      "reopened": "reopened"
+      "reopened": "reopened",
+      "nudge_sent": "sent a reminder"
     },
 
     "stats": {
@@ -121,7 +141,13 @@
       "fileUploaded": "File uploaded",
       "fileDeleted": "File deleted",
       "watchingEnabled": "Now watching this issue",
-      "watchingDisabled": "Stopped watching this issue"
+      "watchingDisabled": "Stopped watching this issue",
+      "screenshotAdded": "Screenshot added"
+    },
+
+    "hints": {
+      "pasteScreenshot": "or paste screenshot with Ctrl+V",
+      "markdownAndMention": "Markdown supported. Use @username to mention someone."
     },
 
     "confirmations": {

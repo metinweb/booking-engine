@@ -1,8 +1,8 @@
 {
   "issues": {
-    "title": "Talep Yonetimi",
+    "title": "Talep Yönetimi",
     "newIssue": "Yeni Talep",
-    "allIssues": "Tum Talepler",
+    "allIssues": "Tüm Talepler",
     "myIssues": "Taleplerim",
     "assignedToMe": "Bana Atananlar",
     "watching": "Takip Ettiklerim",
@@ -10,124 +10,150 @@
 
     "fields": {
       "issueNumber": "Talep No",
-      "title": "Baslik",
-      "description": "Aciklama",
+      "title": "Başlık",
+      "description": "Açıklama",
       "status": "Durum",
-      "priority": "Oncelik",
+      "priority": "Öncelik",
       "category": "Kategori",
       "assignee": "Atanan",
-      "reporter": "Olusturan",
+      "reporter": "Oluşturan",
       "labels": "Etiketler",
       "dueDate": "Son Tarih",
-      "createdAt": "Olusturulma",
-      "updatedAt": "Guncellenme",
-      "watchers": "Takipciler"
+      "createdAt": "Oluşturulma",
+      "updatedAt": "Güncellenme",
+      "watchers": "Takipçiler"
     },
 
     "status": {
-      "open": "Acik",
+      "open": "Açık",
       "in_progress": "Devam Ediyor",
-      "resolved": "Cozuldu",
-      "closed": "Kapatildi",
-      "reopened": "Yeniden Acildi"
+      "resolved": "Çözüldü",
+      "closed": "Kapatıldı",
+      "reopened": "Yeniden Açıldı"
     },
 
     "priority": {
-      "low": "Dusuk",
+      "low": "Düşük",
       "medium": "Orta",
-      "high": "Yuksek",
+      "high": "Yüksek",
       "critical": "Kritik"
     },
 
     "category": {
       "bug": "Hata",
-      "feature": "Ozellik",
-      "improvement": "Iyilestirme",
+      "feature": "Özellik",
+      "improvement": "İyileştirme",
       "question": "Soru",
-      "task": "Gorev",
-      "other": "Diger"
+      "task": "Görev",
+      "other": "Diğer"
     },
 
     "actions": {
-      "create": "Talep Olustur",
-      "edit": "Duzenle",
+      "create": "Talep Oluştur",
+      "edit": "Düzenle",
       "delete": "Sil",
       "assign": "Ata",
-      "unassign": "Atamayi Kaldir",
+      "unassign": "Atamayı Kaldır",
       "watch": "Takip Et",
-      "unwatch": "Takibi Birak",
-      "changeStatus": "Durum Degistir",
+      "unwatch": "Takibi Bırak",
+      "changeStatus": "Durum Değiştir",
       "addComment": "Yorum Ekle",
-      "uploadFile": "Dosya Yukle",
-      "resolve": "Cozuldu Olarak Isaretle",
+      "uploadFile": "Dosya Yükle",
+      "resolve": "Çözüldü Olarak İşaretle",
       "close": "Kapat",
-      "reopen": "Yeniden Ac"
+      "reopen": "Yeniden Aç",
+      "nudge": "Dürt"
+    },
+
+    "nudge": {
+      "title": "Hatırlatma Gönder",
+      "recipients": "Alıcılar",
+      "assigneeOnly": "Atanan kişi",
+      "watchersLabel": "Takipçiler",
+      "allLabel": "Tümü",
+      "allDescription": "Atanan kişi ve tüm takipçiler",
+      "people": "kişi",
+      "noRecipients": "Bu talebin atanmış kişisi veya takipçisi yok",
+      "channels": "Bildirim Kanalları",
+      "channelNotification": "Uygulama",
+      "channelEmail": "E-posta",
+      "message": "Mesaj (İsteğe bağlı)",
+      "messagePlaceholder": "Hatırlatma ile birlikte göndermek istediğiniz mesaj...",
+      "send": "Gönder",
+      "sent": "{count} kişiye hatırlatma gönderildi"
     },
 
     "comments": {
       "title": "Yorumlar",
-      "placeholder": "Yorum yazin... ({'@'}kullanici ile bahsetme yapabilirsiniz)",
-      "edited": "duzenlendi",
-      "noComments": "Henuz yorum yok"
+      "placeholder": "Yorum yazın... ({'@'}kullanıcı ile bahsetme yapabilirsiniz)",
+      "edited": "düzenlendi",
+      "noComments": "Henüz yorum yok"
     },
 
     "activity": {
       "title": "Aktivite",
-      "created": "talep olusturdu",
-      "updated": "talebi guncelledi",
-      "status_changed": "durumu degistirdi",
-      "assigned": "atadi",
-      "unassigned": "atamayi kaldirdi",
-      "priority_changed": "onceligi degistirdi",
+      "created": "talep oluşturdu",
+      "updated": "talebi güncelledi",
+      "status_changed": "durumunu değiştirdi",
+      "assigned": "atadı",
+      "unassigned": "atamayı kaldırdı",
+      "priority_changed": "önceliği değiştirdi",
       "comment_added": "yorum ekledi",
-      "comment_edited": "yorum duzenledi",
+      "comment_edited": "yorum düzenledi",
       "comment_deleted": "yorum sildi",
       "attachment_added": "dosya ekledi",
       "attachment_removed": "dosya sildi",
       "due_date_set": "son tarih belirledi",
-      "due_date_removed": "son tarihi kaldirdi",
-      "watcher_added": "takipci ekledi",
-      "watcher_removed": "takipciyi cikardi",
-      "resolved": "cozuldu olarak isaretledi",
-      "closed": "kapatti",
-      "reopened": "yeniden acti"
+      "due_date_removed": "son tarihi kaldırdı",
+      "watcher_added": "takipçi ekledi",
+      "watcher_removed": "takipçiyi çıkardı",
+      "resolved": "çözüldü olarak işaretledi",
+      "closed": "kapattı",
+      "reopened": "yeniden açtı",
+      "nudge_sent": "hatırlatma gönderdi"
     },
 
     "stats": {
       "total": "Toplam",
-      "open": "Acik",
+      "open": "Açık",
       "critical": "Kritik",
       "assignedToMe": "Bana Atanan",
-      "avgResolution": "Ort. Cozum Suresi"
+      "avgResolution": "Ort. Çözüm Süresi"
     },
 
     "placeholders": {
       "searchIssues": "Talep ara...",
-      "selectAssignee": "Kisi secin",
-      "selectPriority": "Oncelik secin",
-      "selectCategory": "Kategori secin",
-      "enterTitle": "Talep basligi",
-      "enterDescription": "Detayli aciklama yazin..."
+      "selectAssignee": "Kişi seçin",
+      "selectPriority": "Öncelik seçin",
+      "selectCategory": "Kategori seçin",
+      "enterTitle": "Talep başlığı",
+      "enterDescription": "Detaylı açıklama yazın..."
     },
 
     "messages": {
-      "created": "Talep olusturuldu",
-      "updated": "Talep guncellendi",
+      "created": "Talep oluşturuldu",
+      "updated": "Talep güncellendi",
       "deleted": "Talep silindi",
-      "statusChanged": "Durum degistirildi",
-      "assigned": "Talep atandi",
+      "statusChanged": "Durum değiştirildi",
+      "assigned": "Talep atandı",
       "commentAdded": "Yorum eklendi",
       "commentDeleted": "Yorum silindi",
-      "fileUploaded": "Dosya yuklendi",
+      "fileUploaded": "Dosya yüklendi",
       "fileDeleted": "Dosya silindi",
-      "watchingEnabled": "Talep takibe alindi",
-      "watchingDisabled": "Talep takipten cikarildi"
+      "watchingEnabled": "Talep takibe alındı",
+      "watchingDisabled": "Talep takipten çıkarıldı",
+      "screenshotAdded": "Ekran görüntüsü eklendi"
+    },
+
+    "hints": {
+      "pasteScreenshot": "veya Ctrl+V ile ekran görüntüsü yapıştır",
+      "markdownAndMention": "Markdown desteklenir. @kullanıcı ile bahsetme yapabilirsiniz."
     },
 
     "confirmations": {
-      "delete": "Bu talebi silmek istediginize emin misiniz?",
-      "deleteComment": "Bu yorumu silmek istediginize emin misiniz?",
-      "close": "Talebi kapatmak istediginize emin misiniz?"
+      "delete": "Bu talebi silmek istediğinize emin misiniz?",
+      "deleteComment": "Bu yorumu silmek istediğinize emin misiniz?",
+      "close": "Talebi kapatmak istediğinize emin misiniz?"
     }
   }
 }

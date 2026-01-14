@@ -86,6 +86,12 @@ const getPlatformUsers = async () => {
   return response.data
 }
 
+// Nudge
+const nudgeIssue = async (id, { recipients, message, channels }) => {
+  const response = await apiClient.post(`/issues/${id}/nudge`, { recipients, message, channels })
+  return response.data
+}
+
 export default {
   getIssues,
   getIssue,
@@ -101,5 +107,6 @@ export default {
   uploadAttachment,
   deleteAttachment,
   getStats,
-  getPlatformUsers
+  getPlatformUsers,
+  nudgeIssue
 }
