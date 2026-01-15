@@ -134,7 +134,9 @@
           :columns="columns"
           :data="issues"
           :loading="loading"
-          :pagination="pagination"
+          :page="pagination.page"
+          :per-page="pagination.limit"
+          :total="pagination.total"
           @page-change="handlePageChange"
         >
           <!-- Issue Number & Title -->
@@ -416,7 +418,7 @@ const debouncedSearch = debounce(() => {
 }, 300)
 
 // Handle page change
-const handlePageChange = (page) => {
+const handlePageChange = ({ page }) => {
   loadIssues(page)
 }
 
