@@ -23,7 +23,8 @@
     "mySubscription": "My Subscription",
     "issues": "Issues",
     "emailLogs": "Email Logs",
-    "payment": "Payment System"
+    "payment": "Payment System",
+    "tours": "Tours"
   },
   "paymentSystem": {
     "title": "Payment System",

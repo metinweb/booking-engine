@@ -159,6 +159,7 @@ const currentModuleIcon = computed(() => {
     '/hotels': 'hotel',
     '/planning': 'event_note',
     '/bookings': 'book_online',
+    '/tours': 'tour',
     '/profile': 'person',
     '/developers': 'code',
     '/pms-integration': 'link',
@@ -294,6 +295,9 @@ const mainSection = computed(() => {
     }
     if (hasPermission('booking')) {
       items.push({ name: 'bookings', to: '/bookings', icon: 'book_online', label: t('nav.bookings') })
+    }
+    if (hasPermission('tours') || hasPermission('booking')) {
+      items.push({ name: 'tours', to: '/tours', icon: 'tour', label: t('nav.tours') })
     }
     if (hasPermission('pms')) {
       items.push({ name: 'pms-integration', to: '/pms-integration', icon: 'link', label: 'PMS' })

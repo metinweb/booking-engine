@@ -8,6 +8,7 @@ import misc from './misc.json'
 import users from './users.json'
 import issues from './issues.json'
 import emailLogs from './emailLogs.json'
+import tour from './tour.json'
 
 export default {
   ...common,
@@ -19,5 +20,6 @@ export default {
   ...misc,
   ...users,
   ...issues,
-  emailLogs
+  emailLogs,
+  ...tour
 }

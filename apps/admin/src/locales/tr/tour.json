@@ -1,0 +1,668 @@
+{
+  "tour": {
+    "title": "Turlar",
+    "tours": "Turlar",
+    "description": "Tur paketleri ve hareketler",
+    "newTour": "Yeni Tur",
+    "editTour": "Tur Duzenle",
+    "tourDetails": "Tur Detaylari",
+    "tourList": "Tur Listesi",
+    "search": "Tur ara...",
+    "noTours": "Henuz tur bulunmuyor",
+    "noToursDescription": "Yeni bir tur olusturmak icin baslayabilirsiniz.",
+    "createFirstTour": "Ilk Turu Olustur",
+    "duplicate": "Kopyala",
+    "duplicated": "Tur kopyalandi",
+    "generateCode": "Otomatik Kod Olustur",
+    "durationMismatch": "Genellikle gun = gece + 1 olmalidir",
+    "deleteTour": "Turu Sil",
+    "deleteConfirm": "Bu turu silmek istediginize emin misiniz?",
+    "deleted": "Tur silindi",
+
+    "tabs": {
+      "basic": "Temel Bilgiler",
+      "itinerary": "Program",
+      "transportation": "Ulasim",
+      "accommodations": "Konaklama",
+      "pricing": "Fiyatlandirma",
+      "extras": "Ekstralar",
+      "media": "Medya",
+      "settings": "Ayarlar"
+    },
+
+    "fields": {
+      "code": "Tur Kodu",
+      "name": "Tur Adi",
+      "description": "Aciklama",
+      "shortDescription": "Kisa Aciklama",
+      "tourType": "Tur Tipi",
+      "destination": "Destinasyon",
+      "country": "Ulke",
+      "city": "Sehir",
+      "region": "Bolge",
+      "duration": "Sure",
+      "nights": "Gece",
+      "days": "Gun",
+      "status": "Durum",
+      "featured": "One Cikan",
+      "displayOrder": "Siralama"
+    },
+
+    "tourTypes": {
+      "package": "Paket Tur",
+      "day_trip": "Gunubirlik",
+      "multi_day": "Cok Gunlu",
+      "cruise": "Gemi Turu",
+      "cultural": "Kultur Turu",
+      "adventure": "Macera Turu",
+      "religious": "Dini Tur",
+      "nature": "Doga Turu",
+      "city_break": "Sehir Turu"
+    },
+
+    "transportTypes": {
+      "flight": "Ucak",
+      "bus": "Otobus",
+      "ferry": "Feribot",
+      "car": "Arac",
+      "train": "Tren",
+      "combined": "Kombinasyon"
+    },
+
+    "transportClass": {
+      "economy": "Ekonomi",
+      "premium_economy": "Premium Ekonomi",
+      "business": "Business",
+      "first": "First Class",
+      "standard": "Standart",
+      "vip": "VIP"
+    },
+
+    "mealPlans": {
+      "room_only": "Sadece Oda",
+      "bed_breakfast": "Oda + Kahvalti",
+      "half_board": "Yarim Pansiyon",
+      "full_board": "Tam Pansiyon",
+      "all_inclusive": "Hersey Dahil",
+      "ultra_all_inclusive": "Ultra Hersey Dahil"
+    },
+
+    "statuses": {
+      "draft": "Taslak",
+      "active": "Aktif",
+      "inactive": "Pasif",
+      "archived": "Arsivlendi"
+    },
+
+    "itinerary": {
+      "title": "Gunluk Program",
+      "addDay": "Gun Ekle",
+      "addFirstDay": "Ilk Gunu Ekle",
+      "day": "Gun",
+      "dayTitle": "Gun Basligi",
+      "dayDescription": "Gun Aciklamasi",
+      "description": "Aciklama",
+      "descriptionPlaceholder": "Gunun program detaylarini yazin...",
+      "meals": "Yemekler",
+      "activities": "Aktiviteler",
+      "activityName": "Aktivite adi",
+      "noActivities": "Henuz aktivite eklenmedi",
+      "breakfast": "Kahvalti",
+      "lunch": "Ogle Yemegi",
+      "dinner": "Aksam Yemegi",
+      "overnight": "Geceleme",
+      "accommodation": "Konaklama",
+      "accommodationPlaceholder": "Otel veya konaklama yeri...",
+      "empty": "Henuz gunluk program eklenmedi",
+      "quickAdd": "Hizli Ekle",
+      "addDays": "Gun Ekle",
+      "dragToReorder": "Siralama icin surukle"
+    },
+
+    "transportation": {
+      "title": "Ulasim Bilgileri",
+      "add": "Ulasim Ekle",
+      "type": "Ulasim Tipi",
+      "direction": "Yon",
+      "outbound": "Gidis",
+      "return": "Donus",
+      "internal": "Ic Hat",
+      "carrier": "Tasiyici",
+      "class": "Sinif",
+      "included": "Dahil",
+      "notIncluded": "Dahil Degil",
+      "details": "Detaylar"
+    },
+
+    "accommodation": {
+      "title": "Konaklama",
+      "add": "Konaklama Ekle",
+      "hotel": "Otel",
+      "selectHotel": "Otel Sec",
+      "manualEntry": "Manuel Giris",
+      "hotelName": "Otel Adi",
+      "nights": "Gece Sayisi",
+      "mealPlan": "Pansiyon",
+      "starRating": "Yildiz",
+      "roomType": "Oda Tipi",
+      "checkIn": "Giris",
+      "checkOut": "Cikis"
+    },
+
+    "inclusions": {
+      "title": "Dahil Olanlar",
+      "add": "Ekle",
+      "placeholder": "Dahil olan hizmet..."
+    },
+
+    "exclusions": {
+      "title": "Dahil Olmayanlar",
+      "add": "Ekle",
+      "placeholder": "Dahil olmayan hizmet..."
+    },
+
+    "images": {
+      "title": "Gorseller",
+      "add": "Gorsel Ekle",
+      "mainImage": "Ana Gorsel",
+      "setAsMain": "Ana Gorsel Yap",
+      "caption": "Aciklama",
+      "delete": "Sil"
+    },
+
+    "cancellation": {
+      "title": "Iptal Politikasi",
+      "freeCancellation": "Ucretsiz Iptal",
+      "daysBeforeDeparture": "Hareket oncesi gun",
+      "rules": "Iptal Kurallari",
+      "addRule": "Kural Ekle",
+      "fromDay": "Gun'den",
+      "toDay": "Gun'e",
+      "percentage": "Kesinti %"
+    },
+
+    "visibility": {
+      "title": "Gorunurluk",
+      "b2c": "B2C (Son Tuketici)",
+      "b2b": "B2B (Acenteler)"
+    }
+  },
+
+  "departure": {
+    "title": "Hareket Tarihleri",
+    "departures": "Hareketler",
+    "newDeparture": "Yeni Hareket",
+    "editDeparture": "Hareket Duzenle",
+    "calendar": "Hareket Takvimi",
+    "upcoming": "Yaklasan Hareketler",
+    "search": "Hareket ara...",
+    "noDepartures": "Henuz hareket tarihi yok",
+    "createFirst": "Ilk Hareketi Olustur",
+    "bulkCreate": "Toplu Olustur",
+    "bulkCreateDescription": "Belirli bir tarih araliginda toplu hareket olustur",
+
+    "fields": {
+      "departureDate": "Hareket Tarihi",
+      "returnDate": "Donus Tarihi",
+      "tour": "Tur",
+      "capacity": "Kapasite",
+      "totalCapacity": "Toplam Kapasite",
+      "available": "Musait",
+      "reserved": "Rezerve",
+      "sold": "Satilan",
+      "blocked": "Bloke",
+      "status": "Durum",
+      "price": "Fiyat",
+      "guide": "Rehber",
+      "guaranteedDeparture": "Garantili Hareket",
+      "minParticipants": "Min. Katilimci",
+      "enableB2B": "B2B Fiyatlandirma Etkinlestir"
+    },
+
+    "sections": {
+      "capacity": "Kapasite",
+      "pricing": "Fiyatlandirma",
+      "b2bPricing": "B2B Fiyatlandirma",
+      "pickupPoints": "Transfer Noktalari",
+      "labels": "Etiketler"
+    },
+
+    "statuses": {
+      "scheduled": "Planlanmis",
+      "confirmed": "Kesinlesmis",
+      "cancelled": "Iptal",
+      "completed": "Tamamlandi",
+      "sold_out": "Tukendi"
+    },
+
+    "pickupPoint": {
+      "name": "Nokta Adi",
+      "address": "Adres",
+      "additionalPrice": "Ek Ucret"
+    },
+
+    "noPickupPoints": "Henuz transfer noktasi eklenmedi",
+
+    "capacity": {
+      "title": "Kapasite Yonetimi",
+      "total": "Toplam Kapasite",
+      "available": "Musait",
+      "reserved": "Rezerve",
+      "sold": "Satilan",
+      "blocked": "Bloke",
+      "lastSeats": "Son {count} Kisi"
+    },
+
+    "pricing": {
+      "title": "Fiyatlandirma",
+      "adult": "Yetiskin",
+      "child": "Cocuk",
+      "infant": "Bebek",
+      "single": "Tek Kisilik",
+      "double": "Cift Kisilik",
+      "triple": "Uc Kisilik",
+      "withBed": "Yatakli",
+      "withoutBed": "Yataksiz",
+      "minAge": "Min Yas",
+      "maxAge": "Max Yas",
+      "price": "Fiyat",
+      "singleSupplement": "Tek Kisi Farki",
+      "b2bPricing": "B2B Fiyatlandirma",
+      "netPrice": "Net Fiyat",
+      "commission": "Komisyon",
+      "commissionMode": "Komisyon Modu",
+      "commissionRate": "Komisyon Orani",
+      "percentage": "Yuzde",
+      "netMode": "Net Fiyat Modu",
+      "agencyMargin": "Acente Marji"
+    },
+
+    "pickup": {
+      "title": "Transfer Noktalari",
+      "add": "Nokta Ekle",
+      "code": "Kod",
+      "name": "Adi",
+      "address": "Adres",
+      "time": "Saat",
+      "additionalPrice": "Ek Ucret",
+      "coordinates": "Koordinatlar"
+    },
+
+    "flight": {
+      "title": "Ucus Bilgileri",
+      "add": "Ucus Ekle",
+      "direction": "Yon",
+      "outbound": "Gidis",
+      "return": "Donus",
+      "carrier": "Havayolu",
+      "flightNumber": "Ucus No",
+      "departure": "Kalkis",
+      "arrival": "Varis",
+      "departureTime": "Kalkis Saati",
+      "arrivalTime": "Varis Saati"
+    },
+
+    "guide": {
+      "title": "Rehber Bilgisi",
+      "select": "Rehber Sec",
+      "name": "Rehber Adi",
+      "phone": "Telefon",
+      "notes": "Notlar"
+    },
+
+    "labels": {
+      "guaranteed": "Garantili Hareket",
+      "last_seats": "Son Yerler",
+      "lastSeats": "Son Yerler",
+      "popular": "Populer",
+      "early_bird": "Erken Rezervasyon",
+      "earlyBird": "Erken Rezervasyon",
+      "sold_out": "Tukendi",
+      "soldOut": "Tukendi",
+      "new": "Yeni"
+    },
+
+    "departureStatuses": {
+      "scheduled": "Planlanmis",
+      "confirmed": "Kesinlesmis",
+      "cancelled": "Iptal",
+      "completed": "Tamamlandi",
+      "sold_out": "Tukendi"
+    }
+  },
+
+  "extra": {
+    "title": "Ekstralar",
+    "extras": "Opsiyonel Ekstralar",
+    "newExtra": "Yeni Ekstra",
+    "editExtra": "Ekstra Duzenle",
+    "search": "Ekstra ara...",
+    "noExtras": "Henuz ekstra yok",
+    "createFirst": "Ilk Ekstrayi Olustur",
+
+    "fields": {
+      "code": "Kod",
+      "name": "Adi",
+      "description": "Aciklama",
+      "category": "Kategori",
+      "priceType": "Fiyat Tipi",
+      "price": "Fiyat",
+      "currency": "Para Birimi",
+      "duration": "Sure",
+      "status": "Durum"
+    },
+
+    "extraCategories": {
+      "activity": "Aktivite",
+      "meal": "Yemek",
+      "transfer": "Transfer",
+      "upgrade": "Upgrade",
+      "visa": "Vize Hizmeti",
+      "insurance": "Sigorta",
+      "equipment": "Ekipman",
+      "other": "Diger"
+    },
+
+    "priceTypes": {
+      "per_person": "Kisi Basi",
+      "per_group": "Grup Basi",
+      "per_unit": "Adet Basi",
+      "per_night": "Gece Basi"
+    },
+
+    "applicableTours": {
+      "title": "Uygulanabilir Turlar",
+      "all": "Tum Turlara Uygula",
+      "specific": "Belirli Turlar",
+      "selectTours": "Turlari Sec"
+    }
+  },
+
+  "tourExtra": {
+    "noExtras": "Ekstra bulunamadi",
+    "categories": {
+      "activity": "Aktivite",
+      "meal": "Yemek",
+      "transfer": "Transfer",
+      "upgrade": "Upgrade",
+      "visa": "Vize",
+      "insurance": "Sigorta"
+    },
+    "priceTypes": {
+      "per_person": "Kisi Basi",
+      "per_group": "Grup Basi",
+      "per_unit": "Adet Basi"
+    },
+    "totalExtras": "Toplam Ekstralar",
+    "selectPassengers": "Yolculari secin"
+  },
+
+  "tourBooking": {
+    "title": "Tur Rezervasyonlari",
+    "bookings": "Rezervasyonlar",
+    "newBooking": "Yeni Rezervasyon",
+    "editBooking": "Rezervasyon Duzenle",
+    "bookingDetails": "Rezervasyon Detaylari",
+    "search": "Rezervasyon no, misafir ara...",
+    "noBookings": "Henuz rezervasyon yok",
+    "createFirst": "Ilk Rezervasyonu Olustur",
+
+    "fields": {
+      "bookingNumber": "Rezervasyon No",
+      "tour": "Tur",
+      "departure": "Hareket",
+      "status": "Durum",
+      "passengers": "Yolcular",
+      "totalPrice": "Toplam",
+      "paidAmount": "Odenen",
+      "dueAmount": "Kalan",
+      "salesChannel": "Satis Kanali",
+      "createdAt": "Olusturma"
+    },
+
+    "bookingStatuses": {
+      "draft": "Taslak",
+      "pending": "Beklemede",
+      "confirmed": "Onaylandi",
+      "cancelled": "Iptal Edildi",
+      "completed": "Tamamlandi",
+      "no_show": "Gelmedi"
+    },
+
+    "salesChannels": {
+      "b2c": "B2C (Direkt)",
+      "b2b": "B2B (Acente)"
+    },
+
+    "passenger": {
+      "title": "Yolcu Bilgileri",
+      "add": "Yolcu Ekle",
+      "lead": "Ana Yolcu",
+      "type": "Tip",
+      "adult": "Yetiskin",
+      "child": "Cocuk",
+      "infant": "Bebek",
+      "name": "Ad Soyad",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "nationality": "Uyruk",
+      "tcNumber": "TC Kimlik No",
+      "passportNumber": "Pasaport No",
+      "passportExpiry": "Pasaport Gecerliligi",
+      "dateOfBirth": "Dogum Tarihi",
+      "gender": "Cinsiyet",
+      "male": "Erkek",
+      "female": "Kadin",
+      "roomAssignment": "Oda No",
+      "seatAssignment": "Koltuk No"
+    },
+
+    "contact": {
+      "title": "Iletisim",
+      "email": "E-posta",
+      "phone": "Telefon"
+    },
+
+    "pickup": {
+      "title": "Transfer Noktasi",
+      "select": "Transfer Noktasi Sec",
+      "time": "Alinma Saati"
+    },
+
+    "extras": {
+      "title": "Secilen Ekstralar",
+      "add": "Ekstra Ekle",
+      "quantity": "Adet",
+      "unitPrice": "Birim Fiyat",
+      "totalPrice": "Toplam",
+      "selectPassengers": "Yolculari Sec"
+    },
+
+    "rooms": {
+      "title": "Oda Dagilimi",
+      "roomNumber": "Oda No",
+      "roomType": "Oda Tipi",
+      "passengers": "Yolcular"
+    },
+
+    "room": {
+      "title": "Oda Dagilimi",
+      "addRoom": "Oda Ekle",
+      "room": "Oda",
+      "rooms": "Oda",
+      "assigned": "atandi",
+      "unassigned": "atanmadi",
+      "unassignedPassengers": "Atanmamis Yolcular",
+      "dropPassengers": "Yolculari buraya surukleyin",
+      "overCapacity": "Kapasite asildi",
+      "autoAssign": "Otomatik Ata",
+      "single": "Tek Kisilik",
+      "double": "Cift Kisilik",
+      "triple": "Uc Kisilik",
+      "quad": "Dort Kisilik"
+    },
+
+    "pickupPoint": {
+      "title": "Transfer Noktasi",
+      "noPoints": "Transfer noktasi bulunmuyor",
+      "custom": "Ozel Transfer Noktasi",
+      "customDescription": "Kendi adresinizi girin",
+      "addressPlaceholder": "Adres yazin...",
+      "notesPlaceholder": "Ek notlar...",
+      "selected": "Secilen"
+    },
+
+    "pricing": {
+      "title": "Fiyat Ozeti",
+      "adults": "Yetiskinler",
+      "children": "Cocuklar",
+      "infants": "Bebekler",
+      "extras": "Ekstralar",
+      "singleSupplement": "Tek Kisi Farki",
+      "subtotal": "Ara Toplam",
+      "discount": "Indirim",
+      "grandTotal": "Genel Toplam",
+      "netPrice": "Net Fiyat",
+      "commission": "Komisyon"
+    },
+
+    "payment": {
+      "title": "Odeme Bilgileri",
+      "status": "Odeme Durumu",
+      "method": "Odeme Yontemi",
+      "paidAmount": "Odenen",
+      "dueAmount": "Kalan",
+      "addPayment": "Odeme Ekle",
+      "paymentStatuses": {
+        "pending": "Bekliyor",
+        "partial": "Kismi",
+        "paid": "Odendi",
+        "refunded": "Iade Edildi"
+      }
+    },
+
+    "visa": {
+      "title": "Vize Takibi",
+      "status": "Vize Durumu",
+      "appointmentDate": "Randevu Tarihi",
+      "documents": "Evraklar",
+      "uploadDocument": "Evrak Yukle",
+      "updateStatus": "Durum Guncelle",
+      "notes": "Notlar",
+      "visaStatuses": {
+        "not_required": "Gerekli Degil",
+        "pending_documents": "Evrak Bekleniyor",
+        "documents_received": "Evraklar Alindi",
+        "submitted": "Basvuruldu",
+        "appointment_scheduled": "Randevu Alindi",
+        "approved": "Onaylandi",
+        "rejected": "Reddedildi"
+      }
+    },
+
+    "notes": {
+      "title": "Notlar",
+      "add": "Not Ekle",
+      "placeholder": "Not yazin...",
+      "specialRequests": "Ozel Istekler"
+    },
+
+    "actions": {
+      "confirm": "Onayla",
+      "cancel": "Iptal Et",
+      "print": "Yazdir",
+      "export": "Excel",
+      "sendConfirmation": "Onay Gonder"
+    },
+
+    "cancelReason": {
+      "title": "Iptal Nedeni",
+      "placeholder": "Iptal nedenini yazin..."
+    }
+  },
+
+  "group": {
+    "title": "Grup Yonetimi",
+    "passengerList": "Yolcu Listesi",
+    "roomMatrix": "Oda Dagilimi",
+    "seatMap": "Koltuk Duzenlemesi",
+    "guideAssignment": "Rehber Atama",
+    "export": "Disa Aktar",
+    "exportExcel": "Excel",
+    "exportPdf": "PDF",
+    "manifest": "Manifest",
+    "totalPassengers": "Toplam Yolcu",
+    "adults": "Yetiskin",
+    "children": "Cocuk",
+    "infants": "Bebek"
+  },
+
+  "wizard": {
+    "title": "Yeni Tur Rezervasyonu",
+    "step1": "Tur Ara",
+    "step2": "Hareket Sec",
+    "step3": "Yolcu Bilgileri",
+    "step4": "Odeme",
+    "searchTours": "Tur Ara",
+    "selectDeparture": "Hareket Tarihi Sec",
+    "enterPassengers": "Yolcu Bilgileri",
+    "confirmAndPay": "Onayla ve Ode",
+    "destination": "Destinasyon",
+    "dateRange": "Tarih Araligi",
+    "passengers": "Yolcu Sayisi",
+    "searchResults": "Arama Sonuclari",
+    "noResults": "Sonuc bulunamadi",
+    "selectTour": "Tur Sec",
+    "availableDepartures": "Musait Hareketler",
+    "noDepartures": "Musait hareket yok",
+    "pricePerPerson": "Kisi Basi",
+    "totalPrice": "Toplam Fiyat",
+    "complete": "Rezervasyonu Tamamla"
+  },
+
+  "stats": {
+    "totalTours": "Toplam Tur",
+    "activeTours": "Aktif Turlar",
+    "upcomingDepartures": "Yaklasan Hareketler",
+    "totalBookings": "Toplam Rezervasyon",
+    "confirmedBookings": "Onaylanan",
+    "pendingBookings": "Bekleyen",
+    "totalRevenue": "Toplam Gelir",
+    "thisMonth": "Bu Ay"
+  },
+
+  "filters": {
+    "allTypes": "Tum Tipler",
+    "allStatuses": "Tum Durumlar",
+    "allDestinations": "Tum Destinasyonlar",
+    "dateRange": "Tarih Araligi",
+    "priceRange": "Fiyat Araligi"
+  },
+
+  "messages": {
+    "tourCreated": "Tur basariyla olusturuldu",
+    "tourUpdated": "Tur guncellendi",
+    "tourDeleted": "Tur silindi",
+    "departureCreated": "Hareket tarihi eklendi",
+    "departureUpdated": "Hareket guncellendi",
+    "departureDeleted": "Hareket silindi",
+    "extraCreated": "Ekstra olusturuldu",
+    "extraUpdated": "Ekstra guncellendi",
+    "extraDeleted": "Ekstra silindi",
+    "bookingCreated": "Rezervasyon olusturuldu",
+    "bookingUpdated": "Rezervasyon guncellendi",
+    "bookingConfirmed": "Rezervasyon onaylandi",
+    "bookingCancelled": "Rezervasyon iptal edildi",
+    "paymentAdded": "Odeme eklendi",
+    "visaStatusUpdated": "Vize durumu guncellendi"
+  },
+
+  "errors": {
+    "loadFailed": "Veriler yuklenemedi",
+    "saveFailed": "Kayit basarisiz",
+    "deleteFailed": "Silme basarisiz",
+    "noAvailability": "Musaitlik yok",
+    "capacityExceeded": "Kapasite asildi",
+    "invalidDates": "Gecersiz tarihler"
+  }
+}

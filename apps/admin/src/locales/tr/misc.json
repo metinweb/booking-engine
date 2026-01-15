@@ -23,7 +23,8 @@
     "mySubscription": "Aboneliğim",
     "issues": "Talepler",
     "emailLogs": "E-posta Logları",
-    "payment": "Ödeme Sistemi"
+    "payment": "Ödeme Sistemi",
+    "tours": "Turlar"
   },
   "paymentSystem": {
     "title": "Ödeme Sistemi",

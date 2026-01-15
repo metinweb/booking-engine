@@ -1,0 +1,668 @@
+{
+  "tour": {
+    "title": "Tours",
+    "tours": "Tours",
+    "description": "Tour packages and departures",
+    "newTour": "New Tour",
+    "editTour": "Edit Tour",
+    "tourDetails": "Tour Details",
+    "tourList": "Tour List",
+    "search": "Search tours...",
+    "noTours": "No tours found",
+    "noToursDescription": "Get started by creating a new tour.",
+    "createFirstTour": "Create First Tour",
+    "duplicate": "Duplicate",
+    "duplicated": "Tour duplicated",
+    "generateCode": "Generate Code",
+    "durationMismatch": "Usually days should equal nights + 1",
+    "deleteTour": "Delete Tour",
+    "deleteConfirm": "Are you sure you want to delete this tour?",
+    "deleted": "Tour deleted",
+
+    "tabs": {
+      "basic": "Basic Info",
+      "itinerary": "Itinerary",
+      "transportation": "Transportation",
+      "accommodations": "Accommodations",
+      "pricing": "Pricing",
+      "extras": "Extras",
+      "media": "Media",
+      "settings": "Settings"
+    },
+
+    "fields": {
+      "code": "Tour Code",
+      "name": "Tour Name",
+      "description": "Description",
+      "shortDescription": "Short Description",
+      "tourType": "Tour Type",
+      "destination": "Destination",
+      "country": "Country",
+      "city": "City",
+      "region": "Region",
+      "duration": "Duration",
+      "nights": "Nights",
+      "days": "Days",
+      "status": "Status",
+      "featured": "Featured",
+      "displayOrder": "Display Order"
+    },
+
+    "tourTypes": {
+      "package": "Package Tour",
+      "day_trip": "Day Trip",
+      "multi_day": "Multi-day",
+      "cruise": "Cruise Tour",
+      "cultural": "Cultural Tour",
+      "adventure": "Adventure Tour",
+      "religious": "Religious Tour",
+      "nature": "Nature Tour",
+      "city_break": "City Break"
+    },
+
+    "transportTypes": {
+      "flight": "Flight",
+      "bus": "Bus",
+      "ferry": "Ferry",
+      "car": "Car",
+      "train": "Train",
+      "combined": "Combined"
+    },
+
+    "transportClass": {
+      "economy": "Economy",
+      "premium_economy": "Premium Economy",
+      "business": "Business",
+      "first": "First Class",
+      "standard": "Standard",
+      "vip": "VIP"
+    },
+
+    "mealPlans": {
+      "room_only": "Room Only",
+      "bed_breakfast": "Bed & Breakfast",
+      "half_board": "Half Board",
+      "full_board": "Full Board",
+      "all_inclusive": "All Inclusive",
+      "ultra_all_inclusive": "Ultra All Inclusive"
+    },
+
+    "statuses": {
+      "draft": "Draft",
+      "active": "Active",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+
+    "itinerary": {
+      "title": "Daily Itinerary",
+      "addDay": "Add Day",
+      "addFirstDay": "Add First Day",
+      "day": "Day",
+      "dayTitle": "Day Title",
+      "dayDescription": "Day Description",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter the day's itinerary details...",
+      "meals": "Meals",
+      "activities": "Activities",
+      "activityName": "Activity name",
+      "noActivities": "No activities added yet",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "overnight": "Overnight",
+      "accommodation": "Accommodation",
+      "accommodationPlaceholder": "Hotel or accommodation...",
+      "empty": "No daily itinerary added yet",
+      "quickAdd": "Quick Add",
+      "addDays": "Add Days",
+      "dragToReorder": "Drag to reorder"
+    },
+
+    "transportation": {
+      "title": "Transportation Details",
+      "add": "Add Transportation",
+      "type": "Transportation Type",
+      "direction": "Direction",
+      "outbound": "Outbound",
+      "return": "Return",
+      "internal": "Internal",
+      "carrier": "Carrier",
+      "class": "Class",
+      "included": "Included",
+      "notIncluded": "Not Included",
+      "details": "Details"
+    },
+
+    "accommodation": {
+      "title": "Accommodation",
+      "add": "Add Accommodation",
+      "hotel": "Hotel",
+      "selectHotel": "Select Hotel",
+      "manualEntry": "Manual Entry",
+      "hotelName": "Hotel Name",
+      "nights": "Number of Nights",
+      "mealPlan": "Meal Plan",
+      "starRating": "Star Rating",
+      "roomType": "Room Type",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out"
+    },
+
+    "inclusions": {
+      "title": "Inclusions",
+      "add": "Add",
+      "placeholder": "Included service..."
+    },
+
+    "exclusions": {
+      "title": "Exclusions",
+      "add": "Add",
+      "placeholder": "Excluded service..."
+    },
+
+    "images": {
+      "title": "Images",
+      "add": "Add Image",
+      "mainImage": "Main Image",
+      "setAsMain": "Set as Main",
+      "caption": "Caption",
+      "delete": "Delete"
+    },
+
+    "cancellation": {
+      "title": "Cancellation Policy",
+      "freeCancellation": "Free Cancellation",
+      "daysBeforeDeparture": "Days before departure",
+      "rules": "Cancellation Rules",
+      "addRule": "Add Rule",
+      "fromDay": "From Day",
+      "toDay": "To Day",
+      "percentage": "Penalty %"
+    },
+
+    "visibility": {
+      "title": "Visibility",
+      "b2c": "B2C (End Consumer)",
+      "b2b": "B2B (Agencies)"
+    }
+  },
+
+  "departure": {
+    "title": "Departure Dates",
+    "departures": "Departures",
+    "newDeparture": "New Departure",
+    "editDeparture": "Edit Departure",
+    "calendar": "Departure Calendar",
+    "upcoming": "Upcoming Departures",
+    "search": "Search departures...",
+    "noDepartures": "No departure dates yet",
+    "createFirst": "Create First Departure",
+    "bulkCreate": "Bulk Create",
+    "bulkCreateDescription": "Create multiple departures for a date range",
+
+    "fields": {
+      "departureDate": "Departure Date",
+      "returnDate": "Return Date",
+      "tour": "Tour",
+      "capacity": "Capacity",
+      "totalCapacity": "Total Capacity",
+      "available": "Available",
+      "reserved": "Reserved",
+      "sold": "Sold",
+      "blocked": "Blocked",
+      "status": "Status",
+      "price": "Price",
+      "guide": "Guide",
+      "guaranteedDeparture": "Guaranteed Departure",
+      "minParticipants": "Min. Participants",
+      "enableB2B": "Enable B2B Pricing"
+    },
+
+    "sections": {
+      "capacity": "Capacity",
+      "pricing": "Pricing",
+      "b2bPricing": "B2B Pricing",
+      "pickupPoints": "Pickup Points",
+      "labels": "Labels"
+    },
+
+    "statuses": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "sold_out": "Sold Out"
+    },
+
+    "pickupPoint": {
+      "name": "Point Name",
+      "address": "Address",
+      "additionalPrice": "Additional Price"
+    },
+
+    "noPickupPoints": "No pickup points added yet",
+
+    "capacity": {
+      "title": "Capacity Management",
+      "total": "Total Capacity",
+      "available": "Available",
+      "reserved": "Reserved",
+      "sold": "Sold",
+      "blocked": "Blocked",
+      "lastSeats": "Last {count} Seats"
+    },
+
+    "pricing": {
+      "title": "Pricing",
+      "adult": "Adult",
+      "child": "Child",
+      "infant": "Infant",
+      "single": "Single",
+      "double": "Double",
+      "triple": "Triple",
+      "withBed": "With Bed",
+      "withoutBed": "Without Bed",
+      "minAge": "Min Age",
+      "maxAge": "Max Age",
+      "price": "Price",
+      "singleSupplement": "Single Supplement",
+      "b2bPricing": "B2B Pricing",
+      "netPrice": "Net Price",
+      "commission": "Commission",
+      "commissionMode": "Commission Mode",
+      "commissionRate": "Commission Rate",
+      "percentage": "Percentage",
+      "netMode": "Net Price Mode",
+      "agencyMargin": "Agency Margin"
+    },
+
+    "pickup": {
+      "title": "Pickup Points",
+      "add": "Add Point",
+      "code": "Code",
+      "name": "Name",
+      "address": "Address",
+      "time": "Time",
+      "additionalPrice": "Additional Price",
+      "coordinates": "Coordinates"
+    },
+
+    "flight": {
+      "title": "Flight Details",
+      "add": "Add Flight",
+      "direction": "Direction",
+      "outbound": "Outbound",
+      "return": "Return",
+      "carrier": "Airline",
+      "flightNumber": "Flight No",
+      "departure": "Departure",
+      "arrival": "Arrival",
+      "departureTime": "Departure Time",
+      "arrivalTime": "Arrival Time"
+    },
+
+    "guide": {
+      "title": "Guide Information",
+      "select": "Select Guide",
+      "name": "Guide Name",
+      "phone": "Phone",
+      "notes": "Notes"
+    },
+
+    "labels": {
+      "guaranteed": "Guaranteed Departure",
+      "last_seats": "Last Seats",
+      "lastSeats": "Last Seats",
+      "popular": "Popular",
+      "early_bird": "Early Bird",
+      "earlyBird": "Early Bird",
+      "sold_out": "Sold Out",
+      "soldOut": "Sold Out",
+      "new": "New"
+    },
+
+    "departureStatuses": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "sold_out": "Sold Out"
+    }
+  },
+
+  "extra": {
+    "title": "Extras",
+    "extras": "Optional Extras",
+    "newExtra": "New Extra",
+    "editExtra": "Edit Extra",
+    "search": "Search extras...",
+    "noExtras": "No extras yet",
+    "createFirst": "Create First Extra",
+
+    "fields": {
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "category": "Category",
+      "priceType": "Price Type",
+      "price": "Price",
+      "currency": "Currency",
+      "duration": "Duration",
+      "status": "Status"
+    },
+
+    "extraCategories": {
+      "activity": "Activity",
+      "meal": "Meal",
+      "transfer": "Transfer",
+      "upgrade": "Upgrade",
+      "visa": "Visa Service",
+      "insurance": "Insurance",
+      "equipment": "Equipment",
+      "other": "Other"
+    },
+
+    "priceTypes": {
+      "per_person": "Per Person",
+      "per_group": "Per Group",
+      "per_unit": "Per Unit",
+      "per_night": "Per Night"
+    },
+
+    "applicableTours": {
+      "title": "Applicable Tours",
+      "all": "Apply to All Tours",
+      "specific": "Specific Tours",
+      "selectTours": "Select Tours"
+    }
+  },
+
+  "tourExtra": {
+    "noExtras": "No extras found",
+    "categories": {
+      "activity": "Activity",
+      "meal": "Meal",
+      "transfer": "Transfer",
+      "upgrade": "Upgrade",
+      "visa": "Visa",
+      "insurance": "Insurance"
+    },
+    "priceTypes": {
+      "per_person": "Per Person",
+      "per_group": "Per Group",
+      "per_unit": "Per Unit"
+    },
+    "totalExtras": "Total Extras",
+    "selectPassengers": "Select passengers"
+  },
+
+  "tourBooking": {
+    "title": "Tour Bookings",
+    "bookings": "Bookings",
+    "newBooking": "New Booking",
+    "editBooking": "Edit Booking",
+    "bookingDetails": "Booking Details",
+    "search": "Search booking no, guest...",
+    "noBookings": "No bookings yet",
+    "createFirst": "Create First Booking",
+
+    "fields": {
+      "bookingNumber": "Booking No",
+      "tour": "Tour",
+      "departure": "Departure",
+      "status": "Status",
+      "passengers": "Passengers",
+      "totalPrice": "Total",
+      "paidAmount": "Paid",
+      "dueAmount": "Due",
+      "salesChannel": "Sales Channel",
+      "createdAt": "Created"
+    },
+
+    "bookingStatuses": {
+      "draft": "Draft",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "no_show": "No Show"
+    },
+
+    "salesChannels": {
+      "b2c": "B2C (Direct)",
+      "b2b": "B2B (Agency)"
+    },
+
+    "passenger": {
+      "title": "Passenger Information",
+      "add": "Add Passenger",
+      "lead": "Lead Passenger",
+      "type": "Type",
+      "adult": "Adult",
+      "child": "Child",
+      "infant": "Infant",
+      "name": "Full Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "nationality": "Nationality",
+      "tcNumber": "TC ID Number",
+      "passportNumber": "Passport Number",
+      "passportExpiry": "Passport Expiry",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "roomAssignment": "Room No",
+      "seatAssignment": "Seat No"
+    },
+
+    "contact": {
+      "title": "Contact",
+      "email": "Email",
+      "phone": "Phone"
+    },
+
+    "pickup": {
+      "title": "Pickup Point",
+      "select": "Select Pickup Point",
+      "time": "Pickup Time"
+    },
+
+    "extras": {
+      "title": "Selected Extras",
+      "add": "Add Extra",
+      "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "totalPrice": "Total",
+      "selectPassengers": "Select Passengers"
+    },
+
+    "rooms": {
+      "title": "Room Assignment",
+      "roomNumber": "Room No",
+      "roomType": "Room Type",
+      "passengers": "Passengers"
+    },
+
+    "room": {
+      "title": "Room Assignment",
+      "addRoom": "Add Room",
+      "room": "Room",
+      "rooms": "Rooms",
+      "assigned": "assigned",
+      "unassigned": "unassigned",
+      "unassignedPassengers": "Unassigned Passengers",
+      "dropPassengers": "Drop passengers here",
+      "overCapacity": "Capacity exceeded",
+      "autoAssign": "Auto Assign",
+      "single": "Single",
+      "double": "Double",
+      "triple": "Triple",
+      "quad": "Quad"
+    },
+
+    "pickupPoint": {
+      "title": "Pickup Point",
+      "noPoints": "No pickup points available",
+      "custom": "Custom Pickup Point",
+      "customDescription": "Enter your own address",
+      "addressPlaceholder": "Enter address...",
+      "notesPlaceholder": "Additional notes...",
+      "selected": "Selected"
+    },
+
+    "pricing": {
+      "title": "Price Summary",
+      "adults": "Adults",
+      "children": "Children",
+      "infants": "Infants",
+      "extras": "Extras",
+      "singleSupplement": "Single Supplement",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "grandTotal": "Grand Total",
+      "netPrice": "Net Price",
+      "commission": "Commission"
+    },
+
+    "payment": {
+      "title": "Payment Information",
+      "status": "Payment Status",
+      "method": "Payment Method",
+      "paidAmount": "Paid",
+      "dueAmount": "Due",
+      "addPayment": "Add Payment",
+      "paymentStatuses": {
+        "pending": "Pending",
+        "partial": "Partial",
+        "paid": "Paid",
+        "refunded": "Refunded"
+      }
+    },
+
+    "visa": {
+      "title": "Visa Tracking",
+      "status": "Visa Status",
+      "appointmentDate": "Appointment Date",
+      "documents": "Documents",
+      "uploadDocument": "Upload Document",
+      "updateStatus": "Update Status",
+      "notes": "Notes",
+      "visaStatuses": {
+        "not_required": "Not Required",
+        "pending_documents": "Pending Documents",
+        "documents_received": "Documents Received",
+        "submitted": "Submitted",
+        "appointment_scheduled": "Appointment Scheduled",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    },
+
+    "notes": {
+      "title": "Notes",
+      "add": "Add Note",
+      "placeholder": "Enter note...",
+      "specialRequests": "Special Requests"
+    },
+
+    "actions": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "print": "Print",
+      "export": "Excel",
+      "sendConfirmation": "Send Confirmation"
+    },
+
+    "cancelReason": {
+      "title": "Cancel Reason",
+      "placeholder": "Enter cancellation reason..."
+    }
+  },
+
+  "group": {
+    "title": "Group Management",
+    "passengerList": "Passenger List",
+    "roomMatrix": "Room Assignment",
+    "seatMap": "Seat Map",
+    "guideAssignment": "Guide Assignment",
+    "export": "Export",
+    "exportExcel": "Excel",
+    "exportPdf": "PDF",
+    "manifest": "Manifest",
+    "totalPassengers": "Total Passengers",
+    "adults": "Adults",
+    "children": "Children",
+    "infants": "Infants"
+  },
+
+  "wizard": {
+    "title": "New Tour Booking",
+    "step1": "Search Tour",
+    "step2": "Select Departure",
+    "step3": "Passenger Info",
+    "step4": "Payment",
+    "searchTours": "Search Tours",
+    "selectDeparture": "Select Departure Date",
+    "enterPassengers": "Passenger Information",
+    "confirmAndPay": "Confirm and Pay",
+    "destination": "Destination",
+    "dateRange": "Date Range",
+    "passengers": "Passengers",
+    "searchResults": "Search Results",
+    "noResults": "No results found",
+    "selectTour": "Select Tour",
+    "availableDepartures": "Available Departures",
+    "noDepartures": "No available departures",
+    "pricePerPerson": "Per Person",
+    "totalPrice": "Total Price",
+    "complete": "Complete Booking"
+  },
+
+  "stats": {
+    "totalTours": "Total Tours",
+    "activeTours": "Active Tours",
+    "upcomingDepartures": "Upcoming Departures",
+    "totalBookings": "Total Bookings",
+    "confirmedBookings": "Confirmed",
+    "pendingBookings": "Pending",
+    "totalRevenue": "Total Revenue",
+    "thisMonth": "This Month"
+  },
+
+  "filters": {
+    "allTypes": "All Types",
+    "allStatuses": "All Statuses",
+    "allDestinations": "All Destinations",
+    "dateRange": "Date Range",
+    "priceRange": "Price Range"
+  },
+
+  "messages": {
+    "tourCreated": "Tour created successfully",
+    "tourUpdated": "Tour updated",
+    "tourDeleted": "Tour deleted",
+    "departureCreated": "Departure date added",
+    "departureUpdated": "Departure updated",
+    "departureDeleted": "Departure deleted",
+    "extraCreated": "Extra created",
+    "extraUpdated": "Extra updated",
+    "extraDeleted": "Extra deleted",
+    "bookingCreated": "Booking created",
+    "bookingUpdated": "Booking updated",
+    "bookingConfirmed": "Booking confirmed",
+    "bookingCancelled": "Booking cancelled",
+    "paymentAdded": "Payment added",
+    "visaStatusUpdated": "Visa status updated"
+  },
+
+  "errors": {
+    "loadFailed": "Failed to load data",
+    "saveFailed": "Save failed",
+    "deleteFailed": "Delete failed",
+    "noAvailability": "No availability",
+    "capacityExceeded": "Capacity exceeded",
+    "invalidDates": "Invalid dates"
+  }
+}
