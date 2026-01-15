@@ -58,7 +58,7 @@ export const getIssues = asyncHandler(async (req, res) => {
   const query = {}
 
   // Soft delete filter - show only deleted or only non-deleted
-  if (showDeleted === 'true') {
+  if (showDeleted === 'true' || showDeleted === true) {
     query.isDeleted = true
   } else {
     query.isDeleted = { $ne: true }
