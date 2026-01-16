@@ -1086,6 +1086,51 @@ export const getPmsStatus = asyncHandler(async (req, res) => {
 // ==================== Subscription Management ====================
 
 /**
+ * Get all purchases across all partners (for admin subscription management)
+ */
+export const getAllPurchases = asyncHandler(async (req, res) => {
+  // Get all partners with their subscription purchases
+  const partners = await Partner.find({
+    'subscription.purchases': { $exists: true, $ne: [] }
+  }).select('companyName email subscription.purchases').lean()
+
+  // Flatten purchases with partner info
+  const allPurchases = []
+
+  for (const partner of partners) {
+    if (partner.subscription?.purchases) {
+      for (const purchase of partner.subscription.purchases) {
+        allPurchases.push({
+          partner: {
+            _id: partner._id,
+            companyName: partner.companyName,
+            email: partner.email
+          },
+          purchase: {
+            _id: purchase._id,
+            plan: purchase.plan,
+            planName: SUBSCRIPTION_PLANS[purchase.plan]?.name || purchase.plan,
+            period: purchase.period,
+            price: purchase.price,
+            payment: purchase.payment,
+            status: purchase.status,
+            createdAt: purchase.createdAt
+          }
+        })
+      }
+    }
+  }
+
+  // Sort by createdAt desc (newest first)
+  allPurchases.sort((a, b) => new Date(b.purchase.createdAt) - new Date(a.purchase.createdAt))
+
+  res.json({
+    success: true,
+    data: allPurchases
+  })
+})
+
+/**
  * Get available subscription plans
  */
 export const getSubscriptionPlans = asyncHandler(async (req, res) => {

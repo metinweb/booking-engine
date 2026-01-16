@@ -18,6 +18,7 @@ router.get('/', partnerService.getPartners)
 // Static routes (must be before /:id to avoid conflicts)
 router.get('/sms-providers', partnerService.getSMSProviders)
 router.get('/subscription-plans', partnerService.getSubscriptionPlans)
+router.get('/subscriptions/purchases', partnerService.getAllPurchases)
 
 router.get('/:id', partnerService.getPartner)
 router.put('/:id', partnerService.updatePartner)

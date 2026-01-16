@@ -15,6 +15,7 @@ const RegisterView = () => import('../views/RegisterView.vue')
 const ForcePasswordChangeView = () => import('../views/ForcePasswordChangeView.vue')
 const DashboardView = () => import('../views/DashboardView.vue')
 const PartnersView = () => import('../views/PartnersView.vue')
+const PartnerSubscriptionsView = () => import('../views/partners/SubscriptionsView.vue')
 const AgenciesView = () => import('../views/AgenciesView.vue')
 const AgencyUsersView = () => import('../views/AgencyUsersView.vue')
 const SiteManagementView = () => import('../views/SiteManagementView.vue')
@@ -75,6 +76,12 @@ const router = createRouter({
           path: 'partners',
           name: 'partners',
           component: PartnersView,
+          meta: { requiresPlatformAdmin: true }
+        },
+        {
+          path: 'partners/subscriptions',
+          name: 'partner-subscriptions',
+          component: PartnerSubscriptionsView,
           meta: { requiresPlatformAdmin: true }
         },
         {

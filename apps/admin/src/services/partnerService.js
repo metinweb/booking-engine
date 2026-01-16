@@ -147,6 +147,16 @@ const addPurchase = async (partnerId, data) => {
   }
 }
 
+const getAllPurchases = async () => {
+  try {
+    const response = await apiClient.get('/partners/subscriptions/purchases')
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Get all purchases failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
 const updatePurchase = async (partnerId, purchaseId, data) => {
   try {
     const response = await apiClient.put(`/partners/${partnerId}/subscription/purchases/${purchaseId}`, data)
@@ -238,6 +248,7 @@ export default {
   getSubscription,
   updateSubscription,
   addPurchase,
+  getAllPurchases,
   updatePurchase,
   cancelPurchase,
   markPurchaseAsPaid,
