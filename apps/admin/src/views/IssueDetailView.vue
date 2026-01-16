@@ -300,27 +300,70 @@
           </div>
         </div>
 
-        <!-- Assignee -->
+        <!-- Assignees (Multi-select) -->
         <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{{ $t('issues.fields.assignee') }}</h3>
-          <select
-            v-model="selectedAssignee"
-            class="form-input w-full"
-            @change="handleAssigneeChange"
-          >
-            <option value="">{{ $t('issues.placeholders.selectAssignee') }}</option>
-            <option v-for="user in platformUsers" :key="user._id" :value="user._id">
-              {{ user.name }}
-            </option>
-          </select>
-          <div v-if="issue.assignee" class="flex items-center gap-2 mt-3">
-            <div v-if="getUserAvatarUrl(issue.assignee)" class="w-8 h-8 rounded-full overflow-hidden">
-              <img :src="getUserAvatarUrl(issue.assignee)" :alt="issue.assignee?.name" class="w-full h-full object-cover" />
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">{{ $t('issues.fields.assignees') }}</h3>
+
+          <!-- Multi-select dropdown -->
+          <div class="relative">
+            <button
+              type="button"
+              class="form-input w-full text-left flex items-center justify-between"
+              @click="showAssigneeDropdown = !showAssigneeDropdown"
+            >
+              <span v-if="selectedAssignees.length === 0" class="text-gray-400">
+                {{ $t('issues.placeholders.selectAssignees') }}
+              </span>
+              <span v-else class="truncate">
+                {{ selectedAssignees.length }} {{ $t('issues.assigneesSelected') }}
+              </span>
+              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- Dropdown menu -->
+            <div
+              v-if="showAssigneeDropdown"
+              class="absolute z-10 mt-1 w-full bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-lg shadow-lg max-h-60 overflow-auto"
+            >
+              <label
+                v-for="user in platformUsers"
+                :key="user._id"
+                class="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 dark:hover:bg-slate-600 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  :checked="selectedAssignees.includes(user._id)"
+                  class="rounded text-purple-600 focus:ring-purple-500"
+                  @change="toggleAssignee(user._id)"
+                />
+                <div v-if="getUserAvatarUrl(user)" class="w-6 h-6 rounded-full overflow-hidden flex-shrink-0">
+                  <img :src="getUserAvatarUrl(user)" :alt="user.name" class="w-full h-full object-cover" />
+                </div>
+                <div v-else class="w-6 h-6 rounded-full bg-purple-200 dark:bg-purple-900/50 flex items-center justify-center text-xs font-medium text-purple-700 dark:text-purple-300 flex-shrink-0">
+                  {{ user.name?.charAt(0)?.toUpperCase() }}
+                </div>
+                <span class="text-sm text-gray-700 dark:text-slate-300">{{ user.name }}</span>
+              </label>
             </div>
-            <div v-else class="w-8 h-8 rounded-full bg-purple-200 dark:bg-purple-900/50 flex items-center justify-center text-sm font-medium text-purple-700 dark:text-purple-300">
-              {{ issue.assignee?.name?.charAt(0)?.toUpperCase() }}
+          </div>
+
+          <!-- Selected assignees display -->
+          <div v-if="issue.assignees?.length > 0" class="flex flex-wrap gap-2 mt-3">
+            <div
+              v-for="assignee in issue.assignees"
+              :key="assignee._id"
+              class="flex items-center gap-2 bg-gray-100 dark:bg-slate-700 rounded-full px-3 py-1"
+            >
+              <div v-if="getUserAvatarUrl(assignee)" class="w-6 h-6 rounded-full overflow-hidden">
+                <img :src="getUserAvatarUrl(assignee)" :alt="assignee.name" class="w-full h-full object-cover" />
+              </div>
+              <div v-else class="w-6 h-6 rounded-full bg-purple-200 dark:bg-purple-900/50 flex items-center justify-center text-xs font-medium text-purple-700 dark:text-purple-300">
+                {{ assignee.name?.charAt(0)?.toUpperCase() }}
+              </div>
+              <span class="text-sm text-gray-700 dark:text-slate-300">{{ assignee.name }}</span>
             </div>
-            <span class="text-sm text-gray-700 dark:text-slate-300">{{ issue.assignee?.name }}</span>
           </div>
         </div>
 
@@ -475,7 +518,8 @@ const platformUsers = ref([])
 const newComment = ref('')
 const commentMentions = ref([])
 const submittingComment = ref(false)
-const selectedAssignee = ref('')
+const selectedAssignees = ref([])
+const showAssigneeDropdown = ref(false)
 const lightboxImage = ref(null)
 const mentionInputRef = ref(null)
 const showNudgeModal = ref(false)
@@ -538,7 +582,7 @@ const loadIssue = async () => {
   try {
     const { data } = await issueService.getIssue(route.params.id)
     issue.value = data
-    selectedAssignee.value = data.assignee?._id || ''
+    selectedAssignees.value = data.assignees?.map(a => a._id) || []
   } catch (error) {
     toast.error(t('common.error'))
     console.error('Failed to load issue:', error)
@@ -612,10 +656,21 @@ const quickReopen = async () => {
   }
 }
 
-// Handle assignee change
-const handleAssigneeChange = async () => {
+// Toggle assignee in multi-select
+const toggleAssignee = async (userId) => {
+  const index = selectedAssignees.value.indexOf(userId)
+  if (index > -1) {
+    selectedAssignees.value.splice(index, 1)
+  } else {
+    selectedAssignees.value.push(userId)
+  }
+  await handleAssigneesChange()
+}
+
+// Handle assignees change (multi-select)
+const handleAssigneesChange = async () => {
   try {
-    await issueService.assignIssue(issue.value._id, selectedAssignee.value || null)
+    await issueService.assignIssue(issue.value._id, selectedAssignees.value)
     await loadIssue()
     toast.success(t('issues.messages.assigned'))
   } catch (error) {
@@ -787,14 +842,23 @@ const handlePaste = async (e) => {
   }
 }
 
+// Close dropdown on click outside
+const closeDropdownOnClickOutside = (e) => {
+  if (!e.target.closest('.relative')) {
+    showAssigneeDropdown.value = false
+  }
+}
+
 // Init
 onMounted(() => {
   loadIssue()
   loadPlatformUsers()
   document.addEventListener('paste', handlePaste)
+  document.addEventListener('click', closeDropdownOnClickOutside)
 })
 
 onUnmounted(() => {
   document.removeEventListener('paste', handlePaste)
+  document.removeEventListener('click', closeDropdownOnClickOutside)
 })
 </script>

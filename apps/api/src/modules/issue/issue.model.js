@@ -126,10 +126,10 @@ const issueSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  assignee: {
+  assignees: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
-  },
+  }],
   watchers: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -176,7 +176,7 @@ const issueSchema = new mongoose.Schema({
 issueSchema.index({ status: 1 })
 issueSchema.index({ priority: 1 })
 issueSchema.index({ reporter: 1 })
-issueSchema.index({ assignee: 1 })
+issueSchema.index({ assignees: 1 })
 issueSchema.index({ createdAt: -1 })
 issueSchema.index({ isDeleted: 1 })
 issueSchema.index({ title: 'text', description: 'text' })

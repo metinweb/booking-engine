@@ -16,6 +16,7 @@
       "priority": "Öncelik",
       "category": "Kategori",
       "assignee": "Atanan",
+      "assignees": "Atananlar",
       "reporter": "Oluşturan",
       "lastComment": "Son Mesaj",
       "labels": "Etiketler",
@@ -133,6 +134,7 @@
     "placeholders": {
       "searchIssues": "Talep ara...",
       "selectAssignee": "Kişi seçin",
+      "selectAssignees": "Kişi seçin",
       "selectPriority": "Öncelik seçin",
       "selectCategory": "Kategori seçin",
       "enterTitle": "Talep başlığı",
@@ -160,6 +162,8 @@
       "pasteScreenshot": "veya Ctrl+V ile ekran görüntüsü yapıştır",
       "markdownAndMention": "Markdown desteklenir. {'@'}kullanıcı ile bahsetme yapabilirsiniz."
     },
+
+    "assigneesSelected": "kişi seçildi",
 
     "confirmations": {
       "delete": "Bu talebi silmek istediğinize emin misiniz?",

@@ -75,7 +75,7 @@ export const getIssues = asyncHandler(async (req, res) => {
   }
   if (priority) query.priority = priority
   if (category) query.category = category
-  if (assignee) query.assignee = assignee
+  if (assignee) query.assignees = assignee // Tek ID ile filtreleme (array içinde arar)
   if (reporter) query.reporter = reporter
   if (label) query.labels = label
 
@@ -100,7 +100,7 @@ export const getIssues = asyncHandler(async (req, res) => {
   const [issues, total] = await Promise.all([
     Issue.find(query)
       .populate('reporter', 'name email avatar')
-      .populate('assignee', 'name email avatar')
+      .populate('assignees', 'name email avatar')
       .populate('comments.author', 'name email avatar')
       .select('-activity')
       .sort(sort)
@@ -144,7 +144,7 @@ export const getIssues = asyncHandler(async (req, res) => {
 export const getIssue = asyncHandler(async (req, res) => {
   const issue = await Issue.findById(req.params.id)
     .populate('reporter', 'name email avatar')
-    .populate('assignee', 'name email avatar')
+    .populate('assignees', 'name email avatar')
     .populate('watchers', 'name email avatar')
     .populate('comments.author', 'name email avatar')
     .populate('activity.user', 'name email avatar')
@@ -165,12 +165,15 @@ export const createIssue = asyncHandler(async (req, res) => {
     priority,
     category,
     labels,
-    assignee,
+    assignees, // Now array
     dueDate,
     metadata
   } = req.body
 
   const issueNumber = await Issue.getNextIssueNumber()
+
+  // Normalize assignees to array
+  const assigneeList = Array.isArray(assignees) ? assignees : (assignees ? [assignees] : [])
 
   const issue = await Issue.create({
     issueNumber,
@@ -180,7 +183,7 @@ export const createIssue = asyncHandler(async (req, res) => {
     category: category || 'other',
     labels: labels || [],
     reporter: req.user._id,
-    assignee,
+    assignees: assigneeList,
     dueDate,
     metadata,
     watchers: [req.user._id], // Reporter is automatic watcher
@@ -190,19 +193,21 @@ export const createIssue = asyncHandler(async (req, res) => {
     }]
   })
 
-  // Notify assignee
-  if (assignee && assignee !== req.user._id.toString()) {
-    await sendIssueNotification(
-      assignee,
-      'issue_assigned',
-      'Yeni Issue Atandı',
-      `${issue.issueNumber}: ${title}`,
-      issue._id
-    )
+  // Notify assignees
+  for (const assigneeId of assigneeList) {
+    if (assigneeId !== req.user._id.toString()) {
+      await sendIssueNotification(
+        assigneeId,
+        'issue_assigned',
+        'Yeni Issue Atandı',
+        `${issue.issueNumber}: ${title}`,
+        issue._id
+      )
+    }
   }
 
   await issue.populate('reporter', 'name email avatar')
-  await issue.populate('assignee', 'name email avatar')
+  await issue.populate('assignees', 'name email avatar')
 
   res.status(201).json({
     success: true,
@@ -267,7 +272,7 @@ export const updateIssue = asyncHandler(async (req, res) => {
 
   await issue.save()
   await issue.populate('reporter', 'name email avatar')
-  await issue.populate('assignee', 'name email avatar')
+  await issue.populate('assignees', 'name email avatar')
 
   res.json({ success: true, data: issue })
 })
@@ -328,54 +333,66 @@ export const changeStatus = asyncHandler(async (req, res) => {
   }
 
   await issue.populate('reporter', 'name email avatar')
-  await issue.populate('assignee', 'name email avatar')
+  await issue.populate('assignees', 'name email avatar')
 
   res.json({ success: true, data: issue })
 })
 
-// Assign Issue
+// Assign Issue (supports multiple assignees)
 export const assignIssue = asyncHandler(async (req, res) => {
-  const { assignee } = req.body
+  const { assignees } = req.body // Now expects array
   const issue = await Issue.findById(req.params.id)
 
   if (!issue) {
     throw new NotFoundError('ISSUE_NOT_FOUND')
   }
 
-  const oldAssignee = issue.assignee
+  const oldAssignees = issue.assignees || []
 
-  if (assignee) {
-    // Check user
-    const user = await User.findById(assignee)
-    if (!user || user.accountType !== 'platform') {
-      throw new ValidationError('INVALID_ASSIGNEE')
+  // Normalize to array
+  const newAssignees = Array.isArray(assignees) ? assignees : (assignees ? [assignees] : [])
+
+  if (newAssignees.length > 0) {
+    // Validate all users
+    for (const assigneeId of newAssignees) {
+      const user = await User.findById(assigneeId)
+      if (!user || user.accountType !== 'platform') {
+        throw new ValidationError('INVALID_ASSIGNEE')
+      }
     }
 
-    issue.assignee = assignee
-    issue.addActivity('assigned', req.user._id, { to: assignee })
+    issue.assignees = newAssignees
+    issue.addActivity('assigned', req.user._id, {
+      from: oldAssignees.map(a => a.toString()),
+      to: newAssignees
+    })
 
-    // Add new assignee to watchers
-    if (!issue.watchers.some(w => w.toString() === assignee)) {
-      issue.watchers.push(assignee)
-    }
+    // Add new assignees to watchers and notify
+    for (const assigneeId of newAssignees) {
+      // Add to watchers if not already
+      if (!issue.watchers.some(w => w.toString() === assigneeId)) {
+        issue.watchers.push(assigneeId)
+      }
 
-    // Notify
-    if (assignee !== req.user._id.toString()) {
-      await sendIssueNotification(
-        assignee,
-        'issue_assigned',
-        'Issue Atandı',
-        `${issue.issueNumber}: ${issue.title}`,
-        issue._id
-      )
+      // Notify if new assignee (wasn't in old list)
+      const wasAssigned = oldAssignees.some(a => a.toString() === assigneeId)
+      if (!wasAssigned && assigneeId !== req.user._id.toString()) {
+        await sendIssueNotification(
+          assigneeId,
+          'issue_assigned',
+          'Issue Atandı',
+          `${issue.issueNumber}: ${issue.title}`,
+          issue._id
+        )
+      }
     }
   } else {
-    issue.assignee = null
-    issue.addActivity('unassigned', req.user._id, { from: oldAssignee })
+    issue.assignees = []
+    issue.addActivity('unassigned', req.user._id, { from: oldAssignees.map(a => a.toString()) })
   }
 
   await issue.save()
-  await issue.populate('assignee', 'name email avatar')
+  await issue.populate('assignees', 'name email avatar')
 
   res.json({ success: true, data: issue })
 })
@@ -674,7 +691,7 @@ export const getStats = asyncHandler(async (req, res) => {
 
   const totalIssues = await Issue.countDocuments()
   const openIssues = await Issue.countDocuments({ status: { $in: ['open', 'in_progress', 'reopened'] } })
-  const myAssigned = await Issue.countDocuments({ assignee: req.user._id, status: { $nin: ['closed', 'resolved'] } })
+  const myAssigned = await Issue.countDocuments({ assignees: req.user._id, status: { $nin: ['closed', 'resolved'] } })
   const criticalOpen = await Issue.countDocuments({ priority: 'critical', status: { $in: ['open', 'in_progress', 'reopened'] } })
 
   res.json({

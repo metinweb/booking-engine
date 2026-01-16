@@ -327,7 +327,7 @@ const handleSubmit = async () => {
     }
 
     if (form.assignee) {
-      issueData.assignee = form.assignee
+      issueData.assignees = [form.assignee] // Send as array for multi-assignee support
     }
     if (form.dueDate) {
       issueData.dueDate = form.dueDate

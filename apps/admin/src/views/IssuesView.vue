@@ -224,15 +224,24 @@
             </div>
           </template>
 
-          <!-- Assignee -->
-          <template #cell-assignee="{ row }">
-            <div v-if="row.assignee" class="flex items-center gap-2">
+          <!-- Assignees (Multi) -->
+          <template #cell-assignees="{ row }">
+            <div v-if="row.assignees?.length > 0" class="flex items-center -space-x-1">
               <div
-                class="w-6 h-6 rounded-full bg-purple-200 dark:bg-purple-900/50 flex items-center justify-center text-xs font-medium text-purple-700 dark:text-purple-300"
+                v-for="(assignee, idx) in row.assignees.slice(0, 3)"
+                :key="assignee._id"
+                class="w-6 h-6 rounded-full bg-purple-200 dark:bg-purple-900/50 flex items-center justify-center text-xs font-medium text-purple-700 dark:text-purple-300 ring-2 ring-white dark:ring-slate-800"
+                :title="assignee.name"
               >
-                {{ row.assignee?.name?.charAt(0)?.toUpperCase() }}
+                {{ assignee.name?.charAt(0)?.toUpperCase() }}
               </div>
-              <span class="text-sm text-gray-600 dark:text-slate-300">{{ row.assignee?.name }}</span>
+              <div
+                v-if="row.assignees.length > 3"
+                class="w-6 h-6 rounded-full bg-gray-300 dark:bg-slate-600 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-slate-300 ring-2 ring-white dark:ring-slate-800"
+                :title="`+${row.assignees.length - 3} more`"
+              >
+                +{{ row.assignees.length - 3 }}
+              </div>
             </div>
             <span v-else class="text-sm text-gray-400 dark:text-slate-500">-</span>
           </template>
@@ -445,7 +454,7 @@ const columns = computed(() => [
   { key: 'priority', label: t('issues.fields.priority'), sortable: true },
   { key: 'category', label: t('issues.fields.category'), sortable: true },
   { key: 'reporter', label: t('issues.fields.reporter') },
-  { key: 'assignee', label: t('issues.fields.assignee') },
+  { key: 'assignees', label: t('issues.fields.assignees') },
   { key: 'lastComment', label: t('issues.fields.lastComment') },
   { key: 'attachments', label: '', width: '60px' },
   { key: 'createdAt', label: t('issues.fields.createdAt'), sortable: true }

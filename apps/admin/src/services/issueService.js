@@ -32,8 +32,9 @@ const changeStatus = async (id, status, comment) => {
   return response.data
 }
 
-const assignIssue = async (id, assignee) => {
-  const response = await apiClient.patch(`/issues/${id}/assign`, { assignee })
+const assignIssue = async (id, assignees) => {
+  // assignees can be array or single ID (will be normalized on backend)
+  const response = await apiClient.patch(`/issues/${id}/assign`, { assignees })
   return response.data
 }
 

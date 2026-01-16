@@ -2,6 +2,7 @@
  * Booking CRUD Service
  * Core booking CRUD operations
  * Split from booking.service.js for better maintainability
+ * Supports sortBy/sortOrder params for server-side sorting
  */
 
 import { asyncHandler, escapeRegex } from '#helpers'

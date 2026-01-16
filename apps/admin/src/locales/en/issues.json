@@ -16,6 +16,7 @@
       "priority": "Priority",
       "category": "Category",
       "assignee": "Assignee",
+      "assignees": "Assignees",
       "reporter": "Reporter",
       "lastComment": "Last Comment",
       "labels": "Labels",
@@ -133,6 +134,7 @@
     "placeholders": {
       "searchIssues": "Search issues...",
       "selectAssignee": "Select assignee",
+      "selectAssignees": "Select assignees",
       "selectPriority": "Select priority",
       "selectCategory": "Select category",
       "enterTitle": "Issue title",
@@ -160,6 +162,8 @@
       "pasteScreenshot": "or paste screenshot with Ctrl+V",
       "markdownAndMention": "Markdown supported. Use {'@'}username to mention someone."
     },
+
+    "assigneesSelected": "selected",
 
     "confirmations": {
       "delete": "Are you sure you want to delete this issue?",
