@@ -246,7 +246,7 @@
       v-model="showDeleteDialog"
       :title="$t('tour.deleteTour')"
       :message="$t('tour.deleteConfirm')"
-      confirm-variant="danger"
+      type="danger"
       @confirm="deleteTour"
     />
 
