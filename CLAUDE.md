@@ -366,4 +366,4 @@ WebFetch URL: https://app.minires.com/api/debug/issues?status=open&key=dab1e4a01
 
 ---
 
-**Son Güncelleme:** 2026-01-16
+**Son Güncelleme:** 2026-01-16 (v2)
