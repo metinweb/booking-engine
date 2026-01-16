@@ -1,5 +1,5 @@
 <template>
-  <Modal v-model="modelValue" size="xl" :title="$t('tour.aiImport.title')" @close="handleClose">
+  <Modal :modelValue="modelValue" size="xl" :title="$t('tour.aiImport.title')" @update:modelValue="$emit('update:modelValue', $event)" @close="handleClose">
     <div class="space-y-6">
       <!-- Step 1: Input -->
       <div v-if="step === 'input'">
