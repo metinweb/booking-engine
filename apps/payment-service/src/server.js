@@ -38,9 +38,23 @@ const app = express();
 const PORT = process.env.PORT || 7043;
 const SERVICE_NAME = process.env.SERVICE_NAME || 'payment-service';
 
-// Middleware
+// CORS configuration - parse comma-separated origins
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
+  : ['*'];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    // Check if origin is allowed
+    if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+      return callback(null, origin);
+    }
+
+    callback(new Error('CORS not allowed'));
+  },
   credentials: true
 }));
 app.use(express.json());
