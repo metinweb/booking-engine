@@ -326,4 +326,44 @@ Yeni özellik eklerken kontrol et:
 
 ---
 
-**Son Güncelleme:** 2026-01-13
+## 🔧 DEBUG ENDPOİNTLERİ (Claude Code Erişimi)
+
+Production sistemine hızlı erişim için debug endpoint'leri:
+
+**Base URL:** `https://app.minires.com/api/debug`
+
+**API Key:** `dab1e4a01913bfdbc2dc7239ee07f196c0564f6482ea6adb59873f5962264ad9`
+
+### Kullanım
+
+```bash
+# Tüm açık issues'ları getir
+curl -H "x-debug-key: dab1e4a01913bfdbc2dc7239ee07f196c0564f6482ea6adb59873f5962264ad9" \
+  "https://app.minires.com/api/debug/issues?status=open"
+
+# Tek bir issue detayı
+curl -H "x-debug-key: dab1e4a01913bfdbc2dc7239ee07f196c0564f6482ea6adb59873f5962264ad9" \
+  "https://app.minires.com/api/debug/issues/{issueId}"
+
+# Sistem istatistikleri
+curl -H "x-debug-key: dab1e4a01913bfdbc2dc7239ee07f196c0564f6482ea6adb59873f5962264ad9" \
+  "https://app.minires.com/api/debug/stats"
+```
+
+### Endpoint'ler
+
+| Endpoint | Açıklama |
+|----------|----------|
+| `GET /debug/issues` | Tüm issues (query: status, limit) |
+| `GET /debug/issues/:id` | Tek issue detayı (yorumlar dahil) |
+| `GET /debug/stats` | Sistem istatistikleri |
+
+### WebFetch ile Kullanım
+
+```
+WebFetch URL: https://app.minires.com/api/debug/issues?status=open&key=dab1e4a01913bfdbc2dc7239ee07f196c0564f6482ea6adb59873f5962264ad9
+```
+
+---
+
+**Son Güncelleme:** 2026-01-16

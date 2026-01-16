@@ -45,6 +45,9 @@ const ROUTE_CONFIG = {
 
   // Subscription invoices
   'subscriptionInvoice': 'subscription-invoices',
+
+  // Debug endpoint (Claude Code access)
+  'debug': 'debug',
 }
 
 /**
