@@ -466,9 +466,14 @@ const loadIssues = async (page = 1) => {
   try {
     const params = {
       page,
-      limit: pagination.value.limit,
-      ...filters
+      limit: pagination.value.limit
     }
+
+    // Add filters explicitly (reactive proxy spread issue)
+    if (filters.search) params.search = filters.search
+    if (filters.status) params.status = filters.status
+    if (filters.priority) params.priority = filters.priority
+    if (filters.category) params.category = filters.category
 
     // Hide resolved issues by default
     if (!showResolved.value) {
@@ -479,11 +484,6 @@ const loadIssues = async (page = 1) => {
     if (showDeleted.value) {
       params.showDeleted = true
     }
-
-    // Remove empty filters
-    Object.keys(params).forEach(key => {
-      if (!params[key]) delete params[key]
-    })
 
     const { data } = await issueService.getIssues(params)
     issues.value = data.issues
