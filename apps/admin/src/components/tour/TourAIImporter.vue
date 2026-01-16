@@ -262,7 +262,7 @@
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from 'vue-toastification'
-import Modal from '@/components/ui/Modal.vue'
+import Modal from '@/components/ui/overlay/Modal.vue'
 import * as tourService from '@/services/tourService'
 
 defineProps({
