@@ -1,16 +1,9 @@
 <template>
-  <div class="p-6">
-    <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-          {{ $t('partnerSubscriptions.title') }}
-        </h1>
-        <p class="text-gray-500 dark:text-slate-400 mt-1">
-          {{ $t('partnerSubscriptions.description') }}
-        </p>
-      </div>
-    </div>
+  <div>
+    <!-- Module Navigation -->
+    <ModuleNavigation :items="navItems" color="purple" />
+
+    <div class="p-6">
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -316,6 +309,7 @@
         </button>
       </template>
     </Modal>
+    </div>
   </div>
 </template>
 
@@ -324,12 +318,30 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Modal from '@/components/common/Modal.vue'
+import ModuleNavigation from '@/components/common/ModuleNavigation.vue'
 import partnerService from '@/services/partnerService'
 import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
 const { t } = useI18n()
 const toast = useToast()
+
+// Navigation items
+const navItems = computed(() => [
+  {
+    name: 'partners',
+    to: '/partners',
+    icon: 'business',
+    label: t('partners.title'),
+    exact: true
+  },
+  {
+    name: 'subscriptions',
+    to: '/partners/subscriptions',
+    icon: 'card_membership',
+    label: t('partners.subscriptionManagement')
+  }
+])
 
 // State
 const loading = ref(true)

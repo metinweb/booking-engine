@@ -1,28 +1,16 @@
 <template>
   <div>
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow">
-      <div class="p-4 border-b border-gray-200 dark:border-slate-700">
-        <div class="flex justify-between items-center">
-          <router-link
-            to="/partners/subscriptions"
-            class="btn-secondary flex items-center gap-2"
-          >
-            <span class="material-icons text-lg">card_membership</span>
-            {{ $t('partners.subscriptionManagement') }}
-          </router-link>
-          <button class="btn-primary flex items-center" @click="openCreateModal">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-              />
-            </svg>
-            {{ $t('partners.addPartner') }}
-          </button>
-        </div>
-      </div>
+    <!-- Module Navigation -->
+    <ModuleNavigation :items="navItems" color="purple" @action="handleNavAction">
+      <template #actions>
+        <button class="btn-primary flex items-center gap-2" @click="openCreateModal">
+          <span class="material-icons text-lg">add</span>
+          <span class="hidden sm:inline">{{ $t('partners.addPartner') }}</span>
+        </button>
+      </template>
+    </ModuleNavigation>
+
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow mt-4">
 
       <div class="p-6">
         <DataTable :columns="columns" :data="partners" :loading="loading">
@@ -1067,9 +1055,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import DataTable from '@/components/ui/data/DataTable.vue'
 import Modal from '@/components/common/Modal.vue'
+import ModuleNavigation from '@/components/common/ModuleNavigation.vue'
 import DocumentUpload from '@/components/DocumentUpload.vue'
 import partnerService from '@/services/partnerService'
 import subscriptionInvoiceService from '@/services/subscriptionInvoiceService'
@@ -1078,6 +1067,27 @@ import { useAsyncAction } from '@/composables/useAsyncAction'
 import { usePermissions } from '@/composables/usePermissions'
 
 const { t } = useI18n()
+
+// Navigation items
+const navItems = computed(() => [
+  {
+    name: 'partners',
+    to: '/partners',
+    icon: 'business',
+    label: t('partners.title'),
+    exact: true
+  },
+  {
+    name: 'subscriptions',
+    to: '/partners/subscriptions',
+    icon: 'card_membership',
+    label: t('partners.subscriptionManagement')
+  }
+])
+
+const handleNavAction = (action) => {
+  // Handle navigation actions if needed
+}
 const { executeWithPermission } = usePermissions()
 
 // Use async action composables
