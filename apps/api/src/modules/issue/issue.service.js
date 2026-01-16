@@ -95,7 +95,8 @@ export const getIssues = asyncHandler(async (req, res) => {
     ]
   }
 
-  const sort = { [sortBy]: sortOrder === 'desc' ? -1 : 1 }
+  // Pinned issues always first, then by selected sort
+  const sort = { isPinned: -1, [sortBy]: sortOrder === 'desc' ? -1 : 1 }
 
   const [issues, total] = await Promise.all([
     Issue.find(query)
@@ -861,6 +862,37 @@ export const nudgeIssue = asyncHandler(async (req, res) => {
       recipientsCount: targetUsers.length,
       notificationsSent,
       emailsSent
+    }
+  })
+})
+
+// Toggle Pin Issue
+export const togglePin = asyncHandler(async (req, res) => {
+  const issue = await Issue.findById(req.params.id)
+  if (!issue) throw new NotFoundError('Issue not found')
+
+  const wasPinned = issue.isPinned
+
+  if (wasPinned) {
+    // Unpin
+    issue.isPinned = false
+    issue.pinnedAt = null
+    issue.pinnedBy = null
+    issue.addActivity('unpinned', req.user._id)
+  } else {
+    // Pin
+    issue.isPinned = true
+    issue.pinnedAt = new Date()
+    issue.pinnedBy = req.user._id
+    issue.addActivity('pinned', req.user._id)
+  }
+
+  await issue.save()
+
+  res.json({
+    success: true,
+    data: {
+      isPinned: issue.isPinned
     }
   })
 })

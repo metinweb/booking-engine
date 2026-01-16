@@ -41,7 +41,7 @@ const activitySchema = new mongoose.Schema({
       'comment_edited', 'comment_deleted', 'attachment_added', 'attachment_removed',
       'due_date_set', 'due_date_removed', 'watcher_added', 'watcher_removed',
       'related_added', 'related_removed', 'reopened', 'resolved', 'closed',
-      'nudge_sent', 'deleted', 'restored'
+      'nudge_sent', 'deleted', 'restored', 'pinned', 'unpinned'
     ],
     required: true
   },
@@ -158,6 +158,17 @@ const issueSchema = new mongoose.Schema({
     userAgent: String
   },
 
+  // Pin
+  isPinned: {
+    type: Boolean,
+    default: false
+  },
+  pinnedAt: Date,
+  pinnedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+
   // Soft Delete
   isDeleted: {
     type: Boolean,
@@ -179,6 +190,7 @@ issueSchema.index({ reporter: 1 })
 issueSchema.index({ assignees: 1 })
 issueSchema.index({ createdAt: -1 })
 issueSchema.index({ isDeleted: 1 })
+issueSchema.index({ isPinned: -1, createdAt: -1 })
 issueSchema.index({ title: 'text', description: 'text' })
 
 // Issue numarası oluştur

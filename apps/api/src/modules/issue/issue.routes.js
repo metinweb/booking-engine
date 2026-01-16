@@ -22,6 +22,7 @@ router.delete('/:id', issueService.deleteIssue)
 router.patch('/:id/status', issueService.changeStatus)
 router.patch('/:id/assign', issueService.assignIssue)
 router.patch('/:id/watch', issueService.toggleWatcher)
+router.patch('/:id/pin', issueService.togglePin)
 router.post('/:id/nudge', issueService.nudgeIssue)
 
 // Comments

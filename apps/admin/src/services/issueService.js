@@ -43,6 +43,11 @@ const toggleWatch = async (id) => {
   return response.data
 }
 
+const togglePin = async (id) => {
+  const response = await apiClient.patch(`/issues/${id}/pin`)
+  return response.data
+}
+
 // Comments
 const addComment = async (id, content, mentions = []) => {
   const response = await apiClient.post(`/issues/${id}/comments`, { content, mentions })
@@ -102,6 +107,7 @@ export default {
   changeStatus,
   assignIssue,
   toggleWatch,
+  togglePin,
   addComment,
   updateComment,
   deleteComment,

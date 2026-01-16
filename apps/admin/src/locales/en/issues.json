@@ -71,7 +71,9 @@
       "resolve": "Mark as Resolved",
       "close": "Close",
       "reopen": "Reopen",
-      "nudge": "Nudge"
+      "nudge": "Nudge",
+      "pin": "Pin",
+      "unpin": "Unpin"
     },
 
     "nudge": {
@@ -155,7 +157,9 @@
       "fileDeleted": "File deleted",
       "watchingEnabled": "Now watching this issue",
       "watchingDisabled": "Stopped watching this issue",
-      "screenshotAdded": "Screenshot added"
+      "screenshotAdded": "Screenshot added",
+      "pinned": "Issue pinned",
+      "unpinned": "Issue unpinned"
     },
 
     "hints": {

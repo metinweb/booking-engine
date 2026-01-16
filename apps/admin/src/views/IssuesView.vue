@@ -292,6 +292,20 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </router-link>
+              <!-- Pin button -->
+              <button
+                v-if="!row.isDeleted"
+                class="p-2 rounded-lg transition-colors"
+                :class="row.isPinned
+                  ? 'text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20'
+                  : 'text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-600 dark:hover:text-gray-300'"
+                :title="row.isPinned ? $t('issues.actions.unpin') : $t('issues.actions.pin')"
+                @click="handleTogglePin(row)"
+              >
+                <svg class="w-4 h-4" :fill="row.isPinned ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+              </button>
               <!-- Delete button (only for reporter) -->
               <button
                 v-if="canDeleteIssue(row) && !row.isDeleted"
@@ -431,6 +445,19 @@ const handleDeleteIssue = async () => {
     console.error('Failed to delete issue:', error)
   } finally {
     selectedIssue.value = null
+  }
+}
+
+// Handle toggle pin
+const handleTogglePin = async (issue) => {
+  try {
+    const { data } = await issueService.togglePin(issue._id)
+    issue.isPinned = data.isPinned
+    toast.success(t(data.isPinned ? 'issues.messages.pinned' : 'issues.messages.unpinned'))
+    loadIssues()
+  } catch (error) {
+    toast.error(t('common.error'))
+    console.error('Failed to toggle pin:', error)
   }
 }
 

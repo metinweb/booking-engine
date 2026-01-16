@@ -71,7 +71,9 @@
       "resolve": "Çözüldü Olarak İşaretle",
       "close": "Kapat",
       "reopen": "Yeniden Aç",
-      "nudge": "Dürt"
+      "nudge": "Dürt",
+      "pin": "Sabitle",
+      "unpin": "Sabitlemeyi Kaldır"
     },
 
     "nudge": {
@@ -155,7 +157,9 @@
       "fileDeleted": "Dosya silindi",
       "watchingEnabled": "Talep takibe alındı",
       "watchingDisabled": "Talep takipten çıkarıldı",
-      "screenshotAdded": "Ekran görüntüsü eklendi"
+      "screenshotAdded": "Ekran görüntüsü eklendi",
+      "pinned": "Talep sabitlendi",
+      "unpinned": "Talep sabitleme kaldırıldı"
     },
 
     "hints": {
