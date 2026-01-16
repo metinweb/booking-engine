@@ -380,7 +380,8 @@ const partnerSchema = new mongoose.Schema(
 
       // Özel limitler (tüm paketler için geçerli override)
       customLimits: {
-        pmsMaxHotels: { type: Number, default: null } // null = paket limiti kullan
+        pmsMaxHotels: { type: Number, default: null }, // null = paket limiti kullan
+        webDesignMaxSites: { type: Number, default: null } // null = paket limiti kullan
       },
 
       // Satın alınan paketler (yıllık)
@@ -389,7 +390,7 @@ const partnerSchema = new mongoose.Schema(
           // Paket tipi
           plan: {
             type: String,
-            enum: ['business', 'professional', 'enterprise'],
+            enum: ['webdesign', 'business', 'professional', 'enterprise'],
             required: true
           },
 
@@ -579,6 +580,41 @@ partnerSchema.methods.canUsePms = function () {
   return this.isPmsEnabled()
 }
 
+// Get Web Design site limit
+// Returns: number (-1 = unlimited, 0 = disabled, >0 = limit)
+partnerSchema.methods.getWebDesignLimit = function () {
+  // First check custom limit
+  if (this.subscription?.customLimits?.webDesignMaxSites != null) {
+    return this.subscription.customLimits.webDesignMaxSites
+  }
+  // Fall back to plan defaults from current purchase
+  const planKey = this.getCurrentPlan()
+  const plan = SUBSCRIPTION_PLANS[planKey]
+  return plan?.features?.webDesign?.maxSites || 0
+}
+
+// Check if Web Design is enabled for this partner
+partnerSchema.methods.isWebDesignEnabled = function () {
+  // Custom limit > 0 enables Web Design
+  if (this.subscription?.customLimits?.webDesignMaxSites > 0) return true
+  // Custom limit === -1 (unlimited) enables Web Design
+  if (this.subscription?.customLimits?.webDesignMaxSites === -1) return true
+
+  // Fall back to plan defaults from current purchase
+  const planKey = this.getCurrentPlan()
+  const plan = SUBSCRIPTION_PLANS[planKey]
+  return plan?.features?.webDesign?.enabled || false
+}
+
+// Check if Web Design can be used (not expired)
+partnerSchema.methods.canUseWebDesign = function () {
+  const status = this.calculateSubscriptionStatus()
+  if (['expired', 'suspended', 'cancelled'].includes(status)) {
+    return false
+  }
+  return this.isWebDesignEnabled()
+}
+
 // Get remaining days until subscription expires
 partnerSchema.methods.getRemainingDays = function () {
   const purchase = this.getCurrentPurchase()
@@ -685,6 +721,15 @@ partnerSchema.methods.getSubscriptionStatus = function () {
       provisionedHotels: provisionedCount,
       canProvisionMore: this.canProvisionMoreHotels() && this.canUsePms(),
       remainingSlots: limit === -1 ? 'unlimited' : Math.max(0, limit - provisionedCount)
+    },
+
+    // Web Design status
+    webDesignStatus: {
+      enabled: this.canUseWebDesign(),
+      maxSites: this.getWebDesignLimit(),
+      maxSitesDisplay: this.getWebDesignLimit() === -1 ? 'unlimited' : this.getWebDesignLimit(),
+      ssl: plan?.features?.webDesign?.ssl || false,
+      customDomain: plan?.features?.webDesign?.customDomain || false
     },
 
     // Dates (from current purchase)

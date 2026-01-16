@@ -226,6 +226,66 @@
         </div>
       </div>
 
+      <!-- Web Design Quota Card (if applicable) -->
+      <div
+        v-if="subscription.webDesignEnabled"
+        class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
+      >
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+          <h3 class="font-semibold text-gray-900 dark:text-white">
+            {{ $t('mySubscription.webDesign.title') }}
+          </h3>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Sites Limit -->
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-teal-100 dark:bg-teal-900/30 flex items-center justify-center">
+                <span class="material-icons text-xl text-teal-500">web</span>
+              </div>
+              <div>
+                <div class="text-sm text-gray-500 dark:text-slate-400">
+                  {{ $t('mySubscription.webDesign.maxSites') }}
+                </div>
+                <div class="text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ subscription.webDesignLimit === -1 ? $t('mySubscription.pmsUnlimited') : subscription.webDesignLimit }}
+                </div>
+              </div>
+            </div>
+
+            <!-- SSL -->
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <span class="material-icons text-xl text-green-500">lock</span>
+              </div>
+              <div>
+                <div class="text-sm text-gray-500 dark:text-slate-400">
+                  {{ $t('mySubscription.webDesign.ssl') }}
+                </div>
+                <div class="text-lg font-semibold text-green-600 dark:text-green-400">
+                  {{ $t('mySubscription.webDesign.included') }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Domain -->
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                <span class="material-icons text-xl text-purple-500">dns</span>
+              </div>
+              <div>
+                <div class="text-sm text-gray-500 dark:text-slate-400">
+                  {{ $t('mySubscription.webDesign.customDomain') }}
+                </div>
+                <div class="text-lg font-semibold text-green-600 dark:text-green-400">
+                  {{ $t('mySubscription.webDesign.included') }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Invoices Card -->
       <div
         class="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden"
@@ -649,6 +709,11 @@ const card = ref({
 
 // Available plans
 const availablePlans = {
+  webdesign: {
+    name: 'Web Design',
+    description: 'Web tasarım ve domain yönetimi',
+    price: { yearly: 29 }
+  },
   business: {
     name: 'Business',
     description: 'Orta ölçekli işletmeler için',
@@ -667,6 +732,11 @@ const availablePlans = {
 }
 
 const planColors = {
+  webdesign: {
+    bg: 'bg-teal-100 dark:bg-teal-900/30',
+    text: 'text-teal-500',
+    icon: 'web'
+  },
   business: {
     bg: 'bg-blue-100 dark:bg-blue-900/30',
     text: 'text-blue-500',
@@ -709,6 +779,7 @@ const purchaseStatusColors = {
 
 const getPlanName = plan => {
   const planNames = {
+    webdesign: 'Web Design',
     business: 'Business',
     professional: 'Professional',
     enterprise: 'Enterprise'

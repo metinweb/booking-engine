@@ -892,6 +892,8 @@
       "status": "Status",
       "planDescription": "Select the partner's subscription plan",
       "plans": {
+        "webdesign": "Web Design",
+        "webdesignDesc": "Web design and domain management",
         "business": "Business",
         "businessDesc": "For medium-sized businesses",
         "professional": "Professional",
@@ -900,6 +902,7 @@
         "enterpriseDesc": "Enterprise package with unlimited PMS"
       },
       "planDescriptions": {
+        "webdesign": "Web design and domain management",
         "business": "For medium-sized businesses",
         "professional": "Professional package with PMS integration",
         "enterprise": "Enterprise package with unlimited PMS"
@@ -1111,6 +1114,13 @@
     "pmsQuota": "PMS Quota",
     "pmsQuotaUsage": "{used} / {limit} hotels used",
     "pmsUnlimited": "Unlimited",
+    "webDesign": {
+      "title": "Web Design Package",
+      "maxSites": "Website Limit",
+      "ssl": "SSL Certificate",
+      "customDomain": "Custom Domain",
+      "included": "Included"
+    },
     "status": {
       "active": "Active",
       "expired": "Expired",

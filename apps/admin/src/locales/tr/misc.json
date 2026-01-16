@@ -892,6 +892,8 @@
       "status": "Durum",
       "planDescription": "Partner'ın abonelik paketini seçin",
       "plans": {
+        "webdesign": "Web Design",
+        "webdesignDesc": "Web tasarım ve domain yönetimi",
         "business": "Business",
         "businessDesc": "Orta ölçekli işletmeler için",
         "professional": "Professional",
@@ -900,6 +902,7 @@
         "enterpriseDesc": "Sınırsız PMS ile kurumsal paket"
       },
       "planDescriptions": {
+        "webdesign": "Web tasarım ve domain yönetimi",
         "business": "Orta ölçekli işletmeler için",
         "professional": "PMS entegrasyonu dahil profesyonel paket",
         "enterprise": "Sınırsız PMS ile kurumsal paket"
@@ -1084,6 +1087,13 @@
     "pmsQuota": "PMS Kotası",
     "pmsQuotaUsage": "{used} / {limit} otel kullanılıyor",
     "pmsUnlimited": "Sınırsız",
+    "webDesign": {
+      "title": "Web Design Paketi",
+      "maxSites": "Website Limiti",
+      "ssl": "SSL Sertifikası",
+      "customDomain": "Özel Domain",
+      "included": "Dahil"
+    },
     "status": {
       "active": "Aktif",
       "expired": "Süresi Doldu",

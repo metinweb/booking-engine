@@ -2,10 +2,30 @@
  * Subscription Plans Configuration
  *
  * Paket tipleri, fiyatlar ve ozellikleri.
- * 3 paket: Business, Professional, Enterprise
+ * 4 paket: Web Design, Business, Professional, Enterprise
  */
 
 export const SUBSCRIPTION_PLANS = {
+  webdesign: {
+    name: 'Web Design',
+    description: 'Web tasarım ve domain yönetimi',
+    price: {
+      yearly: 29,
+      currency: 'USD'
+    },
+    features: {
+      pms: {
+        enabled: false,
+        maxHotels: 0
+      },
+      webDesign: {
+        enabled: true,
+        maxSites: 1,
+        ssl: true,
+        customDomain: true
+      }
+    }
+  },
   business: {
     name: 'Business',
     description: 'Orta ölçekli işletmeler için',
@@ -17,6 +37,12 @@ export const SUBSCRIPTION_PLANS = {
       pms: {
         enabled: false,
         maxHotels: 0
+      },
+      webDesign: {
+        enabled: false,
+        maxSites: 0,
+        ssl: false,
+        customDomain: false
       }
     }
   },
@@ -31,6 +57,12 @@ export const SUBSCRIPTION_PLANS = {
       pms: {
         enabled: true,
         maxHotels: 5
+      },
+      webDesign: {
+        enabled: false,
+        maxSites: 0,
+        ssl: false,
+        customDomain: false
       }
     }
   },
@@ -45,6 +77,12 @@ export const SUBSCRIPTION_PLANS = {
       pms: {
         enabled: true,
         maxHotels: -1 // -1 = sınırsız
+      },
+      webDesign: {
+        enabled: false,
+        maxSites: 0,
+        ssl: false,
+        customDomain: false
       }
     }
   }
