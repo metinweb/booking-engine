@@ -23,6 +23,14 @@ import {
   createPaximumActions
 } from './booking/index.js'
 
+// Helper: Format date as YYYY-MM-DD (local timezone)
+const formatDateLocal = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // Helper: Get default date range (today + 2 nights)
 const getDefaultDateRange = () => {
   const today = new Date()
@@ -30,8 +38,8 @@ const getDefaultDateRange = () => {
   const checkOut = new Date(today)
   checkOut.setDate(checkOut.getDate() + 2)
   return {
-    start: today.toISOString().split('T')[0],
-    end: checkOut.toISOString().split('T')[0]
+    start: formatDateLocal(today),
+    end: formatDateLocal(checkOut)
   }
 }
 
