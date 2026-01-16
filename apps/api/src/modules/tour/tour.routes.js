@@ -2,11 +2,13 @@
 import express from 'express'
 import * as tourService from './tour.service.js'
 import { protect, requirePartnerOrAdmin } from '#middleware/auth.js'
+import { partnerContext } from '#middleware/partnerContext.js'
 
 const router = express.Router()
 
 // All routes require authentication and partner context
 router.use(protect)
+router.use(partnerContext)
 router.use(requirePartnerOrAdmin)
 
 // =====================
