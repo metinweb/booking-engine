@@ -79,6 +79,15 @@
             </button>
           </div>
 
+          <!-- AI Import Button -->
+          <button
+            class="btn-outline border-teal-500 text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30"
+            @click="showAIImporter = true"
+          >
+            <span class="material-icons mr-2">auto_awesome</span>
+            {{ $t('tour.aiImport.button') }}
+          </button>
+
           <!-- New Tour Button -->
           <button class="btn-primary bg-teal-600 hover:bg-teal-700" @click="createTour">
             <span class="material-icons mr-2">add</span>
@@ -240,6 +249,12 @@
       confirm-variant="danger"
       @confirm="deleteTour"
     />
+
+    <!-- AI Import Modal -->
+    <TourAIImporter
+      v-model="showAIImporter"
+      @apply="handleAIImportApply"
+    />
   </div>
 </template>
 
@@ -251,6 +266,7 @@ import { useTourStore } from '@/stores/tour'
 import { getTourTypes } from '@/services/tourService'
 import ModuleNavigation from '@/components/common/ModuleNavigation.vue'
 import { DataTable, ConfirmDialog } from '@/components/ui'
+import TourAIImporter from '@/components/tour/TourAIImporter.vue'
 import debounce from 'lodash/debounce'
 
 const router = useRouter()
@@ -264,6 +280,7 @@ const pagination = computed(() => tourStore.pagination)
 const viewMode = ref('table')
 const showDeleteDialog = ref(false)
 const tourToDelete = ref(null)
+const showAIImporter = ref(false)
 
 // Filters
 const filters = ref({
@@ -450,6 +467,12 @@ const handlePageChange = (page) => {
 
 const createTour = () => {
   router.push('/tours/new')
+}
+
+const handleAIImportApply = (data) => {
+  // Store data in session storage and navigate to new tour page
+  sessionStorage.setItem('aiTourData', JSON.stringify(data))
+  router.push('/tours/new?ai=true')
 }
 
 const editTour = (tour) => {

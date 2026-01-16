@@ -15,6 +15,9 @@ router.use(requirePartnerOrAdmin)
 router.get('/', tourService.getList)
 router.get('/stats', tourService.getStats)
 
+// AI Extraction
+router.post('/ai/extract', tourService.aiExtractTour)
+
 // =====================
 // DEPARTURE ROUTES (MUST be before /:id to avoid matching)
 // =====================

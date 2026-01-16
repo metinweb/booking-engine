@@ -582,6 +582,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useToast } from 'vue-toastification'
 import { useTourStore } from '@/stores/tour'
 import { getTourTypes, getTransportationTypes, getMealPlans } from '@/services/tourService'
 import MultiLangInput from '@/components/common/MultiLangInput.vue'
@@ -591,6 +592,7 @@ import { B2C_LANGUAGES } from '@/constants/languages'
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
+const toast = useToast()
 const tourStore = useTourStore()
 
 // State
@@ -838,8 +840,105 @@ watch(() => route.params.id, () => {
   loadTour()
 })
 
+// Apply AI imported data to form
+const applyAIData = (data) => {
+  if (!data) return
+
+  // Basic fields
+  if (data.code) form.value.code = data.code
+  if (data.name) form.value.name = data.name
+  if (data.shortDescription) form.value.shortDescription = data.shortDescription
+  if (data.description) form.value.description = data.description
+  if (data.tourType) form.value.tourType = data.tourType
+
+  // Destination
+  if (data.destination) {
+    form.value.destination = {
+      country: data.destination.country || '',
+      city: data.destination.city || '',
+      region: data.destination.region || ''
+    }
+  }
+
+  // Duration
+  if (data.duration) {
+    form.value.duration = {
+      nights: data.duration.nights || 0,
+      days: data.duration.days || 1
+    }
+  }
+
+  // Transportation
+  if (data.transportation?.length) {
+    form.value.transportation = data.transportation.map((t, idx) => ({
+      type: t.type || 'flight',
+      direction: 'outbound',
+      carrier: t.carrier || '',
+      class: t.class || 'economy',
+      isIncluded: t.isIncluded !== false,
+      sequence: idx + 1
+    }))
+  }
+
+  // Accommodations
+  if (data.accommodations?.length) {
+    form.value.accommodations = data.accommodations.map((a, idx) => ({
+      hotelName: a.hotelName || '',
+      nights: a.nights || 1,
+      mealPlan: a.mealPlanCode?.toLowerCase().replace(/-/g, '_') || 'bed_breakfast',
+      starRating: a.starRating || 4,
+      isMain: idx === 0
+    }))
+  }
+
+  // Itinerary
+  if (data.itinerary?.length) {
+    form.value.itinerary = data.itinerary.map(day => ({
+      day: day.day || 1,
+      title: day.title || { tr: '', en: '' },
+      description: day.description || { tr: '', en: '' },
+      meals: {
+        breakfast: day.meals?.includes('breakfast') || false,
+        lunch: day.meals?.includes('lunch') || false,
+        dinner: day.meals?.includes('dinner') || false
+      },
+      activities: day.activities || [],
+      overnight: day.accommodation || ''
+    }))
+  }
+
+  // Inclusions
+  if (data.inclusions?.length) {
+    form.value.inclusions = data.inclusions.map(item => ({
+      text: typeof item === 'object' ? item : { tr: item, en: '' }
+    }))
+  }
+
+  // Exclusions
+  if (data.exclusions?.length) {
+    form.value.exclusions = data.exclusions.map(item => ({
+      text: typeof item === 'object' ? item : { tr: item, en: '' }
+    }))
+  }
+}
+
 // Lifecycle
 onMounted(() => {
   loadTour()
+
+  // Check for AI imported data
+  if (route.query.ai === 'true') {
+    const aiData = sessionStorage.getItem('aiTourData')
+    if (aiData) {
+      try {
+        const parsedData = JSON.parse(aiData)
+        applyAIData(parsedData)
+        sessionStorage.removeItem('aiTourData')
+        toast.success(t('tour.aiImport.success'))
+      } catch (error) {
+        console.error('Failed to parse AI data:', error)
+      }
+    }
+  }
 })
 </script>

@@ -1083,6 +1083,34 @@ export const calculatePrice = asyncHandler(async (req, res) => {
 })
 
 // =====================
+// AI EXTRACTION
+// =====================
+
+/**
+ * Extract tour data from text using AI
+ */
+export const aiExtractTour = asyncHandler(async (req, res) => {
+  const { content } = req.body
+
+  if (!content || content.trim().length < 50) {
+    throw new BadRequestError('CONTENT_TOO_SHORT')
+  }
+
+  const { extractTourData } = await import('#services/gemini/tourExtraction.js')
+
+  const result = await extractTourData(content)
+
+  if (!result.success) {
+    throw new BadRequestError(result.error || 'AI_EXTRACTION_FAILED')
+  }
+
+  res.json({
+    success: true,
+    data: result.data
+  })
+})
+
+// =====================
 // STATS & REPORTS
 // =====================
 
@@ -1157,6 +1185,7 @@ export default {
   update,
   remove,
   duplicate,
+  aiExtractTour,
   // Departures
   getDepartures,
   getDepartureById,

@@ -23,12 +23,46 @@
       "basic": "Basic Info",
       "itinerary": "Itinerary",
       "transportation": "Transportation",
+      "accommodation": "Accommodation",
       "accommodations": "Accommodations",
       "pricing": "Pricing",
       "extras": "Extras",
       "media": "Media",
-      "settings": "Settings"
+      "settings": "Settings",
+      "details": "Details"
     },
+
+    "aiImport": {
+      "button": "AI Import",
+      "title": "AI Tour Import",
+      "description": "Paste the tour information as text, AI will automatically fill in the required fields.",
+      "contentLabel": "Tour Information",
+      "placeholder": "Paste the tour package information here...\n\nExample:\n- Tour name and code\n- Destination country and city\n- Number of nights and days\n- Transportation details\n- Hotel information\n- Daily itinerary\n- Included and excluded services\n- Cancellation policy",
+      "hint": "Enter detailed information with at least 50 characters",
+      "processing": "AI Processing...",
+      "processingDescription": "Tour information is being analyzed and fields are being filled.",
+      "success": "Data extracted successfully",
+      "error": "Failed to extract data",
+      "extract": "Extract Data",
+      "apply": "Apply",
+      "extractionSuccess": "Tour data extracted successfully",
+      "extractionError": "Data extraction error",
+      "confidenceScores": "Confidence Scores",
+      "noAccommodations": "No accommodation found",
+      "noItinerary": "No itinerary found",
+      "noInclusions": "No inclusions found",
+      "noExclusions": "No exclusions found"
+    },
+
+    "meals": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snack"
+    },
+
+    "nights": "Nights",
+    "days": "Days",
 
     "fields": {
       "code": "Tour Code",
@@ -45,7 +79,11 @@
       "days": "Days",
       "status": "Status",
       "featured": "Featured",
-      "displayOrder": "Display Order"
+      "displayOrder": "Display Order",
+      "mealPlan": "Meal Plan",
+      "roomType": "Room Type",
+      "inclusions": "Inclusions",
+      "exclusions": "Exclusions"
     },
 
     "tourTypes": {

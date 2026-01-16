@@ -276,6 +276,18 @@ export async function addBookingNote(id, payload) {
 }
 
 // =====================
+// AI OPERATIONS
+// =====================
+
+/**
+ * Extract tour data from text using AI
+ */
+export async function aiExtractTour(content) {
+  const { data } = await api.post(`${BASE_URL}/ai/extract`, { content })
+  return data
+}
+
+// =====================
 // HELPER FUNCTIONS
 // =====================
 
@@ -391,6 +403,8 @@ export default {
   updateTour,
   deleteTour,
   duplicateTour,
+  // AI
+  aiExtractTour,
   // Departures
   getDepartures,
   createDeparture,

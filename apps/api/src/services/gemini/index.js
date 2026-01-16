@@ -24,6 +24,9 @@ export { translateText, translateFields, batchTranslate } from './translation.js
 // Hotel extraction exports
 export { extractHotelData, extractHotelDataFromUrl } from './hotelExtraction.js'
 
+// Tour extraction exports
+export { extractTourData } from './tourExtraction.js'
+
 // Pricing parser exports
 export { parsePricingCommand } from './pricingParser.js'
 

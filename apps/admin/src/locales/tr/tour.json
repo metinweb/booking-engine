@@ -23,12 +23,46 @@
       "basic": "Temel Bilgiler",
       "itinerary": "Program",
       "transportation": "Ulasim",
+      "accommodation": "Konaklama",
       "accommodations": "Konaklama",
       "pricing": "Fiyatlandirma",
       "extras": "Ekstralar",
       "media": "Medya",
-      "settings": "Ayarlar"
+      "settings": "Ayarlar",
+      "details": "Detaylar"
     },
+
+    "aiImport": {
+      "button": "AI ile Aktar",
+      "title": "AI ile Tur Iceri Aktarma",
+      "description": "Tur bilgilerini metin olarak yapistirun, AI gerekli alanlari otomatik olarak dolduracaktir.",
+      "contentLabel": "Tur Bilgileri",
+      "placeholder": "Tur paketinin bilgilerini buraya yapistirun...\n\nOrnek:\n- Tur adi ve kodu\n- Gidilecek ulke ve sehir\n- Kac gece kac gun\n- Ulasim bilgileri\n- Otel bilgileri\n- Gunluk program\n- Dahil olan ve olmayan hizmetler\n- Iptal kosullari",
+      "hint": "En az 50 karakter iceren detayli bilgi girin",
+      "processing": "AI Isleniyor...",
+      "processingDescription": "Tur bilgileri analiz ediliyor ve gerekli alanlar dolduruluyor.",
+      "success": "Veriler basariyla cikarildi",
+      "error": "Veri cikarilamadi",
+      "extract": "Verileri Cikar",
+      "apply": "Uygula",
+      "extractionSuccess": "Tur verileri basariyla cikarildi",
+      "extractionError": "Veri cikarma hatasi",
+      "confidenceScores": "Guven Skorlari",
+      "noAccommodations": "Konaklama bilgisi bulunamadi",
+      "noItinerary": "Gunluk program bulunamadi",
+      "noInclusions": "Dahil olan hizmet bulunamadi",
+      "noExclusions": "Dahil olmayan hizmet bulunamadi"
+    },
+
+    "meals": {
+      "breakfast": "Kahvalti",
+      "lunch": "Ogle Yemegi",
+      "dinner": "Aksam Yemegi",
+      "snack": "Ara Ogun"
+    },
+
+    "nights": "Gece",
+    "days": "Gun",
 
     "fields": {
       "code": "Tur Kodu",
@@ -45,7 +79,11 @@
       "days": "Gun",
       "status": "Durum",
       "featured": "One Cikan",
-      "displayOrder": "Siralama"
+      "displayOrder": "Siralama",
+      "mealPlan": "Pansiyon Tipi",
+      "roomType": "Oda Tipi",
+      "inclusions": "Dahil Olanlar",
+      "exclusions": "Dahil Olmayanlar"
     },
 
     "tourTypes": {
