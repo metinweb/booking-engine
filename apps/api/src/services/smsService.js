@@ -143,6 +143,15 @@ class SMSService {
     </body>
 </mainbody>`
 
+      // DEBUG: Log XML body (mask password)
+      logger.info('SMS XML Request:', {
+        url: this.apiUrl,
+        usercode: settings.usercode,
+        password: settings.password ? `${settings.password.substring(0, 3)}***` : null,
+        msgheader: settings.msgheader,
+        phone: formattedPhone
+      })
+
       const response = await axios.post(this.apiUrl, xmlBody, {
         headers: { 'Content-Type': 'text/xml' },
         timeout: 30000
