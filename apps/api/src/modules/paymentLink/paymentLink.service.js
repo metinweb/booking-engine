@@ -138,8 +138,10 @@ export const createPaymentLink = asyncHandler(async (req, res) => {
   if (req.user.accountType === 'partner') {
     // Partner users must use their own partner
     partnerId = req.user.accountId
-  } else if (req.partnerId) {
-    partnerId = req.partnerId
+  } else {
+    // Platform admin: use explicit partner from body, or null for platform-level links
+    // Don't auto-assign from req.partnerId - let admin choose
+    partnerId = req.body.partner || null
   }
 
   // Partner is required only for partner users
