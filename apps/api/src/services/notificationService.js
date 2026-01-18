@@ -110,10 +110,13 @@ class NotificationService {
       try {
         log.channels.email = { attempted: true }
 
+        // Use emailTemplate from config if available, otherwise use type
+        const templateName = config?.emailTemplate || type
+
         const emailResult = await sendEmail({
           to: recipient.email,
           subject: data.subject || this.getEmailSubject(type, data),
-          html: data.html || (await this.renderEmailTemplate(type, data)),
+          html: data.html || (await this.renderEmailTemplate(templateName, data)),
           partnerId
         })
 

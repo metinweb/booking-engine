@@ -1272,7 +1272,7 @@
     "interestRate": "Interest Rate",
     "interestRates": "Interest Rates",
     "perMonth": "per month",
-    "interestRateHint": "Interest rate applied per installment. Leave empty = no interest.",
+    "interestRateHint": "Interest rate applied per installment (%)",
     "expiryHint": "Default: 30 days",
     "installmentDisabledHint": "Customer can only pay in full",
     "noEmailEntered": "No email entered",
@@ -1309,7 +1309,17 @@
       "viewed": "Viewed",
       "paid": "Paid",
       "thisMonth": "This Month"
-    }
+    },
+    "commission": "Commission",
+    "commissionLabel": "Bank Commission",
+    "totalDeduction": "Total Deduction",
+    "resetToDefault": "Reset to Default",
+    "ratesModifiedWarning": "Interest rates differ from defaults",
+    "estimatedCommission": "Estimated Commission",
+    "netAmount": "Net Amount",
+    "noCommissionData": "No commission data available",
+    "singlePayment": "Single",
+    "upTo": "Up to"
   },
   "misc": {
     "search": "Search",

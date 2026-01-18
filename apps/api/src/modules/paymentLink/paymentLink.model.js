@@ -190,11 +190,10 @@ paymentLinkSchema.pre('save', async function (next) {
     this.token = uuidv4()
   }
 
-  // Generate link number if not set
+  // Generate link number if not set (globally unique, not per-partner)
   if (!this.linkNumber) {
     const year = new Date().getFullYear()
     const count = await this.constructor.countDocuments({
-      partner: this.partner,
       createdAt: {
         $gte: new Date(`${year}-01-01`),
         $lt: new Date(`${year + 1}-01-01`)

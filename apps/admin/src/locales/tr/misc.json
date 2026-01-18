@@ -1245,7 +1245,7 @@
     "interestRate": "Vade Farkı Oranı",
     "interestRates": "Vade Farkı Oranları",
     "perMonth": "aylık",
-    "interestRateHint": "Her taksit için uygulanacak vade farkı oranı. Boş bırakılan = vade farksız.",
+    "interestRateHint": "Her taksit için uygulanacak vade farkı oranı (%)",
     "expiryHint": "Varsayılan: 30 gün",
     "installmentDisabledHint": "Müşteri sadece tek çekim ödeme yapabilir",
     "noEmailEntered": "E-posta girilmedi",
@@ -1282,7 +1282,17 @@
       "viewed": "Görüntülenen",
       "paid": "Ödenen",
       "thisMonth": "Bu Ay"
-    }
+    },
+    "commission": "Komisyon",
+    "commissionLabel": "Banka Komisyonu",
+    "totalDeduction": "Toplam Kesinti",
+    "resetToDefault": "Varsayılana Sıfırla",
+    "ratesModifiedWarning": "Vade farkı oranları varsayılandan farklı",
+    "estimatedCommission": "Tahmini Komisyon",
+    "netAmount": "Net Tutar",
+    "noCommissionData": "Komisyon bilgisi mevcut değil",
+    "singlePayment": "Tek Çekim",
+    "upTo": "Maks."
   },
   "misc": {
     "search": "Ara",

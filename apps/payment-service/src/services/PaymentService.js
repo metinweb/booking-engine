@@ -3,10 +3,120 @@
  * Ana ödeme işlemleri
  */
 
-import { Transaction, VirtualPos } from '../models/index.js';
+import { Transaction, VirtualPos, PartnerPosCommission } from '../models/index.js';
 import { getProvider, isProviderSupported } from '../providers/index.js';
 import { getBinInfo, isDomesticCard } from './BinService.js';
 import config from '../config/index.js';
+
+/**
+ * Calculate and store transaction commission
+ * Called after successful payment to calculate bank and platform commissions
+ *
+ * @param {Object} transaction - Transaction document
+ * @param {Object} pos - VirtualPos document
+ * @param {String} partnerId - Partner ID (if using platform POS)
+ */
+export async function calculateTransactionCommission(transaction, pos, partnerId = null) {
+  try {
+    const amount = transaction.amount;
+    const installment = transaction.installment || 1;
+    const cardType = transaction.bin?.type || 'credit';
+    const cardFamily = transaction.bin?.family || 'all';
+    const currency = transaction.currency || 'try';
+
+    // 1. Calculate bank commission from POS commission rates
+    const bankCommission = getBankCommissionRate(pos, installment, cardType);
+    const bankAmount = Math.round(amount * bankCommission.rate / 100 * 100) / 100;
+
+    // 2. Calculate platform commission if using platform POS
+    let platformCommission = { rate: 0, amount: 0 };
+    const isUsingPlatformPos = !pos.partnerId;
+
+    if (isUsingPlatformPos && partnerId) {
+      // Find partner's commission configuration
+      const commissionConfig = await PartnerPosCommission.findForPartner(
+        partnerId,
+        currency.toLowerCase(),
+        pos._id
+      );
+
+      if (commissionConfig) {
+        platformCommission = commissionConfig.calculateCommission(amount, {
+          cardType,
+          cardFamily,
+          installment
+        });
+      }
+    }
+
+    // 3. Calculate totals
+    const totalRate = Math.round((bankCommission.rate + platformCommission.rate) * 100) / 100;
+    const totalAmount = Math.round((bankAmount + platformCommission.amount) * 100) / 100;
+    const netAmount = Math.round((amount - totalAmount) * 100) / 100;
+
+    // 4. Update transaction with commission data
+    const commissionData = {
+      bankRate: bankCommission.rate,
+      bankAmount,
+      platformRate: platformCommission.rate,
+      platformAmount: platformCommission.amount,
+      totalRate,
+      totalAmount,
+      netAmount
+    };
+
+    transaction.commission = commissionData;
+    transaction.usedPlatformPos = isUsingPlatformPos;
+    transaction.partnerId = partnerId;
+
+    await transaction.save();
+
+    console.log(`[Commission] Calculated for transaction ${transaction._id}:`, commissionData);
+
+    return commissionData;
+  } catch (error) {
+    console.error('[Commission] Error calculating commission:', error);
+    return null;
+  }
+}
+
+/**
+ * Get bank commission rate from POS commission periods
+ */
+function getBankCommissionRate(pos, installment, cardType = 'credit') {
+  const now = new Date();
+
+  // Find current commission period
+  let currentPeriod = null;
+  if (pos.commissionRates && pos.commissionRates.length > 0) {
+    currentPeriod = pos.commissionRates
+      .filter(p => p.startDate <= now)
+      .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))[0];
+  }
+
+  if (!currentPeriod) {
+    return { rate: 0 };
+  }
+
+  // Check for foreign card rates
+  // TODO: Check transaction.bin.country if not 'tr'
+
+  // Find rate for this installment count
+  const rateConfig = currentPeriod.rates?.find(r => r.count === installment);
+  if (rateConfig) {
+    return {
+      rate: rateConfig.rate || 0,
+      platformMargin: rateConfig.platformMargin || 0
+    };
+  }
+
+  // Fallback: use single payment rate (count = 1)
+  const singleRate = currentPeriod.rates?.find(r => r.count === 1);
+  return {
+    rate: singleRate?.rate || 0,
+    platformMargin: singleRate?.platformMargin || 0
+  };
+}
 
 /**
  * Query BIN and get installment options
@@ -720,5 +830,6 @@ export default {
   queryBankStatus,
   createPreAuth,
   createPostAuth,
-  getPosCapabilities
+  getPosCapabilities,
+  calculateTransactionCommission
 };

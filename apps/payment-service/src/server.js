@@ -35,6 +35,7 @@ import transactionRoutes from './routes/transaction.routes.js';
 import binRoutes from './routes/bin.routes.js';
 import partnerCommissionRoutes from './routes/partnerCommission.routes.js';
 import paymentLinkRoutes from './routes/paymentLink.routes.js';
+import commissionRoutes from './routes/commission.routes.js';
 
 const app = express();
 const PORT = process.env.PORT || 7043;
@@ -229,6 +230,9 @@ app.use('/api/bins', binRoutes);
 
 // Partner commission management
 app.use('/api/partner-commissions', partnerCommissionRoutes);
+
+// Commission rate queries and calculations
+app.use('/api/commission', commissionRoutes);
 
 // Transaction history (MUST be before paymentRoutes due to /:id catch-all)
 app.use('/api/transactions', transactionRoutes);

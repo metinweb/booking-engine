@@ -92,6 +92,22 @@ const getStats = async () => {
   }
 }
 
+/**
+ * Get default installment rates
+ * Returns bank commission + platform margin for each installment
+ */
+const getDefaultRates = async (currency = 'TRY') => {
+  try {
+    const response = await apiClient.get('/payment-links/default-rates', {
+      params: { currency }
+    })
+    return response.data
+  } catch (error) {
+    apiLogger.error('PaymentLink Service: Get default rates failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
 export default {
   getPaymentLinks,
   getPaymentLink,
@@ -99,5 +115,6 @@ export default {
   updatePaymentLink,
   cancelPaymentLink,
   resendNotification,
-  getStats
+  getStats,
+  getDefaultRates
 }

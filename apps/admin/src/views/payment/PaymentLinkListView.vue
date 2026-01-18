@@ -3,8 +3,10 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import paymentLinkService from '@/services/paymentLinkService'
 import { StatusBadge, Modal, ConfirmDialog, DatePicker } from '@/components/ui'
+import { usePartnerStore } from '@/stores/partner'
 
 const { t } = useI18n()
+const partnerStore = usePartnerStore()
 
 // State
 const items = ref([])
@@ -20,6 +22,10 @@ const selectedItem = ref(null)
 const formData = ref(getEmptyForm())
 const saving = ref(false)
 const formErrors = ref({})
+const defaultRates = ref({})
+const defaultRatesBreakdown = ref({})
+const loadingRates = ref(false)
+const ratesModified = ref(false)
 
 // Confirm dialog
 const confirmDialog = ref({ show: false, title: '', message: '', action: null })
@@ -93,7 +99,34 @@ function setRate(n, value) {
     formData.value.installment.rates = {}
   }
   formData.value.installment.rates[n] = value === '' ? undefined : Number(value)
+  // Check if rate differs from default
+  const defaultRate = defaultRates.value[n]
+  if (defaultRate !== undefined && Number(value) !== defaultRate) {
+    ratesModified.value = true
+  }
   console.log('setRate called:', { n, value, rates: { ...formData.value.installment.rates } })
+}
+
+// Calculate estimated commission for display
+function getEstimatedCommission(installment) {
+  if (!formData.value.amount || formData.value.amount <= 0) return null
+  const breakdown = defaultRatesBreakdown.value[installment]
+  if (!breakdown) return null
+
+  const amount = Number(formData.value.amount)
+  const bankCommission = amount * (breakdown.bankRate / 100)
+  const platformCommission = amount * (breakdown.platformMargin / 100)
+  const totalCommission = bankCommission + platformCommission
+
+  return {
+    bankRate: breakdown.bankRate,
+    bankAmount: Math.round(bankCommission * 100) / 100,
+    platformRate: breakdown.platformMargin,
+    platformAmount: Math.round(platformCommission * 100) / 100,
+    totalRate: breakdown.bankRate + breakdown.platformMargin,
+    totalAmount: Math.round(totalCommission * 100) / 100,
+    netAmount: Math.round((amount - totalCommission) * 100) / 100
+  }
 }
 
 // Watch currency changes - reset installment if not TRY
@@ -132,11 +165,55 @@ async function fetchStats() {
   }
 }
 
-function openCreateModal() {
+async function fetchDefaultRates(currency = 'TRY') {
+  loadingRates.value = true
+  try {
+    const result = await paymentLinkService.getDefaultRates(currency)
+    if (result.success && result.data) {
+      defaultRates.value = result.data.defaultRates || {}
+      defaultRatesBreakdown.value = result.data.breakdown || {}
+      console.log('Fetched default rates:', defaultRates.value)
+    }
+  } catch (error) {
+    console.error('Failed to fetch default rates:', error)
+    defaultRates.value = {}
+    defaultRatesBreakdown.value = {}
+  } finally {
+    loadingRates.value = false
+  }
+}
+
+function applyDefaultRates() {
+  if (!formData.value.installment.rates) {
+    formData.value.installment.rates = {}
+  }
+  // Apply default rates to form
+  Object.entries(defaultRates.value).forEach(([count, rate]) => {
+    if (parseInt(count) <= formData.value.installment.maxCount) {
+      formData.value.installment.rates[count] = rate
+    }
+  })
+  ratesModified.value = false
+  console.log('Applied default rates:', formData.value.installment.rates)
+}
+
+function resetToDefaultRates() {
+  formData.value.installment.rates = {}
+  applyDefaultRates()
+}
+
+async function openCreateModal() {
   formData.value = getEmptyForm()
   formErrors.value = {}
   selectedItem.value = null
+  ratesModified.value = false
   showFormModal.value = true
+
+  // Fetch and apply default rates
+  await fetchDefaultRates('TRY')
+  if (Object.keys(defaultRates.value).length > 0) {
+    applyDefaultRates()
+  }
 }
 
 function openDetailModal(item) {
@@ -330,6 +407,13 @@ onMounted(() => {
   fetchItems()
   fetchStats()
 })
+
+// Re-fetch when selected partner changes (platform admin switches partner in header)
+watch(() => partnerStore.selectedPartner, () => {
+  pagination.value.page = 1 // Reset to first page
+  fetchItems()
+  fetchStats()
+})
 </script>
 
 <template>
@@ -454,6 +538,12 @@ onMounted(() => {
               {{ $t('paymentLink.fields.amount') }}
             </th>
             <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-slate-300 uppercase">
+              {{ $t('paymentLink.installment') }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-slate-300 uppercase">
+              {{ $t('paymentLink.commission') }}
+            </th>
+            <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-slate-300 uppercase">
               {{ $t('misc.status') }}
             </th>
             <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-slate-300 uppercase">
@@ -466,12 +556,12 @@ onMounted(() => {
         </thead>
         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
           <tr v-if="loading">
-            <td colspan="7" class="px-4 py-16 text-center">
+            <td colspan="9" class="px-4 py-16 text-center">
               <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
             </td>
           </tr>
           <tr v-else-if="items.length === 0">
-            <td colspan="7" class="px-4 py-16 text-center text-gray-500 dark:text-slate-400">
+            <td colspan="9" class="px-4 py-16 text-center text-gray-500 dark:text-slate-400">
               <span class="material-icons text-4xl text-gray-300 dark:text-slate-600 mb-2 block">link_off</span>
               {{ $t('paymentLink.noData') }}
             </td>
@@ -496,6 +586,45 @@ onMounted(() => {
             </td>
             <td class="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">
               {{ formatAmount(item.amount, item.currency) }}
+            </td>
+            <td class="px-4 py-3 text-center">
+              <div class="flex flex-col items-center gap-0.5">
+                <!-- Ödenmişse: kaç taksitle ödendiği -->
+                <template v-if="item.status === 'paid' && item.transaction?.installment">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                    {{ item.transaction.installment === 1 ? $t('paymentLink.singlePayment') : item.transaction.installment + ' ' + $t('paymentLink.installment') }}
+                  </span>
+                  <span v-if="item.installment?.maxCount > 1" class="text-[10px] text-gray-400 dark:text-slate-500">
+                    ({{ $t('paymentLink.upTo') }} {{ item.installment.maxCount }})
+                  </span>
+                </template>
+                <!-- Ödenmemişse: max taksit -->
+                <template v-else-if="item.installment?.enabled && item.installment?.maxCount > 1">
+                  <span class="text-xs text-gray-500 dark:text-slate-400">
+                    {{ $t('paymentLink.upTo') }} {{ item.installment.maxCount }}
+                  </span>
+                </template>
+                <!-- Taksit kapalı -->
+                <template v-else>
+                  <span class="text-xs text-gray-400 dark:text-slate-500">-</span>
+                </template>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-right">
+              <template v-if="item.status === 'paid' && item.transaction?.commission?.totalAmount > 0">
+                <div class="text-sm font-medium text-orange-600 dark:text-orange-400">
+                  {{ formatAmount(item.transaction.commission.totalAmount, item.currency) }}
+                </div>
+                <div class="text-xs text-gray-500 dark:text-slate-400">
+                  %{{ item.transaction.commission.totalRate?.toFixed(2) }}
+                </div>
+              </template>
+              <template v-else-if="item.status === 'paid'">
+                <span class="text-xs text-gray-400 dark:text-slate-500">-</span>
+              </template>
+              <template v-else>
+                <span class="text-xs text-gray-400 dark:text-slate-500">-</span>
+              </template>
             </td>
             <td class="px-4 py-3 text-center">
               <StatusBadge :status="item.status" :variant="getStatusVariant(item.status)">
@@ -739,33 +868,60 @@ onMounted(() => {
 
           <Transition name="slide-fade">
             <div v-if="formData.installment.enabled" class="space-y-4">
-              <!-- Max Installment Selection -->
+              <!-- Max Installment Selection - Visual Buttons -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                   {{ $t('paymentLink.maxInstallment') }}
                 </label>
-                <div class="grid grid-cols-6 gap-2">
+                <div class="flex flex-wrap gap-2">
                   <button
-                    v-for="n in [2, 3, 4, 6, 9, 12]"
+                    v-for="n in [2, 3, 4, 5, 6, 9, 12]"
                     :key="n"
                     type="button"
-                    class="py-3 rounded-xl text-center transition-all border-2"
+                    class="relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
                     :class="formData.installment.maxCount === n
-                      ? 'bg-primary-500 text-white border-primary-500 shadow-lg shadow-primary-500/30'
-                      : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-200 dark:border-slate-600 hover:border-primary-300'"
+                      ? 'bg-primary-600 text-white shadow-md shadow-primary-200 dark:shadow-primary-900/30 ring-2 ring-primary-600 ring-offset-2 dark:ring-offset-slate-800'
+                      : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600'"
                     @click="formData.installment.maxCount = n"
                   >
-                    <span class="block text-lg font-bold">{{ n }}</span>
-                    <span class="block text-xs opacity-70">{{ $t('paymentLink.months') }}</span>
+                    {{ n }} Taksit
                   </button>
                 </div>
+                <p class="mt-2 text-xs text-gray-500 dark:text-slate-400">
+                  {{ $t('paymentLink.upToInstallments', { count: formData.installment.maxCount }) }}
+                </p>
               </div>
 
               <!-- Interest Rates per Installment -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
-                  {{ $t('paymentLink.interestRates') }}
-                </label>
+                <div class="flex items-center justify-between mb-2">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-slate-300">
+                    {{ $t('paymentLink.interestRates') }}
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <span v-if="loadingRates" class="text-xs text-gray-400">
+                      <span class="material-icons animate-spin text-sm">sync</span>
+                    </span>
+                    <button
+                      v-if="Object.keys(defaultRates).length > 0"
+                      type="button"
+                      class="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                      @click="resetToDefaultRates"
+                    >
+                      <span class="material-icons text-sm">refresh</span>
+                      {{ $t('paymentLink.resetToDefault') }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Warning if rates modified -->
+                <div v-if="ratesModified" class="mb-3 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <p class="text-xs text-yellow-700 dark:text-yellow-400 flex items-center gap-1">
+                    <span class="material-icons text-sm">warning</span>
+                    {{ $t('paymentLink.ratesModifiedWarning') }}
+                  </p>
+                </div>
+
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
                   <div
                     v-for="n in getInstallmentRange(formData.installment.maxCount)"
@@ -774,6 +930,9 @@ onMounted(() => {
                   >
                     <div class="flex items-center justify-between mb-1">
                       <span class="text-sm font-medium text-gray-700 dark:text-slate-300">{{ n }} {{ $t('paymentLink.installment') }}</span>
+                      <span v-if="defaultRatesBreakdown[n]" class="text-xs text-gray-400" :title="`Banka: %${defaultRatesBreakdown[n].bankRate}, Platform: %${defaultRatesBreakdown[n].platformMargin}`">
+                        <span class="material-icons text-xs">info</span>
+                      </span>
                     </div>
                     <div class="relative">
                       <input
@@ -793,6 +952,29 @@ onMounted(() => {
                 <p class="text-xs text-gray-500 dark:text-slate-400 mt-2">
                   {{ $t('paymentLink.interestRateHint') }}
                 </p>
+
+                <!-- Estimated Commission Display -->
+                <div v-if="formData.amount > 0 && formData.installment.maxCount > 1" class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <h5 class="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-1">
+                    <span class="material-icons text-sm">calculate</span>
+                    {{ $t('paymentLink.estimatedCommission') }}
+                  </h5>
+                  <div class="text-xs text-blue-700 dark:text-blue-400">
+                    <template v-if="getEstimatedCommission(formData.installment.maxCount)">
+                      <p>
+                        {{ formData.installment.maxCount }} {{ $t('paymentLink.installment') }}:
+                        <span class="font-semibold">{{ formatAmount(getEstimatedCommission(formData.installment.maxCount).totalAmount, formData.currency) }}</span>
+                        <span class="text-gray-500">(%{{ getEstimatedCommission(formData.installment.maxCount).totalRate.toFixed(2) }})</span>
+                      </p>
+                      <p class="mt-1 text-gray-500 dark:text-slate-500">
+                        {{ $t('paymentLink.netAmount') }}: {{ formatAmount(getEstimatedCommission(formData.installment.maxCount).netAmount, formData.currency) }}
+                      </p>
+                    </template>
+                    <p v-else class="text-gray-500 dark:text-slate-500">
+                      {{ $t('paymentLink.noCommissionData') }}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </Transition>
@@ -1004,25 +1186,21 @@ onMounted(() => {
           <div v-if="selectedItem.transaction.commission" class="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
             <h4 class="font-medium text-orange-800 dark:text-orange-300 mb-3 flex items-center gap-2">
               <span class="material-icons text-lg">account_balance</span>
-              Komisyon Detayları
+              {{ $t('paymentLink.commissionDetails') }}
             </h4>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
               <div>
-                <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">Banka Komisyonu</label>
+                <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{ $t('paymentLink.commissionLabel') }}</label>
                 <div class="mt-1">
-                  <span class="font-medium">{{ formatAmount(selectedItem.transaction.commission.bankAmount || 0, selectedItem.currency) }}</span>
-                  <span class="text-xs text-gray-500 ml-1">({{ selectedItem.transaction.commission.bankRate || 0 }}%)</span>
+                  <span class="font-medium">{{ formatAmount(selectedItem.transaction.commission.totalAmount || 0, selectedItem.currency) }}</span>
+                  <span class="text-xs text-gray-500 ml-1">(%{{ selectedItem.transaction.commission.totalRate || 0 }})</span>
                 </div>
-              </div>
-              <div v-if="selectedItem.transaction.commission.platformAmount > 0">
-                <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">Platform Komisyonu</label>
-                <div class="mt-1">
-                  <span class="font-medium">{{ formatAmount(selectedItem.transaction.commission.platformAmount, selectedItem.currency) }}</span>
-                  <span class="text-xs text-gray-500 ml-1">({{ selectedItem.transaction.commission.platformRate || 0 }}%)</span>
+                <div v-if="selectedItem.transaction.commission.platformAmount > 0" class="text-xs text-gray-400 mt-0.5">
+                  Banka: %{{ selectedItem.transaction.commission.bankRate }} + Markup: %{{ selectedItem.transaction.commission.platformRate }}
                 </div>
               </div>
               <div>
-                <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">Toplam Kesinti</label>
+                <label class="text-xs text-gray-500 dark:text-slate-400 uppercase">{{ $t('paymentLink.totalDeduction') }}</label>
                 <div class="mt-1 font-medium text-orange-600 dark:text-orange-400">
                   {{ formatAmount(selectedItem.transaction.commission.totalAmount || 0, selectedItem.currency) }}
                 </div>

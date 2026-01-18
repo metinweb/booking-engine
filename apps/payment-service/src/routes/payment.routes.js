@@ -5,9 +5,15 @@
  */
 
 import { Router } from 'express';
+import https from 'https';
 import PaymentService from '../services/PaymentService.js';
 import { VirtualPos } from '../models/index.js';
 import config from '../config/index.js';
+
+// HTTPS agent for self-signed certificates in development
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: process.env.NODE_ENV === 'production'
+});
 
 const router = Router();
 
@@ -322,21 +328,41 @@ publicPaymentRoutes.post('/:id/callback', async (req, res) => {
     // If this was a payment link transaction, notify main API
     if (result.success) {
       try {
+        const { Transaction } = await import('../models/index.js');
+        const transaction = await Transaction.findById(req.params.id).populate('pos');
+
+        // Calculate commission for successful payment
+        if (transaction && transaction.pos) {
+          // Extract partnerId from externalId if payment link (PL-{token})
+          let partnerId = transaction.partnerId;
+
+          // If not set, try to get from payment link via main API
+          if (!partnerId && transaction.externalId?.startsWith('PL-')) {
+            // Partner will be determined when main API is notified
+            // Commission will be calculated there
+          }
+
+          // Calculate commission
+          await PaymentService.calculateTransactionCommission(
+            transaction,
+            transaction.pos,
+            partnerId
+          );
+        }
+
         const txDetails = await PaymentService.getTransactionDetails(req.params.id);
 
         // Check if this is a payment link transaction (externalId starts with PL-)
         if (txDetails && txDetails.transactionId) {
-          const { Transaction } = await import('../models/index.js');
-          const transaction = await Transaction.findById(req.params.id);
-
           if (transaction?.externalId?.startsWith('PL-')) {
             const token = transaction.externalId.replace('PL-', '');
             const mainApiUrl = process.env.MAIN_API_URL || 'http://localhost:4000/api';
 
             console.log('[Payment Callback] Payment link detected, notifying main API:', token);
+            console.log('[Payment Callback] URL:', `${mainApiUrl}/pay/${token}/complete`);
 
             const axios = (await import('axios')).default;
-            await axios.post(`${mainApiUrl}/pay/${token}/complete`, txDetails);
+            await axios.post(`${mainApiUrl}/pay/${token}/complete`, txDetails, { httpsAgent });
 
             console.log('[Payment Callback] Main API notified successfully');
           }

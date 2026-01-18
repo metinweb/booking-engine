@@ -5,12 +5,18 @@
 
 import { Router } from 'express';
 import axios from 'axios';
+import https from 'https';
 import PaymentService from '../services/PaymentService.js';
 
 const router = Router();
 
 // API Base URL (main booking-engine API)
 const API_BASE_URL = process.env.MAIN_API_URL || 'http://localhost:4000/api';
+
+// HTTPS agent for self-signed certificates in development
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: process.env.NODE_ENV === 'production'
+});
 
 /**
  * GET /pay-link/:token
@@ -21,7 +27,7 @@ router.get('/:token', async (req, res) => {
     const { token } = req.params;
 
     // Fetch payment link from main API
-    const response = await axios.get(`${API_BASE_URL}/pay/${token}`);
+    const response = await axios.get(`${API_BASE_URL}/pay/${token}`, { httpsAgent });
     const paymentLink = response.data.data;
 
     // Check status
@@ -54,7 +60,7 @@ router.post('/:token/bin', async (req, res) => {
     }
 
     // Fetch payment link to get amount and currency
-    const linkResponse = await axios.get(`${API_BASE_URL}/pay/${token}`);
+    const linkResponse = await axios.get(`${API_BASE_URL}/pay/${token}`, { httpsAgent });
     const paymentLink = linkResponse.data.data;
 
     if (['cancelled', 'expired', 'paid'].includes(paymentLink.status)) {
@@ -166,7 +172,7 @@ router.post('/:token/process', async (req, res) => {
     }
 
     // Fetch payment link
-    const linkResponse = await axios.get(`${API_BASE_URL}/pay/${token}`);
+    const linkResponse = await axios.get(`${API_BASE_URL}/pay/${token}`, { httpsAgent });
     const paymentLink = linkResponse.data.data;
 
     if (['cancelled', 'expired', 'paid'].includes(paymentLink.status)) {
@@ -230,7 +236,7 @@ router.post('/:token/process', async (req, res) => {
         const txDetails = await PaymentService.getTransactionDetails(paymentResult.transactionId);
 
         // Notify main API about successful payment
-        await axios.post(`${API_BASE_URL}/pay/${token}/complete`, txDetails);
+        await axios.post(`${API_BASE_URL}/pay/${token}/complete`, txDetails, { httpsAgent });
       } catch (notifyError) {
         console.error('Failed to notify main API:', notifyError.message);
       }
@@ -271,16 +277,43 @@ router.post('/:token/callback', async (req, res) => {
 
     console.log('[PaymentLink Callback] ProcessCallback result:', { success: result.success, message: result.message });
 
-    // If successful, notify main API with full transaction details
+    // If successful, calculate commission and notify main API
     if (result.success) {
       try {
-        // Get full transaction details
+        // Import Transaction model to get partner info
+        const { Transaction } = await import('../models/index.js');
+        const transaction = await Transaction.findById(transactionId).populate('pos');
+
+        // Get payment link info from main API to get partnerId
+        let partnerId = transaction?.partnerId;
+        if (!partnerId) {
+          try {
+            const linkResponse = await axios.get(`${API_BASE_URL}/pay/${token}`, { httpsAgent });
+            const paymentLink = linkResponse.data.data;
+            partnerId = paymentLink?.partner?._id || paymentLink?.partner;
+            console.log('[PaymentLink Callback] Got partnerId from payment link:', partnerId);
+          } catch (linkError) {
+            console.log('[PaymentLink Callback] Could not get partner from payment link:', linkError.message);
+          }
+        }
+
+        // Calculate commission for successful payment
+        if (transaction && transaction.pos) {
+          await PaymentService.calculateTransactionCommission(
+            transaction,
+            transaction.pos,
+            partnerId
+          );
+          console.log('[PaymentLink Callback] Commission calculated');
+        }
+
+        // Get full transaction details (now includes commission)
         const txDetails = await PaymentService.getTransactionDetails(transactionId);
 
         console.log('[PaymentLink Callback] Transaction details:', txDetails ? 'OK' : 'NULL');
         console.log('[PaymentLink Callback] Calling main API:', `${API_BASE_URL}/pay/${token}/complete`);
 
-        const apiResponse = await axios.post(`${API_BASE_URL}/pay/${token}/complete`, txDetails);
+        const apiResponse = await axios.post(`${API_BASE_URL}/pay/${token}/complete`, txDetails, { httpsAgent });
         console.log('[PaymentLink Callback] Main API response:', apiResponse.data);
       } catch (notifyError) {
         console.error('[PaymentLink Callback] Failed to notify main API:', notifyError.message);
@@ -430,121 +463,148 @@ function renderPaymentForm(paymentLink, token) {
       text-transform: uppercase;
       font-weight: 600;
     }
-    .installment-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    /* Compact Custom Dropdown */
+    .custom-dropdown {
+      position: relative;
+      width: 100%;
     }
-    .installment-option {
+    .dropdown-selected {
       display: flex;
       align-items: center;
-      padding: 16px 18px;
-      border: 2px solid #e9ecef;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      justify-content: space-between;
+      padding: 12px 14px;
       background: white;
-      position: relative;
-      overflow: hidden;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
-    .installment-option::before {
-      content: '';
+    .dropdown-selected:hover {
+      border-color: #667eea;
+    }
+    .custom-dropdown.open .dropdown-selected {
+      border-color: #667eea;
+      border-radius: 10px 10px 0 0;
+    }
+    .dropdown-selected-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+    }
+    .dropdown-selected-amount {
+      font-size: 14px;
+      font-weight: 700;
+      color: #667eea;
+      margin-right: 8px;
+    }
+    .dropdown-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .dropdown-arrow svg {
+      width: 16px;
+      height: 16px;
+      stroke: #9ca3af;
+      stroke-width: 2.5;
+      fill: none;
+    }
+    .custom-dropdown.open .dropdown-arrow {
+      transform: rotate(180deg);
+    }
+    .dropdown-options {
       position: absolute;
-      top: 0;
+      top: 100%;
       left: 0;
       right: 0;
-      bottom: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: white;
+      border: 2px solid #667eea;
+      border-top: 1px solid #e5e7eb;
+      border-radius: 0 0 10px 10px;
+      max-height: 0;
+      overflow: hidden;
       opacity: 0;
-      transition: opacity 0.25s;
+      transition: all 0.2s ease;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .installment-option:hover {
-      border-color: #667eea;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    .custom-dropdown.open .dropdown-options {
+      max-height: 200px;
+      overflow-y: auto;
+      opacity: 1;
     }
-    .installment-option.selected {
-      border-color: #667eea;
-      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.25);
-    }
-    .installment-option.selected::before {
-      opacity: 0.05;
-    }
-    .installment-option input { display: none; }
-    .installment-checkbox {
-      width: 24px;
-      height: 24px;
-      border: 2px solid #d1d5db;
-      border-radius: 8px;
-      margin-right: 14px;
+    .dropdown-option {
       display: flex;
       align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      background: white;
-      position: relative;
-      z-index: 1;
+      justify-content: space-between;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: background 0.1s ease;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 13px;
     }
-    .installment-option:hover .installment-checkbox {
-      border-color: #667eea;
+    .dropdown-option:last-child {
+      border-bottom: none;
     }
-    .installment-option.selected .installment-checkbox {
-      border-color: #667eea;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    .dropdown-option:hover {
+      background: #f8f9ff;
     }
-    .installment-checkbox svg {
-      width: 14px;
-      height: 14px;
-      stroke: white;
+    .dropdown-option.selected {
+      background: #eef2ff;
+    }
+    .dropdown-option-label {
+      color: #374151;
+      font-weight: 500;
+    }
+    .dropdown-option-price {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dropdown-option-total {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    .dropdown-option-extra {
+      font-size: 11px;
+      color: #d97706;
+      font-weight: 500;
+    }
+    .dropdown-option-check {
+      width: 16px;
+      height: 16px;
+      margin-left: 8px;
+      opacity: 0;
+    }
+    .dropdown-option-check svg {
+      width: 16px;
+      height: 16px;
+      stroke: #667eea;
       stroke-width: 3;
       fill: none;
-      opacity: 0;
-      transform: scale(0.5);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .installment-option.selected .installment-checkbox svg {
+    .dropdown-option.selected .dropdown-option-check {
       opacity: 1;
-      transform: scale(1);
     }
-    .installment-details { flex: 1; position: relative; z-index: 1; }
-    .installment-title { font-weight: 600; color: #1f2937; font-size: 15px; }
-    .installment-monthly { font-size: 13px; color: #6b7280; margin-top: 3px; }
-    .installment-total {
-      text-align: right;
-      position: relative;
-      z-index: 1;
+    .installment-summary {
+      margin-top: 8px;
+      padding: 10px 14px;
+      background: #f8f9ff;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
     }
-    .installment-total .amount {
-      font-weight: 700;
-      color: #1f2937;
-      font-size: 16px;
+    .installment-summary-label {
+      color: #6b7280;
     }
-    .installment-total .interest {
-      display: block;
-      font-size: 11px;
-      color: #f59e0b;
+    .installment-summary-value {
       font-weight: 600;
-      margin-top: 2px;
-      background: #fef3c7;
-      padding: 2px 8px;
-      border-radius: 10px;
+      color: #667eea;
     }
-    .installment-badge {
-      position: absolute;
-      top: -1px;
-      right: 12px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 0 0 8px 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .btn-pay {
+        .btn-pay {
       width: 100%;
       padding: 16px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -667,20 +727,20 @@ function renderPaymentForm(paymentLink, token) {
 
           <div class="form-group" id="installmentGroup" style="${installment?.enabled ? '' : 'display: none;'}">
             <label class="form-label">Taksit Seçimi</label>
-            <div class="installment-options" id="installmentOptions">
-              <label class="installment-option selected" onclick="selectInstallment(this, 1)">
-                <input type="radio" name="installment" value="1" checked>
-                <div class="installment-checkbox">
-                  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                </div>
-                <div class="installment-details">
-                  <div class="installment-title">Tek Çekim</div>
-                  <div class="installment-monthly">Peşin ödeme</div>
-                </div>
-                <div class="installment-total"><span class="amount">${currencySymbol}${formattedAmount}</span></div>
-              </label>
+            <div class="custom-dropdown" id="installmentDropdown">
+              <div class="dropdown-selected" onclick="toggleDropdown()">
+                <span class="dropdown-selected-text" id="selectedText">Tek Çekim</span>
+                <span class="dropdown-selected-amount" id="selectedAmount">${currencySymbol}${formattedAmount}</span>
+                <span class="dropdown-arrow">
+                  <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </span>
+              </div>
+              <div class="dropdown-options" id="dropdownOptions"></div>
             </div>
             <input type="hidden" id="installmentSelect" value="1">
+            <div class="installment-summary" id="installmentSummary">
+              <span class="installment-summary-label">Toplam: <span class="installment-summary-value" id="totalAmount">${currencySymbol}${formattedAmount}</span></span>
+            </div>
           </div>
 
           <input type="hidden" id="posId" value="">
@@ -815,44 +875,44 @@ function renderPaymentForm(paymentLink, token) {
 
           cardInfo.classList.remove('hidden');
 
-          // Update installments with checkbox UI
-          const installmentOptions = document.getElementById('installmentOptions');
+          // Update custom dropdown options
           if (data.installments && data.installments.length > 0) {
+            const dropdownOptions = document.getElementById('dropdownOptions');
             const checkIcon = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
 
-            installmentOptions.innerHTML = data.installments.map((i, idx) => {
-              const isFirst = idx === 0;
+            dropdownOptions.innerHTML = data.installments.map((i, idx) => {
+              const totalAmount = (i.totalAmount || baseAmount).toFixed(2);
+              const monthlyAmount = (i.monthlyAmount || baseAmount).toFixed(2);
               const hasInterest = i.totalAmount && i.totalAmount > baseAmount;
-              const noInterest = i.count > 1 && !hasInterest;
+              const extraAmount = hasInterest ? (i.totalAmount - baseAmount).toFixed(2) : null;
+              const isFirst = idx === 0;
 
+              let label, priceText;
               if (i.count === 1) {
-                return '<label class="installment-option' + (isFirst ? ' selected' : '') + '" onclick="selectInstallment(this, 1)">' +
-                  '<input type="radio" name="installment" value="1"' + (isFirst ? ' checked' : '') + '>' +
-                  '<div class="installment-checkbox">' + checkIcon + '</div>' +
-                  '<div class="installment-details">' +
-                    '<div class="installment-title">Tek Çekim</div>' +
-                    '<div class="installment-monthly">Peşin ödeme</div>' +
-                  '</div>' +
-                  '<div class="installment-total"><span class="amount">' + currencySymbol + baseAmount.toFixed(2) + '</span></div>' +
-                '</label>';
+                label = 'Tek Çekim';
+                priceText = currencySymbol + totalAmount;
+              } else {
+                label = i.count + ' Taksit';
+                priceText = currencySymbol + monthlyAmount + '/ay';
               }
 
-              let monthlyText = i.monthlyAmount ? (currencySymbol + i.monthlyAmount.toFixed(2) + ' x ' + i.count + ' ay') : '';
-              let totalAmount = (i.totalAmount || baseAmount).toFixed(2);
-              let interestBadge = hasInterest ? '<span class="interest">+' + currencySymbol + (i.totalAmount - baseAmount).toFixed(2) + '</span>' : '';
-              let freeBadge = noInterest ? '<div class="installment-badge">Faizsiz</div>' : '';
+              const extraHtml = extraAmount ? '<span class="dropdown-option-extra">(+' + currencySymbol + extraAmount + ')</span>' : '';
 
-              return '<label class="installment-option' + (isFirst ? ' selected' : '') + '" onclick="selectInstallment(this, ' + i.count + ')">' +
-                freeBadge +
-                '<input type="radio" name="installment" value="' + i.count + '"' + (isFirst ? ' checked' : '') + '>' +
-                '<div class="installment-checkbox">' + checkIcon + '</div>' +
-                '<div class="installment-details">' +
-                  '<div class="installment-title">' + i.count + ' Taksit</div>' +
-                  '<div class="installment-monthly">' + monthlyText + '</div>' +
-                '</div>' +
-                '<div class="installment-total"><span class="amount">' + currencySymbol + totalAmount + '</span>' + interestBadge + '</div>' +
-              '</label>';
+              return '<div class="dropdown-option' + (isFirst ? ' selected' : '') + '" data-value="' + i.count + '" data-total="' + totalAmount + '" data-label="' + label + '" onclick="selectOption(this)">' +
+                '<span class="dropdown-option-label">' + label + '</span>' +
+                '<span class="dropdown-option-price">' +
+                  '<span class="dropdown-option-total">' + priceText + '</span>' +
+                  extraHtml +
+                  '<span class="dropdown-option-check">' + checkIcon + '</span>' +
+                '</span>' +
+              '</div>';
             }).join('');
+
+            // Select first option by default
+            const firstOption = dropdownOptions.querySelector('.dropdown-option');
+            if (firstOption) {
+              selectOption(firstOption, false);
+            }
 
             // Show installment selector if enabled and has more than single option
             if (installmentEnabled && data.installments.length > 1) {
@@ -928,12 +988,48 @@ function renderPaymentForm(paymentLink, token) {
       }
     });
 
-    // Select installment option
-    function selectInstallment(el, count) {
-      document.querySelectorAll('.installment-option').forEach(o => o.classList.remove('selected'));
-      el.classList.add('selected');
-      document.querySelector('input[name="installment"][value="' + count + '"]').checked = true;
-      installmentSelect.value = count;
+    // Toggle dropdown open/close
+    function toggleDropdown() {
+      const dropdown = document.getElementById('installmentDropdown');
+      dropdown.classList.toggle('open');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      const dropdown = document.getElementById('installmentDropdown');
+      if (dropdown && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+      }
+    });
+
+    // Select an option from dropdown
+    function selectOption(optionEl, closeDropdown = true) {
+      const dropdown = document.getElementById('installmentDropdown');
+      const options = dropdown.querySelectorAll('.dropdown-option');
+
+      // Remove selected from all
+      options.forEach(o => o.classList.remove('selected'));
+
+      // Add selected to clicked
+      optionEl.classList.add('selected');
+
+      // Update hidden input
+      const value = optionEl.getAttribute('data-value');
+      const total = optionEl.getAttribute('data-total');
+      const label = optionEl.getAttribute('data-label');
+      installmentSelect.value = value;
+
+      // Update selected display
+      document.getElementById('selectedText').textContent = label;
+      document.getElementById('selectedAmount').textContent = currencySymbol + total;
+
+      // Update summary
+      document.getElementById('totalAmount').textContent = currencySymbol + total;
+
+      // Close dropdown
+      if (closeDropdown) {
+        dropdown.classList.remove('open');
+      }
     }
 
     // Listen for 3D callback result

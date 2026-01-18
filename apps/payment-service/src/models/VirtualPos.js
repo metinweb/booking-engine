@@ -423,4 +423,4 @@ virtualPosSchema.methods.toJSON = function () {
   return obj;
 };
 
-export default mongoose.model('VirtualPos', virtualPosSchema);
+export default mongoose.model('VirtualPos', virtualPosSchema, 'virtualpos');

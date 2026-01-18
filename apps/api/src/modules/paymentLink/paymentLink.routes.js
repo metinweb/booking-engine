@@ -6,15 +6,27 @@ import {
   updatePaymentLink,
   cancelPaymentLink,
   resendNotification,
-  getPaymentLinkStats
+  getPaymentLinkStats,
+  getDefaultRates
 } from './paymentLink.service.js'
 import { protect } from '#middleware/auth.js'
 import { requirePermission } from '#middleware/permission.js'
+import { partnerContext } from '#middleware/partnerContext.js'
 
 const router = express.Router()
 
 // All routes require authentication
 router.use(protect)
+
+// Apply partner context middleware to properly parse X-Partner-Id header
+router.use(partnerContext)
+
+// Get default installment rates
+router.get(
+  '/default-rates',
+  requirePermission('payment-link', 'view'),
+  getDefaultRates
+)
 
 // Get payment link statistics
 router.get(

@@ -6,6 +6,10 @@ import { NotFoundError, BadRequestError, ConflictError } from '#core/errors.js'
 import { asyncHandler } from '#helpers'
 import logger from '#core/logger.js'
 import notificationService from '#services/notificationService.js'
+import axios from 'axios'
+
+// Payment Service URL
+const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:4001'
 
 /**
  * Get payment links list with filtering and pagination
@@ -23,58 +27,74 @@ export const getPaymentLinks = asyncHandler(async (req, res) => {
     sortOrder = 'desc'
   } = req.query
 
-  // Build filter
-  const filter = {}
+  // Build filter using $and to ensure partner isolation is never overwritten
+  const conditions = []
 
-  // Partner isolation - STRICT SEPARATION
+  // Partner isolation - STRICT SEPARATION (ALWAYS FIRST, NEVER OVERWRITTEN)
   if (req.user.accountType === 'partner') {
     // Partner users: ONLY see their own partner's links
-    filter.partner = req.user.accountId
+    conditions.push({ partner: req.user.accountId })
   } else {
     // Platform admin
     if (req.partnerId) {
       // Partner selected: show ONLY that partner's links
-      filter.partner = req.partnerId
+      conditions.push({ partner: req.partnerId })
     } else {
       // No partner selected: show ONLY platform-level links (partner is null or doesn't exist)
-      filter.$or = [
-        { partner: null },
-        { partner: { $exists: false } }
-      ]
+      conditions.push({
+        $or: [
+          { partner: null },
+          { partner: { $exists: false } }
+        ]
+      })
     }
   }
 
   // Status filter
   if (status) {
-    filter.status = status
+    conditions.push({ status })
   }
 
   // Booking filter
   if (booking) {
-    filter.booking = booking
+    conditions.push({ booking })
   }
 
   // Date range filter
   if (startDate || endDate) {
-    filter.createdAt = {}
+    const dateFilter = {}
     if (startDate) {
-      filter.createdAt.$gte = new Date(startDate)
+      dateFilter.$gte = new Date(startDate)
     }
     if (endDate) {
-      filter.createdAt.$lte = new Date(endDate)
+      dateFilter.$lte = new Date(endDate)
     }
+    conditions.push({ createdAt: dateFilter })
   }
 
   // Search filter
   if (search) {
-    filter.$or = [
-      { linkNumber: { $regex: search, $options: 'i' } },
-      { 'customer.name': { $regex: search, $options: 'i' } },
-      { 'customer.email': { $regex: search, $options: 'i' } },
-      { 'customer.phone': { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } }
-    ]
+    conditions.push({
+      $or: [
+        { linkNumber: { $regex: search, $options: 'i' } },
+        { 'customer.name': { $regex: search, $options: 'i' } },
+        { 'customer.email': { $regex: search, $options: 'i' } },
+        { 'customer.phone': { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ]
+    })
   }
+
+  // Build final filter with $and to ensure all conditions apply
+  const filter = conditions.length > 0 ? { $and: conditions } : {}
+
+  // Debug logging
+  logger.info('[PaymentLinks] Query debug:', {
+    accountType: req.user.accountType,
+    partnerId: req.partnerId,
+    userAccountId: req.user.accountId,
+    filter: JSON.stringify(filter)
+  })
 
   // Pagination
   const skip = (page - 1) * limit
@@ -154,14 +174,21 @@ export const createPaymentLink = asyncHandler(async (req, res) => {
   let partnerId = req.body.partner
   let partner = null
 
+  // Debug logging
+  logger.info('[PaymentLink] Create request:', {
+    accountType: req.user.accountType,
+    headerPartnerId: req.partnerId,
+    bodyPartnerId: req.body.partner
+  })
+
   // Partner isolation
   if (req.user.accountType === 'partner') {
     // Partner users must use their own partner
     partnerId = req.user.accountId
   } else {
-    // Platform admin: use explicit partner from body, or null for platform-level links
-    // Don't auto-assign from req.partnerId - let admin choose
-    partnerId = req.body.partner || null
+    // Platform admin: use partner from header (selected in UI) or body
+    // req.partnerId comes from X-Partner-Id header set by partnerContext middleware
+    partnerId = req.partnerId || req.body.partner || null
   }
 
   // Partner is required only for partner users
@@ -496,7 +523,39 @@ async function sendPaymentLinkNotification(paymentLink, partner, channels = {}) 
   const companyLogo = partner?.branding?.logo || null
 
   // E-posta için uzun URL kullan
+  // Template variable isimleri büyük harfli olmalı
+  const formattedAmount = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2 }).format(paymentLink.amount)
+  const currencySymbol = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }[paymentLink.currency] || paymentLink.currency
+  const formattedExpiry = new Date(paymentLink.expiresAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+
+  // Site ve support bilgileri
+  const siteUrl = partner?.branding?.website || process.env.FRONTEND_URL || 'https://app.minires.com'
+  const supportEmail = partner?.supportEmail || process.env.SUPPORT_EMAIL || 'destek@minires.com'
+
+  // Logo URL - tam URL olmalı
+  let logoUrl = ''
+  if (companyLogo) {
+    if (companyLogo.startsWith('http')) {
+      logoUrl = companyLogo
+    } else {
+      const apiUrl = process.env.API_URL || 'https://api.minires.com'
+      logoUrl = `${apiUrl}${companyLogo}`
+    }
+  }
+
   const notificationData = {
+    // Büyük harfli template değişkenleri
+    CUSTOMER_NAME: paymentLink.customer.name,
+    DESCRIPTION: paymentLink.description,
+    AMOUNT: `${currencySymbol}${formattedAmount}`,
+    CURRENCY: paymentLink.currency,
+    PAYMENT_URL: paymentLink.paymentUrl,
+    EXPIRY_DATE: formattedExpiry,
+    COMPANY_NAME: companyName,
+    LOGO_URL: logoUrl,
+    SITE_URL: siteUrl,
+    SUPPORT_EMAIL: supportEmail,
+    // Küçük harfli değişkenler de gönder (SMS için)
     customerName: paymentLink.customer.name,
     description: paymentLink.description,
     amount: paymentLink.amount,
@@ -653,6 +712,62 @@ export const getPaymentLinkByToken = asyncHandler(async (req, res) => {
       } : null
     }
   })
+})
+
+/**
+ * Get default installment rates for payment links
+ * Calculates: Bank commission + Platform margin = Default rate
+ */
+export const getDefaultRates = asyncHandler(async (req, res) => {
+  const { currency = 'TRY' } = req.query
+  let partnerId = null
+
+  // Partner isolation
+  if (req.user.accountType === 'partner') {
+    partnerId = req.user.accountId
+  } else if (req.partnerId) {
+    partnerId = req.partnerId
+  }
+
+  try {
+    // Call payment-service to get commission rates
+    const response = await axios.get(`${PAYMENT_SERVICE_URL}/api/commission/default-rates`, {
+      params: {
+        partnerId,
+        currency: currency.toLowerCase()
+      },
+      headers: {
+        'x-api-key': process.env.PAYMENT_SERVICE_API_KEY || 'internal-api-key'
+      }
+    })
+
+    if (response.data.success) {
+      res.json({
+        success: true,
+        data: response.data.data
+      })
+    } else {
+      res.json({
+        success: true,
+        data: {
+          defaultRates: {},
+          breakdown: {},
+          message: 'Varsayılan oranlar bulunamadı'
+        }
+      })
+    }
+  } catch (error) {
+    logger.error('Failed to get default rates from payment service:', error.message)
+    // Return empty rates if payment service is unavailable
+    res.json({
+      success: true,
+      data: {
+        defaultRates: {},
+        breakdown: {},
+        message: 'Ödeme servisi erişilemez durumda'
+      }
+    })
+  }
 })
 
 /**
