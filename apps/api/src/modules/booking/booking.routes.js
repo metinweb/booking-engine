@@ -7,11 +7,43 @@ import express from 'express'
 import { protect, requireAdmin } from '#middleware/auth.js'
 import { partnerContext } from '#middleware/partnerContext.js'
 import * as bookingService from './booking.service.js'
+import * as paymentService from './payment.service.js'
 import paymentRoutes from './payment.routes.js'
 
 const router = express.Router()
 
-// All routes require authentication and admin role
+// ==================== PUBLIC ROUTES (no auth) ====================
+
+/**
+ * @swagger
+ * /api/bookings/payment-webhook:
+ *   post:
+ *     tags: [Payments]
+ *     summary: Payment webhook from payment service
+ *     description: Webhook endpoint called by payment-service when 3D Secure completes
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               transactionId:
+ *                 type: string
+ *               externalId:
+ *                 type: string
+ *               success:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Webhook processed
+ */
+router.post('/payment-webhook', paymentService.paymentWebhook)
+
+// ==================== PROTECTED ROUTES ====================
+// All routes below require authentication and admin role
 router.use(protect)
 router.use(requireAdmin)
 router.use(partnerContext)
@@ -124,6 +156,39 @@ router.post('/search-autocomplete', bookingService.searchHotelsAndRegions)
  *                       type: number
  */
 router.get('/stats', bookingService.getBookingStats)
+
+// ==================== PAYMENT HELPER ====================
+
+/**
+ * @swagger
+ * /api/bookings/query-bin:
+ *   post:
+ *     tags: [Bookings]
+ *     summary: Query card BIN for installment options
+ *     description: Query card BIN without requiring a booking/payment record.
+ *       Used for inline payment flow where form is shown before booking is created.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [bin, amount]
+ *             properties:
+ *               bin:
+ *                 type: string
+ *                 description: First 6-8 digits of card number
+ *               amount:
+ *                 type: number
+ *                 description: Payment amount
+ *               currency:
+ *                 type: string
+ *                 default: TRY
+ *     responses:
+ *       200:
+ *         description: BIN info and installment options
+ */
+router.post('/query-bin', paymentService.queryBinByPartner)
 
 // ==================== SEARCH & PRICING ====================
 
@@ -541,6 +606,86 @@ router.get('/', bookingService.listBookings)
  *         $ref: '#/components/responses/ValidationError'
  */
 router.post('/', bookingService.createBooking)
+
+/**
+ * @swagger
+ * /api/booking/with-payment-link:
+ *   post:
+ *     tags: [Bookings]
+ *     summary: Create booking with payment link
+ *     description: Create a booking and generate a payment link for credit card payment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [hotelId, checkIn, checkOut, rooms, contact]
+ *             properties:
+ *               hotelId:
+ *                 type: string
+ *               marketId:
+ *                 type: string
+ *               checkIn:
+ *                 type: string
+ *                 format: date
+ *               checkOut:
+ *                 type: string
+ *                 format: date
+ *               rooms:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               contact:
+ *                 type: object
+ *                 properties:
+ *                   email:
+ *                     type: string
+ *                   phone:
+ *                     type: string
+ *               sendEmail:
+ *                 type: boolean
+ *                 default: true
+ *               sendSms:
+ *                 type: boolean
+ *                 default: false
+ *     responses:
+ *       201:
+ *         description: Booking created with payment link
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     booking:
+ *                       $ref: '#/components/schemas/Booking'
+ *                     paymentLink:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                         linkNumber:
+ *                           type: string
+ *                         token:
+ *                           type: string
+ *                         paymentUrl:
+ *                           type: string
+ *                         amount:
+ *                           type: number
+ *                         currency:
+ *                           type: string
+ *                         expiresAt:
+ *                           type: string
+ *                           format: date-time
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ */
+router.post('/with-payment-link', bookingService.createBookingWithPaymentLink)
 
 /**
  * @swagger

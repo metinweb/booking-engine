@@ -185,6 +185,23 @@
               @select="handleSetPaymentMethod"
             />
 
+            <!-- Credit Card Payment Options -->
+            <CreditCardPaymentOptions
+              v-if="bookingStore.payment.method === 'credit_card'"
+              ref="creditCardPaymentRef"
+              v-model="creditCardOption"
+              v-model:send-email="sendPaymentLinkEmail"
+              v-model:send-sms="sendPaymentLinkSms"
+              :amount="bookingStore.grandTotal"
+              :currency="bookingStore.currency"
+              :customer-name="(bookingStore.guests.leadGuest?.firstName || '') + ' ' + (bookingStore.guests.leadGuest?.lastName || '')"
+              :customer-email="bookingStore.guests.leadGuest?.email"
+              :customer-phone="bookingStore.guests.leadGuest?.phone"
+              @payment-start="handleInlinePaymentStart"
+              @payment-success="handleInlinePaymentSuccess"
+              @payment-error="handleInlinePaymentError"
+            />
+
             <!-- Terms & Create Booking -->
             <div
               class="bg-white dark:bg-slate-800 rounded-xl p-6 border border-gray-200 dark:border-slate-700"
@@ -276,7 +293,9 @@
                   <span class="material-icons mr-2">arrow_back</span>
                   {{ $t('common.back') }}
                 </button>
+                <!-- Hide create booking button when inline payment is selected (form has its own pay button) -->
                 <button
+                  v-if="!(bookingStore.payment.method === 'credit_card' && creditCardOption === 'inline')"
                   :disabled="bookingStore.loading.booking"
                   class="btn-primary px-8 py-2.5"
                   @click="handleTryCreateBooking"
@@ -312,9 +331,48 @@
         <span class="material-icons text-6xl text-green-500">check_circle</span>
         <h3 class="text-xl font-semibold mt-4">{{ $t('booking.bookingSuccess') }}</h3>
         <p class="text-gray-600 dark:text-slate-400 mt-2">
+          {{ paymentLinkResult ? $t('booking.creditCardOptions.paymentLinkSentDescription') : '' }}
+        </p>
+        <p class="text-gray-600 dark:text-slate-400 mt-2">
           {{ $t('booking.bookingNumber') }}:
           <strong>{{ bookingStore.bookingResult?.bookingNumber }}</strong>
         </p>
+
+        <!-- Payment Link Info -->
+        <div v-if="paymentLinkResult" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-4 text-left">
+          <div class="flex items-center mb-3">
+            <span class="material-icons text-blue-500 mr-2">link</span>
+            <span class="font-medium text-blue-700 dark:text-blue-400">
+              {{ $t('booking.creditCardOptions.paymentLinkInfo') }}
+            </span>
+          </div>
+          <div class="bg-white dark:bg-slate-800 rounded-lg p-3 mb-3">
+            <p class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+              {{ $t('booking.creditCardOptions.linkNumber') }}
+            </p>
+            <p class="font-mono text-sm text-gray-900 dark:text-white">
+              {{ paymentLinkResult.linkNumber }}
+            </p>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600 dark:text-slate-400">
+              {{ $t('booking.creditCardOptions.amount') }}:
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ formatPaymentAmount(paymentLinkResult.amount, paymentLinkResult.currency) }}
+              </span>
+            </span>
+          </div>
+          <div class="mt-3">
+            <button
+              class="w-full btn-sm btn-secondary flex items-center justify-center"
+              @click="copyPaymentLink"
+            >
+              <span class="material-icons text-sm mr-1">content_copy</span>
+              {{ $t('booking.creditCardOptions.copyLink') }}
+            </button>
+          </div>
+        </div>
+
         <div class="mt-6 flex justify-center gap-4">
           <button class="btn-secondary px-6 py-2" @click="handleNewBooking">
             {{ $t('booking.newBooking') }}
@@ -325,6 +383,7 @@
         </div>
       </div>
     </Modal>
+
   </div>
 </template>
 
@@ -335,6 +394,7 @@ import { useI18n } from 'vue-i18n'
 import { useBookingStore } from '@/stores/booking'
 import { useBookingValidation } from '@/composables/useBookingValidation'
 import { savePhase1Data, clearPhase1Data } from '@/services/bookingStorageService'
+import paymentService from '@/services/paymentService'
 import SearchPanel from './search/SearchPanel.vue'
 import HotelList from './search/HotelList.vue'
 import PaximumHotelList from './search/PaximumHotelList.vue'
@@ -345,6 +405,7 @@ import BookingSummary from './checkout/BookingSummary.vue'
 import GuestForms from './checkout/GuestForms.vue'
 import InvoiceDetailsForm from './checkout/InvoiceDetailsForm.vue'
 import PaymentMethodSelect from './checkout/PaymentMethodSelect.vue'
+import CreditCardPaymentOptions from './wizard/CreditCardPaymentOptions.vue'
 import Modal from '@/components/common/Modal.vue'
 
 const router = useRouter()
@@ -354,6 +415,17 @@ const { validateBooking, formatErrors } = useBookingValidation()
 
 const showSuccessModal = ref(false)
 const showValidation = ref(false)
+
+// Credit card payment options
+const creditCardOption = ref('payment_link') // 'inline' or 'payment_link'
+const sendPaymentLinkEmail = ref(true)
+const sendPaymentLinkSms = ref(false)
+const paymentLinkResult = ref(null)
+const creditCardPaymentRef = ref(null)
+
+// Inline payment state
+const inlinePaymentBookingId = ref(null)
+const inlinePaymentId = ref(null)
 
 // Auto-save debounce timer
 let autoSaveTimer = null
@@ -454,6 +526,15 @@ const handleTryCreateBooking = async () => {
   // Check if this is a Paximum booking
   if (bookingStore.hasPaximumItems()) {
     result = await bookingStore.createPaximumBooking()
+  } else if (bookingStore.payment.method === 'credit_card' && creditCardOption.value === 'payment_link') {
+    // Credit card with payment link - use special flow
+    result = await bookingStore.createBookingWithPaymentLink({
+      sendEmail: sendPaymentLinkEmail.value,
+      sendSms: sendPaymentLinkSms.value
+    })
+    if (result) {
+      paymentLinkResult.value = result.paymentLink
+    }
   } else {
     // Local booking - complete draft (this also checks allotment)
     result = await bookingStore.completeDraft()
@@ -465,6 +546,118 @@ const handleTryCreateBooking = async () => {
     showSuccessModal.value = true
     showValidation.value = false
   }
+}
+
+// Inline payment handlers
+const handleInlinePaymentStart = async (paymentData) => {
+  console.log('[BookingLayout] handleInlinePaymentStart called', paymentData)
+  showValidation.value = true
+  bookingStore.allotmentError = null
+
+  // Check validation first
+  if (validationErrors.value.length > 0) {
+    console.log('[BookingLayout] Validation errors:', validationErrors.value)
+    const validationBox = document.querySelector('.bg-red-50')
+    if (validationBox) {
+      validationBox.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    // Reset processing state in child component
+    if (creditCardPaymentRef.value?.resetProcessing) {
+      creditCardPaymentRef.value.resetProcessing()
+    }
+    return
+  }
+
+  // Extra check for lead guest (required for booking)
+  const leadGuest = bookingStore.guests.leadGuest
+  if (!leadGuest?.firstName || !leadGuest?.lastName) {
+    console.log('[BookingLayout] Lead guest validation failed')
+    bookingStore.error = t('booking.validation.leadGuestRequired')
+    if (creditCardPaymentRef.value?.resetProcessing) {
+      creditCardPaymentRef.value.resetProcessing()
+    }
+    return
+  }
+
+  try {
+    // 1. Save draft (DO NOT complete - payment not received yet!)
+    console.log('[BookingLayout] Saving draft (NOT completing)...')
+    await bookingStore.updateDraft()
+
+    // Get draft booking ID from store
+    const draftId = bookingStore.draftData?._id
+    if (!draftId) {
+      throw new Error('Draft booking ID not found')
+    }
+    console.log('[BookingLayout] Using draft booking ID:', draftId)
+
+    inlinePaymentBookingId.value = draftId
+
+    // 2. Create payment record on draft booking
+    console.log('[BookingLayout] Creating payment record...')
+    const paymentResponse = await paymentService.addPayment(draftId, {
+      type: 'credit_card',
+      amount: bookingStore.grandTotal,
+      currency: bookingStore.currency
+    })
+    console.log('[BookingLayout] Payment record created:', paymentResponse?.data?._id)
+
+    if (!paymentResponse.success) {
+      throw new Error('Payment record creation failed')
+    }
+
+    inlinePaymentId.value = paymentResponse.data._id
+
+    // 3. Process payment through child component
+    // Booking will be completed ONLY after successful 3D payment
+    console.log('[BookingLayout] Calling creditCardPaymentRef.processPayment...')
+    console.log('[BookingLayout] creditCardPaymentRef exists:', !!creditCardPaymentRef.value)
+    if (creditCardPaymentRef.value) {
+      await creditCardPaymentRef.value.processPayment(draftId, paymentResponse.data._id)
+      console.log('[BookingLayout] processPayment completed')
+    } else {
+      console.error('[BookingLayout] creditCardPaymentRef is null!')
+    }
+  } catch (error) {
+    console.error('[BookingLayout] Inline payment start failed:', error)
+    bookingStore.error = error.response?.data?.message || error.message || t('booking.error.paymentFailed')
+    if (creditCardPaymentRef.value?.resetProcessing) {
+      creditCardPaymentRef.value.resetProcessing()
+    }
+  }
+}
+
+const handleInlinePaymentSuccess = async (result) => {
+  console.log('[BookingLayout] handleInlinePaymentSuccess called!', result)
+
+  try {
+    // Payment successful - NOW complete the draft booking
+    console.log('[BookingLayout] Payment successful, completing draft booking...')
+    const booking = await bookingStore.completeDraft()
+
+    if (booking) {
+      console.log('[BookingLayout] Booking completed:', booking.bookingNumber)
+    } else {
+      console.error('[BookingLayout] Failed to complete booking after payment')
+    }
+  } catch (error) {
+    console.error('[BookingLayout] Error completing booking:', error)
+    // Payment was successful, so show success anyway
+    // Backend should handle this case via webhook/callback
+  }
+
+  console.log('[BookingLayout] Opening success modal')
+  clearPhase1Data()
+  showSuccessModal.value = true
+  showValidation.value = false
+}
+
+const handleInlinePaymentError = (error) => {
+  console.error('Inline payment error:', error)
+  if (error !== 'cancelled') {
+    bookingStore.error = error
+  }
+  // Booking may already be created - user can retry payment from booking detail
 }
 
 // Search handler
@@ -563,6 +756,25 @@ const handleViewBooking = () => {
   bookingStore.resetAll()
   if (bookingId) {
     router.push(`/bookings/${bookingId}`)
+  }
+}
+
+// Format payment amount
+const formatPaymentAmount = (amount, currency = 'TRY') => {
+  if (!amount && amount !== 0) return '-'
+  const symbols = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }
+  const symbol = symbols[currency] || currency
+  return `${symbol}${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2 }).format(amount)}`
+}
+
+// Copy payment link
+const copyPaymentLink = async () => {
+  if (!paymentLinkResult.value?.paymentUrl) return
+  try {
+    await navigator.clipboard.writeText(paymentLinkResult.value.paymentUrl)
+    // Could add toast here
+  } catch (err) {
+    console.error('Failed to copy:', err)
   }
 }
 </script>

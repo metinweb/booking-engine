@@ -179,6 +179,21 @@
       :daily-breakdown="dailyBreakdown"
     />
 
+    <!-- Payment Method Selection -->
+    <PaymentMethodSelect
+      :accepted-methods="['cash', 'bank_transfer', 'credit_card']"
+      :selected-method="paymentMethod"
+      @select="paymentMethod = $event"
+    />
+
+    <!-- Credit Card Payment Options (only when credit_card selected) -->
+    <CreditCardPaymentOptions
+      v-if="paymentMethod === 'credit_card'"
+      v-model="creditCardOption"
+      v-model:send-email="sendPaymentLinkEmail"
+      v-model:send-sms="sendPaymentLinkSms"
+    />
+
     <!-- Terms & Conditions -->
     <div class="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-4 md:p-6">
       <label class="flex items-start space-x-3 cursor-pointer">
@@ -279,15 +294,56 @@
           {{ $t('booking.bookingSuccessTitle') }}
         </h3>
         <p class="text-gray-500 dark:text-slate-400 mb-4">
-          {{ $t('booking.bookingSuccessDescription') }}
+          {{ paymentLinkResult ? $t('booking.creditCardOptions.paymentLinkSentDescription') : $t('booking.bookingSuccessDescription') }}
         </p>
         <div v-if="bookingResult" class="bg-gray-50 dark:bg-slate-800 rounded-lg p-4 mb-4">
           <p class="text-sm text-gray-500 dark:text-slate-400">
             {{ $t('booking.confirmationNumber') }}
           </p>
           <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
-            {{ bookingResult.confirmationNumber }}
+            {{ bookingResult.bookingNumber || bookingResult.confirmationNumber }}
           </p>
+        </div>
+
+        <!-- Payment Link Info -->
+        <div v-if="paymentLinkResult" class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mt-4 text-left">
+          <div class="flex items-center mb-3">
+            <span class="material-icons text-blue-500 mr-2">link</span>
+            <span class="font-medium text-blue-700 dark:text-blue-400">
+              {{ $t('booking.creditCardOptions.paymentLinkInfo') }}
+            </span>
+          </div>
+          <div class="bg-white dark:bg-slate-800 rounded-lg p-3 mb-3">
+            <p class="text-xs text-gray-500 dark:text-slate-400 mb-1">
+              {{ $t('booking.creditCardOptions.linkNumber') }}
+            </p>
+            <p class="font-mono text-sm text-gray-900 dark:text-white">
+              {{ paymentLinkResult.linkNumber }}
+            </p>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-600 dark:text-slate-400">
+              {{ $t('booking.creditCardOptions.amount') }}:
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ formatPrice(paymentLinkResult.amount, paymentLinkResult.currency) }}
+              </span>
+            </span>
+            <span class="text-gray-600 dark:text-slate-400">
+              {{ $t('booking.creditCardOptions.expiresAt') }}:
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ formatExpiryDate(paymentLinkResult.expiresAt) }}
+              </span>
+            </span>
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button
+              class="flex-1 btn-sm btn-secondary flex items-center justify-center"
+              @click="copyPaymentLink"
+            >
+              <span class="material-icons text-sm mr-1">content_copy</span>
+              {{ $t('booking.creditCardOptions.copyLink') }}
+            </button>
+          </div>
         </div>
       </div>
       <template #footer>
@@ -311,6 +367,8 @@ import { useRouter } from 'vue-router'
 import { useBookingStore } from '@/stores/booking'
 import { useToast } from 'vue-toastification'
 import PriceSummary from '@/components/booking/PriceSummary.vue'
+import PaymentMethodSelect from '@/components/booking/checkout/PaymentMethodSelect.vue'
+import CreditCardPaymentOptions from '@/components/booking/wizard/CreditCardPaymentOptions.vue'
 import Modal from '@/components/common/Modal.vue'
 
 const { t, locale } = useI18n()
@@ -325,6 +383,12 @@ const specialRequests = ref('')
 const termsAccepted = ref(false)
 const isSubmitting = ref(false)
 
+// Payment state
+const paymentMethod = ref('cash')
+const creditCardOption = ref('payment_link') // 'inline' or 'payment_link'
+const sendPaymentLinkEmail = ref(true)
+const sendPaymentLinkSms = ref(false)
+
 // Modals
 const showTerms = ref(false)
 const showPrivacy = ref(false)
@@ -332,6 +396,7 @@ const showSuccess = ref(false)
 
 // Booking result
 const bookingResult = ref(null)
+const paymentLinkResult = ref(null)
 
 // Sync special requests with store
 watch(specialRequests, value => {
@@ -438,19 +503,64 @@ const handleConfirm = async () => {
     return
   }
 
+  if (!paymentMethod.value) {
+    toast.error(t('booking.validation.paymentMethod'))
+    return
+  }
+
   isSubmitting.value = true
 
   try {
-    const result = await bookingStore.createBooking()
+    // Handle credit card with payment link option
+    if (paymentMethod.value === 'credit_card' && creditCardOption.value === 'payment_link') {
+      const result = await bookingStore.createBookingWithPaymentLink({
+        sendEmail: sendPaymentLinkEmail.value,
+        sendSms: sendPaymentLinkSms.value
+      })
 
-    if (result) {
-      bookingResult.value = result
-      showSuccess.value = true
+      if (result) {
+        bookingResult.value = result.booking
+        paymentLinkResult.value = result.paymentLink
+        showSuccess.value = true
+      }
+    } else {
+      // Standard booking flow (cash, bank_transfer, or inline credit card)
+      bookingStore.setPaymentMethod(paymentMethod.value)
+      const result = await bookingStore.createBooking()
+
+      if (result) {
+        bookingResult.value = result
+        paymentLinkResult.value = null
+        showSuccess.value = true
+      }
     }
   } catch (error) {
     toast.error(error.message || t('booking.bookingFailed'))
   } finally {
     isSubmitting.value = false
+  }
+}
+
+// Format expiry date
+const formatExpiryDate = dateStr => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleDateString(locale.value === 'tr' ? 'tr-TR' : 'en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  })
+}
+
+// Copy payment link to clipboard
+const copyPaymentLink = async () => {
+  if (!paymentLinkResult.value?.paymentUrl) return
+
+  try {
+    await navigator.clipboard.writeText(paymentLinkResult.value.paymentUrl)
+    toast.success(t('booking.creditCardOptions.linkCopied'))
+  } catch {
+    toast.error(t('common.copyError'))
   }
 }
 

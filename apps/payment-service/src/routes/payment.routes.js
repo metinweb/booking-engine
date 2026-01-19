@@ -325,51 +325,72 @@ publicPaymentRoutes.post('/:id/callback', async (req, res) => {
   try {
     const result = await PaymentService.processCallback(req.params.id, req.body);
 
-    // If this was a payment link transaction, notify main API
-    if (result.success) {
-      try {
-        const { Transaction } = await import('../models/index.js');
-        const transaction = await Transaction.findById(req.params.id).populate('pos');
+    // Notify main API for ALL transactions (not just payment links)
+    try {
+      const { Transaction } = await import('../models/index.js');
+      const transaction = await Transaction.findById(req.params.id).populate('pos');
 
-        // Calculate commission for successful payment
-        if (transaction && transaction.pos) {
-          // Extract partnerId from externalId if payment link (PL-{token})
-          let partnerId = transaction.partnerId;
+      // Calculate commission for successful payment
+      if (result.success && transaction && transaction.pos) {
+        let partnerId = transaction.partnerId;
 
-          // If not set, try to get from payment link via main API
-          if (!partnerId && transaction.externalId?.startsWith('PL-')) {
-            // Partner will be determined when main API is notified
-            // Commission will be calculated there
-          }
-
-          // Calculate commission
-          await PaymentService.calculateTransactionCommission(
-            transaction,
-            transaction.pos,
-            partnerId
-          );
-        }
-
-        const txDetails = await PaymentService.getTransactionDetails(req.params.id);
-
-        // Check if this is a payment link transaction (externalId starts with PL-)
-        if (txDetails && txDetails.transactionId) {
-          if (transaction?.externalId?.startsWith('PL-')) {
-            const token = transaction.externalId.replace('PL-', '');
-            const mainApiUrl = process.env.MAIN_API_URL || 'http://localhost:4000/api';
-
-            console.log('[Payment Callback] Payment link detected, notifying main API:', token);
-            console.log('[Payment Callback] URL:', `${mainApiUrl}/pay/${token}/complete`);
-
-            const axios = (await import('axios')).default;
-            await axios.post(`${mainApiUrl}/pay/${token}/complete`, txDetails, { httpsAgent });
-
-            console.log('[Payment Callback] Main API notified successfully');
-          }
-        }
-      } catch (notifyError) {
-        console.error('[Payment Callback] Failed to notify main API:', notifyError.message);
+        // Calculate commission
+        await PaymentService.calculateTransactionCommission(
+          transaction,
+          transaction.pos,
+          partnerId
+        );
       }
+
+      const txDetails = await PaymentService.getTransactionDetails(req.params.id);
+      const mainApiUrl = process.env.MAIN_API_URL || 'http://localhost:4000/api';
+      const axios = (await import('axios')).default;
+
+      if (txDetails && transaction?.externalId) {
+        // Payment Link transactions (PL-{token})
+        if (transaction.externalId.startsWith('PL-')) {
+          const token = transaction.externalId.replace('PL-', '');
+          console.log('[Payment Callback] Payment link detected, notifying main API:', token);
+
+          await axios.post(`${mainApiUrl}/pay/${token}/complete`, txDetails, { httpsAgent });
+          console.log('[Payment Callback] Payment link webhook sent successfully');
+        }
+        // Regular booking payments (externalId = payment._id)
+        else {
+          console.log('[Payment Callback] Booking payment detected, notifying main API');
+          console.log('[Payment Callback] externalId:', transaction.externalId);
+
+          const webhookKey = process.env.PAYMENT_WEBHOOK_KEY || 'payment-webhook-secret';
+          await axios.post(
+            `${mainApiUrl}/bookings/payment-webhook`,
+            {
+              transactionId: transaction._id,
+              externalId: transaction.externalId,
+              success: result.success,
+              authCode: txDetails.authCode,
+              refNumber: txDetails.refNumber,
+              provisionNumber: txDetails.provisionNumber,
+              maskedCard: txDetails.maskedCard,
+              lastFour: txDetails.lastFour,
+              brand: txDetails.brand,
+              cardType: txDetails.cardType,
+              cardFamily: txDetails.cardFamily,
+              cardBank: txDetails.cardBank,
+              installment: txDetails.installment,
+              amount: transaction.amount,
+              error: result.success ? null : (result.message || 'Payment failed')
+            },
+            {
+              headers: { 'X-Api-Key': webhookKey },
+              httpsAgent
+            }
+          );
+          console.log('[Payment Callback] Booking payment webhook sent successfully');
+        }
+      }
+    } catch (notifyError) {
+      console.error('[Payment Callback] Failed to notify main API:', notifyError.message);
+      // Don't throw - we still want to show result to user
     }
 
     // Return HTML result page

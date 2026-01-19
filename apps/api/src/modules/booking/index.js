@@ -31,6 +31,7 @@ export {
   listBookings,
   getBookingDetail,
   createBooking,
+  createBookingWithPaymentLink,
   updateBookingStatus,
   cancelBooking,
   addBookingNote,

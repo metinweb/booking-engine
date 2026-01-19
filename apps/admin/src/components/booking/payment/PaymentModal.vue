@@ -107,6 +107,16 @@
           </div>
           <!-- Actions -->
           <div class="flex items-center gap-2">
+            <!-- Send Payment Link (for pending credit card payments) -->
+            <button
+              v-if="payment.type === 'credit_card' && payment.status === 'pending'"
+              class="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-800/40 transition-colors"
+              :title="$t('payment.sendLink.tooltip')"
+              @click="handleSendPaymentLink(payment)"
+            >
+              <span class="material-icons text-sm mr-1">link</span>
+              {{ $t('payment.sendLink.button') }}
+            </button>
             <!-- Confirm Button (for pending bank transfers and pay at check-in) -->
             <button
               v-if="
@@ -427,6 +437,103 @@
 
     <!-- Receipt Lightbox -->
     <Lightbox v-model="showReceiptLightbox" :url="receiptUrl" :title="receiptTitle" />
+
+    <!-- Send Payment Link Modal -->
+    <Modal v-model="showPaymentLinkModal" size="md" :title="$t('payment.sendLink.title')">
+      <div class="space-y-4">
+        <!-- Payment Info -->
+        <div class="p-4 bg-gray-50 dark:bg-slate-700/50 rounded-lg">
+          <p class="text-sm text-gray-500 dark:text-slate-400">
+            {{ $t('payment.amount') }}
+          </p>
+          <p class="font-bold text-lg text-gray-900 dark:text-white">
+            {{ formatPrice(selectedPayment?.amount, selectedPayment?.currency) }}
+          </p>
+        </div>
+
+        <!-- Options -->
+        <div class="space-y-3">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input
+              v-model="paymentLinkForm.sendEmail"
+              type="checkbox"
+              class="form-checkbox"
+            />
+            <span class="text-gray-700 dark:text-slate-300">
+              <span class="material-icons text-sm mr-1 align-middle">email</span>
+              {{ $t('payment.sendLink.sendEmail') }}
+            </span>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input
+              v-model="paymentLinkForm.sendSms"
+              type="checkbox"
+              class="form-checkbox"
+            />
+            <span class="text-gray-700 dark:text-slate-300">
+              <span class="material-icons text-sm mr-1 align-middle">sms</span>
+              {{ $t('payment.sendLink.sendSms') }}
+            </span>
+          </label>
+        </div>
+
+        <!-- Expiry -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+            {{ $t('payment.sendLink.expiresIn') }}
+          </label>
+          <select v-model="paymentLinkForm.expiresInDays" class="form-select w-full">
+            <option :value="1">1 {{ $t('common.day') }}</option>
+            <option :value="3">3 {{ $t('common.days') }}</option>
+            <option :value="7">7 {{ $t('common.days') }}</option>
+            <option :value="14">14 {{ $t('common.days') }}</option>
+            <option :value="30">30 {{ $t('common.days') }}</option>
+          </select>
+        </div>
+
+        <!-- Generated Link (if created) -->
+        <div v-if="generatedPaymentLink" class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <p class="text-sm font-medium text-green-800 dark:text-green-300 mb-2">
+            {{ $t('payment.sendLink.linkCreated') }}
+          </p>
+          <div class="flex items-center gap-2">
+            <input
+              type="text"
+              :value="generatedPaymentLink"
+              readonly
+              class="form-input flex-1 text-sm font-mono"
+            />
+            <button
+              class="btn-secondary px-3 py-2"
+              :title="$t('common.copy')"
+              @click="copyPaymentLink"
+            >
+              <span class="material-icons text-sm">content_copy</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end gap-3">
+          <button class="btn-secondary px-4 py-2" @click="showPaymentLinkModal = false">
+            {{ generatedPaymentLink ? $t('common.close') : $t('common.cancel') }}
+          </button>
+          <button
+            v-if="!generatedPaymentLink"
+            class="btn-primary px-4 py-2"
+            :disabled="creatingPaymentLink"
+            @click="createPaymentLink"
+          >
+            <span v-if="creatingPaymentLink" class="flex items-center">
+              <span class="material-icons text-sm animate-spin mr-2">refresh</span>
+              {{ $t('common.loading') }}
+            </span>
+            <span v-else>{{ $t('payment.sendLink.create') }}</span>
+          </button>
+        </div>
+      </template>
+    </Modal>
   </Modal>
 </template>
 
@@ -471,6 +578,7 @@ const showDeleteModal = ref(false)
 const showRefundModal = ref(false)
 const showEditModal = ref(false)
 const showReceiptLightbox = ref(false)
+const showPaymentLinkModal = ref(false)
 const receiptUrl = ref('')
 const receiptTitle = ref('')
 const selectedPayment = ref(null)
@@ -478,11 +586,20 @@ const confirming = ref(false)
 const deleting = ref(false)
 const refunding = ref(false)
 const editing = ref(false)
+const creatingPaymentLink = ref(false)
+const generatedPaymentLink = ref('')
 
 // Refund form
 const refundForm = reactive({
   amount: 0,
   reason: ''
+})
+
+// Payment link form
+const paymentLinkForm = reactive({
+  sendEmail: false,
+  sendSms: false,
+  expiresInDays: 7
 })
 
 // Edit form
@@ -646,6 +763,61 @@ const viewReceipt = payment => {
     const filename = payment.bankTransfer.receiptUrl.split('/').pop()
     receiptTitle.value = filename || t('payment.bankTransfer.receipt')
     showReceiptLightbox.value = true
+  }
+}
+
+// Handle send payment link
+const handleSendPaymentLink = payment => {
+  selectedPayment.value = payment
+  generatedPaymentLink.value = ''
+  paymentLinkForm.sendEmail = false
+  paymentLinkForm.sendSms = false
+  paymentLinkForm.expiresInDays = 7
+  showPaymentLinkModal.value = true
+}
+
+// Create payment link
+const createPaymentLink = async () => {
+  if (!selectedPayment.value) return
+
+  creatingPaymentLink.value = true
+  try {
+    const response = await paymentService.createPaymentLinkForPayment(
+      props.booking._id,
+      selectedPayment.value._id,
+      {
+        sendEmail: paymentLinkForm.sendEmail,
+        sendSms: paymentLinkForm.sendSms,
+        expiresInDays: paymentLinkForm.expiresInDays
+      }
+    )
+    if (response.success) {
+      generatedPaymentLink.value = response.data.paymentUrl
+      toast.success(t('payment.sendLink.success'))
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || t('common.operationFailed'))
+  } finally {
+    creatingPaymentLink.value = false
+  }
+}
+
+// Copy payment link
+const copyPaymentLink = async () => {
+  if (!generatedPaymentLink.value) return
+
+  try {
+    await navigator.clipboard.writeText(generatedPaymentLink.value)
+    toast.success(t('common.copied'))
+  } catch {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea')
+    textArea.value = generatedPaymentLink.value
+    document.body.appendChild(textArea)
+    textArea.select()
+    document.execCommand('copy')
+    document.body.removeChild(textArea)
+    toast.success(t('common.copied'))
   }
 }
 

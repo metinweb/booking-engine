@@ -1,113 +1,26 @@
 /**
  * Payment Webhook Routes
- * Receives callbacks from Payment Service
+ * Receives callbacks from Payment Service (external gateways)
+ *
+ * NOTE: The main webhook handler is in payment.service.js (paymentWebhook function).
+ * This file is kept for backward compatibility and specific gateway integrations.
+ *
+ * Notification functions are centralized in payment-notifications.service.js
  */
 
 import express from 'express'
 import { asyncHandler } from '#helpers'
-// Error handling provided by asyncHandler
 import Payment from './payment.model.js'
 import Booking from './booking.model.js'
 import logger from '#core/logger.js'
-import notificationService from '#services/notificationService.js'
+// Import shared functions to avoid duplication
+import { updateBookingPayment } from './payment.service.js'
+import { sendPaymentNotification } from './payment-notifications.service.js'
 
 const router = express.Router()
 
-/**
- * Send payment notification to customer
- */
-async function sendPaymentNotification(payment, booking, eventType) {
-  if (!booking?.leadGuest?.email) {
-    logger.warn('[PaymentWebhook] No email for notification:', { bookingId: booking?._id })
-    return
-  }
-
-  try {
-    const notificationTypes = {
-      completed: 'payment_completed',
-      failed: 'payment_failed',
-      refunded: 'payment_refunded'
-    }
-
-    const notificationType = notificationTypes[eventType]
-    if (!notificationType) return
-
-    // Format amount
-    const currencySymbol = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }[payment.currency] || payment.currency
-    const formattedAmount = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2 }).format(payment.amount)
-
-    await notificationService.send({
-      type: notificationType,
-      recipient: {
-        email: booking.leadGuest.email,
-        name: `${booking.leadGuest.firstName} ${booking.leadGuest.lastName}`,
-        phone: booking.leadGuest.phone
-      },
-      data: {
-        subject: eventType === 'completed' ? 'Ödemeniz Alındı' :
-                 eventType === 'failed' ? 'Ödeme Başarısız' :
-                 'İade İşleminiz Tamamlandı',
-        CUSTOMER_NAME: `${booking.leadGuest.firstName} ${booking.leadGuest.lastName}`,
-        BOOKING_NUMBER: booking.bookingNumber,
-        AMOUNT: `${currencySymbol}${formattedAmount}`,
-        CURRENCY: payment.currency,
-        PAYMENT_TYPE: payment.type,
-        PAYMENT_DATE: new Date().toLocaleDateString('tr-TR'),
-        HOTEL_NAME: booking.hotelName,
-        CHECK_IN: new Date(booking.checkIn).toLocaleDateString('tr-TR'),
-        CHECK_OUT: new Date(booking.checkOut).toLocaleDateString('tr-TR'),
-        // Refund specific
-        REFUND_AMOUNT: payment.refund?.amount ? `${currencySymbol}${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2 }).format(payment.refund.amount)}` : null,
-        REFUND_REASON: payment.refund?.reason
-      },
-      channels: ['email'],
-      partnerId: booking.partner,
-      relatedTo: { model: 'Payment', id: payment._id }
-    })
-
-    logger.info('[PaymentWebhook] Notification sent:', {
-      type: notificationType,
-      paymentId: payment._id,
-      email: booking.leadGuest.email
-    })
-  } catch (error) {
-    logger.error('[PaymentWebhook] Failed to send notification:', error.message)
-  }
-}
-
-/**
- * Update booking payment status and amounts
- */
-async function updateBookingPayment(bookingId) {
-  const payments = await Payment.find({ booking: bookingId })
-
-  const paidAmount = payments
-    .filter(p => p.status === 'completed')
-    .reduce((sum, p) => sum + p.amount, 0)
-
-  const booking = await Booking.findById(bookingId)
-  if (!booking) return
-
-  const grandTotal = booking.pricing?.grandTotal || 0
-
-  let status = 'pending'
-  if (paidAmount >= grandTotal) {
-    status = 'paid'
-  } else if (paidAmount > 0) {
-    status = 'partial'
-  }
-
-  const hasRefund = payments.some(p => p.status === 'refunded')
-  if (hasRefund && paidAmount === 0) {
-    status = 'refunded'
-  }
-
-  booking.payment.paidAmount = paidAmount
-  booking.payment.status = status
-  booking.payment.payments = payments.map(p => p._id)
-
-  await booking.save()
-}
+// Re-export for backward compatibility (if any code imports from here)
+export { sendPaymentNotification }
 
 /**
  * POST /api/payments/webhook

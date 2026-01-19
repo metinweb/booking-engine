@@ -66,7 +66,8 @@ const paymentSchema = new mongoose.Schema(
       cardFamily: { type: String }, // bonus, world, maximum, etc.
       bankName: { type: String }, // Issuing bank name
       installment: { type: Number, default: 1 }, // Number of installments
-      paymentLink: { type: String },
+      // Reference to PaymentLink if payment was created via payment link
+      paymentLink: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentLink' },
       linkSentAt: { type: Date },
       linkExpiresAt: { type: Date },
       // Gateway/POS integration

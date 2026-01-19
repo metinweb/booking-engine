@@ -443,4 +443,47 @@ router.post('/:paymentId/card/release', paymentService.releasePreAuth)
  */
 router.get('/pre-authorized', paymentService.getPreAuthorizedPayments)
 
+// ============================================================================
+// PAYMENT LINK FOR EXISTING PAYMENT
+// ============================================================================
+
+/**
+ * @swagger
+ * /api/booking/{id}/payments/{paymentId}/create-link:
+ *   post:
+ *     tags: [Bookings]
+ *     summary: Create payment link for pending payment
+ *     description: Create a public payment link for an existing pending credit card payment
+ *     parameters:
+ *       - $ref: '#/components/parameters/IdParam'
+ *       - name: paymentId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sendEmail:
+ *                 type: boolean
+ *                 default: false
+ *               sendSms:
+ *                 type: boolean
+ *                 default: false
+ *               expiresInDays:
+ *                 type: number
+ *                 default: 7
+ *     responses:
+ *       201:
+ *         description: Payment link created
+ *       400:
+ *         description: Payment is not pending
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ */
+router.post('/:paymentId/create-link', paymentService.createPaymentLinkForPayment)
+
 export default router

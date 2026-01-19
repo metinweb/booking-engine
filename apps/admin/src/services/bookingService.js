@@ -85,6 +85,17 @@ const createBooking = async data => {
 }
 
 /**
+ * Create a booking with payment link
+ * Creates booking and generates a payment link for credit card payment
+ * @param {Object} data - Booking data including sendEmail, sendSms options
+ * @returns {Promise} - { booking, paymentLink }
+ */
+const createBookingWithPaymentLink = async data => {
+  const response = await apiClient.post('/bookings/with-payment-link', data)
+  return response.data
+}
+
+/**
  * Update booking status
  * @param {string} id - Booking ID
  * @param {string} status - New status
@@ -246,6 +257,7 @@ export default {
   getBookings,
   getBooking,
   createBooking,
+  createBookingWithPaymentLink,
   updateBookingStatus,
   cancelBooking,
   addBookingNote,

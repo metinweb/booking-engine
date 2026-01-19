@@ -391,6 +391,77 @@ export const useBookingStore = defineStore('booking', () => {
     }
   }
 
+  // ==================== CREATE BOOKING WITH PAYMENT LINK ====================
+
+  async function createBookingWithPaymentLink({ sendEmail = true, sendSms = false } = {}) {
+    // Guard against multiple submissions
+    if (loading.value.booking) {
+      console.warn('Booking creation already in progress')
+      return null
+    }
+
+    loading.value.booking = true
+    error.value = null
+
+    try {
+      const firstItem = cart.value[0]
+
+      const roomsData = cart.value.map((item, index) => ({
+        roomTypeId: item.roomType._id,
+        mealPlanId: item.mealPlan._id,
+        adults: item.adults,
+        children: item.children,
+        guests: guests.value.roomGuests[index] || [],
+        specialRequests: '',
+        rateType: item.rateType || 'refundable',
+        isNonRefundable: item.isNonRefundable || false,
+        nonRefundableDiscount: item.nonRefundableDiscount || 0,
+        customDiscount: item.customDiscount || null,
+        pricing: item.pricing
+      }))
+
+      const bookingData = {
+        hotelId: firstItem.hotelId,
+        marketId: firstItem.marketId || searchResults.value.selectedMarket?._id,
+        checkIn: search.value.dateRange.start,
+        checkOut: search.value.dateRange.end,
+        rooms: roomsData,
+        salesChannel: search.value.channel?.toLowerCase() || 'b2c',
+        contact: {
+          email: guests.value.leadGuest.email,
+          phone: guests.value.leadGuest.phone,
+          countryCode: search.value.countryCode,
+          firstName: guests.value.leadGuest.firstName,
+          lastName: guests.value.leadGuest.lastName
+        },
+        specialRequests: specialRequests.value,
+        sendEmail,
+        sendSms
+      }
+
+      const response = await bookingService.createBookingWithPaymentLink(bookingData)
+
+      if (response.success) {
+        bookingResult.value = response.data.booking
+        return response.data
+      } else {
+        error.value = response.message
+        return null
+      }
+    } catch (err) {
+      error.value = err.response?.data?.message || err.message
+      throw err
+    } finally {
+      loading.value.booking = false
+    }
+  }
+
+  // ==================== PAYMENT METHOD ====================
+
+  function setPaymentMethod(method) {
+    payment.value.method = method
+  }
+
   // ==================== RESET ====================
 
   function resetAll() {
@@ -516,6 +587,8 @@ export const useBookingStore = defineStore('booking', () => {
 
     // Booking
     createBooking,
+    createBookingWithPaymentLink,
+    setPaymentMethod,
     resetAll,
 
     // Cart actions

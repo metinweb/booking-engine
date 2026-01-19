@@ -372,6 +372,12 @@ const bookingSchema = new mongoose.Schema(
           ref: 'Payment'
         }
       ],
+      // Payment Link reference (for credit card payments via payment link)
+      paymentLinkId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'PaymentLink'
+      },
+      paymentLinkToken: { type: String },
       // Legacy transactions (keeping for backward compatibility)
       transactions: [
         {

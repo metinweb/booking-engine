@@ -1,12 +1,16 @@
 import PaymentLink from './paymentLink.model.js'
 import Partner from '../partner/partner.model.js'
 import Booking from '../booking/booking.model.js'
-import ShortUrl from '../shortUrl/shortUrl.model.js'
+import Payment from '../booking/payment.model.js'
 import { NotFoundError, BadRequestError, ConflictError } from '#core/errors.js'
 import { asyncHandler, getEffectivePartnerId } from '#helpers'
 import logger from '#core/logger.js'
-import notificationService from '#services/notificationService.js'
 import paymentGateway from '#services/paymentGateway.js'
+// Import centralized notification function
+import { sendPaymentLinkNotification } from '../booking/payment-notifications.service.js'
+
+// Re-export for backward compatibility
+export { sendPaymentLinkNotification }
 
 /**
  * Get payment links list with filtering and pagination
@@ -508,133 +512,6 @@ export const getPaymentLinkStats = asyncHandler(async (req, res) => {
   })
 })
 
-/**
- * Helper: Send payment link notification
- */
-async function sendPaymentLinkNotification(paymentLink, partner, channels = {}) {
-  const { email = true, sms = false } = channels
-  const result = { email: null, sms: null }
-
-  // Default company info for platform-level links
-  const companyName = partner?.companyName || process.env.PLATFORM_NAME || 'MiniRes'
-  const companyLogo = partner?.branding?.logo || null
-
-  // E-posta için uzun URL kullan
-  // Template variable isimleri büyük harfli olmalı
-  const formattedAmount = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2 }).format(paymentLink.amount)
-  const currencySymbol = { TRY: '₺', USD: '$', EUR: '€', GBP: '£' }[paymentLink.currency] || paymentLink.currency
-  const formattedExpiry = new Date(paymentLink.expiresAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-
-  // Site ve support bilgileri
-  const siteUrl = partner?.branding?.website || process.env.FRONTEND_URL || 'https://app.minires.com'
-  const supportEmail = partner?.supportEmail || process.env.SUPPORT_EMAIL || 'destek@minires.com'
-
-  // Logo URL - tam URL olmalı
-  let logoUrl = ''
-  if (companyLogo) {
-    if (companyLogo.startsWith('http')) {
-      logoUrl = companyLogo
-    } else {
-      const apiUrl = process.env.API_URL || 'https://api.minires.com'
-      logoUrl = `${apiUrl}${companyLogo}`
-    }
-  }
-
-  const notificationData = {
-    // Büyük harfli template değişkenleri
-    CUSTOMER_NAME: paymentLink.customer.name,
-    DESCRIPTION: paymentLink.description,
-    AMOUNT: `${currencySymbol}${formattedAmount}`,
-    CURRENCY: paymentLink.currency,
-    PAYMENT_URL: paymentLink.paymentUrl,
-    EXPIRY_DATE: formattedExpiry,
-    COMPANY_NAME: companyName,
-    LOGO_URL: logoUrl,
-    SITE_URL: siteUrl,
-    SUPPORT_EMAIL: supportEmail,
-    // Küçük harfli değişkenler de gönder (SMS için)
-    customerName: paymentLink.customer.name,
-    description: paymentLink.description,
-    amount: paymentLink.amount,
-    currency: paymentLink.currency,
-    paymentUrl: paymentLink.paymentUrl,
-    expiresAt: paymentLink.expiresAt,
-    companyName,
-    companyLogo
-  }
-
-  // Send email notification
-  if (email && paymentLink.customer.email) {
-    try {
-      const emailResult = await notificationService.send({
-        type: 'payment_link',
-        recipient: {
-          email: paymentLink.customer.email,
-          name: paymentLink.customer.name
-        },
-        data: {
-          subject: `Ödeme Linki - ${companyName}`,
-          ...notificationData
-        },
-        channels: ['email'],
-        partnerId: partner?._id,
-        relatedTo: { model: 'PaymentLink', id: paymentLink._id }
-      })
-
-      result.email = emailResult
-      await paymentLink.recordNotification('email')
-    } catch (error) {
-      logger.error('Payment link email failed:', error.message)
-      result.email = { success: false, error: error.message }
-    }
-  }
-
-  // Send SMS notification with SHORT URL
-  if (sms && paymentLink.customer.phone) {
-    try {
-      // SMS için kısa URL oluştur
-      const shortUrl = await ShortUrl.createShortUrl({
-        originalUrl: paymentLink.paymentUrl,
-        type: 'payment_link',
-        relatedId: paymentLink._id,
-        partner: partner?._id,
-        expiresAt: paymentLink.expiresAt
-      })
-
-      logger.info('Short URL created for payment link:', {
-        linkNumber: paymentLink.linkNumber,
-        shortUrl: shortUrl.shortUrl
-      })
-
-      // SMS için kısa URL'li data
-      const smsData = {
-        ...notificationData,
-        paymentUrl: shortUrl.shortUrl // Kısa URL kullan
-      }
-
-      const smsResult = await notificationService.send({
-        type: 'payment_link',
-        recipient: {
-          phone: paymentLink.customer.phone,
-          name: paymentLink.customer.name
-        },
-        data: smsData,
-        channels: ['sms'],
-        partnerId: partner?._id,
-        relatedTo: { model: 'PaymentLink', id: paymentLink._id }
-      })
-
-      result.sms = smsResult
-      await paymentLink.recordNotification('sms')
-    } catch (error) {
-      logger.error('Payment link SMS failed:', error.message)
-      result.sms = { success: false, error: error.message }
-    }
-  }
-
-  return result
-}
-
 // ===== PUBLIC ROUTES (No Auth) =====
 
 /**
@@ -809,8 +686,8 @@ export const completePaymentLink = asyncHandler(async (req, res) => {
 
   logger.info(`Payment link ${paymentLink.linkNumber} marked as paid`)
 
-  // If linked to a booking, update booking payment status
-  if (paymentLink.booking) {
+  // If linked to a booking (standalone link), update booking payment status
+  if (paymentLink.booking && !paymentLink.linkedPayment) {
     try {
       const booking = await Booking.findById(paymentLink.booking)
       if (booking) {
@@ -831,6 +708,45 @@ export const completePaymentLink = asyncHandler(async (req, res) => {
       }
     } catch (bookingError) {
       logger.error('Failed to update booking payment:', bookingError.message)
+    }
+  }
+
+  // If linked to an existing Payment record, update it
+  if (paymentLink.linkedPayment) {
+    try {
+      const payment = await Payment.findById(paymentLink.linkedPayment)
+      if (payment && payment.status === 'pending') {
+        // Complete the payment with transaction data
+        await payment.completeCardPayment({
+          authCode: transactionData.authCode,
+          refNumber: transactionData.refNumber,
+          provisionNumber: transactionData.provisionNumber,
+          maskedCard: transactionData.maskedCard,
+          lastFour: transactionData.lastFour,
+          brand: transactionData.brand,
+          cardType: transactionData.cardType,
+          cardFamily: transactionData.cardFamily,
+          cardBank: transactionData.cardBank,
+          installment: transactionData.installment,
+          amount: paymentLink.amount
+        })
+
+        // Store payment link reference
+        payment.cardDetails = payment.cardDetails || {}
+        payment.cardDetails.paymentLinkId = paymentLink._id
+        payment.cardDetails.gatewayTransactionId = transactionData.transactionId
+        await payment.save()
+
+        // Update booking payment summary
+        if (payment.booking) {
+          const { updateBookingPayment } = await import('../booking/payment.service.js')
+          await updateBookingPayment(payment.booking)
+        }
+
+        logger.info(`Linked Payment ${payment._id} completed via payment link ${paymentLink.linkNumber}`)
+      }
+    } catch (paymentError) {
+      logger.error('Failed to update linked payment:', paymentError.message)
     }
   }
 

@@ -5,6 +5,7 @@ import { NotFoundError, BadRequestError } from '#core/errors.js'
 import Payment from './payment.model.js'
 import Booking from './booking.model.js'
 import paymentGateway from '#services/paymentGateway.js'
+import logger from '#core/logger.js'
 
 /**
  * Get all payments for a booking
@@ -415,8 +416,9 @@ export const deletePayment = asyncHandler(async (req, res) => {
 
 /**
  * Helper: Update booking payment status and amounts
+ * Exported for use by paymentLink.service.js
  */
-async function updateBookingPayment(bookingId) {
+export async function updateBookingPayment(bookingId) {
   const payments = await Payment.find({ booking: bookingId })
 
   const paidAmount = payments
@@ -455,7 +457,43 @@ async function updateBookingPayment(bookingId) {
 // ============================================================================
 
 /**
- * Query card BIN for installment options
+ * Query card BIN for installment options (Partner-based, no booking required)
+ * Used for inline payment flow where booking/payment doesn't exist yet
+ */
+export const queryBinByPartner = asyncHandler(async (req, res) => {
+  const { bin, amount, currency = 'TRY' } = req.body
+  const partnerId = req.user.role === 'platform_admin'
+    ? req.body.partnerId || req.query.partnerId
+    : req.user.partner
+
+  // Validate BIN
+  if (!bin || bin.length < 6) {
+    throw new BadRequestError('BIN numarası en az 6 karakter olmalı')
+  }
+
+  // Validate amount
+  if (!amount || amount <= 0) {
+    throw new BadRequestError('Geçerli bir tutar belirtilmeli')
+  }
+
+  // Query BIN from payment gateway
+  const token = req.headers.authorization?.split(' ')[1]
+  const result = await paymentGateway.queryBin(
+    bin,
+    amount,
+    currency.toLowerCase(),
+    partnerId?.toString(),
+    token
+  )
+
+  res.json({
+    success: true,
+    data: result
+  })
+})
+
+/**
+ * Query card BIN for installment options (Booking-based)
  */
 export const queryCardBin = asyncHandler(async (req, res) => {
   const { id: bookingId, paymentId } = req.params
@@ -566,6 +604,26 @@ export const processCardPayment = asyncHandler(async (req, res) => {
     throw new BadRequestError(result.error || 'PAYMENT_FAILED')
   }
 
+  // In Turkey, 3D Secure is mandatory for all card transactions
+  // If payment service doesn't return requires3D, assume true
+  const requires3D = result.requires3D !== false // Default to true if undefined
+
+  // Determine payment form URL based on request host
+  // Development: payment.mini.com (dedicated payment domain)
+  // Production: payment.minires.com (dedicated payment domain)
+  const getFormUrl = (transactionId) => {
+    if (!requires3D) return null
+    const host = req.get('host') || ''
+    // Always use HTTPS for payment forms (avoid mixed content)
+    if (host.includes('mini.com')) {
+      return `https://payment.mini.com/payment/${transactionId}/form`
+    }
+    // Default to minires.com for production
+    return `https://payment.minires.com/payment/${transactionId}/form`
+  }
+
+  const formUrl = getFormUrl(result.transactionId)
+
   // Get BIN info for card details
   const binInfo = await paymentGateway.queryBin(
     card.number.slice(0, 8),
@@ -580,8 +638,8 @@ export const processCardPayment = asyncHandler(async (req, res) => {
     transactionId: result.transactionId,
     posId: result.posId,
     posName: result.posName,
-    requires3D: result.requires3D,
-    formUrl: result.requires3D ? paymentGateway.getPaymentFormUrl(result.transactionId) : null,
+    requires3D: requires3D,
+    formUrl: formUrl,
     lastFour: card.number.slice(-4),
     brand: binInfo?.card?.brand || null,
     cardFamily: binInfo?.card?.cardFamily || null,
@@ -593,9 +651,9 @@ export const processCardPayment = asyncHandler(async (req, res) => {
     success: true,
     data: {
       transactionId: result.transactionId,
-      requires3D: result.requires3D,
-      formUrl: result.requires3D ? paymentGateway.getPaymentFormUrl(result.transactionId) : null,
-      status: result.requires3D ? 'requires_3d' : 'processing'
+      requires3D: requires3D,
+      formUrl: formUrl,
+      status: requires3D ? 'requires_3d' : 'processing'
     }
   })
 })
@@ -898,5 +956,272 @@ export const getPreAuthorizedPayments = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     data: paymentsWithExpiry
+  })
+})
+
+// ============================================================================
+// WEBHOOK FROM PAYMENT SERVICE
+// ============================================================================
+
+/**
+ * Webhook endpoint for payment service callbacks
+ * Called by payment-service when 3D Secure completes
+ * No JWT auth - uses API key
+ */
+export const paymentWebhook = asyncHandler(async (req, res) => {
+  const {
+    transactionId,
+    externalId,
+    success,
+    authCode,
+    refNumber,
+    provisionNumber,
+    maskedCard,
+    lastFour,
+    brand,
+    cardType,
+    cardFamily,
+    cardBank,
+    installment,
+    amount,
+    error
+  } = req.body
+
+  logger.info('[Payment Webhook] Received:', { transactionId, externalId, success })
+
+  // Validate API key (simple validation for internal service)
+  const apiKey = req.headers['x-api-key']
+  const validApiKey = process.env.PAYMENT_WEBHOOK_KEY || 'payment-webhook-secret'
+
+  if (apiKey !== validApiKey) {
+    logger.error('[Payment Webhook] Invalid API key')
+    return res.status(401).json({ success: false, error: 'Invalid API key' })
+  }
+
+  // externalId is the Payment record ID for booking payments
+  if (!externalId) {
+    logger.error('[Payment Webhook] Missing externalId')
+    return res.status(400).json({ success: false, error: 'Missing externalId' })
+  }
+
+  // Skip payment link webhooks (handled separately)
+  if (externalId.startsWith('PL-')) {
+    logger.info('[Payment Webhook] Payment link webhook, skipping (handled by pay routes)')
+    return res.json({ success: true, message: 'Payment link handled separately' })
+  }
+
+  // Find payment by ID (externalId = payment._id)
+  const payment = await Payment.findById(externalId)
+
+  if (!payment) {
+    logger.error('[Payment Webhook] Payment not found:', externalId)
+    return res.status(404).json({ success: false, error: 'Payment not found' })
+  }
+
+  logger.info('[Payment Webhook] Found payment:', { paymentId: payment._id, status: payment.status })
+
+  // Already processed?
+  if (payment.status === 'completed' || payment.status === 'failed') {
+    logger.info('[Payment Webhook] Payment already processed, status:', payment.status)
+    return res.json({ success: true, message: 'Already processed' })
+  }
+
+  // Fetch booking for notifications
+  const booking = await Booking.findById(payment.booking)
+
+  // Update payment based on result
+  if (success) {
+    logger.info('[Payment Webhook] Completing payment...')
+    await payment.completeCardPayment({
+      authCode,
+      refNumber,
+      provisionNumber,
+      maskedCard,
+      lastFour: lastFour || maskedCard?.slice(-4),
+      brand,
+      cardType,
+      cardFamily,
+      cardBank,
+      installment,
+      amount
+    })
+
+    // Update booking payment summary
+    await updateBookingPayment(payment.booking)
+
+    // Send payment notification
+    if (booking) {
+      try {
+        const { sendPaymentNotification } = await import('./payment-notifications.service.js')
+        await sendPaymentNotification(payment, booking, 'completed')
+      } catch (notifyError) {
+        logger.error('[Payment Webhook] Failed to send notification:', notifyError.message)
+      }
+    }
+
+    logger.info('[Payment Webhook] Payment completed successfully')
+  } else {
+    logger.info('[Payment Webhook] Failing payment...')
+    await payment.failCardPayment(error || 'Payment failed', { transactionId })
+
+    // Send failure notification
+    if (booking) {
+      try {
+        const { sendPaymentNotification } = await import('./payment-notifications.service.js')
+        await sendPaymentNotification(payment, booking, 'failed')
+      } catch (notifyError) {
+        logger.error('[Payment Webhook] Failed to send notification:', notifyError.message)
+      }
+    }
+
+    logger.info('[Payment Webhook] Payment marked as failed')
+  }
+
+  res.json({
+    success: true,
+    message: success ? 'Payment completed' : 'Payment failed',
+    paymentId: payment._id,
+    paymentStatus: payment.status
+  })
+})
+
+// ============================================================================
+// PAYMENT LINK FOR EXISTING PAYMENT
+// ============================================================================
+
+/**
+ * Create a payment link for an existing pending payment
+ * This allows customers to pay via a public link
+ */
+export const createPaymentLinkForPayment = asyncHandler(async (req, res) => {
+  const { id: bookingId, paymentId } = req.params
+  const { sendEmail = false, sendSms = false, expiresInDays = 7 } = req.body
+  const partnerId = req.user.role === 'platform_admin' ? req.query.partnerId : req.user.partner
+
+  // Find the payment
+  const payment = await Payment.findOne({
+    _id: paymentId,
+    booking: bookingId,
+    type: 'credit_card',
+    ...(partnerId && { partner: partnerId })
+  }).populate('booking', 'bookingNumber leadGuest contact partner')
+
+  if (!payment) {
+    throw new NotFoundError('PAYMENT_NOT_FOUND')
+  }
+
+  // Only pending payments can have links created
+  if (payment.status !== 'pending') {
+    throw new BadRequestError('PAYMENT_NOT_PENDING')
+  }
+
+  // Check if there's already an active payment link for this payment
+  const PaymentLink = (await import('../paymentLink/paymentLink.model.js')).default
+  const existingLink = await PaymentLink.findOne({
+    linkedPayment: payment._id,
+    status: { $in: ['pending', 'viewed', 'processing'] }
+  })
+
+  if (existingLink) {
+    // Update existing link with latest customer info if needed
+    const leadGuest = payment.booking?.leadGuest || {}
+    const contact = payment.booking?.contact || {}
+    const updatedEmail = leadGuest.email || contact.email || ''
+    const updatedPhone = leadGuest.phone || contact.phone || ''
+
+    // Update customer info if it was empty before
+    if ((!existingLink.customer.email && updatedEmail) || (!existingLink.customer.phone && updatedPhone)) {
+      existingLink.customer.email = existingLink.customer.email || updatedEmail
+      existingLink.customer.phone = existingLink.customer.phone || updatedPhone
+      await existingLink.save()
+    }
+
+    // Send notifications if requested and not sent before
+    const shouldSendEmail = sendEmail && existingLink.customer.email && !existingLink.notifications.emailSent
+    const shouldSendSms = sendSms && existingLink.customer.phone && !existingLink.notifications.smsSent
+
+    if (shouldSendEmail || shouldSendSms) {
+      try {
+        const { sendPaymentLinkNotification } = await import('./payment-notifications.service.js')
+        const Partner = (await import('../partner/partner.model.js')).default
+        const partner = await Partner.findById(payment.partner)
+
+        await sendPaymentLinkNotification(existingLink, partner, {
+          email: shouldSendEmail,
+          sms: shouldSendSms
+        })
+      } catch (notifyError) {
+        logger.error('Failed to send notification for existing link:', notifyError.message)
+      }
+    }
+
+    return res.json({
+      success: true,
+      data: existingLink,
+      message: 'EXISTING_LINK_RETURNED'
+    })
+  }
+
+  // Get customer info from booking (leadGuest + contact fallback)
+  const leadGuest = payment.booking?.leadGuest || {}
+  const contact = payment.booking?.contact || {}
+  const customerName = `${leadGuest.firstName || ''} ${leadGuest.lastName || ''}`.trim() || 'Müşteri'
+  const customerEmail = leadGuest.email || contact.email || ''
+  const customerPhone = leadGuest.phone || contact.phone || ''
+
+  // Create payment link
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + expiresInDays)
+
+  const paymentLink = new PaymentLink({
+    partner: payment.partner,
+    booking: payment.booking._id,
+    linkedPayment: payment._id,
+    customer: {
+      name: customerName,
+      email: customerEmail,
+      phone: customerPhone
+    },
+    description: `Rezervasyon Ödemesi - ${payment.booking.bookingNumber}`,
+    amount: payment.amount,
+    currency: payment.currency,
+    installment: {
+      enabled: true,
+      maxCount: 12,
+      rates: {}
+    },
+    expiresAt,
+    createdBy: req.user._id
+  })
+
+  await paymentLink.save()
+
+  // Store payment link reference in payment
+  payment.cardDetails = payment.cardDetails || {}
+  payment.cardDetails.paymentLink = paymentLink._id
+  payment.cardDetails.linkSentAt = new Date()
+  await payment.save()
+
+  // Send notifications if requested
+  if ((sendEmail || sendSms) && (customerEmail || customerPhone)) {
+    try {
+      const { sendPaymentLinkNotification } = await import('./payment-notifications.service.js')
+      const Partner = (await import('../partner/partner.model.js')).default
+      const partner = await Partner.findById(payment.partner)
+
+      await sendPaymentLinkNotification(paymentLink, partner, {
+        email: sendEmail && !!customerEmail,
+        sms: sendSms && !!customerPhone
+      })
+    } catch (notifyError) {
+      logger.error('Failed to send payment link notification:', notifyError.message)
+      // Don't fail the request, just log the error
+    }
+  }
+
+  res.status(201).json({
+    success: true,
+    data: paymentLink,
+    message: 'PAYMENT_LINK_CREATED'
   })
 })

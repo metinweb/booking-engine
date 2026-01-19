@@ -28,6 +28,10 @@
       "no_show": "Gelmedi",
       "completed": "Tamamlandı"
     },
+    "error": {
+      "createFailed": "Rezervasyon oluşturulamadı",
+      "paymentFailed": "Ödeme işlemi başarısız oldu"
+    },
     "provider": {
       "local": "Yerel",
       "paximum": "Bedbank"
@@ -382,6 +386,23 @@
       "credit_card": "Kredi Kartı",
       "credit_cardDescription": "Kredi kartı ile güvenli ödeme"
     },
+    "creditCardOptions": {
+      "inline": "Şimdi Öde",
+      "inlineDescription": "Kart bilgilerini şimdi girerek ödemeyi hemen tamamlayın",
+      "paymentLink": "Ödeme Linki Gönder",
+      "paymentLinkDescription": "Müşteriye ödeme linki gönderilir, müşteri istediği zaman ödeme yapabilir",
+      "recommended": "Önerilen",
+      "sendVia": "Ödeme linki gönderim yöntemi:",
+      "email": "E-posta",
+      "sms": "SMS",
+      "paymentLinkSentDescription": "Rezervasyon oluşturuldu ve ödeme linki gönderildi.",
+      "paymentLinkInfo": "Ödeme Linki Bilgileri",
+      "linkNumber": "Link Numarası",
+      "amount": "Tutar",
+      "expiresAt": "Son Geçerlilik",
+      "copyLink": "Linki Kopyala",
+      "linkCopied": "Ödeme linki panoya kopyalandı"
+    },
     "noPaymentMethodsAvailable": "Kullanılabilir ödeme yöntemi bulunmuyor",
     "acceptTerms": "Rezervasyon şartlarını ve iptal politikasını kabul ediyorum",
     "completeBooking": "Rezervasyonu Tamamla",
@@ -419,6 +440,7 @@
     "noOptionsAvailable": "Bu oda için uygun seçenek bulunmuyor",
     "validation": {
       "pleaseComplete": "Lütfen aşağıdaki alanları tamamlayın:",
+      "leadGuestRequired": "Lütfen ana misafir ad ve soyadını doldurun",
       "leadGuestTitle": "Ana misafir ünvanı seçilmeli",
       "leadGuestFirstName": "Ana misafir adı girilmeli",
       "leadGuestLastName": "Ana misafir soyadı girilmeli",
@@ -728,7 +750,8 @@
       "3dSecureInfo": "Bankanız doğrulama sayfasını yükleyecektir. Lütfen bekleyin.",
       "cancel3D": "İptal Et ve Geri Dön",
       "success": "Ödeme başarıyla tamamlandı",
-      "failed": "Ödeme başarısız oldu"
+      "failed": "Ödeme başarısız oldu",
+      "fillAllFields": "Lütfen tüm kart bilgilerini doldurun"
     },
     "payAtCheckin": {
       "info": "Ödeme check-in sırasında alınacak olarak işaretlenecektir."
@@ -755,6 +778,17 @@
     "delete": {
       "title": "Ödeme Sil",
       "description": "Bu ödemeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+    },
+    "sendLink": {
+      "title": "Ödeme Linki Oluştur",
+      "button": "Link Gönder",
+      "tooltip": "Müşteriye ödeme linki gönder",
+      "create": "Link Oluştur",
+      "sendEmail": "E-posta ile gönder",
+      "sendSms": "SMS ile gönder",
+      "expiresIn": "Link Geçerlilik Süresi",
+      "linkCreated": "Ödeme linki oluşturuldu!",
+      "success": "Ödeme linki başarıyla oluşturuldu"
     }
   }
 }

@@ -27,6 +27,10 @@
       "no_show": "No Show",
       "completed": "Completed"
     },
+    "error": {
+      "createFailed": "Failed to create booking",
+      "paymentFailed": "Payment failed"
+    },
     "provider": {
       "local": "Local",
       "paximum": "Bedbank"
@@ -324,6 +328,23 @@
       "credit_card": "Credit Card",
       "credit_cardDescription": "Secure payment with credit card"
     },
+    "creditCardOptions": {
+      "inline": "Pay Now",
+      "inlineDescription": "Enter card details now and complete the payment immediately",
+      "paymentLink": "Send Payment Link",
+      "paymentLinkDescription": "A payment link will be sent to the customer, they can pay whenever they want",
+      "recommended": "Recommended",
+      "sendVia": "Send payment link via:",
+      "email": "Email",
+      "sms": "SMS",
+      "paymentLinkSentDescription": "Booking created and payment link has been sent.",
+      "paymentLinkInfo": "Payment Link Information",
+      "linkNumber": "Link Number",
+      "amount": "Amount",
+      "expiresAt": "Expires At",
+      "copyLink": "Copy Link",
+      "linkCopied": "Payment link copied to clipboard"
+    },
     "noPaymentMethodsAvailable": "No payment methods available",
     "acceptTerms": "I accept the booking terms and cancellation policy",
     "completeBooking": "Complete Booking",
@@ -344,6 +365,7 @@
     "noOptionsAvailable": "No options available for this room",
     "validation": {
       "pleaseComplete": "Please complete the following fields:",
+      "leadGuestRequired": "Please fill in the lead guest first and last name",
       "leadGuestTitle": "Lead guest title is required",
       "leadGuestFirstName": "Lead guest first name is required",
       "leadGuestLastName": "Lead guest last name is required",
@@ -670,7 +692,8 @@
       "3dSecureInfo": "Your bank will load the verification page. Please wait.",
       "cancel3D": "Cancel and Go Back",
       "success": "Payment completed successfully",
-      "failed": "Payment failed"
+      "failed": "Payment failed",
+      "fillAllFields": "Please fill in all card details"
     },
     "payAtCheckin": {
       "info": "Payment will be marked as to be collected at check-in."
@@ -697,6 +720,17 @@
     "delete": {
       "title": "Delete Payment",
       "description": "Are you sure you want to delete this payment? This action cannot be undone."
+    },
+    "sendLink": {
+      "title": "Create Payment Link",
+      "button": "Send Link",
+      "tooltip": "Send payment link to customer",
+      "create": "Create Link",
+      "sendEmail": "Send via email",
+      "sendSms": "Send via SMS",
+      "expiresIn": "Link Validity",
+      "linkCreated": "Payment link created!",
+      "success": "Payment link created successfully"
     }
   }
 }

@@ -216,6 +216,7 @@ export async function cancelTransaction(transactionId, token = null) {
  */
 export function getPaymentFormUrl(transactionId) {
   // Use public-facing URL for browser redirect
+  // Payment service runs on api.minires.com (separate from main API)
   const publicUrl = process.env.PAYMENT_PUBLIC_URL || 'https://api.minires.com/payment-api'
   return `${publicUrl}/payment/${transactionId}/form`
 }

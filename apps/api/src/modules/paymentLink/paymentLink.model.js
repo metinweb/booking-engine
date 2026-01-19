@@ -89,6 +89,13 @@ const paymentLinkSchema = new mongoose.Schema(
       index: true
     },
 
+    // Optional Payment Reference (for creating link from existing pending payment)
+    linkedPayment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Payment',
+      index: true
+    },
+
     // Link Settings
     expiresAt: {
       type: Date,

@@ -167,17 +167,97 @@
         </div>
       </div>
 
-      <!-- Credit Card Payment - Opens Card Modal -->
-      <div v-if="form.type === 'credit_card'" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <div class="flex items-start gap-3">
-          <span class="material-icons text-blue-500">credit_card</span>
-          <div class="flex-1">
-            <p class="text-sm text-blue-700 dark:text-blue-300">
-              {{ $t('payment.creditCard.processOnline') }}
+      <!-- Credit Card Payment Options -->
+      <div v-if="form.type === 'credit_card'" class="space-y-3">
+        <!-- Inline Payment Option -->
+        <label
+          :class="[
+            'flex items-center p-4 rounded-xl border-2 cursor-pointer transition-colors',
+            creditCardOption === 'inline'
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              : 'border-gray-200 dark:border-slate-700 hover:border-blue-300'
+          ]"
+        >
+          <input
+            v-model="creditCardOption"
+            type="radio"
+            name="creditCardOption"
+            value="inline"
+            class="form-radio h-5 w-5 text-blue-600"
+          />
+          <div class="ml-4 flex-1">
+            <div class="flex items-center">
+              <span class="material-icons text-blue-500 mr-2">credit_card</span>
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ $t('booking.creditCardOptions.inline') }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
+              {{ $t('booking.creditCardOptions.inlineDescription') }}
             </p>
-            <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              {{ $t('payment.creditCard.3dSecureRequired') }}
+          </div>
+        </label>
+
+        <!-- Payment Link Option -->
+        <label
+          :class="[
+            'flex items-center p-4 rounded-xl border-2 cursor-pointer transition-colors',
+            creditCardOption === 'payment_link'
+              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              : 'border-gray-200 dark:border-slate-700 hover:border-blue-300'
+          ]"
+        >
+          <input
+            v-model="creditCardOption"
+            type="radio"
+            name="creditCardOption"
+            value="payment_link"
+            class="form-radio h-5 w-5 text-blue-600"
+          />
+          <div class="ml-4 flex-1">
+            <div class="flex items-center">
+              <span class="material-icons text-green-500 mr-2">link</span>
+              <span class="font-medium text-gray-900 dark:text-white">
+                {{ $t('booking.creditCardOptions.paymentLink') }}
+              </span>
+              <span class="ml-2 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
+                {{ $t('booking.creditCardOptions.recommended') }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-slate-400 mt-1">
+              {{ $t('booking.creditCardOptions.paymentLinkDescription') }}
             </p>
+          </div>
+        </label>
+
+        <!-- Notification Options (only for payment_link) -->
+        <div v-if="creditCardOption === 'payment_link'" class="ml-12 p-4 bg-gray-50 dark:bg-slate-800/50 rounded-lg">
+          <p class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
+            {{ $t('booking.creditCardOptions.sendVia') }}
+          </p>
+          <div class="flex flex-wrap gap-4">
+            <label class="flex items-center cursor-pointer">
+              <input
+                v-model="sendPaymentLinkEmail"
+                type="checkbox"
+                class="form-checkbox h-4 w-4 text-blue-600 rounded"
+              />
+              <span class="ml-2 text-sm text-gray-600 dark:text-slate-400">
+                <span class="material-icons text-base align-middle mr-1">email</span>
+                {{ $t('booking.creditCardOptions.email') }}
+              </span>
+            </label>
+            <label class="flex items-center cursor-pointer">
+              <input
+                v-model="sendPaymentLinkSms"
+                type="checkbox"
+                class="form-checkbox h-4 w-4 text-blue-600 rounded"
+              />
+              <span class="ml-2 text-sm text-gray-600 dark:text-slate-400">
+                <span class="material-icons text-base align-middle mr-1">sms</span>
+                {{ $t('booking.creditCardOptions.sms') }}
+              </span>
+            </label>
           </div>
         </div>
       </div>
@@ -250,6 +330,7 @@ import { useToast } from 'vue-toastification'
 import Modal from '@/components/common/Modal.vue'
 import PaymentCardModal from './PaymentCardModal.vue'
 import paymentService from '@/services/paymentService'
+import paymentLinkService from '@/services/paymentLinkService'
 
 const props = defineProps({
   booking: Object,
@@ -271,6 +352,11 @@ const receiptFile = ref(null)
 const receiptInput = ref(null)
 const showCardModal = ref(false)
 const cardPaymentId = ref(null)
+
+// Credit card options
+const creditCardOption = ref('payment_link') // 'inline' or 'payment_link'
+const sendPaymentLinkEmail = ref(true)
+const sendPaymentLinkSms = ref(false)
 
 const paymentTypes = [
   { value: 'credit_card', icon: 'credit_card' },
@@ -335,6 +421,12 @@ const handleSubmit = async () => {
 
   saving.value = true
   try {
+    // Handle credit card with payment link option
+    if (form.type === 'credit_card' && creditCardOption.value === 'payment_link') {
+      await handlePaymentLinkSubmit()
+      return
+    }
+
     // Prepare data
     const data = {
       type: form.type,
@@ -357,8 +449,8 @@ const handleSubmit = async () => {
     const response = await paymentService.addPayment(props.booking._id, data)
 
     if (response.success) {
-      // For credit card payments, open the card modal
-      if (form.type === 'credit_card') {
+      // For credit card inline payments, open the card modal
+      if (form.type === 'credit_card' && creditCardOption.value === 'inline') {
         cardPaymentId.value = response.data._id
         showCardModal.value = true
         saving.value = false
@@ -402,5 +494,49 @@ const handleCardPaymentSuccess = () => {
 const handleCardModalClose = () => {
   showCardModal.value = false
   // Keep the form open so user can try again or change payment type
+}
+
+// Handle payment link submit
+const handlePaymentLinkSubmit = async () => {
+  try {
+    // Create payment link for existing booking
+    const customerName = `${props.booking.leadGuest?.firstName || ''} ${props.booking.leadGuest?.lastName || ''}`.trim() || 'Misafir'
+    const customerEmail = props.booking.leadGuest?.email || props.booking.contact?.email
+    const customerPhone = props.booking.leadGuest?.phone || props.booking.contact?.phone
+
+    const hotelName = typeof props.booking.hotel?.name === 'object'
+      ? (props.booking.hotel.name.tr || props.booking.hotel.name.en || '')
+      : (props.booking.hotel?.name || '')
+
+    const linkData = {
+      customer: {
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone
+      },
+      description: `${hotelName} - ${props.booking.bookingNumber || props.booking.confirmationNumber}`,
+      amount: form.amount,
+      currency: props.currency,
+      booking: props.booking._id,
+      installment: {
+        enabled: true,
+        maxCount: 6
+      },
+      sendEmail: sendPaymentLinkEmail.value,
+      sendSms: sendPaymentLinkSms.value
+    }
+
+    const response = await paymentLinkService.createPaymentLink(linkData)
+
+    if (response.success) {
+      toast.success(t('booking.creditCardOptions.paymentLinkSentDescription'))
+      emit('saved')
+    }
+  } catch (error) {
+    console.error('Failed to create payment link:', error)
+    toast.error(error.response?.data?.message || t('common.operationFailed'))
+  } finally {
+    saving.value = false
+  }
 }
 </script>

@@ -100,7 +100,20 @@ export const uploadReceipt = async (bookingId, paymentId, file) => {
 // ============================================================================
 
 /**
- * Query BIN for installment options
+ * Query BIN for installment options (Partner-based, no booking required)
+ * Used for inline payment flow where booking/payment doesn't exist yet
+ * @param {string} bin - First 6-8 digits of card number
+ * @param {number} amount - Payment amount
+ * @param {string} currency - Currency code (default: TRY)
+ * @returns {Promise} - BIN info and installment options
+ */
+export const queryBin = async (bin, amount, currency = 'TRY') => {
+  const response = await apiClient.post('/bookings/query-bin', { bin, amount, currency })
+  return response.data
+}
+
+/**
+ * Query BIN for installment options (Booking-based)
  * @param {string} bookingId - Booking ID
  * @param {string} paymentId - Payment ID
  * @param {string} bin - First 6-8 digits of card number
@@ -183,6 +196,23 @@ export const getPreAuthorizedPayments = async bookingId => {
 }
 
 // ============================================================================
+// PAYMENT LINK API
+// ============================================================================
+
+/**
+ * Create payment link for existing pending payment
+ * Allows sending a public payment link to customer for pending credit card payments
+ * @param {string} bookingId - Booking ID
+ * @param {string} paymentId - Payment ID
+ * @param {object} options - Options { sendEmail, sendSms, expiresInDays }
+ * @returns {Promise} - Payment link data
+ */
+export const createPaymentLinkForPayment = async (bookingId, paymentId, options = {}) => {
+  const response = await apiClient.post(`/bookings/${bookingId}/payments/${paymentId}/create-link`, options)
+  return response.data
+}
+
+// ============================================================================
 // ANALYTICS API
 // ============================================================================
 
@@ -245,6 +275,7 @@ export default {
   refundPayment,
   uploadReceipt,
   // Card payment methods
+  queryBin,
   queryCardBin,
   processCardPayment,
   getCardPaymentStatus,
@@ -253,6 +284,8 @@ export default {
   capturePreAuth,
   releasePreAuth,
   getPreAuthorizedPayments,
+  // Payment link methods
+  createPaymentLinkForPayment,
   // Analytics methods
   getRevenueSummary,
   getPaymentMethods,
