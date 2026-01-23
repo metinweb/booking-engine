@@ -223,7 +223,8 @@ export const updateHotel = asyncHandler(async (req, res) => {
       'profile',
       'tags',
       'featured',
-      'displayOrder'
+      'displayOrder',
+      'childAgeGroups'
     ]
   }
 
