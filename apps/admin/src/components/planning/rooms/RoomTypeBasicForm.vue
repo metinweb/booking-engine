@@ -531,7 +531,7 @@ const amenitiesList = computed(() => [
   { key: 'hairdryer', icon: 'air', label: t('planning.roomTypes.amenities.hairdryer') },
   { key: 'toiletries', icon: 'soap', label: t('planning.roomTypes.amenities.toiletries') },
   { key: 'bathrobes', icon: 'checkroom', label: t('planning.roomTypes.amenities.bathrobes') },
-  { key: 'slippers', icon: 'steps', label: t('planning.roomTypes.amenities.slippers') },
+  { key: 'slippers', icon: 'spa', label: t('planning.roomTypes.amenities.slippers') },
   // View
   { key: 'seaView', icon: 'waves', label: t('planning.roomTypes.amenities.seaView') },
   { key: 'poolView', icon: 'pool', label: t('planning.roomTypes.amenities.poolView') },
@@ -593,17 +593,21 @@ const toggleAmenity = key => {
   }
 }
 
-// Watch for roomType prop changes
+// Track if form has been initialized to prevent re-initialization
+const isFormInitialized = ref(false)
+
+// Watch for roomType prop changes (only reference changes, not deep)
 watch(
   () => props.roomType,
   newVal => {
-    if (newVal) {
+    // Only initialize once for new room types, or when roomType reference changes for existing
+    if (newVal && !isFormInitialized.value) {
       formData.value = {
         code: newVal.code || '',
         name: { ...createMultiLangObject(), ...newVal.name },
         description: { ...createMultiLangObject(), ...newVal.description },
         size: newVal.size || null,
-        amenities: newVal.amenities || [],
+        amenities: [...(newVal.amenities || [])],
         status: newVal.status || 'draft'
       }
       // Sync codeInput with formData
@@ -616,9 +620,11 @@ watch(
           selectedCodeDef.value = existingDef
         }
       }
+
+      isFormInitialized.value = true
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true }
 )
 
 // Validate all fields
