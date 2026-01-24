@@ -200,12 +200,28 @@ export const executeAIPricingCommand = asyncHandler(async (req, res) => {
       partner: partnerId
     }
 
+    // Child-related actions should only apply to rooms with maxChildren > 0
+    const isChildRelatedAction = ['update_child_order_pricing', 'update_extra_child', 'update_child_free'].includes(action)
+
     if (filters?.roomTypes !== 'all' && Array.isArray(filters?.roomTypes)) {
-      const rtIds = await RoomType.find({
+      const rtQuery = {
         hotel: hotelId,
         code: { $in: filters.roomTypes }
+      }
+      // For child-related actions, only include rooms that accept children
+      if (isChildRelatedAction) {
+        rtQuery['occupancy.maxChildren'] = { $gt: 0 }
+      }
+      const rtIds = await RoomType.find(rtQuery).select('_id')
+      rateFilter.roomType = { $in: rtIds.map(r => r._id) }
+    } else if (isChildRelatedAction) {
+      // If "all" rooms but child-related action, filter to only rooms with maxChildren > 0
+      const rtIds = await RoomType.find({
+        hotel: hotelId,
+        'occupancy.maxChildren': { $gt: 0 }
       }).select('_id')
       rateFilter.roomType = { $in: rtIds.map(r => r._id) }
+      logger.info(`Child-related action: filtered to ${rtIds.length} rooms with maxChildren > 0`)
     }
 
     if (filters?.mealPlans !== 'all' && Array.isArray(filters?.mealPlans)) {

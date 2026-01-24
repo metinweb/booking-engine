@@ -118,13 +118,15 @@ JSON formati (SADECE JSON döndür):
 
 ACTION: stop_sale, open_sale, single_stop, open_single, set_price, update_price, update_single_supplement, update_extra_adult, update_extra_child, update_child_order_pricing, update_allotment, update_min_stay, update_max_stay, close_to_arrival, close_to_departure
 
-EK YETISKIN/COCUK FIYATI (COK ÖNEMLI!):
-- "ek yetiskin", "ekstra yetiskin", "extra adult" -> update_extra_adult
-- "ek cocuk", "ekstra cocuk", "extra child" -> update_extra_child veya update_child_order_pricing
-- "tek kisi farki", "single supplement" -> update_single_supplement
+EK YETISKIN/COCUK FIYATI (COK ÖNEMLI! - ASLA set_supplement KULLANMA!):
+- "ek yetiskin", "ekstra yetiskin", "extra adult", "ilave yetiskin" -> action: "update_extra_adult"
+- "ek cocuk", "ekstra cocuk", "extra child", "ilave cocuk", "cocuk fiyati" -> action: "update_child_order_pricing", childIndex: 1
+- "tek kisi farki", "single supplement", "single use" -> action: "update_single_supplement"
+- DIKKAT: set_supplement KULLANMA! Sadece yukaridaki action'lari kullan!
 - Bu action'lar icin value: fiyat (sayi), valueType: "fixed" (varsayilan) veya "percentage"
 - "1. cocuk", "birinci cocuk", "ilk cocuk" -> update_child_order_pricing, childIndex: 1
 - "2. cocuk", "ikinci cocuk" -> update_child_order_pricing, childIndex: 2
+- Ek cocuk fiyati girildiginde SADECE cocuk kabul eden odalara (maxChildren > 0) uygulanir
 
 CTA/CTD KURALLARI (COK ÖNEMLI!):
 - close_to_arrival (CTA) ve close_to_departure (CTD) icin value: true veya false OLMALI

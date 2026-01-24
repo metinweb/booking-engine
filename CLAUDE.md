@@ -382,4 +382,19 @@ ssh root@194.146.50.11
 
 ---
 
-**Son Güncelleme:** 2026-01-16 (v2)
+## 🧪 TEST HESABI
+
+Lokal ve production testleri için:
+
+```
+Email: metinweb@gmail.com
+Şifre: iJqt92PivLurFWb
+```
+
+**Lokal Test URL'leri:**
+- Frontend: http://localhost:5173
+- API: http://localhost:4000
+
+---
+
+**Son Güncelleme:** 2026-01-24 (v3)
