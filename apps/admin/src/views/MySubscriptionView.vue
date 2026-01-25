@@ -55,7 +55,7 @@
                 {{ $t(`mySubscription.status.${subscription.status}`) }}
               </span>
               <button
-                @click="showPaymentModal = true"
+                @click="openPaymentForUpgrade"
                 class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg flex items-center gap-2 transition-colors"
               >
                 <span class="material-icons text-sm">upgrade</span>
@@ -370,6 +370,7 @@
               :key="purchase._id"
               class="flex items-center justify-between p-4 rounded-lg border"
               :class="{
+                'bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800': purchase.status === 'pending',
                 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800': purchase.status === 'active',
                 'bg-gray-50 dark:bg-slate-700/50 border-gray-200 dark:border-slate-700': purchase.status === 'expired',
                 'bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-800': purchase.status === 'cancelled'
@@ -404,13 +405,24 @@
                   </div>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="font-semibold text-gray-900 dark:text-white">
-                  {{ formatCurrency(purchase.price?.amount, purchase.price?.currency) }}
+              <div class="text-right flex items-center gap-3">
+                <div>
+                  <div class="font-semibold text-gray-900 dark:text-white">
+                    {{ formatCurrency(purchase.price?.amount, purchase.price?.currency) }}
+                  </div>
+                  <div class="text-xs text-gray-500 dark:text-slate-400">
+                    {{ purchase.status === 'pending' ? $t('mySubscription.awaitingPayment') : $t(`mySubscription.paymentMethods.${purchase.payment?.method}`) }}
+                  </div>
                 </div>
-                <div class="text-xs text-gray-500 dark:text-slate-400">
-                  {{ $t(`mySubscription.paymentMethods.${purchase.payment?.method}`) }}
-                </div>
+                <!-- Pay Now button for pending purchases -->
+                <button
+                  v-if="purchase.status === 'pending'"
+                  @click="openPaymentForPending(purchase)"
+                  class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                >
+                  <span class="material-icons text-sm">payment</span>
+                  {{ $t('mySubscription.payNow') }}
+                </button>
               </div>
             </div>
           </div>
@@ -478,8 +490,40 @@
 
           <!-- Body -->
           <div class="p-6 space-y-6">
-            <!-- Plan Selection -->
-            <div>
+            <!-- Pending Purchase Info (when paying for admin-created package) -->
+            <div v-if="selectedPendingPurchase" class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 rounded-lg flex items-center justify-center"
+                  :class="planColors[selectedPendingPurchase.plan]?.bg"
+                >
+                  <span class="material-icons text-xl" :class="planColors[selectedPendingPurchase.plan]?.text">
+                    {{ planColors[selectedPendingPurchase.plan]?.icon }}
+                  </span>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="font-semibold text-gray-900 dark:text-white">
+                      {{ getPlanName(selectedPendingPurchase.plan) }}
+                    </span>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                      {{ $t('mySubscription.purchaseStatus.pending') }}
+                    </span>
+                  </div>
+                  <div class="text-sm text-gray-500 dark:text-slate-400 mt-1">
+                    {{ formatDate(selectedPendingPurchase.period?.startDate) }} - {{ formatDate(selectedPendingPurchase.period?.endDate) }}
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ formatCurrency(selectedPendingPurchase.price?.amount, selectedPendingPurchase.price?.currency) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Plan Selection (only for new purchases, not for pending) -->
+            <div v-else>
               <label class="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-3">
                 {{ $t('mySubscription.selectPlan') }}
               </label>
@@ -748,6 +792,7 @@ const showPaymentModal = ref(false)
 const show3DModal = ref(false)
 const showSuccessMessage = ref(false)
 const selectedPlan = ref('professional')
+const selectedPendingPurchase = ref(null) // For paying admin-created pending purchases
 const processing = ref(false)
 const paymentError = ref('')
 const formUrl = ref('')
@@ -829,6 +874,7 @@ const invoiceStatusColors = {
 }
 
 const purchaseStatusColors = {
+  pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   expired: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400',
   cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
@@ -994,22 +1040,60 @@ const formatExpiry = () => {
   card.value.expiry = value
 }
 
+// Open payment modal for pending purchase (admin-created)
+const openPaymentForPending = (purchase) => {
+  selectedPendingPurchase.value = purchase
+  selectedPlan.value = purchase.plan
+  paymentError.value = ''
+  card.value = { holder: '', number: '', expiry: '', cvv: '' }
+  binInfo.value = null
+  selectedInstallment.value = 1
+  installmentOptions.value = [{ count: 1, amount: purchase.price?.amount || 0, totalAmount: purchase.price?.amount || 0 }]
+  showPaymentModal.value = true
+}
+
+// Open payment modal for new purchase (upgrade)
+const openPaymentForUpgrade = () => {
+  selectedPendingPurchase.value = null
+  paymentError.value = ''
+  card.value = { holder: '', number: '', expiry: '', cvv: '' }
+  binInfo.value = null
+  selectedInstallment.value = 1
+  showPaymentModal.value = true
+}
+
 // Process purchase
 const processPurchase = async () => {
   processing.value = true
   paymentError.value = ''
 
   try {
-    const response = await partnerService.initiatePurchase({
-      plan: selectedPlan.value,
-      installment: selectedInstallment.value,
-      card: {
-        holder: card.value.holder,
-        number: card.value.number.replace(/\s/g, ''),
-        expiry: card.value.expiry,
-        cvv: card.value.cvv
-      }
-    })
+    let response
+
+    if (selectedPendingPurchase.value) {
+      // Pay for existing pending purchase
+      response = await partnerService.payPendingPurchase(selectedPendingPurchase.value._id, {
+        installment: selectedInstallment.value,
+        card: {
+          holder: card.value.holder,
+          number: card.value.number.replace(/\s/g, ''),
+          expiry: card.value.expiry,
+          cvv: card.value.cvv
+        }
+      })
+    } else {
+      // Create new purchase
+      response = await partnerService.initiatePurchase({
+        plan: selectedPlan.value,
+        installment: selectedInstallment.value,
+        card: {
+          holder: card.value.holder,
+          number: card.value.number.replace(/\s/g, ''),
+          expiry: card.value.expiry,
+          cvv: card.value.cvv
+        }
+      })
+    }
 
     if (response.success && response.data?.formUrl) {
       showPaymentModal.value = false

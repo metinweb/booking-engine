@@ -187,6 +187,86 @@ const markPurchaseAsPaid = async (partnerId, purchaseId, paymentData) => {
   }
 }
 
+// ==================== Partner Self-Profile ====================
+
+// Get my profile (for partner users)
+const getMyProfile = async () => {
+  try {
+    const response = await apiClient.get('/partners/my/profile')
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Get my profile failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+// Update my profile (for partner users)
+const updateMyProfile = async data => {
+  try {
+    const response = await apiClient.put('/partners/my/profile', data)
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Update my profile failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+// Upload my logo (for partner users)
+const uploadMyLogo = async file => {
+  try {
+    const formData = new FormData()
+    formData.append('logo', file)
+    const response = await apiClient.post('/partners/my/profile/logo', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Upload my logo failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+// Delete my logo (for partner users)
+const deleteMyLogo = async () => {
+  try {
+    const response = await apiClient.delete('/partners/my/profile/logo')
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Delete my logo failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+// Upload my favicon (for partner users)
+const uploadMyFavicon = async file => {
+  try {
+    const formData = new FormData()
+    formData.append('favicon', file)
+    const response = await apiClient.post('/partners/my/profile/favicon', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Upload my favicon failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
+// Delete my favicon (for partner users)
+const deleteMyFavicon = async () => {
+  try {
+    const response = await apiClient.delete('/partners/my/profile/favicon')
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Delete my favicon failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
 // Get my subscription (for partner users)
 const getMySubscription = async () => {
   try {
@@ -244,6 +324,17 @@ const initiatePurchase = async data => {
   }
 }
 
+// Pay for existing pending purchase (admin-created packages)
+const payPendingPurchase = async (purchaseId, data) => {
+  try {
+    const response = await apiClient.post(`/my/subscription/purchases/${purchaseId}/pay`, data)
+    return response.data
+  } catch (error) {
+    apiLogger.error('Partner Service: Pay pending purchase failed', error.response?.data || error.message)
+    throw error
+  }
+}
+
 export default {
   getPartners,
   getPartner,
@@ -263,9 +354,18 @@ export default {
   updatePurchase,
   cancelPurchase,
   markPurchaseAsPaid,
+  // Partner Self-Profile
+  getMyProfile,
+  updateMyProfile,
+  uploadMyLogo,
+  deleteMyLogo,
+  uploadMyFavicon,
+  deleteMyFavicon,
+  // Subscription
   getMySubscription,
   getMyInvoices,
   downloadMyInvoicePdf,
   querySubscriptionBin,
-  initiatePurchase
+  initiatePurchase,
+  payPendingPurchase
 }

@@ -4,6 +4,7 @@ import { asyncHandler } from '#helpers'
 import { NotFoundError, ForbiddenError, BadRequestError } from '#core/errors.js'
 import { SUBSCRIPTION_PLANS, PLAN_TYPES } from '#constants/subscriptionPlans.js'
 import { createInvoice } from '#modules/subscriptionInvoice/subscriptionInvoice.service.js'
+import { convertCurrency } from '#services/currencyService.js'
 import PDFDocument from 'pdfkit'
 import axios from 'axios'
 
@@ -34,6 +35,23 @@ export const getMySubscription = asyncHandler(async (req, res) => {
     'pms.enabled': true
   })
 
+  // Get purchases sorted by date (newest first)
+  const purchases = (partner.subscription?.purchases || [])
+    .map(p => ({
+      _id: p._id,
+      plan: p.plan,
+      planName: SUBSCRIPTION_PLANS[p.plan]?.name || p.plan,
+      status: p.status,
+      period: p.period,
+      price: p.price,
+      payment: p.payment,
+      invoice: p.invoice,
+      createdAt: p.createdAt,
+      cancelledAt: p.cancelledAt,
+      cancellationReason: p.cancellationReason
+    }))
+    .sort((a, b) => new Date(b.createdAt || b.period?.startDate) - new Date(a.createdAt || a.period?.startDate))
+
   res.json({
     success: true,
     data: {
@@ -53,7 +71,9 @@ export const getMySubscription = asyncHandler(async (req, res) => {
       pmsLimit: subscriptionStatus.customLimits?.pmsMaxHotels ?? plan.pmsMaxHotels,
       pmsUsed: pmsHotelsCount,
       // Plan features
-      features: plan.features || []
+      features: plan.features || [],
+      // Purchases (for purchase history)
+      purchases
     }
   })
 })
@@ -338,8 +358,11 @@ export const initiatePurchase = asyncHandler(async (req, res) => {
 
   // Get plan price
   const planInfo = SUBSCRIPTION_PLANS[plan]
-  const amount = planInfo.price.yearly
-  const currency = planInfo.price.currency.toLowerCase()
+  let amount = planInfo.price.yearly
+  let currency = planInfo.price.currency.toLowerCase()
+  let originalAmount = amount
+  let originalCurrency = currency
+  let exchangeRate = null
 
   // Get partner
   const partner = await Partner.findById(partnerId)
@@ -347,16 +370,53 @@ export const initiatePurchase = asyncHandler(async (req, res) => {
     throw new NotFoundError('PARTNER_NOT_FOUND')
   }
 
+  // Query BIN to check card country and convert currency if needed
+  try {
+    const binResponse = await axios.post(
+      `${PAYMENT_SERVICE_URL}/api/bin`,
+      {
+        bin: card.number.replace(/\s/g, '').substring(0, 8),
+        amount,
+        currency
+      },
+      {
+        headers: {
+          'Authorization': req.headers.authorization,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    // If Turkish card and currency is not TRY, convert to TRY
+    // BIN response format: { success: true, card: { country: 'tr' }, pos: {...}, installments: [...] }
+    const cardCountry = binResponse.data?.card?.country?.toLowerCase()
+    console.log(`[Subscription Purchase] BIN query result - card country: ${cardCountry}`)
+
+    if (cardCountry === 'tr' && currency !== 'try') {
+      console.log(`[Subscription Purchase] Turkish card detected, converting ${currency.toUpperCase()} to TRY`)
+
+      const conversionResult = await convertCurrency(amount, currency.toUpperCase(), 'TRY')
+      amount = conversionResult.convertedAmount
+      currency = 'try'
+      exchangeRate = conversionResult.rate
+
+      console.log(`[Subscription Purchase] Converted: ${originalAmount} ${originalCurrency.toUpperCase()} -> ${amount} TRY (rate: ${exchangeRate})`)
+    }
+  } catch (binError) {
+    console.error('[Subscription Purchase] BIN query failed, proceeding with original currency:', binError.message)
+    // Continue with original currency if BIN query fails
+  }
+
   // Create subscription period
   const startDate = new Date()
   const endDate = new Date(startDate)
   endDate.setFullYear(endDate.getFullYear() + 1)
 
-  // Create pending purchase
+  // Create pending purchase (store original currency for invoice)
   const purchase = {
     plan,
     period: { startDate, endDate },
-    price: { amount, currency },
+    price: { amount: originalAmount, currency: originalCurrency },
     status: 'pending',
     createdAt: new Date(),
     createdBy: req.user._id
@@ -404,10 +464,17 @@ export const initiatePurchase = asyncHandler(async (req, res) => {
       throw new BadRequestError(paymentResponse.data.error || 'PAYMENT_INIT_FAILED')
     }
 
-    // Store transaction ID in purchase
+    // Store transaction ID and conversion info in purchase
     const purchaseDoc = partner.subscription.purchases.id(purchaseId)
     purchaseDoc.payment = {
       transactionId: paymentResponse.data.transactionId
+    }
+    if (exchangeRate) {
+      purchaseDoc.payment.originalAmount = originalAmount
+      purchaseDoc.payment.originalCurrency = originalCurrency.toUpperCase()
+      purchaseDoc.payment.convertedAmount = amount
+      purchaseDoc.payment.convertedCurrency = currency.toUpperCase()
+      purchaseDoc.payment.exchangeRate = exchangeRate
     }
     await partner.save()
 
@@ -416,7 +483,15 @@ export const initiatePurchase = asyncHandler(async (req, res) => {
       data: {
         formUrl: paymentResponse.data.formUrl,
         transactionId: paymentResponse.data.transactionId,
-        purchaseId
+        purchaseId,
+        // Include conversion info if applicable
+        ...(exchangeRate && {
+          originalAmount,
+          originalCurrency: originalCurrency.toUpperCase(),
+          convertedAmount: amount,
+          convertedCurrency: currency.toUpperCase(),
+          exchangeRate
+        })
       }
     })
   } catch (error) {
@@ -431,35 +506,221 @@ export const initiatePurchase = asyncHandler(async (req, res) => {
   }
 })
 
-// Handle payment callback from payment service
-export const paymentCallback = asyncHandler(async (req, res) => {
-  const { transactionId, success, message, externalId } = req.body
-
-  // Find partner with this transaction
-  let partner = await Partner.findOne({
-    'subscription.purchases.payment.transactionId': transactionId
-  })
-
-  // Fallback: try to find by externalId if transactionId not found
-  if (!partner && externalId) {
-    const [, partnerIdStr] = externalId.split('-')
-    if (partnerIdStr) {
-      partner = await Partner.findById(partnerIdStr)
-    }
+// Pay for existing pending purchase (admin-created packages)
+export const payPendingPurchase = asyncHandler(async (req, res) => {
+  // Only partner users can access this
+  if (req.user.accountType !== 'partner') {
+    throw new ForbiddenError('PARTNER_ONLY')
   }
 
+  const partnerId = req.user.accountId
+  const { purchaseId } = req.params
+  const { card, installment = 1 } = req.body
+
+  // Validate card info
+  if (!card?.holder || !card?.number || !card?.expiry || !card?.cvv) {
+    throw new BadRequestError('CARD_INFO_REQUIRED')
+  }
+
+  // Get partner
+  const partner = await Partner.findById(partnerId)
   if (!partner) {
-    throw new NotFoundError('PURCHASE_NOT_FOUND')
+    throw new NotFoundError('PARTNER_NOT_FOUND')
   }
 
-  // Find the purchase with this transaction
-  const purchase = partner.subscription.purchases.find(
-    p => p.payment?.transactionId === transactionId || p.status === 'pending'
+  // Find the pending purchase
+  const purchase = partner.subscription?.purchases?.find(
+    p => p._id.toString() === purchaseId
   )
 
   if (!purchase) {
     throw new NotFoundError('PURCHASE_NOT_FOUND')
   }
+
+  if (purchase.status !== 'pending') {
+    throw new BadRequestError('PURCHASE_NOT_PENDING')
+  }
+
+  // Validate installment
+  const installmentCount = parseInt(installment) || 1
+  if (installmentCount < 1 || installmentCount > 12) {
+    throw new BadRequestError('INVALID_INSTALLMENT')
+  }
+
+  // Get amount and currency from the purchase
+  let amount = purchase.price.amount
+  let currency = (purchase.price.currency || 'usd').toLowerCase()
+  let originalAmount = amount
+  let originalCurrency = currency
+  let exchangeRate = null
+
+  // Query BIN to check card country
+  try {
+    const binResponse = await axios.post(
+      `${PAYMENT_SERVICE_URL}/api/bin`,
+      {
+        bin: card.number.replace(/\s/g, '').substring(0, 8),
+        amount,
+        currency
+      },
+      {
+        headers: {
+          'Authorization': req.headers.authorization,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    // If Turkish card and currency is not TRY, convert to TRY
+    // BIN response format: { success: true, card: { country: 'tr' }, pos: {...}, installments: [...] }
+    const cardCountry = binResponse.data?.card?.country?.toLowerCase()
+    console.log(`[Subscription Payment] BIN query result - card country: ${cardCountry}`)
+
+    if (cardCountry === 'tr' && currency !== 'try') {
+      console.log(`[Subscription Payment] Turkish card detected, converting ${currency.toUpperCase()} to TRY`)
+
+      const conversionResult = await convertCurrency(amount, currency.toUpperCase(), 'TRY')
+      amount = conversionResult.convertedAmount
+      currency = 'try'
+      exchangeRate = conversionResult.rate
+
+      console.log(`[Subscription Payment] Converted: ${originalAmount} ${originalCurrency.toUpperCase()} -> ${amount} TRY (rate: ${exchangeRate})`)
+    }
+  } catch (binError) {
+    console.error('[Subscription Payment] BIN query failed, proceeding with original currency:', binError.message)
+    // Continue with original currency if BIN query fails
+  }
+
+  // Call payment service
+  try {
+    const paymentResponse = await axios.post(
+      `${PAYMENT_SERVICE_URL}/api/pay`,
+      {
+        amount,
+        currency,
+        installment: installmentCount,
+        card: {
+          holder: card.holder,
+          number: card.number,
+          expiry: card.expiry,
+          cvv: card.cvv
+        },
+        customer: {
+          name: partner.companyName,
+          email: partner.email,
+          ip: req.ip || req.headers['x-forwarded-for'] || '127.0.0.1'
+        },
+        externalId: `subscription-${partnerId}-${purchaseId}`,
+        callbackUrl: `${process.env.API_BASE_URL || 'http://localhost:4000'}/api/my/subscription/payment-callback`
+      },
+      {
+        headers: {
+          'Authorization': req.headers.authorization,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
+
+    if (!paymentResponse.data.success) {
+      throw new BadRequestError(paymentResponse.data.error || 'PAYMENT_INIT_FAILED')
+    }
+
+    // Store transaction ID and conversion info in purchase
+    purchase.payment = purchase.payment || {}
+    purchase.payment.transactionId = paymentResponse.data.transactionId
+    if (exchangeRate) {
+      purchase.payment.originalAmount = originalAmount
+      purchase.payment.originalCurrency = originalCurrency.toUpperCase()
+      purchase.payment.convertedAmount = amount
+      purchase.payment.convertedCurrency = currency.toUpperCase()
+      purchase.payment.exchangeRate = exchangeRate
+    }
+    await partner.save()
+
+    res.json({
+      success: true,
+      data: {
+        formUrl: paymentResponse.data.formUrl,
+        transactionId: paymentResponse.data.transactionId,
+        purchaseId,
+        // Include conversion info if applicable
+        ...(exchangeRate && {
+          originalAmount,
+          originalCurrency: originalCurrency.toUpperCase(),
+          convertedAmount: amount,
+          convertedCurrency: currency.toUpperCase(),
+          exchangeRate
+        })
+      }
+    })
+  } catch (error) {
+    if (error.response?.data?.error) {
+      throw new BadRequestError(error.response.data.error)
+    }
+    throw error
+  }
+})
+
+// Handle payment callback from payment service
+export const paymentCallback = asyncHandler(async (req, res) => {
+  const { transactionId, success, message, externalId } = req.body
+
+  console.log('[Subscription Callback] Received:', { transactionId, success, message, externalId })
+
+  // Parse externalId: subscription-{partnerId}-{purchaseId}
+  let partnerId = null
+  let purchaseId = null
+  if (externalId && externalId.startsWith('subscription-')) {
+    const parts = externalId.split('-')
+    // Format: subscription-{partnerId}-{purchaseId}
+    if (parts.length >= 3) {
+      partnerId = parts[1]
+      purchaseId = parts[2]
+    }
+  }
+
+  // Find partner with this transaction or by partnerId from externalId
+  let partner = await Partner.findOne({
+    'subscription.purchases.payment.transactionId': transactionId
+  })
+
+  // Fallback: try to find by partnerId from externalId
+  if (!partner && partnerId) {
+    partner = await Partner.findById(partnerId)
+  }
+
+  if (!partner) {
+    console.error('[Subscription Callback] Partner not found:', { transactionId, partnerId, externalId })
+    throw new NotFoundError('PURCHASE_NOT_FOUND')
+  }
+
+  console.log('[Subscription Callback] Found partner:', partner._id)
+
+  // Find the purchase - prioritize purchaseId from externalId
+  let purchase = null
+  if (purchaseId) {
+    purchase = partner.subscription.purchases.find(
+      p => p._id.toString() === purchaseId
+    )
+  }
+
+  // Fallback: find by transactionId or pending status
+  if (!purchase) {
+    purchase = partner.subscription.purchases.find(
+      p => p.payment?.transactionId === transactionId || p.status === 'pending'
+    )
+  }
+
+  if (!purchase) {
+    console.error('[Subscription Callback] Purchase not found:', {
+      purchaseId,
+      transactionId,
+      purchases: partner.subscription?.purchases?.map(p => ({ id: p._id, status: p.status }))
+    })
+    throw new NotFoundError('PURCHASE_NOT_FOUND')
+  }
+
+  console.log('[Subscription Callback] Found purchase:', { purchaseId: purchase._id, status: purchase.status, plan: purchase.plan })
 
   if (success) {
     // Mark as paid
@@ -468,6 +729,7 @@ export const paymentCallback = asyncHandler(async (req, res) => {
     purchase.payment.date = new Date()
     purchase.payment.method = 'credit_card'
     purchase.payment.reference = transactionId
+    purchase.payment.transactionId = transactionId // Store for future reference
 
     // Activate subscription
     partner.subscription.status = 'active'
@@ -477,12 +739,14 @@ export const paymentCallback = asyncHandler(async (req, res) => {
 
     // Enable PMS if plan includes it
     const planInfo = SUBSCRIPTION_PLANS[purchase.plan]
-    if (planInfo.features.pms.enabled) {
+    if (planInfo?.features?.pms?.enabled) {
       partner.pmsIntegration = partner.pmsIntegration || {}
       partner.pmsIntegration.enabled = true
     }
 
     await partner.save()
+
+    console.log('[Subscription Callback] Payment successful, subscription activated for partner:', partner._id)
 
     // Create invoice
     try {

@@ -355,6 +355,27 @@ publicPaymentRoutes.post('/:id/callback', async (req, res) => {
           await axios.post(`${mainApiUrl}/pay/${token}/complete`, txDetails, { httpsAgent });
           console.log('[Payment Callback] Payment link webhook sent successfully');
         }
+        // Subscription payments (externalId = subscription-{partnerId}-{purchaseId})
+        else if (transaction.externalId.startsWith('subscription-')) {
+          console.log('[Payment Callback] Subscription payment detected, notifying main API');
+          console.log('[Payment Callback] externalId:', transaction.externalId);
+
+          const webhookKey = process.env.PAYMENT_WEBHOOK_KEY || 'payment-webhook-secret';
+          await axios.post(
+            `${mainApiUrl}/my/subscription/payment-callback`,
+            {
+              transactionId: transaction._id,
+              externalId: transaction.externalId,
+              success: result.success,
+              message: result.message || (result.success ? 'Payment successful' : 'Payment failed')
+            },
+            {
+              headers: { 'X-Api-Key': webhookKey },
+              httpsAgent
+            }
+          );
+          console.log('[Payment Callback] Subscription payment webhook sent successfully');
+        }
         // Regular booking payments (externalId = payment._id)
         else {
           console.log('[Payment Callback] Booking payment detected, notifying main API');
