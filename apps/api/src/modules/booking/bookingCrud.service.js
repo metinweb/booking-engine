@@ -1181,10 +1181,13 @@ export const createBookingWithPaymentLink = asyncHandler(async (req, res) => {
   })
   await payment.save()
 
+  // Build customer name with fallback
+  const customerName = `${leadGuest.firstName || ''} ${leadGuest.lastName || ''}`.trim() || 'Müşteri'
+
   const paymentLink = await PaymentLink.create({
     partner: partnerId,
     customer: {
-      name: `${leadGuest.firstName} ${leadGuest.lastName}`.trim(),
+      name: customerName,
       email: contact.email,
       phone: contact.phone
     },
@@ -1225,7 +1228,7 @@ export const createBookingWithPaymentLink = asyncHandler(async (req, res) => {
       const formattedExpiry = new Date(expiresAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 
       const notificationData = {
-        CUSTOMER_NAME: `${leadGuest.firstName} ${leadGuest.lastName}`.trim(),
+        CUSTOMER_NAME: customerName,
         DESCRIPTION: `${hotel.name?.tr || hotel.name?.en || bookingNumber} - ${nights} gece konaklama`,
         AMOUNT: `${currencySymbol}${formattedAmount}`,
         CURRENCY: market.currency,
@@ -1233,7 +1236,7 @@ export const createBookingWithPaymentLink = asyncHandler(async (req, res) => {
         EXPIRY_DATE: formattedExpiry,
         COMPANY_NAME: companyName,
         BOOKING_NUMBER: bookingNumber,
-        customerName: `${leadGuest.firstName} ${leadGuest.lastName}`.trim(),
+        customerName,
         amount: finalTotal,
         currency: market.currency,
         paymentUrl: paymentLink.paymentUrl,
@@ -1246,7 +1249,7 @@ export const createBookingWithPaymentLink = asyncHandler(async (req, res) => {
           type: 'payment_link',
           recipient: {
             email: contact.email,
-            name: `${leadGuest.firstName} ${leadGuest.lastName}`.trim()
+            name: customerName
           },
           data: {
             subject: `Ödeme Linki - ${bookingNumber}`,
@@ -1264,7 +1267,7 @@ export const createBookingWithPaymentLink = asyncHandler(async (req, res) => {
           type: 'payment_link',
           recipient: {
             phone: contact.phone,
-            name: `${leadGuest.firstName} ${leadGuest.lastName}`.trim()
+            name: customerName
           },
           data: notificationData,
           channels: ['sms'],

@@ -154,13 +154,13 @@ const router = createRouter({
           path: 'agencies',
           name: 'agencies',
           component: AgenciesView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'agencies' }
         },
         {
           path: 'agencies/:id/users',
           name: 'agency-users',
           component: AgencyUsersView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'agencies' }
         },
         {
           path: 'users',
@@ -168,7 +168,8 @@ const router = createRouter({
           component: UsersView,
           meta: {
             requiresAuth: true,
-            titleKey: 'users.title'
+            titleKey: 'users.title',
+            requiredPermission: 'users'
           }
         },
         {
@@ -177,7 +178,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'siteManagement.title',
-            descriptionKey: 'siteManagement.description'
+            descriptionKey: 'siteManagement.description',
+            requiredPermission: 'settings'
           },
           children: [
             {
@@ -225,24 +227,24 @@ const router = createRouter({
           path: 'hotels',
           name: 'hotels',
           component: HotelsView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'hotels' }
         },
         {
           path: 'hotels/new',
           name: 'hotel-new',
           component: HotelDetailView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'hotels' }
         },
         {
           path: 'hotels/:id',
           name: 'hotel-detail',
           component: HotelDetailView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'hotels' }
         },
         {
           path: 'planning',
           component: PlanningView,
-          meta: { requiresPartnerOrAdmin: true },
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'planning' },
           children: [
             {
               path: '',
@@ -304,31 +306,31 @@ const router = createRouter({
           path: 'developers',
           name: 'developers',
           component: DevelopersView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'settings' }
         },
         {
           path: 'bookings',
           name: 'bookings',
           component: BookingListView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'booking' }
         },
         {
           path: 'bookings/new',
           name: 'booking-new',
           component: BookingWizardView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'booking' }
         },
         {
           path: 'bookings/draft/:bookingNumber',
           name: 'booking-draft',
           component: BookingWizardView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'booking' }
         },
         {
           path: 'bookings/:id',
           name: 'booking-detail',
           component: BookingDetailView,
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'booking' }
         },
         // Tour Module
         {
@@ -338,7 +340,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'tour.title',
-            descriptionKey: 'tour.description'
+            descriptionKey: 'tour.description',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -349,7 +352,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'tour.newTour',
-            descriptionKey: 'tour.description'
+            descriptionKey: 'tour.description',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -359,7 +363,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'departure.title',
-            descriptionKey: 'departure.calendar'
+            descriptionKey: 'departure.calendar',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -369,7 +374,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'extra.title',
-            descriptionKey: 'extra.extras'
+            descriptionKey: 'extra.extras',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -379,7 +385,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'tourBooking.title',
-            descriptionKey: 'tourBooking.bookings'
+            descriptionKey: 'tourBooking.bookings',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -389,7 +396,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'wizard.title',
-            descriptionKey: 'tourBooking.newBooking'
+            descriptionKey: 'tourBooking.newBooking',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -399,7 +407,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'tourBooking.bookingDetails',
-            descriptionKey: 'tourBooking.bookings'
+            descriptionKey: 'tourBooking.bookings',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -409,7 +418,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'tour.editTour',
-            descriptionKey: 'tour.tourDetails'
+            descriptionKey: 'tour.tourDetails',
+            requiredPermission: 'booking'
           }
         },
         {
@@ -419,7 +429,8 @@ const router = createRouter({
           meta: {
             requiresPartnerOrAdmin: true,
             titleKey: 'departure.title',
-            descriptionKey: 'departure.departures'
+            descriptionKey: 'departure.departures',
+            requiredPermission: 'booking'
           }
         },
         // PMS Integration
@@ -427,7 +438,7 @@ const router = createRouter({
           path: 'pms-integration',
           name: 'pms-integration',
           component: () => import('../views/PmsIntegrationView.vue'),
-          meta: { requiresPartnerOrAdmin: true }
+          meta: { requiresPartnerOrAdmin: true, requiredPermission: 'pms' }
         },
         // My Subscription (for partner users only)
         {
@@ -601,6 +612,19 @@ const router = createRouter({
   ]
 })
 
+// Helper function to check module permission
+function hasModulePermission(authStore, module) {
+  // Platform admins and admin role users have all permissions
+  if (authStore.isPlatformAdmin || authStore.user?.role === 'admin') {
+    return true
+  }
+
+  // Check user's permissions array
+  const permissions = authStore.user?.permissions || []
+  const permission = permissions.find(p => p.module === module)
+  return permission?.actions?.view === true
+}
+
 // Navigation Guard
 router.beforeEach(async (to, from, next) => {
   // Import stores inside beforeEach to ensure Pinia is initialized
@@ -622,6 +646,9 @@ router.beforeEach(async (to, from, next) => {
   const requiresPlatformAdmin = to.matched.some(record => record.meta.requiresPlatformAdmin)
   const requiresPartnerOrAdmin = to.matched.some(record => record.meta.requiresPartnerOrAdmin)
   const requiresPartner = to.matched.some(record => record.meta.requiresPartner)
+
+  // Get required permission from route meta (check all matched routes)
+  const requiredPermission = to.matched.find(record => record.meta.requiredPermission)?.meta.requiredPermission
 
   // Check authentication on first load
   if (authStore.token && !authStore.user) {
@@ -654,6 +681,10 @@ router.beforeEach(async (to, from, next) => {
   } else if (requiresPartner && authStore.accountType !== 'partner') {
     // Redirect to dashboard if not a partner user (partner-only routes)
     routerLogger.warn('Authorization failed: User is not a partner')
+    next({ name: 'dashboard' })
+  } else if (requiredPermission && !hasModulePermission(authStore, requiredPermission)) {
+    // Check module-level permission
+    routerLogger.warn(`Authorization failed: User does not have permission for module '${requiredPermission}'`)
     next({ name: 'dashboard' })
   } else if ((to.name === 'login' || to.name === 'register') && authStore.isAuthenticated) {
     // Redirect to dashboard if already logged in

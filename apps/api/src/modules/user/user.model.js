@@ -138,7 +138,8 @@ const userSchema = new mongoose.Schema(
             'users',
             'agencies',
             'hotels',
-            'pms'
+            'pms',
+            'payment-link'
           ]
         },
         actions: {

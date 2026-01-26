@@ -547,16 +547,29 @@ export async function updateBookingPayment(bookingId) {
     status = 'refunded'
   }
 
-  // Step 4: ATOMIC update booking with calculated values
+  // Step 4: Build update object
+  const updateData = {
+    'payment.paidAmount': paidAmount,
+    'payment.status': status,
+    'payment.payments': paymentIds
+  }
+
+  // Step 5: If payment is complete (paid), also confirm the booking
+  // Only update booking status if it's currently 'pending' and payment is now 'paid'
+  if (status === 'paid') {
+    // Get current booking status
+    const currentBooking = await Booking.findById(bookingId).select('status').lean()
+    if (currentBooking && currentBooking.status === 'pending') {
+      updateData.status = 'confirmed'
+      updateData.confirmedAt = new Date()
+      logger.info('[updateBookingPayment] Booking confirmed after full payment:', { bookingId })
+    }
+  }
+
+  // Step 6: ATOMIC update booking with calculated values
   await Booking.findByIdAndUpdate(
     bookingId,
-    {
-      $set: {
-        'payment.paidAmount': paidAmount,
-        'payment.status': status,
-        'payment.payments': paymentIds
-      }
-    },
+    { $set: updateData },
     { new: true }
   )
 }

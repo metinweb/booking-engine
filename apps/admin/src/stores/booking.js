@@ -585,6 +585,14 @@ export const useBookingStore = defineStore('booking', () => {
     goToCheckout,
     goBackToSearch,
 
+    // Guest actions
+    updateLeadGuest: (value) => {
+      guests.value.leadGuest = { ...guests.value.leadGuest, ...value }
+    },
+    updateRoomGuests: (value) => {
+      guests.value.roomGuests = value
+    },
+
     // Booking
     createBooking,
     createBookingWithPaymentLink,

@@ -273,7 +273,7 @@
                     >{{ $t('common.email') }}:</span
                   >
                   <span class="font-medium text-gray-900 dark:text-white">{{
-                    booking.leadGuest?.email || '-'
+                    booking.contact?.email || '-'
                   }}</span>
                 </div>
                 <div class="flex">
@@ -281,7 +281,7 @@
                     >{{ $t('booking.phone') }}:</span
                   >
                   <span class="font-medium text-gray-900 dark:text-white">{{
-                    booking.leadGuest?.phone || '-'
+                    booking.contact?.phone || '-'
                   }}</span>
                 </div>
                 <div class="flex">
