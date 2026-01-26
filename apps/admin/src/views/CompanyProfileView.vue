@@ -18,7 +18,9 @@
     </div>
 
     <!-- Error State -->
-    <Alert v-else-if="error" type="error" :message="error" />
+    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+    </div>
 
     <!-- Content -->
     <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
@@ -89,8 +91,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useToast } from '@/composables/useToast'
 import partnerService from '@/services/partnerService'
-import Spinner from '@/components/ui/Spinner.vue'
-import Alert from '@/components/ui/Alert.vue'
+import Spinner from '@/components/ui/feedback/Spinner.vue'
 import CompanyTab from '@/components/companyProfile/CompanyTab.vue'
 import TaxTab from '@/components/companyProfile/TaxTab.vue'
 import AddressTab from '@/components/companyProfile/AddressTab.vue'
