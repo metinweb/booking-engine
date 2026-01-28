@@ -130,11 +130,6 @@
           />
         </div>
 
-        <!-- Amenities Tab -->
-        <div v-show="activeTab === 'amenities'">
-          <HotelAmenities ref="amenitiesFormRef" :hotel="hotel" :saving="saving" />
-        </div>
-
         <!-- Policies Tab -->
         <div v-show="activeTab === 'policies'">
           <HotelPolicies ref="policiesFormRef" :hotel="hotel" :saving="saving" />
@@ -169,7 +164,6 @@ import HotelBasicForm from '@/components/hotels/HotelBasicForm.vue'
 import HotelContactForm from '@/components/hotels/HotelContactForm.vue'
 import HotelAddressForm from '@/components/hotels/HotelAddressForm.vue'
 import HotelGallery from '@/components/hotels/HotelGallery.vue'
-import HotelAmenities from '@/components/hotels/HotelAmenities.vue'
 import HotelPolicies from '@/components/hotels/HotelPolicies.vue'
 import HotelProfile from '@/components/hotels/HotelProfile.vue'
 import HotelSeoForm from '@/components/hotels/HotelSeoForm.vue'
@@ -312,7 +306,6 @@ const activeTab = ref('basic')
 const basicFormRef = ref(null)
 const contactFormRef = ref(null)
 const addressFormRef = ref(null)
-const amenitiesFormRef = ref(null)
 const policiesFormRef = ref(null)
 const profileFormRef = ref(null)
 const seoFormRef = ref(null)
@@ -324,7 +317,6 @@ const tabErrors = reactive({
   address: {},
   profile: {},
   gallery: {},
-  amenities: {},
   policies: {},
   seo: {},
   roomTemplates: {}
@@ -337,7 +329,6 @@ const tabFields = {
   address: ['address.city', 'address.country'],
   profile: [],
   gallery: [],
-  amenities: [],
   policies: [],
   seo: [],
   roomTemplates: []
@@ -391,7 +382,6 @@ const collectFormData = () => {
   const basicData = basicFormRef.value?.getFormData?.() || {}
   const contactData = contactFormRef.value?.getFormData?.() || {}
   const addressData = addressFormRef.value?.getFormData?.() || {}
-  const amenitiesData = amenitiesFormRef.value?.getFormData?.() || {}
   const policiesData = policiesFormRef.value?.getFormData?.() || {}
   const profileData = profileFormRef.value?.getFormData?.() || {}
   const seoData = seoFormRef.value?.getFormData?.() || {}
@@ -401,7 +391,6 @@ const collectFormData = () => {
     ...basicData,
     ...contactData,
     ...addressData,
-    ...amenitiesData,
     ...policiesData,
     ...profileData,
     ...seoData,
@@ -417,7 +406,6 @@ const tabs = computed(() => [
   { id: 'address', label: t('hotels.tabs.address'), icon: 'location_on', requiresSave: false },
   { id: 'profile', label: t('hotels.tabs.profile'), icon: 'description', requiresSave: false },
   { id: 'gallery', label: t('hotels.tabs.gallery'), icon: 'photo_library', requiresSave: true },
-  { id: 'amenities', label: t('hotels.tabs.amenities'), icon: 'wifi', requiresSave: false },
   { id: 'policies', label: t('hotels.tabs.policies'), icon: 'policy', requiresSave: false },
   { id: 'seo', label: t('hotels.tabs.seo'), icon: 'search', requiresSave: false },
   {
