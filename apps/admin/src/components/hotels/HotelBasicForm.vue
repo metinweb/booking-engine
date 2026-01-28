@@ -504,6 +504,19 @@ const handleFieldValidation = (fieldName, error) => {
   emit('validation-change', { ...fieldErrors.value })
 }
 
+// Helper to normalize tags to array of IDs
+// Tags can come as array of IDs (strings) or array of populated objects
+const normalizeTagsToIds = tags => {
+  if (!tags || !Array.isArray(tags)) return []
+  return tags.map(tag => {
+    // If it's already a string (tag ID), return as-is
+    if (typeof tag === 'string') return tag
+    // If it's an object with _id, extract the ID
+    if (tag && typeof tag === 'object' && tag._id) return tag._id
+    return tag
+  })
+}
+
 // Watch for hotel changes and update form
 watch(
   () => props.hotel,
@@ -514,7 +527,7 @@ watch(
         description: { ...createMultiLangObject(), ...newHotel.description },
         slug: newHotel.slug || '',
         logo: newHotel.logo || '',
-        tags: newHotel.tags || [],
+        tags: normalizeTagsToIds(newHotel.tags),
         stars: newHotel.stars || 3,
         type: newHotel.type || 'hotel',
         category: newHotel.category || 'standard',

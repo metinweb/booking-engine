@@ -15,12 +15,12 @@ if (!fs.existsSync(uploadsDir)) {
 // Configure storage for hotel images
 const hotelStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Partner ID from request
-    const partnerId = req.partnerId || req.user?.accountId
+    // Partner ID from request - use 'base' for base hotels (platform admin uploads)
+    const partnerId = req.partnerId || req.user?.accountId || 'base'
     const hotelId = req.params?.id
 
-    if (!partnerId || !hotelId) {
-      return cb(new Error('Partner ID and Hotel ID are required'))
+    if (!hotelId) {
+      return cb(new Error('Hotel ID is required'))
     }
 
     const hotelDir = path.join(uploadsDir, 'hotels', partnerId.toString(), hotelId.toString())
