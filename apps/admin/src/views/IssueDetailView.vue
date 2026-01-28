@@ -59,10 +59,21 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Main Content -->
       <div class="lg:col-span-2 space-y-6">
-        <!-- Description -->
-        <div class="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $t('issues.fields.description') }}</h2>
-          <div class="prose dark:prose-invert max-w-none" v-html="renderedDescription" />
+        <!-- Description (Original Issue - @0) -->
+        <div id="comment-0" class="bg-white dark:bg-slate-800 rounded-lg shadow p-6 scroll-mt-4">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('issues.fields.description') }}</h2>
+            <button
+              class="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
+              :title="$t('issues.actions.reply') + ' (@0)'"
+              @click="insertReply(0)"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="prose dark:prose-invert max-w-none" v-html="renderedDescription" @click="handleContentClick" />
         </div>
 
         <!-- Attachments -->
@@ -72,10 +83,18 @@
           </h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div
-              v-for="attachment in issue.attachments"
+              v-for="(attachment, attachmentIndex) in issue.attachments"
               :key="attachment._id"
               class="group relative bg-gray-100 dark:bg-slate-700 rounded-lg overflow-hidden"
             >
+              <!-- Screenshot index badge (only for images) -->
+              <span
+                v-if="isImage(attachment.mimeType)"
+                class="absolute top-1 left-1 z-10 bg-yellow-400 text-yellow-900 text-xs font-bold px-1.5 py-0.5 rounded shadow"
+                :title="`SS@${getImageIndex(attachmentIndex)}`"
+              >
+                SS@{{ getImageIndex(attachmentIndex) }}
+              </span>
               <img
                 v-if="isImage(attachment.mimeType)"
                 :src="getFileUrl(attachment.url)"
@@ -127,9 +146,10 @@
           <!-- Comment List -->
           <div class="space-y-4 mb-6">
             <div
-              v-for="comment in issue.comments"
+              v-for="(comment, commentIndex) in issue.comments"
               :key="comment._id"
-              class="flex gap-3"
+              :id="`comment-${commentIndex + 1}`"
+              class="flex gap-3 scroll-mt-4"
             >
               <div v-if="getUserAvatarUrl(comment.author)" class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                 <img :src="getUserAvatarUrl(comment.author)" :alt="comment.author?.name" class="w-full h-full object-cover" />
@@ -140,27 +160,40 @@
               <div class="flex-1 bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 dark:text-slate-500 font-mono">@{{ commentIndex + 1 }}</span>
                     <span class="font-medium text-gray-900 dark:text-white">{{ comment.author?.name }}</span>
                     <span class="text-xs text-gray-500 dark:text-slate-400">{{ formatDateTime(comment.createdAt) }}</span>
                     <span v-if="comment.isEdited" class="text-xs text-gray-400 dark:text-slate-500">({{ $t('issues.comments.edited') }})</span>
                   </div>
-                  <div v-if="canEditComment(comment) && editingCommentId !== comment._id" class="flex items-center gap-1">
+                  <div class="flex items-center gap-1">
+                    <!-- Reply Button -->
                     <button
-                      class="p-1 text-gray-400 hover:text-blue-500"
-                      @click="startEditComment(comment)"
+                      class="p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
+                      :title="$t('issues.actions.reply') + ` (@${commentIndex + 1})`"
+                      @click="insertReply(commentIndex + 1)"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                       </svg>
                     </button>
-                    <button
-                      class="p-1 text-gray-400 hover:text-red-500"
-                      @click="confirmDeleteComment(comment)"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
+                    <template v-if="canEditComment(comment) && editingCommentId !== comment._id">
+                      <button
+                        class="p-1 text-gray-400 hover:text-blue-500"
+                        @click="startEditComment(comment)"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                      <button
+                        class="p-1 text-gray-400 hover:text-red-500"
+                        @click="confirmDeleteComment(comment)"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </template>
                   </div>
                 </div>
                 <!-- Edit Mode -->
@@ -187,7 +220,7 @@
                   </div>
                 </div>
                 <!-- Display Mode -->
-                <div v-else class="text-gray-700 dark:text-slate-300 whitespace-pre-wrap" v-html="renderCommentWithMentions(comment.content)" />
+                <div v-else class="text-gray-700 dark:text-slate-300 whitespace-pre-wrap" v-html="renderCommentWithMentions(comment.content)" @click="handleContentClick" />
               </div>
             </div>
 
@@ -489,7 +522,7 @@ const simpleMarkdown = (text) => {
     .replace(/\n/g, '<br>')
 }
 
-// Render comment with highlighted mentions
+// Render comment with highlighted mentions, @index references, and SS@index references
 const renderCommentWithMentions = (content) => {
   if (!content) return ''
   // Escape HTML first
@@ -497,11 +530,27 @@ const renderCommentWithMentions = (content) => {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-  // Highlight @mentions
+  
+  // Highlight SS@index references (screenshot links) - must be before @mentions to avoid conflict
+  // SS@1 opens screenshot 1, SS@2 opens screenshot 2, etc. (1-indexed)
   escaped = escaped.replace(
-    /@(\w+)/g,
+    /SS@(\d+)/g,
+    '<span class="screenshot-ref bg-yellow-200 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 px-1 rounded cursor-pointer hover:bg-yellow-300 dark:hover:bg-yellow-900/70 font-semibold" data-screenshot-index="$1">SS@$1</span>'
+  )
+  
+  // Highlight @index references (comment links) - @0 is the original issue, @1 is first comment, etc.
+  // Use negative lookbehind (?<!SS) to NOT match @index when it's part of SS@index
+  escaped = escaped.replace(
+    /(?<!SS)@(\d+)/g,
+    '<span class="comment-ref bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1 rounded cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-900/60 font-medium" data-comment-index="$1">@$1</span>'
+  )
+  
+  // Highlight @username mentions (user mentions)
+  escaped = escaped.replace(
+    /@([a-zA-Z]\w*)/g,
     '<span class="text-purple-600 dark:text-purple-400 font-medium">@$1</span>'
   )
+  
   // Convert newlines to br
   return escaped.replace(/\n/g, '<br>')
 }
@@ -569,11 +618,27 @@ const priorityDotClass = computed(() => ({
   'bg-red-500': issue.value?.priority === 'critical'
 }))
 
-// Rendered description (sanitized for XSS protection)
+// Rendered description (sanitized for XSS protection, with clickable references)
 const renderedDescription = computed(() => {
   if (!issue.value?.description) return ''
-  const html = simpleMarkdown(issue.value.description)
-  return sanitizeMarkdown(html)
+  let html = simpleMarkdown(issue.value.description)
+  html = sanitizeMarkdown(html)
+  
+  // Add SS@index and @index reference highlighting (after sanitization)
+  // SS@index references (screenshot links) - 1-indexed
+  html = html.replace(
+    /SS@(\d+)/g,
+    '<span class="screenshot-ref bg-yellow-200 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 px-1 rounded cursor-pointer hover:bg-yellow-300 dark:hover:bg-yellow-900/70 font-semibold" data-screenshot-index="$1">SS@$1</span>'
+  )
+  
+  // @index references (comment links) - @0 is the original issue, @1 is first comment, etc.
+  // Use negative lookbehind (?<!SS) to NOT match @index when it's part of SS@index
+  html = html.replace(
+    /(?<!SS)@(\d+)/g,
+    '<span class="comment-ref bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1 rounded cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-900/60 font-medium" data-comment-index="$1">@$1</span>'
+  )
+  
+  return html
 })
 
 // Load issue
@@ -703,6 +768,63 @@ const canEditComment = (comment) => {
   return comment.author?._id === userId || currentUser.value?.role === 'admin'
 }
 
+// Insert reply reference (@index) into comment input
+const insertReply = (commentIndex) => {
+  const replyText = `@${commentIndex} `
+  // Append to current comment or start fresh
+  if (newComment.value && !newComment.value.endsWith(' ')) {
+    newComment.value += ' ' + replyText
+  } else {
+    newComment.value += replyText
+  }
+  // Focus the input
+  mentionInputRef.value?.focus()
+}
+
+// Handle click on content with @index or SS@index references
+const handleContentClick = (e) => {
+  const target = e.target
+  
+  // Handle comment reference click (@index)
+  if (target.classList.contains('comment-ref')) {
+    const commentIndex = target.dataset.commentIndex
+    scrollToComment(parseInt(commentIndex))
+    return
+  }
+  
+  // Handle screenshot reference click (SS@index)
+  if (target.classList.contains('screenshot-ref')) {
+    const screenshotIndex = parseInt(target.dataset.screenshotIndex)
+    openScreenshot(screenshotIndex)
+    return
+  }
+}
+
+// Scroll to comment by index (0 = description, 1+ = comments)
+const scrollToComment = (index) => {
+  const element = document.getElementById(`comment-${index}`)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    // Highlight briefly
+    element.classList.add('ring-2', 'ring-blue-400', 'ring-offset-2')
+    setTimeout(() => {
+      element.classList.remove('ring-2', 'ring-blue-400', 'ring-offset-2')
+    }, 2000)
+  }
+}
+
+// Open screenshot by index (1-indexed)
+const openScreenshot = (index) => {
+  const attachments = issue.value?.attachments || []
+  // Filter only images
+  const images = attachments.filter(a => isImage(a.mimeType))
+  // index is 1-based, array is 0-based
+  const targetImage = images[index - 1]
+  if (targetImage) {
+    lightboxImage.value = getFileUrl(targetImage.url)
+  }
+}
+
 // Start edit comment
 const startEditComment = (comment) => {
   editingCommentId.value = comment._id
@@ -774,6 +896,19 @@ const confirmDeleteAttachment = async (attachment) => {
 // Is image
 const isImage = (mimeType) => {
   return mimeType?.startsWith('image/')
+}
+
+// Get image index (1-based) for SS@ reference
+// This calculates which image number this attachment is among images only
+const getImageIndex = (attachmentIndex) => {
+  const attachments = issue.value?.attachments || []
+  let imageCount = 0
+  for (let i = 0; i <= attachmentIndex; i++) {
+    if (isImage(attachments[i]?.mimeType)) {
+      imageCount++
+    }
+  }
+  return imageCount
 }
 
 // Open image

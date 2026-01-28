@@ -147,12 +147,15 @@
       <div class="p-6">
         <DataTable
           :columns="columns"
-          :data="issues"
+          :data="sortedIssues"
           :loading="loading"
           :page="pagination.page"
           :per-page="pagination.limit"
           :total="pagination.total"
+          :sort-key="sortState.key"
+          :sort-order="sortState.order"
           @page-change="handlePageChange"
+          @sort="handleSort"
         >
           <!-- Issue Number & Title -->
           <template #cell-title="{ row }">
@@ -473,6 +476,12 @@ const statusOptions = ['open', 'in_progress', 'resolved', 'closed', 'reopened']
 const priorityOptions = ['low', 'medium', 'high', 'critical']
 const categoryOptions = ['bug', 'feature', 'improvement', 'question', 'task', 'other']
 
+// Sort state
+const sortState = ref({
+  key: '',
+  order: 'asc'
+})
+
 // Table columns
 const columns = computed(() => [
   { key: 'title', label: t('issues.fields.title'), sortable: true },
@@ -481,7 +490,7 @@ const columns = computed(() => [
   { key: 'category', label: t('issues.fields.category'), sortable: true },
   { key: 'reporter', label: t('issues.fields.reporter') },
   { key: 'assignees', label: t('issues.fields.assignees') },
-  { key: 'lastComment', label: t('issues.fields.lastComment') },
+  { key: 'lastComment', label: t('issues.fields.lastComment'), sortable: true, sortKey: 'lastCommentTime' },
   { key: 'attachments', label: '', width: '60px' },
   { key: 'createdAt', label: t('issues.fields.createdAt'), sortable: true }
 ])
@@ -556,6 +565,67 @@ const debouncedSearch = debounce(() => {
 const handlePageChange = ({ page }) => {
   loadIssues(page)
 }
+
+// Handle sort - for lastComment we sort by createdAt timestamp, not by user name
+const handleSort = ({ key, order }) => {
+  // Find the column to get its sortKey if it has one
+  const column = columns.value.find(col => col.key === key)
+  const actualSortKey = column?.sortKey || key
+  
+  sortState.value = { key, order }
+  
+  // For now, we do frontend sorting since backend might not support all sort keys
+  // If backend supports sorting, uncomment and modify loadIssues to pass sort params
+}
+
+// Sorted issues - applies frontend sorting when needed
+const sortedIssues = computed(() => {
+  if (!sortState.value.key || !issues.value.length) {
+    return issues.value
+  }
+  
+  const column = columns.value.find(col => col.key === sortState.value.key)
+  const sortKey = column?.sortKey || sortState.value.key
+  const order = sortState.value.order
+  
+  // Create a copy to avoid mutating original
+  const sorted = [...issues.value]
+  
+  sorted.sort((a, b) => {
+    let aVal, bVal
+    
+    // Handle special sort keys
+    if (sortKey === 'lastCommentTime') {
+      // Sort by the last comment's createdAt timestamp
+      aVal = a.lastComment?.createdAt ? new Date(a.lastComment.createdAt).getTime() : 0
+      bVal = b.lastComment?.createdAt ? new Date(b.lastComment.createdAt).getTime() : 0
+    } else if (sortKey.includes('.')) {
+      // Handle nested keys like 'reporter.name'
+      aVal = sortKey.split('.').reduce((obj, k) => obj?.[k], a)
+      bVal = sortKey.split('.').reduce((obj, k) => obj?.[k], b)
+    } else {
+      aVal = a[sortKey]
+      bVal = b[sortKey]
+    }
+    
+    // Handle null/undefined
+    if (aVal == null && bVal == null) return 0
+    if (aVal == null) return order === 'asc' ? 1 : -1
+    if (bVal == null) return order === 'asc' ? -1 : 1
+    
+    // Compare
+    if (typeof aVal === 'string' && typeof bVal === 'string') {
+      const comparison = aVal.localeCompare(bVal, 'tr')
+      return order === 'asc' ? comparison : -comparison
+    }
+    
+    if (aVal < bVal) return order === 'asc' ? -1 : 1
+    if (aVal > bVal) return order === 'asc' ? 1 : -1
+    return 0
+  })
+  
+  return sorted
+})
 
 // Handle issue created
 const handleIssueCreated = (issue) => {
