@@ -18,6 +18,7 @@ import { asyncHandler } from '#helpers'
 import { deleteHotelFile } from '#helpers/hotelUpload.js'
 import logger from '#core/logger.js'
 import { getPartnerId, verifyHotelOwnership } from '#services/helpers.js'
+import { generateAmenitiesFromProfile } from './amenityMapping.js'
 
 // Re-export from other service files for backwards compatibility
 export * from './hotelImage.service.js'
@@ -127,8 +128,18 @@ export const createHotel = asyncHandler(async (req, res) => {
     throw new NotFoundError('PARTNER_NOT_FOUND')
   }
 
+  // Auto-generate amenities from profile if profile is provided
+  let amenities = req.body.amenities
+  if (req.body.profile) {
+    const generatedAmenities = generateAmenitiesFromProfile(req.body.profile)
+    if (generatedAmenities.length > 0) {
+      amenities = generatedAmenities
+    }
+  }
+
   const hotel = await Hotel.create({
     ...req.body,
+    amenities,
     partner: partnerId,
     hotelType: 'partner', // Partner's own hotel
     hotelBase: null,
@@ -238,6 +249,15 @@ export const updateHotel = asyncHandler(async (req, res) => {
       }
     }
   })
+
+  // Auto-generate amenities from profile features (for non-linked hotels)
+  if (hotel.hotelType !== 'linked' && hotel.profile) {
+    const generatedAmenities = generateAmenitiesFromProfile(hotel.profile)
+    if (generatedAmenities.length > 0) {
+      hotel.amenities = generatedAmenities
+      logger.info(`Auto-generated amenities for hotel ${hotel._id}: ${generatedAmenities.join(', ')}`)
+    }
+  }
 
   hotel.updatedBy = req.user._id
   await hotel.save()
