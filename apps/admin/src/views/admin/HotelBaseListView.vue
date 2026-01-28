@@ -93,7 +93,7 @@
             >
               <img
                 v-if="getMainImage(row)"
-                :src="getImageUrl(getMainImage(row))"
+                :src="getHotelImageUrl(getMainImage(row))"
                 :alt="row.name"
                 class="w-full h-full object-cover"
               />
@@ -293,7 +293,7 @@ import hotelService from '@/services/hotelService'
 import Modal from '@/components/common/Modal.vue'
 import DataTable from '@/components/ui/data/DataTable.vue'
 import HotelAIImporter from '@/components/hotels/HotelAIImporter.vue'
-import { getImageUrl } from '@/utils/imageUrl'
+import { getImageUrl, getFileUrl } from '@/utils/imageUrl'
 
 const router = useRouter()
 const toast = useToast()
@@ -455,12 +455,25 @@ const deleteHotel = async () => {
 
 // Get main image from hotel
 const getMainImage = hotel => {
+  // Prefer logo for list view, fallback to gallery images
+  if (hotel.logo) return hotel.logo
   if (!hotel.images || hotel.images.length === 0) return null
   const mainImage = hotel.images.find(img => img.isMain)
   return mainImage?.url || hotel.images[0]?.url
 }
 
-// getImageUrl imported from @/utils/imageUrl
+// Get correct image URL based on path
+// New base hotels use /uploads/hotels/base/ (stored on API server)
+// Old base hotels use /uploads/hotels/ without base (stored on CDN)
+const getHotelImageUrl = url => {
+  if (!url) return ''
+  // New base hotel images are stored on API server
+  if (url.includes('/hotels/base/')) {
+    return getFileUrl(url)
+  }
+  // Old base hotel images are on CDN
+  return getImageUrl(url)
+}
 
 // Get status badge class
 const getStatusClass = status => {

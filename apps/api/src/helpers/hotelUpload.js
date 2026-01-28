@@ -15,8 +15,10 @@ if (!fs.existsSync(uploadsDir)) {
 // Configure storage for hotel images
 const hotelStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Partner ID from request - use 'base' for base hotels (platform admin uploads)
-    const partnerId = req.partnerId || req.user?.accountId || 'base'
+    // For platform admin users, use 'base' folder (base hotel uploads)
+    // For partners, use their partner ID
+    const partnerId =
+      req.user?.accountType === 'platform' ? 'base' : req.partnerId || req.user?.accountId || 'base'
     const hotelId = req.params?.id
 
     if (!hotelId) {
