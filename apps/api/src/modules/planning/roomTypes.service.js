@@ -6,12 +6,40 @@
 
 import RoomType from './roomType.model.js'
 import Rate from './rate.model.js'
-import Hotel from '../hotel/hotel.model.js'
+import Hotel, { ROOM_AMENITIES } from '../hotel/hotel.model.js'
 import { NotFoundError, BadRequestError } from '#core/errors.js'
 import { asyncHandler } from '#helpers'
 import logger from '#core/logger.js'
 import { getRoomTypeFileUrl, deleteRoomTypeFile } from '#helpers/roomTypeUpload.js'
 import { getPartnerId, verifyHotelOwnership } from '#services/helpers.js'
+
+const ROOM_AMENITIES_SET = new Set(ROOM_AMENITIES)
+
+function normalizeRoomAmenities(input) {
+  if (!Array.isArray(input)) return { amenities: [], unknownAmenities: [] }
+
+  const amenities = []
+  const unknownAmenities = []
+  const seen = new Set()
+
+  for (const raw of input) {
+    if (typeof raw !== 'string') continue
+    const trimmed = raw.trim()
+    if (!trimmed) continue
+
+    if (!ROOM_AMENITIES_SET.has(trimmed)) {
+      unknownAmenities.push(trimmed)
+      continue
+    }
+
+    if (!seen.has(trimmed)) {
+      seen.add(trimmed)
+      amenities.push(trimmed)
+    }
+  }
+
+  return { amenities, unknownAmenities }
+}
 
 // ==================== ROOM TYPES ====================
 
@@ -267,6 +295,15 @@ export const importRoomTypesFromBase = asyncHandler(async (req, res) => {
 
   const createdRoomTypes = []
   for (const template of templatesToImport) {
+    const { amenities, unknownAmenities } = normalizeRoomAmenities(template.amenities)
+    if (unknownAmenities.length > 0) {
+      logger.warn(
+        `Ignoring unsupported room amenities during base import for template ${template.code}: ${unknownAmenities.join(
+          ', '
+        )}`
+      )
+    }
+
     const roomTypeData = {
       hotel: hotelId,
       partner: partnerId,
@@ -279,7 +316,7 @@ export const importRoomTypesFromBase = asyncHandler(async (req, res) => {
         maxInfants: 1,
         totalMaxGuests: 4
       },
-      amenities: template.amenities || [],
+      amenities,
       size: template.size || null,
       bedConfiguration: template.bedConfiguration || [],
       images: (template.images || []).map(img => ({

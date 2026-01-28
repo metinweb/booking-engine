@@ -14,6 +14,89 @@ const SUPPORTED_LANGUAGES = B2C_LANGUAGES
 // Multilingual text schema helper - supports all 20 languages
 const multiLangString = (required = false) => b2cLangString(required)
 
+// Export room amenities for use in other modules (single source of truth)
+export const ROOM_AMENITIES = [
+  // Klima & Isıtma
+  'airConditioning',
+  'heating',
+  'fan',
+  'centralHeating',
+  // Eğlence
+  'tv',
+  'satelliteTV',
+  'cableTV',
+  'smartTV',
+  'radio',
+  // Bağlantı
+  'wifi',
+  'telephone',
+  'usbPorts',
+  'laptop',
+  // Minibar & Mutfak
+  'minibar',
+  'refrigerator',
+  'kettle',
+  'coffeeMachine',
+  'kitchen',
+  'kitchenette',
+  'microwave',
+  'toaster',
+  'dishwasher',
+  'oven',
+  'stove',
+  'diningArea',
+  'diningTable',
+  // Banyo
+  'privateBathroom',
+  'sharedBathroom',
+  'bathtub',
+  'shower',
+  'rainShower',
+  'jacuzzi',
+  'hairdryer',
+  'toiletries',
+  'bathrobes',
+  'slippers',
+  'bidet',
+  // Manzara
+  'seaView',
+  'poolView',
+  'gardenView',
+  'cityView',
+  'mountainView',
+  'landmarkView',
+  // Dış Mekan
+  'balcony',
+  'terrace',
+  'privatePool',
+  'privateGarden',
+  'patio',
+  // Konfor
+  'safe',
+  'desk',
+  'sofa',
+  'wardrobe',
+  'ironingEquipment',
+  'soundproofing',
+  'carpeted',
+  'parquet',
+  'livingRoom',
+  'separateLivingRoom',
+  // Servis
+  'roomService',
+  'dailyHousekeeping',
+  'laundryService',
+  'turndownService',
+  // Erişilebilirlik
+  'wheelchairAccessible',
+  'connectedRooms',
+  // Özel
+  'smokingAllowed',
+  'nonSmoking',
+  'petFriendly',
+  'hypoallergenic'
+]
+
 // Cancellation rule schema for algorithmic cancellation policy
 const cancellationRuleSchema = new mongoose.Schema(
   {
@@ -681,87 +764,7 @@ const hotelSchema = new mongoose.Schema(
         amenities: [
           {
             type: String,
-            enum: [
-              // Klima & Isıtma
-              'airConditioning',
-              'heating',
-              'fan',
-              'centralHeating',
-              // Eğlence
-              'tv',
-              'satelliteTV',
-              'cableTV',
-              'smartTV',
-              'radio',
-              // Bağlantı
-              'wifi',
-              'telephone',
-              'usbPorts',
-              'laptop',
-              // Minibar & Mutfak
-              'minibar',
-              'refrigerator',
-              'kettle',
-              'coffeeMachine',
-              'kitchen',
-              'kitchenette',
-              'microwave',
-              'toaster',
-              'dishwasher',
-              'oven',
-              'stove',
-              'diningArea',
-              'diningTable',
-              // Banyo
-              'privateBathroom',
-              'sharedBathroom',
-              'bathtub',
-              'shower',
-              'rainShower',
-              'jacuzzi',
-              'hairdryer',
-              'toiletries',
-              'bathrobes',
-              'slippers',
-              'bidet',
-              // Manzara
-              'seaView',
-              'poolView',
-              'gardenView',
-              'cityView',
-              'mountainView',
-              'landmarkView',
-              // Dış Mekan
-              'balcony',
-              'terrace',
-              'privatePool',
-              'privateGarden',
-              'patio',
-              // Konfor
-              'safe',
-              'desk',
-              'sofa',
-              'wardrobe',
-              'ironingEquipment',
-              'soundproofing',
-              'carpeted',
-              'parquet',
-              'livingRoom',
-              'separateLivingRoom',
-              // Servis
-              'roomService',
-              'dailyHousekeeping',
-              'laundryService',
-              'turndownService',
-              // Erişilebilirlik
-              'wheelchairAccessible',
-              'connectedRooms',
-              // Özel
-              'smokingAllowed',
-              'nonSmoking',
-              'petFriendly',
-              'hypoallergenic'
-            ]
+            enum: ROOM_AMENITIES
           }
         ],
         size: { type: Number, min: 0 }, // m²
@@ -1187,77 +1190,6 @@ hotelSchema.pre('save', async function () {
 
 // Export supported languages for use in other modules
 export const HOTEL_LANGUAGES = SUPPORTED_LANGUAGES
-
-// Export room amenities for use in other modules
-export const ROOM_AMENITIES = [
-  // Klima & Isıtma
-  'airConditioning',
-  'heating',
-  'fan',
-  'centralHeating',
-  // Eğlence
-  'tv',
-  'satelliteTV',
-  'cableTV',
-  'smartTV',
-  'radio',
-  // Bağlantı
-  'wifi',
-  'telephone',
-  'usbPorts',
-  'laptop',
-  // Minibar & Mutfak
-  'minibar',
-  'refrigerator',
-  'kettle',
-  'coffeeMachine',
-  'kitchenette',
-  'microwave',
-  'toaster',
-  // Banyo
-  'privateBathroom',
-  'sharedBathroom',
-  'bathtub',
-  'shower',
-  'rainShower',
-  'jacuzzi',
-  'hairdryer',
-  'toiletries',
-  'bathrobes',
-  'slippers',
-  // Manzara
-  'seaView',
-  'poolView',
-  'gardenView',
-  'cityView',
-  'mountainView',
-  'landmarkView',
-  // Dış Mekan
-  'balcony',
-  'terrace',
-  'privatePool',
-  'privateGarden',
-  // Konfor
-  'safe',
-  'desk',
-  'sofa',
-  'wardrobe',
-  'ironingEquipment',
-  'soundproofing',
-  // Servis
-  'roomService',
-  'dailyHousekeeping',
-  'laundryService',
-  'turndownService',
-  // Erişilebilirlik
-  'wheelchairAccessible',
-  'connectedRooms',
-  // Özel
-  'smokingAllowed',
-  'nonSmoking',
-  'petFriendly',
-  'hypoallergenic'
-]
 
 // Export bed types for use in other modules
 export const BED_TYPES = ['single', 'double', 'queen', 'king', 'twin', 'sofa', 'bunk', 'extra']

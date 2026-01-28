@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { B2C_LANGUAGES, b2cLangString } from '#constants/languages.js'
+import { ROOM_AMENITIES } from '../hotel/hotel.model.js'
 
 /**
  * RoomType Model
@@ -85,65 +86,7 @@ const roomTypeSchema = new mongoose.Schema(
     amenities: [
       {
         type: String,
-        enum: [
-          // Climate
-          'airConditioning',
-          'heating',
-          'fan',
-          // Entertainment
-          'tv',
-          'satelliteTV',
-          'cableTV',
-          'radio',
-          // Connectivity
-          'wifi',
-          'telephone',
-          'usbPorts',
-          // Mini Bar & Kitchen
-          'minibar',
-          'refrigerator',
-          'kettle',
-          'coffeeMachine',
-          'kitchenette',
-          // Bathroom
-          'privateBathroom',
-          'sharedBathroom',
-          'bathtub',
-          'shower',
-          'hairdryer',
-          'toiletries',
-          'bathrobes',
-          'slippers',
-          // View
-          'seaView',
-          'poolView',
-          'gardenView',
-          'cityView',
-          'mountainView',
-          'landmarkView',
-          // Outdoor
-          'balcony',
-          'terrace',
-          'privatePool',
-          'jacuzzi',
-          // Comfort
-          'safe',
-          'desk',
-          'sofa',
-          'wardrobe',
-          'ironingEquipment',
-          // Services
-          'roomService',
-          'dailyHousekeeping',
-          'laundryService',
-          // Accessibility
-          'wheelchairAccessible',
-          'connectedRooms',
-          // Special
-          'smokingAllowed',
-          'nonSmoking',
-          'petFriendly'
-        ]
+        enum: ROOM_AMENITIES
       }
     ],
 
