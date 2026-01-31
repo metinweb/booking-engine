@@ -658,6 +658,91 @@ export const getPriceQuote = asyncHandler(async (req, res) => {
     throw new NotFoundError('NO_MARKET_AVAILABLE')
   }
 
+  // Get effective child age groups to determine infant age range
+  const childAgeGroups = getEffectiveChildAgeGroups(hotel, market)
+  const infantGroup = childAgeGroups.find(g => g.code === 'infant')
+  const maxInfantAge = infantGroup?.maxAge ?? 2
+
+  // Classify children by age (infant vs child)
+  let infantCount = 0
+  let childCount = 0
+  for (const child of children) {
+    const childAge = typeof child === 'object' ? child.age : child
+    if (childAge <= maxInfantAge) {
+      infantCount++
+    } else {
+      childCount++
+    }
+  }
+
+  // Check capacity
+  const maxAdults = roomType.occupancy?.maxAdults ?? 2
+  const maxChildren = roomType.occupancy?.maxChildren ?? 0
+  const maxInfants = roomType.occupancy?.maxInfants ?? 1
+  const maxTotal = roomType.occupancy?.totalMaxGuests ?? 4
+  const totalPax = adults + childCount
+
+  // Check infant capacity
+  if (infantCount > maxInfants) {
+    return res.json({
+      success: true,
+      data: {
+        hotel: { _id: hotel._id, code: hotel.code, name: hotel.name },
+        roomType: { _id: roomType._id, code: roomType.code, name: roomType.name },
+        mealPlan: { _id: mealPlan._id, code: mealPlan.code, name: mealPlan.name },
+        market: { _id: market._id, code: market.code, currency: market.currency },
+        booking: { checkIn, checkOut, adults, children },
+        availability: {
+          isAvailable: false,
+          capacityExceeded: true,
+          capacityMessage: maxInfants === 0
+            ? 'Bu oda bebek kabul etmemektedir'
+            : `Max ${maxInfants} bebek kabul edilmektedir`
+        }
+      }
+    })
+  }
+
+  // Check child capacity
+  if (childCount > maxChildren) {
+    return res.json({
+      success: true,
+      data: {
+        hotel: { _id: hotel._id, code: hotel.code, name: hotel.name },
+        roomType: { _id: roomType._id, code: roomType.code, name: roomType.name },
+        mealPlan: { _id: mealPlan._id, code: mealPlan.code, name: mealPlan.name },
+        market: { _id: market._id, code: market.code, currency: market.currency },
+        booking: { checkIn, checkOut, adults, children },
+        availability: {
+          isAvailable: false,
+          capacityExceeded: true,
+          capacityMessage: maxChildren === 0
+            ? 'Bu oda çocuk kabul etmemektedir'
+            : `Max ${maxChildren} çocuk kabul edilmektedir`
+        }
+      }
+    })
+  }
+
+  // Check adult and total capacity
+  if (adults > maxAdults || totalPax > maxTotal) {
+    return res.json({
+      success: true,
+      data: {
+        hotel: { _id: hotel._id, code: hotel.code, name: hotel.name },
+        roomType: { _id: roomType._id, code: roomType.code, name: roomType.name },
+        mealPlan: { _id: mealPlan._id, code: mealPlan.code, name: mealPlan.name },
+        market: { _id: market._id, code: market.code, currency: market.currency },
+        booking: { checkIn, checkOut, adults, children },
+        availability: {
+          isAvailable: false,
+          capacityExceeded: true,
+          capacityMessage: `Max ${maxAdults} yetişkin, ${maxTotal} toplam misafir`
+        }
+      }
+    })
+  }
+
   // Calculate price
   const priceResult = await pricingService.calculatePriceWithCampaigns({
     hotelId: hotel._id.toString(),
